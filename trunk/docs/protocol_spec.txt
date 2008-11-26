@@ -1,0 +1,37 @@
+################################################################################
+[[SERVER]]
+################################################################################
+
+* protocol-init message:
+PSERVER <version> <client-id>
+
+* client-command responses:
+OK [<code>] [<text>]
+ERR [<code>] [<text>]
+
+* server messages:
+MSG <from> <client-name> <message>        # from := { -1 | <game-id> | <client-id> }    # -1 is server
+CLIENTINFO <client-id>:<info-str> [...]   # info-str := <type>:<str> [...]
+SNAP <snap-type> [<snap-data> ...]
+
+
+################################################################################
+[[CLIENT]]
+################################################################################
+
+* protocol-init response:
+PCLIENT <version>
+
+* client commands:
+INFO <type>:<str> [...]      # type := { name, location }
+CHAT <to> <str>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 is foyer
+REQUEST gamelist
+REQUEST gameinfo <game-id>
+REQUEST clientinfo <client-id> [...]
+REGISTER <game-id>    # register to a game
+UNREGISTER <game-id>
+SUBSCRIBE <game-id>:<table-id>   # retrieve instant data from table
+UNSUBSCRIBE <game-id>:<table-id>
+AUTH <type> <password>    # type := { -1 | <game-id> }    # -1 is server
+QUIT [<reason>]
+
