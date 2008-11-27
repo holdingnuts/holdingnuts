@@ -130,14 +130,14 @@ int send_msg(socktype sock, const char *msg)
 	return bytes;
 }
 
-bool send_ok(socktype sock, int code=0, char *str="")
+bool send_ok(socktype sock, int code=0, const char *str="")
 {
 	char msg[128];
 	snprintf(msg, sizeof(msg), "OK %d %s", code, str);
 	return send_msg(sock, msg);
 }
 
-bool send_err(socktype sock, int code=0, char *str="")
+bool send_err(socktype sock, int code=0, const char *str="")
 {
 	char msg[128];
 	snprintf(msg, sizeof(msg), "ERR %d %s", code, str);
