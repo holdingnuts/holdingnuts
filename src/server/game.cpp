@@ -70,7 +70,7 @@ clientcon* get_client_by_sock(socktype sock)
 		if (clients[i].sock == sock)
 			return &(clients[i]);
 	
-	return 0;
+	return NULL;
 }
 
 bool client_add(socktype sock)
@@ -165,7 +165,12 @@ void Tokenize(const string& str, vector<string>& tokens, const string& delimiter
 bool client_chat(int from, int to, char *msg)
 {
 	char data[1024];
-	snprintf(data, sizeof(data), "MSG %d %s", from, msg);
+	clientcon* fromclient = get_client_by_sock((socktype)from);
+	
+	snprintf(data, sizeof(data), "MSG %d %s %s",
+		from,
+		(fromclient) ? fromclient->name : "???",
+		msg);
 	
 	if (to == -1)
 	{
