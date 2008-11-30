@@ -34,5 +34,4 @@ UNREGISTER <game-id>
 SUBSCRIBE <game-id>:<table-id>   # retrieve instant data from table
 UNSUBSCRIBE <game-id>:<table-id>
 AUTH <type> <password>    # type := { -1 | <game-id> }    # -1 is server
-QUIT [<reason>]
-
+QUIT [<code>] [<text>]
