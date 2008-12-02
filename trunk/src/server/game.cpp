@@ -8,6 +8,7 @@
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
+#include "Tokenizer.hpp"
 
 #include "Debug.h"
 #include "GameController.hpp"
