@@ -73,7 +73,12 @@ bool Tokenizer::parse(string str, string sep)
 					quote_open = true;
 				}
 				else
-					token_start = i;
+				{
+					if (i == str.length() -1)
+						tokens.push_back(str.substr(i, 1)); // end of loop
+					else
+						token_start = i;
+				}
 			}
 		}
 		
