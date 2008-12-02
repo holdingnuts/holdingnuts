@@ -9,6 +9,7 @@ int main(void)
 {
 	string sa[] = {
 		"Hallo",
+		"one 1",
 		"Der test",
 		"Test 123 \"hello bla\"",
 		"bla \"1 2\" blu \"3 4\"",
