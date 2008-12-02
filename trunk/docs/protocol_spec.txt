@@ -10,7 +10,7 @@ OK [<code>] [<text>]
 ERR [<code>] [<text>]
 
 * server messages:
-MSG <from> <client-name> <message>        # from := { -1 | <game-id>:<table-id> | <client-id> }    # -1 is server
+MSG <from> <sender-name> <message>        # from := { -1 | <game-id>:<table-id> | <client-id> }    # -1 is server
 CLIENTINFO <client-id>:<info-str> [...]   # info-str := <type>:<str> [...]
 SNAP <snap-type> <id> [<snap-data> ...]   # snap-type := { game | table }
 NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
