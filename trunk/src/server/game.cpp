@@ -16,7 +16,7 @@
 using namespace std;
 
 
-GameController *game = NULL;
+//GameController *game = NULL;
 
 typedef enum {
 	Collecting=1,
@@ -32,7 +32,6 @@ typedef enum {
 
 unsigned int snap_update = 0x0;
 
-string foyer_snapshot;
 
 typedef enum {
 	Connected = 0x01,
@@ -98,11 +97,13 @@ bool client_remove(socktype sock)
 			
 			if (client->state & SentInfo)
 			{
+#if 0
 				if (game->removePlayer((int) client->sock))
 				{
 					dbg_print("game", "player %d parted game (%d/%d)", client->sock,
 						game->getPlayerCount(), game->getPlayerMax());
 				}
+#endif
 				
 				snap_update |= Foyer;
 			}
@@ -145,23 +146,30 @@ bool send_err(socktype sock, int code=0, const char *str="")
 	return send_msg(sock, msg);
 }
 
+// from client/foyer to client/foyer
 bool client_chat(int from, int to, char *msg)
 {
 	char data[1024];
-	clientcon* fromclient = get_client_by_sock((socktype)from);
 	
-	snprintf(data, sizeof(data), "MSG %d %s %s",
-		from,
-		(fromclient) ? fromclient->name : "???",
-		msg);
+	if (from == -1)
+	{
+		snprintf(data, sizeof(data), "MSG %d %s %s",
+			from, "foyer", msg);
+	}
+	else
+	{
+		clientcon* fromclient = get_client_by_sock((socktype)from);
+		
+		snprintf(data, sizeof(data), "MSG %d %s %s",
+			from,
+			(fromclient) ? fromclient->name : "???",
+			msg);
+	}
 	
 	if (to == -1)
 	{
 		for (vector<clientcon>::iterator e = clients.begin(); e != clients.end(); e++)
-		{
-			//if (e->sock != (socktype)from)
-				send_msg(e->sock, data);
-		}
+			send_msg(e->sock, data);
 	}
 	else
 	{
@@ -219,26 +227,42 @@ int client_execute(clientcon *client, const char *cmd)
 	}
 	else if (command == "INFO")
 	{
-		string infotype = t[1];
+		string infostr;
+		Tokenizer it;
+		bool infoerr = false;
 		
-		if (infotype == "name")
+		while (t.getNext(infostr))
 		{
-			if (client->state & SentInfo)
-				send_err(s, 0, "name already set");
-			else
+			it.parse(infostr, ":");
+			
+			string infotype, infoarg;
+			it.getNext(infotype);
+			
+			bool havearg = it.getNext(infoarg);
+			
+			if (infotype == "name" && havearg)
 			{
-				// FIXME: check for invalid chars and null-string
-				snprintf(client->name, sizeof(client->name), "%s", t[2].c_str());
-				
-				dbg_print("foyer", "player '%s' (%d) joined foyer", client->name, s);
-				
-				client->state |= SentInfo;
-				
-				snap_update |= Foyer;
-				
-				send_ok(s);
+				snprintf(client->name, sizeof(client->name), "%s", infoarg.c_str());
 			}
 		}
+		
+		if (!infoerr)
+		{
+			send_ok(s);
+			
+			if (!(client->state & SentInfo))
+			{
+				snprintf(msg, sizeof(msg),
+					"client '%s' (%d) joined foyer",
+					client->name, client->sock);
+				
+				client_chat(-1, -1, msg);
+			}
+			
+			client->state |= SentInfo;
+		}
+		else
+			send_err(s);
 	}
 	//else if (!(client->state & SentInfo))
 	//{
@@ -263,6 +287,7 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 			send_err(s);
 	}
+#if 0
 	else if (command == "JOIN")
 	{
 		game->removePlayer((int) s);  // remove if already present
@@ -294,6 +319,7 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 			send_err(s);
 	}
+#endif
 	else if (command == "AUTH")
 	{
 		if (t[1] == "secret")
@@ -302,7 +328,7 @@ int client_execute(clientcon *client, const char *cmd)
 			send_ok(s);
 		}
 		else
-			send_err(s, 0, "auth faild");
+			send_err(s, 0, "auth failed");
 	}
 	else if (command == "QUIT")
 	{
@@ -400,6 +426,7 @@ int client_handle(socktype sock)
 	return bytes;
 }
 
+#if 0
 int send_snapshot(snaptype type)
 {
 	char msg[1024];
@@ -442,9 +469,11 @@ int update_foyer_snapshot()
 	
 	return 0;
 }
+#endif
 
 int gameloop()
 {
+#if 0
 	// create and initialize a gamecontroller
 	if (!game)
 	{
@@ -462,6 +491,7 @@ int gameloop()
 		
 		snap_update = 0x0;
 	}
+#endif
 	
 	return 0;
 }
