@@ -145,24 +145,6 @@ bool send_err(socktype sock, int code=0, const char *str="")
 	return send_msg(sock, msg);
 }
 
-void Tokenize(const string& str, vector<string>& tokens, const string& delimiters = " ")
-{
-	// Skip delimiters at beginning.
-	string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-	// Find first "non-delimiter".
-	string::size_type pos     = str.find_first_of(delimiters, lastPos);
-	
-	while (string::npos != pos || string::npos != lastPos)
-	{
-		// Found a token, add it to the vector.
-		tokens.push_back(str.substr(lastPos, pos - lastPos));
-		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
-	}
-}
-
 bool client_chat(int from, int to, char *msg)
 {
 	char data[1024];
@@ -192,29 +174,29 @@ bool client_chat(int from, int to, char *msg)
 	return true;
 }
 
-
 int client_execute(clientcon *client, const char *cmd)
 {
 	socktype s = client->sock;
 	char msg[1024];
 	
-	string scmd = cmd;
-	vector<string> tokens;
+	Tokenizer t;
+	t.parse(cmd);  // parse the command line
 	
-	Tokenize(scmd, tokens, " ");
-	if (!tokens.size())
+	if (!t.getCount())
 		return -1;
 	
 	dbg_print("clientsock", "(%d) trying to execute '%s'", s, cmd);
 	
 	
-	string command = tokens[0];
+	// get first arg
+	string command;
+	t.getNext(command);
 	
 	if (!(client->state & Introduced))
 	{
 		if (command == "PCLIENT")
 		{
-			unsigned int version = atol(tokens[1].c_str());
+			unsigned int version = atol(t[1].c_str());
 			if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
 				VERSION_GETMINOR(version) != VERSION_MINOR)
 			{
@@ -237,7 +219,7 @@ int client_execute(clientcon *client, const char *cmd)
 	}
 	else if (command == "INFO")
 	{
-		string infotype = tokens[1];
+		string infotype = t[1];
 		
 		if (infotype == "name")
 		{
@@ -246,7 +228,7 @@ int client_execute(clientcon *client, const char *cmd)
 			else
 			{
 				// FIXME: check for invalid chars and null-string
-				snprintf(client->name, sizeof(client->name), "%s", tokens[2].c_str());
+				snprintf(client->name, sizeof(client->name), "%s", t[2].c_str());
 				
 				dbg_print("foyer", "player '%s' (%d) joined foyer", client->name, s);
 				
@@ -264,18 +246,18 @@ int client_execute(clientcon *client, const char *cmd)
 	//}
 	else if (command == "CHAT")
 	{
-		if (tokens.size() < 3)
+		if (t.getCount() < 3)
 			return -1;
 		
 		msg[0] = '\0';
-		for (unsigned int i=2; i < tokens.size(); i++)
+		for (unsigned int i=2; i < t.getCount(); i++)
 		{
 			// FIXME: buffer overflow AND DIRTY DIRTY
-			strcat(msg, tokens[i].c_str());
+			strcat(msg, t[i].c_str());
 			strcat(msg, " ");
 		}
 		
-		int dest = atol(tokens[1].c_str());
+		int dest = atol(t[1].c_str());
 		if (client_chat(s, dest, msg))
 			send_ok(s);
 		else
@@ -314,7 +296,7 @@ int client_execute(clientcon *client, const char *cmd)
 	}
 	else if (command == "AUTH")
 	{
-		if (tokens[1] == "secret")
+		if (t[1] == "secret")
 		{
 			client->state |= Authed;
 			send_ok(s);
