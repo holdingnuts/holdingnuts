@@ -11,7 +11,7 @@ ERR [<code>] [<text>]
 
 * server messages:
 MSG <from> <sender-name> <message>        # from := { -1 | <game-id>:<table-id> | <client-id> }    # -1 is server
-CLIENTINFO <client-id>:<info-str> [...]   # info-str := <type>:<str> [...]
+CLIENTINFO <client-id> <type>:<value> [...]
 SNAP <snap-type> <id> [<snap-data> ...]   # snap-type := { game | table }
 NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
 
@@ -24,7 +24,7 @@ NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
 PCLIENT <version>
 
 * client commands:
-INFO <type>:<str> [...]      # type := { name, location }
+INFO <type>:<value> [...]      # type := { name, location }
 CHAT <to> <str>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 is foyer
 REQUEST gamelist
 REQUEST gameinfo <game-id>
