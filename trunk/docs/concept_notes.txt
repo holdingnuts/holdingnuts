@@ -1,5 +1,6 @@
-
+IDEAS
 ================================================================================
+
 game-list:
 	- games
 		- id
@@ -44,3 +45,12 @@ flow client
 
 
 
+clients can chat to
+* [cid]      one another specific client
+* [-1]       to foyer (all clients)
+* [gid:tid]  to table of a specific game (all players on table)
+
+server chats by
+* [-1] -> [-1]       foyer message to all
+* [-1] -> [cid]      foyer message to specific client
+* [gid:tid] -> [-1]  table message to all
