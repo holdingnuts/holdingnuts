@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "Tokenizer.hpp"
 
 using namespace std;
@@ -95,4 +97,18 @@ bool Tokenizer::getNext(string &str)
 	
 	str = tokens[index++];
 	return true;
+}
+
+string Tokenizer::operator[](const unsigned int i) const
+{
+	if (i < tokens.size())
+		return tokens[i];
+	else
+		return "";
+}
+
+int string2int(string s, unsigned int base)
+{
+	char *ptr;
+	return strtol(s.c_str(), &ptr, base);
 }
