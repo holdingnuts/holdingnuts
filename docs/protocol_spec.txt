@@ -1,3 +1,5 @@
+Protocol specification (client<->server)
+
 ################################################################################
 [[SERVER]]
 ################################################################################
@@ -24,7 +26,7 @@ NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
 PCLIENT <version>
 
 * client commands:
-INFO <type>:<value> [...]      # type := { name, location }
+INFO <type>:<value> [...]      # type := { name | location }
 CHAT <to> <str>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 is foyer
 REQUEST gamelist
 REQUEST gameinfo <game-id>
@@ -33,5 +35,5 @@ REGISTER <game-id>    # register to a game
 UNREGISTER <game-id>
 SUBSCRIBE <game-id>:<table-id>   # retrieve instant data from table
 UNSUBSCRIBE <game-id>:<table-id>
-AUTH <type> <password>    # type := { -1 | <game-id> }    # -1 is server
+AUTH <type> <password>    # type := { -1 | <game-id> }    # -1 is server-auth
 QUIT [<code>] [<text>]
