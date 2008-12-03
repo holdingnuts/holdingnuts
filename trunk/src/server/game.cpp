@@ -195,16 +195,19 @@ int client_execute(clientcon *client, const char *cmd)
 	
 	dbg_print("clientsock", "(%d) trying to execute '%s'", s, cmd);
 	
+	unsigned int argcount = t.getCount() - 1;
 	
 	// get first arg
 	string command;
 	t.getNext(command);
 	
-	if (!(client->state & Introduced))
+	bool cmderr = false;
+	
+	if (!(client->state & Introduced))  // state: not introduced
 	{
 		if (command == "PCLIENT")
 		{
-			unsigned int version = atol(t[1].c_str());
+			unsigned int version = string2int(t[1]);
 			if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
 				VERSION_GETMINOR(version) != VERSION_MINOR)
 			{
@@ -229,7 +232,6 @@ int client_execute(clientcon *client, const char *cmd)
 	{
 		string infostr;
 		Tokenizer it;
-		bool infoerr = false;
 		
 		while (t.getNext(infostr))
 		{
@@ -246,7 +248,7 @@ int client_execute(clientcon *client, const char *cmd)
 			}
 		}
 		
-		if (!infoerr)
+		if (!cmderr)
 		{
 			send_ok(s);
 			
@@ -264,10 +266,6 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 			send_err(s);
 	}
-	//else if (!(client->state & SentInfo))
-	//{
-	//	send_msg(s, "ERR 2 info needed first");
-	//}
 	else if (command == "CHAT")
 	{
 		if (t.getCount() < 3)
@@ -281,7 +279,7 @@ int client_execute(clientcon *client, const char *cmd)
 			strcat(msg, " ");
 		}
 		
-		int dest = atol(t[1].c_str());
+		int dest = string2int(t[1]);
 		if (client_chat(s, dest, msg))
 			send_ok(s);
 		else
@@ -322,11 +320,22 @@ int client_execute(clientcon *client, const char *cmd)
 #endif
 	else if (command == "AUTH")
 	{
-		if (t[1] == "secret")
+		if (argcount < 2)
+			cmderr = true;
+		else
 		{
-			client->state |= Authed;
-			send_ok(s);
+			int type = string2int(t[1]);  // FIXME: parse gid:tid
+			
+			snprintf(msg, sizeof(msg), "auth on %d", type);
+			
+			if (t[2] == "secret")  // FIXME: no default pw, only testing here
+				client->state |= Authed;
+			else
+				cmderr = true;
 		}
+		
+		if (!cmderr)
+			send_ok(s, 0, msg);
 		else
 			send_err(s, 0, "auth failed");
 	}
