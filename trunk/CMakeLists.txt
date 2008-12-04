@@ -29,7 +29,7 @@ MESSAGE("Target platform is ${PLATFORM_STR}")
 if (DEBUG)
 	add_definitions(-g -O0 -DDEBUG=${DEBUG})
 else (DEBUG)
-	add_definitions(-O2)
+	add_definitions(-O2 -fstack-protector -fstack-protector-all)
 endif (DEBUG)
 
 add_definitions(-Wall)  #-pedantic #-DPLATFORM_STR=${PLATFORM_STR}
