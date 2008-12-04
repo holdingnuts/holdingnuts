@@ -268,15 +268,56 @@ int client_execute(clientcon *client, const char *cmd)
 	}
 	else if (command == "CHAT")
 	{
-		if (t.getCount() < 3)
-			return -1;
+		if (argcount < 2)
+			cmderr = true;
+		else
+		{
+			string chatmsg;
+			for (unsigned int i=2; i < t.getCount(); i++)
+				chatmsg += t[i] + ' ';
+			
+			int dest = string2int(t[1]);  // FIXME: chat to table
+			if (!client_chat(s, dest, chatmsg.c_str()))
+				cmderr = true;
+		}
 		
-		string chatmsg;
-		for (unsigned int i=2; i < t.getCount(); i++)
-			chatmsg += t[i] + ' ';
+		if (!cmderr)
+			send_ok(s);
+		else
+			send_err(s);
+	}
+	else if (command == "REQUEST")
+	{
+		if (!argcount)
+			cmderr = true;
+		else
+		{
+			string request;
+			t.getNext(request);
+			
+			if (request == "clientinfo")
+			{
+				string scid;
+				while (t.getNext(scid))   // FIXME: have maximum for count of requests
+				{
+					socktype cid = string2int(scid);
+					clientcon *client;
+					if ((client = get_client_by_sock(cid)))
+					{
+						snprintf(msg, sizeof(msg),
+							"CLIENTINFO %d name:%s",
+							cid,
+							client->name);
+						
+						send_msg(s, msg);
+					}
+				}
+			}
+			else
+				cmderr = true;
+		}
 		
-		int dest = string2int(t[1]);
-		if (client_chat(s, dest, chatmsg.c_str()))
+		if (!cmderr)
 			send_ok(s);
 		else
 			send_err(s);
