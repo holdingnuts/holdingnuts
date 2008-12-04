@@ -8,13 +8,15 @@ using namespace std;
 
 GameController::GameController()
 {
+	game_id = -1;
+	
 	started = false;
 	max_players = MAX_PLAYERS;
 	
 	type = SNG;
 }
 
-bool GameController::addPlayer(int client_id, char *name)
+bool GameController::addPlayer(int client_id)
 {
 	if (started || players.size() == max_players)
 		return false;
@@ -53,3 +55,7 @@ bool GameController::setPlayerMax(unsigned int max)
 	return true;
 }
 
+void GameController::tick()
+{
+
+}
