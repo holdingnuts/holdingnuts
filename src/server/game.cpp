@@ -147,7 +147,7 @@ bool send_err(socktype sock, int code=0, const char *str="")
 }
 
 // from client/foyer to client/foyer
-bool client_chat(int from, int to, char *msg)
+bool client_chat(int from, int to, const char *msg)
 {
 	char data[1024];
 	
@@ -271,16 +271,12 @@ int client_execute(clientcon *client, const char *cmd)
 		if (t.getCount() < 3)
 			return -1;
 		
-		msg[0] = '\0';
+		string chatmsg;
 		for (unsigned int i=2; i < t.getCount(); i++)
-		{
-			// FIXME: buffer overflow AND DIRTY DIRTY
-			strcat(msg, t[i].c_str());
-			strcat(msg, " ");
-		}
+			chatmsg += t[i] + ' ';
 		
 		int dest = string2int(t[1]);
-		if (client_chat(s, dest, msg))
+		if (client_chat(s, dest, chatmsg.c_str()))
 			send_ok(s);
 		else
 			send_err(s);
