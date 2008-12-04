@@ -36,14 +36,21 @@ public:
 	
 	GameController();
 	
+	bool setGameId(int gid) { game_id = gid; return true; };
+	int getGameId() { return game_id; };
+	
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() { return max_players; };
 	unsigned int getPlayerCount() { return players.size(); };
 	
-	bool addPlayer(int client_id, char *name /* FIXME: user_info_struct */);
+	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);
+	
+	void tick();
 
 private:
+	int game_id;
+	
 	bool started;
 	unsigned int max_players;
 	

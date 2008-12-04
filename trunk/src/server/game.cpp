@@ -16,8 +16,6 @@
 using namespace std;
 
 
-//GameController *game = NULL;
-
 typedef enum {
 	Collecting=1,
 	Playing
@@ -54,6 +52,22 @@ typedef struct {
 } clientcon;
 
 
+////////////////////////
+vector<GameController*> games;
+
+GameController* get_game_by_id(int gid)
+{
+	for (vector<GameController*>::iterator e = games.begin(); e != games.end(); e++)
+	{
+		GameController *g = *e;
+		if (g->getGameId() == gid)
+			return g;
+	}
+	return NULL;
+}
+
+
+////////////////////////
 vector<clientcon> clients;
 
 void get_sock_vector(vector<socktype> &vec)
@@ -322,24 +336,40 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 			send_err(s);
 	}
-#if 0
-	else if (command == "JOIN")
+	else if (command == "REGISTER")
 	{
-		game->removePlayer((int) s);  // remove if already present
-		
-		if (game->addPlayer((int) s, client->name))
+		if (!argcount)
+			cmderr = true;
+		else
 		{
-			send_ok(s);
-			dbg_print("game", "player %d joined game (%d/%d)", s,
-				game->getPlayerCount(), game->getPlayerMax());
+			string sgid;
+			t.getNext(sgid);
 			
-			client->state |= IsPlayer;
-			snap_update |= Foyer;
+			int gid = string2int(sgid);
+			GameController *g;
+			if ((g = get_game_by_id(gid)))
+			{
+				g->removePlayer(s);
+				
+				if (g->addPlayer(s))
+				{
+					dbg_print("game", "player %d joined game (%d/%d)",
+						s, g->getPlayerCount(), g->getPlayerMax());
+				}
+				else
+					cmderr = true;
+			}
+			else
+				cmderr = true;
 		}
+		
+		if (!cmderr)
+			send_ok(s);
 		else
 			send_err(s);
 	}
-	else if (command == "PART")
+#if 0
+	else if (command == "UNREGISTER")
 	{
 		// FIXME: remove player from list when quitting
 		if (game->removePlayer((int) s))
@@ -538,6 +568,21 @@ int gameloop()
 		snap_update = 0x0;
 	}
 #endif
+	
+	// initially add a game for debugging purpose
+	if (!games.size())
+	{
+		GameController *g = new GameController();
+		g->setGameId(0);
+		g->setPlayerMax(2);
+		games.push_back(g);
+	}
+	
+	for (vector<GameController*>::iterator e = games.begin(); e != games.end(); e++)
+	{
+		GameController *g = *e;
+		g->tick();
+	}
 	
 	return 0;
 }
