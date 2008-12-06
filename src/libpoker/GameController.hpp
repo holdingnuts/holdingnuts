@@ -46,6 +46,8 @@ public:
 	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);
 	
+	void chatTable(int tid, const char* msg);
+	
 	void tick();
 
 private:

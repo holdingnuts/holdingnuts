@@ -4,7 +4,15 @@
 #include "Debug.h"
 #include "GameController.hpp"
 
+#include "game.hpp"
+
+
 using namespace std;
+
+extern clientcon* get_client_by_sock(socktype sock);
+//extern bool client_chat(int from, int to, const char *msg);
+extern bool client_chat(int from_gid, int from_tid, int to, const char *msg);
+
 
 GameController::GameController()
 {
@@ -55,7 +63,27 @@ bool GameController::setPlayerMax(unsigned int max)
 	return true;
 }
 
+void GameController::chatTable(int tid, const char* msg)
+{
+	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)
+	{
+		client_chat(game_id, tid, e->client_id, msg);
+	}
+}
+
 void GameController::tick()
 {
-
+	if (!started)
+	{
+		if (players.size() == max_players)
+		{
+			dbg_print("game", "game %d has been started", game_id);
+			
+			char msg[1024];
+			snprintf(msg, sizeof(msg), "game %d has been started", game_id);
+			chatTable(-1, msg);
+			
+			started = true;
+		}
+	}
 }
