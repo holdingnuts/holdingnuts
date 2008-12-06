@@ -12,45 +12,12 @@
 
 #include "Debug.h"
 #include "GameController.hpp"
+#include "game.hpp"
 
 using namespace std;
 
 
-typedef enum {
-	Collecting=1,
-	Playing
-} gamestate;
-
-typedef enum {
-	Settings=0x1,
-	Foyer=0x2,
-	Table=0x4
-} snaptype;
-
-
 unsigned int snap_update = 0x0;
-
-
-typedef enum {
-	Connected = 0x01,
-	Introduced = 0x02,
-	SentInfo = 0x04,
-	Authed = 0x08,
-	IsPlayer = 0x10
-} clientstate;
-
-typedef struct {
-	socktype sock;
-	//time_t lastdata;
-	
-	char msgbuf[1024];
-	int buflen;
-	
-	unsigned int state;
-	unsigned int version;
-	char name[64];
-} clientcon;
-
 
 ////////////////////////
 vector<GameController*> games;
@@ -70,6 +37,7 @@ GameController* get_game_by_id(int gid)
 ////////////////////////
 vector<clientcon> clients;
 
+// for pserver.cpp filling FD_SET
 void get_sock_vector(vector<socktype> &vec)
 {
 	vec.clear();
@@ -196,6 +164,20 @@ bool client_chat(int from, int to, const char *msg)
 	return true;
 }
 
+// from game/game-table to client
+bool client_chat(int from_gid, int from_tid, int to, const char *msg)
+{
+	char data[1024];
+	
+	snprintf(data, sizeof(data), "MSG %d:%d %s %s",
+		from_gid, from_tid, "game", msg);
+	
+	if (get_client_by_sock((socktype)to))
+		send_msg((socktype)to, data);
+	
+	return true;
+}
+
 int client_execute(clientcon *client, const char *cmd)
 {
 	socktype s = client->sock;
@@ -207,7 +189,7 @@ int client_execute(clientcon *client, const char *cmd)
 	if (!t.getCount())
 		return -1;
 	
-	dbg_print("clientsock", "(%d) trying to execute '%s'", s, cmd);
+	dbg_print("clientsock", "(%d) executing '%s'", s, cmd);
 	
 	unsigned int argcount = t.getCount() - 1;
 	
