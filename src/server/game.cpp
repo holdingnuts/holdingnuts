@@ -373,7 +373,7 @@ int client_execute(clientcon *client, const char *cmd)
 			cmderr = true;
 		else
 		{
-			int type = string2int(t[1]);  // FIXME: parse gid:tid
+			int type = string2int(t[1]);  // FIXME: -1=server | other=game_id
 			
 			snprintf(msg, sizeof(msg), "auth on %d", type);
 			
