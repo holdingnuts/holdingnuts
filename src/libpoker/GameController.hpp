@@ -8,6 +8,7 @@
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
 #include "Player.hpp"
+#include "Table.hpp"
 
 // only variant "Texas Hold'em" supported yet
 
@@ -61,6 +62,7 @@ private:
 	Player *dealer;
 	
 	std::vector<Player> players;
+	std::vector<Table> tables;
 };
 
 

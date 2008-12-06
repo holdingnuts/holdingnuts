@@ -8,6 +8,6 @@ include_directories (
 add_library(Poker
 	GameDebug.cpp
 	Card.cpp Deck.cpp HoleCards.cpp CommunityCards.cpp
-	GameLogic.cpp GameController.cpp
+	GameLogic.cpp GameController.cpp Table.cpp
 	Player.cpp
 )

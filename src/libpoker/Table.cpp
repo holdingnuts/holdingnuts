@@ -1,10 +1,10 @@
 
 #include "Debug.h"
-#include "Player.hpp"
+#include "Table.hpp"
 
 using namespace std;
 
-Player::Player()
+Table::Table()
 {
 
 }
