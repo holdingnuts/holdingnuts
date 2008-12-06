@@ -66,16 +66,14 @@ bool GameController::setPlayerMax(unsigned int max)
 void GameController::chatTable(int tid, const char* msg)
 {
 	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)
-	{
 		client_chat(game_id, tid, e->client_id, msg);
-	}
 }
 
 void GameController::tick()
 {
 	if (!started)
 	{
-		if (players.size() == max_players)
+		if (getPlayerCount() == max_players)
 		{
 			dbg_print("game", "game %d has been started", game_id);
 			
