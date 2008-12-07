@@ -16,7 +16,8 @@ int main(void)
 		"Man sagt \"noend",
 		"This isn't ended\"",
 		"Quote \\\"hallo was\\\"",
-		"backslash ended\\"
+		"backslash ended\\",
+		"space at end "
 	};
 	const int count = sizeof(sa) / sizeof(sa[0]);
 	
