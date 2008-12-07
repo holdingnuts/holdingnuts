@@ -36,7 +36,7 @@ bool Tokenizer::parse(string str, string sep)
 			
 			if (!quote_open)
 			{
-				if (i == str.length()-1)
+				if (i == str.length()-1 && !isSep(cur_char, sep))
 				{
 					end_tok = true;
 					token_end = i - token_start + 1;
