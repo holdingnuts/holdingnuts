@@ -7,28 +7,15 @@
 #include "Deck.hpp"
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
-#include "Player.hpp"
 #include "Table.hpp"
+#include "Player.hpp"
+
 
 // only variant "Texas Hold'em" supported yet
 
 class GameController
 {
 public:
-	typedef enum {
-		ElectDealer,
-		Blinds,
-		Betting,
-		Showdown,
-	} State;
-	
-	typedef enum {
-		Preflop,
-		Flop,
-		Turn,
-		River
-	} BettingRound;
-	
 	typedef enum {
 		RingGame,   // Cash game
 		FreezeOut,  // Tournament
@@ -40,14 +27,19 @@ public:
 	bool setGameId(int gid) { game_id = gid; return true; };
 	int getGameId() { return game_id; };
 	
+	GameType getGameType() { return type; };
+	
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() { return max_players; };
 	unsigned int getPlayerCount() { return players.size(); };
 	
 	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);
+	Player* findPlayer(int cid);
 	
-	void chatTable(int tid, const char* msg);
+	void chat(int tid, const char* msg);
+	
+	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
 	void tick();
 
@@ -57,9 +49,7 @@ private:
 	bool started;
 	unsigned int max_players;
 	
-	State state;
 	GameType type;
-	Player *dealer;
 	
 	std::vector<Player> players;
 	std::vector<Table> tables;

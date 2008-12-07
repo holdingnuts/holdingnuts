@@ -8,12 +8,33 @@ class Player
 friend class GameController;
 
 public:
+	typedef enum {
+		Check,
+		Fold,
+		Call,
+		Bet,
+		Raise,
+		Allin
+	} PlayerAction;
+	
+	typedef struct {
+		bool valid;
+		PlayerAction action;
+		float amount;
+	} SchedAction;
+	
 	Player();
 	
 private:
 	int client_id;
 	
+	float chipstack;
+	
 	HoleCards holecards;
+	
+	bool in_round;
+	
+	SchedAction next_action;
 };
 
 

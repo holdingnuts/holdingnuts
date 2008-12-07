@@ -5,6 +5,7 @@
 #include "Platform.h"
 #include "Network.h"
 
+#if 0
 typedef enum {
 	Collecting=1,
 	Playing
@@ -13,9 +14,8 @@ typedef enum {
 typedef enum {
 	Settings=0x1,
 	Foyer=0x2,
-	Table=0x4
 } snaptype;
-
+#endif
 
 
 typedef enum {

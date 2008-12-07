@@ -85,9 +85,10 @@ bool client_remove(socktype sock)
 					dbg_print("game", "player %d parted game (%d/%d)", client->sock,
 						game->getPlayerCount(), game->getPlayerMax());
 				}
-#endif
+
 				
 				snap_update |= Foyer;
+#endif
 			}
 			
 			dbg_print("clientsock", "(%d) connection closed", client->sock);
@@ -104,7 +105,7 @@ int send_msg(socktype sock, const char *msg)
 {
 	const int bufsize = 1024;
 	char buf[bufsize];
-	int len = snprintf(buf, bufsize, "%s\n", msg);
+	int len = snprintf(buf, bufsize, "%s\r\n", msg);
 	int bytes = socket_write(sock, buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
@@ -164,13 +165,13 @@ bool client_chat(int from, int to, const char *msg)
 	return true;
 }
 
-// from game/game-table to client
+// from game/table to client
 bool client_chat(int from_gid, int from_tid, int to, const char *msg)
 {
 	char data[1024];
 	
 	snprintf(data, sizeof(data), "MSG %d:%d %s %s",
-		from_gid, from_tid, "game", msg);
+		from_gid, from_tid, (from_tid == -1) ? "game" : "table", msg);
 	
 	if (get_client_by_sock((socktype)to))
 		send_msg((socktype)to, data);
@@ -309,6 +310,25 @@ int client_execute(clientcon *client, const char *cmd)
 					}
 				}
 			}
+			else if (request == "gamelist")
+			{
+				string gameinfo;
+				for (vector<GameController*>::iterator e = games.begin(); e != games.end(); e++)
+				{
+					GameController *g = *e;
+					char tmp[128];
+					
+					snprintf(tmp, sizeof(tmp), "%d:%d:moreinfo ",
+						g->getGameId(), (int)g->getGameType());
+					
+					gameinfo += tmp;
+				}
+				
+				snprintf(msg, sizeof(msg),
+					"GAMELIST %s", gameinfo.c_str());
+				
+				send_msg(s, msg);
+			}
 			else
 				cmderr = true;
 		}
@@ -367,6 +387,56 @@ int client_execute(clientcon *client, const char *cmd)
 			send_err(s);
 	}
 #endif
+	else if (command == "ACTION")
+	{
+		if (argcount < 2)
+			cmderr = true;
+		else
+		{
+			string sgid;
+			t.getNext(sgid);
+			
+			int gid = string2int(sgid);
+			GameController *g;
+			if ((g = get_game_by_id(gid)))
+			{
+				string action;
+				t.getNext(action);
+				
+				string samount;
+				float amount = 0.0f;
+				if (t.getNext(samount))
+					amount = (float)string2int(samount);  // FIXME: convert to float
+				
+				Player::PlayerAction a;
+				
+				if (action == "check")
+					a = Player::Check;
+				else if (action == "fold")
+					a = Player::Fold;
+				else if (action == "call")
+					a = Player::Call;
+				else if (action == "bet")
+					a = Player::Bet;
+				else if (action == "raise")
+					a = Player::Raise;
+				else if (action == "allin")
+					a = Player::Allin;
+				else
+					cmderr = true;
+				
+				if (!cmderr)
+					g->setPlayerAction(s, a, amount);
+			}
+			else
+				cmderr = true;
+		}
+		
+		if (!cmderr)
+			send_ok(s, 0);
+		else
+			send_err(s, 0, "what?");
+	}
 	else if (command == "AUTH")
 	{
 		if (argcount < 2)
@@ -560,6 +630,7 @@ int gameloop()
 		games.push_back(g);
 	}
 	
+	// handle all games
 	for (vector<GameController*>::iterator e = games.begin(); e != games.end(); e++)
 	{
 		GameController *g = *e;
