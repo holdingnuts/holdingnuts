@@ -1,13 +1,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 #if not defined(PLATFORM_WINDOWS)
 # include <signal.h>
 #endif
 
 #include <vector>
-#include <string>
 
 #include "Config.h"
 #include "Platform.h"
@@ -185,6 +185,9 @@ int main(int argc, char **argv)
 	// ignore broken-pipe signal eventually caused by sockets
 	signal(SIGPIPE, SIG_IGN);
 #endif
+	
+	// init PRNG
+	srand((unsigned) time(NULL));
 	
 	network_init();
 	
