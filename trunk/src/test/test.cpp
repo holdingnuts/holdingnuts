@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 #include "Platform.h"
 #include "Debug.h"
@@ -277,7 +278,7 @@ int main(void)
 	
 	printf("#####################\n");
 	
-	/////////////////////
+#if 0
 	for(;;)
 	{
 		Deck *d = new Deck();
@@ -340,6 +341,110 @@ int main(void)
 		
 		getchar();
 	}
+#endif
+
+#if 1
+	{
+		Deck d;
+		d.fill();
+		d.shuffle();
+		
+		Card f1, f2, f3, t, r;
+		CommunityCards cc;
+		
+		d.pop(f1); d.pop(f2); d.pop(f3); d.pop(t); d.pop(r);
+		cc.setFlop(f1, f2, f3);
+		cc.setTurn(t);
+		cc.setRiver(r);
+		
+		const unsigned int players = 4;
+		
+		HoleCards h[players];
+		HandStrength hs[players];
+		
+		vector<HandStrength> wl, w2;
+		vector< vector<HandStrength> > winlist;
+		
+		for (unsigned int i=0; i < players; i++)
+		{
+			printf("--- Player %d ---\n", i); fflush(stdout);
+			
+			Card c1, c2;
+			d.pop(c1);
+			d.pop(c2);
+			h[i].setCards(c1, c2);
+			
+			GameLogic::getStrength(&(h[i]), &cc, &(hs[i]));
+			hs[i].id = i;
+			
+			wl.push_back(hs[i]);
+		}
+		
+		winlist.push_back(wl);
+		
+		int index=0;
+		do
+		{
+			vector<HandStrength> &tw = winlist[index];
+			vector<HandStrength> tmp;
+			
+			sort(tw.begin(), tw.end(), greater<HandStrength>());
+			
+			for (unsigned int i=tw.size()-1; i > 0; i--)
+			{
+				if (tw[i] < tw[0])
+				{
+					tmp.push_back(tw[i]);
+					tw.pop_back();
+				}
+			}
+			
+			if (!tmp.size())
+				break;
+			
+			winlist.push_back(tmp);
+			index++;
+			
+		} while(true);
+		
+		for (unsigned int i=0; i < winlist.size(); i++)
+		{
+			printf("--- Winlist %d---\n", i); fflush(stdout);
+			
+			vector<HandStrength> &tw = winlist[i];
+			
+			for (unsigned int j=0; j < tw.size(); j++)
+				printf("Rank %d = player %d\n", j, tw[j].id); fflush(stdout);
+		}
+		
+	#if 0
+		sort(wl.begin(), wl.end(), greater<HandStrength>());
+		
+		printf("--- Ranking ---\n"); fflush(stdout);
+		for (unsigned int i=0; i < wl.size(); i++)
+			printf("Rank %d = player %d\n", i, wl[i].id); fflush(stdout);
+		
+		
+		//for (vector<HandStrength>::reverse_iterator e = wl->end(); e != wl->begin(); e++)
+		for (unsigned int i=wl.size()-1; i > 0; i--)
+		{
+			if (wl[i] < wl[0])
+			{
+				w2.push_back(wl[i]);
+				wl.pop_back();
+			}
+		}
+		
+		printf("--- wl ---\n"); fflush(stdout);
+		for (unsigned int i=0; i < wl.size(); i++)
+			printf("Rank %d = player %d\n", i, wl[i].id); fflush(stdout);
+		
+		printf("--- w2 ---\n"); fflush(stdout);
+		for (unsigned int i=0; i < w2.size(); i++)
+			printf("Rank %d = player %d\n", i, w2[i].id); fflush(stdout);
+	#endif
+	}
+#endif
 	
 	return 0;
 }
