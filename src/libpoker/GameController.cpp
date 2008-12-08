@@ -285,10 +285,8 @@ void GameController::stateBetting(Table *t)
 			allowed_action = true;
 			amount = p->chipstack;
 		}
-		else
-			allowed_action = true;  // FIXME: debugging; fix this case!
 		
-		// reset
+		// reset player action
 		p->next_action.valid = false;
 	}
 	else
