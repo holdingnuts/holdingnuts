@@ -32,8 +32,6 @@ private:
 	
 	HoleCards holecards;
 	
-	bool in_round;
-	
 	SchedAction next_action;
 };
 

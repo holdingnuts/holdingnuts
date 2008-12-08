@@ -28,6 +28,7 @@ public:
 	typedef struct {
 		Player *player;
 		float bet;
+		bool in_round;
 	} Seat;
 	
 	Table();
@@ -36,6 +37,8 @@ public:
 	int getTableId() { return table_id; };
 	
 	int getNextPlayer(unsigned int pos);
+	int getNextActivePlayer(unsigned int pos);
+	unsigned int countActivePlayers();
 	
 	void tick();
 	
@@ -56,6 +59,7 @@ private:
 	unsigned int last_bet_player;
 	
 	float bet_amount;
+	float pot;
 };
 
 

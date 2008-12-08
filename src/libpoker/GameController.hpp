@@ -42,6 +42,11 @@ public:
 	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
 	void tick();
+	int handleTable(Table *t);
+	void dealHole(Table *t);
+	void dealFlop(Table *t);
+	void dealTurn(Table *t);
+	void dealRiver(Table *t);
 
 private:
 	int game_id;
