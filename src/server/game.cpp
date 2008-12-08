@@ -61,7 +61,13 @@ bool client_add(socktype sock)
 	
 	memset(&client, 0, sizeof(client));
 	client.sock = sock;
+	
+#ifndef SERVER_TESTING
 	client.state |= Connected;
+#else
+	client.state |= Introduced;
+#endif
+	
 	snprintf(client.name, sizeof(client.name), "client_%d", sock);
 	
 	clients.push_back(client);
