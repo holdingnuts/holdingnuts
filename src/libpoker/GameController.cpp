@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <string>
 
 #include "Config.h"
 #include "Debug.h"
@@ -170,8 +171,23 @@ void GameController::stateNewRound(Table *t)
 	
 	t->deck.fill();
 	t->deck.shuffle();
+
+#ifdef SERVER_TESTING
+	chat(t->table_id, "---------------------------------------------");
 	
-	chat(t->getTableId(), "New round started, deck shuffled");
+	string ststr = "Stacks: ";
+	for (unsigned int i=0; i < t->seats.size(); i++)
+	{
+		Player *p = t->seats[i].player;
+		
+		char tmp[128];
+		snprintf(tmp, sizeof(tmp), "[%d]=%0.2f ", p->client_id, p->chipstack);
+		ststr += tmp;
+	}
+	chat(t->table_id, ststr.c_str());
+#endif
+	
+	chat(t->table_id, "New round started, deck shuffled");
 	
 	t->pot = 0.0f;
 	t->state = Table::Blinds;
@@ -199,10 +215,10 @@ void GameController::stateBlinds(Table *t)
 	pBig->chipstack -= t->blind;
 	
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB ($%d), [%d] is BB ($%d)",
+	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f)",
 		pDealer->client_id,
-		pSmall->client_id, t->blind / 2,
-		pBig->client_id, t->blind);
+		pSmall->client_id, (float)t->blind / 2,
+		pBig->client_id, (float)t->blind);
 	chat(t->getTableId(), msg);
 	
 	// player under the gun
@@ -223,6 +239,8 @@ void GameController::stateBlinds(Table *t)
 
 void GameController::stateBetting(Table *t)
 {
+	char msg[1024];
+	
 	Player *p = t->seats[t->cur_player].player;
 	bool allowed_action = false;  // is action allowed?
 	
@@ -296,8 +314,6 @@ void GameController::stateBetting(Table *t)
 	
 	if (allowed_action)
 	{
-		char msg[1024];
-		
 		// perform action
 		if (action == Player::Fold)
 		{
@@ -381,6 +397,11 @@ void GameController::stateBetting(Table *t)
 			}
 			t->bet_amount = 0.0f;
 			
+#ifdef SERVER_TESTING
+			// pot-size message
+			snprintf(msg, sizeof(msg), "Pot size: %.2f", t->pot);
+			chat(t->table_id, msg);
+#endif
 			
 			// set current player to SB or next active
 			t->cur_player = t->getNextActivePlayer(t->dealer);
