@@ -396,8 +396,8 @@ void GameController::stateBetting(Table *t)
 	else
 	{
 		// player can't bet/raise more than this chipstack
-		if (amount > t->chipstack)
-			amount = t->chipstack;
+		if (amount > p->chipstack)
+			amount = p->chipstack;
 		
 		t->seats[t->cur_player].bet += amount;
 		p->chipstack -= amount;
