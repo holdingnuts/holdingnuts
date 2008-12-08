@@ -15,6 +15,7 @@
 # include <sys/param.h>
 # include <errno.h>
 # include <fcntl.h>
+#include <arpa/inet.h>
 #endif
 
 #if defined __cplusplus
@@ -28,9 +29,9 @@ typedef int socktype;
 #endif
 
 int socket_create(int domain, int type, int protocol);
-int socket_bind(socktype sockfd, const struct sockaddr *addr, int addrlen);
+int socket_bind(socktype sockfd, const struct sockaddr *addr, unsigned int addrlen);
 int socket_listen(socktype sockfd, int backlog);
-int socket_accept(socktype sockfd, struct sockaddr *addr, int *addrlen);
+int socket_accept(socktype sockfd, struct sockaddr *addr, unsigned int *addrlen);
 int socket_close(socktype fd);
 
 int socket_read(socktype fd, void *buf, size_t count);
