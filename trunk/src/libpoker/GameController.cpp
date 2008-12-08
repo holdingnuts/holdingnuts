@@ -224,7 +224,7 @@ void GameController::stateBlinds(Table *t)
 void GameController::stateBetting(Table *t)
 {
 	Player *p = t->seats[t->cur_player].player;
-	bool valid_action = false;  // is action allowed?
+	bool allowed_action = false;  // is action allowed?
 	
 	Player::PlayerAction action;
 	float amount;
@@ -237,14 +237,14 @@ void GameController::stateBetting(Table *t)
 		dbg_print("game", "player %d choose an action", p->client_id);
 		
 		if (action == Player::Fold)
-			valid_action = true;
+			allowed_action = true;
 		else if (action == Player::Check)
 		{
 			// allowed to check?
 			if (t->seats[t->cur_player].bet < t->bet_amount)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot check! Try call.");
 			else
-				valid_action = true;
+				allowed_action = true;
 		}
 		else if (action == Player::Call)
 		{
@@ -252,7 +252,7 @@ void GameController::stateBetting(Table *t)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot call, nothing was bet! Try check.");
 			else
 			{
-				valid_action = true;
+				allowed_action = true;
 				amount = t->bet_amount - t->seats[t->cur_player].bet;
 			}
 		}
@@ -264,7 +264,7 @@ void GameController::stateBetting(Table *t)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet this amount.");
 			else
 			{
-				valid_action = true;
+				allowed_action = true;
 				amount = p->next_action.amount - t->seats[t->cur_player].bet;
 			}
 		}
@@ -276,17 +276,17 @@ void GameController::stateBetting(Table *t)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise this amount.");
 			else
 			{
-				valid_action = true;
+				allowed_action = true;
 				amount = p->next_action.amount - t->seats[t->cur_player].bet;
 			}
 		}
 		else if (action == Player::Allin)
 		{
-			valid_action = true;
+			allowed_action = true;
 			amount = p->chipstack;
 		}
 		else
-			valid_action = true;  // FIXME: debugging; fix this case!
+			allowed_action = true;  // FIXME: debugging; fix this case!
 		
 		// reset
 		p->next_action.valid = false;
@@ -296,7 +296,7 @@ void GameController::stateBetting(Table *t)
 		// FIXME: handle player timeout
 	}
 	
-	if (valid_action)
+	if (allowed_action)
 	{
 		char msg[1024];
 		
