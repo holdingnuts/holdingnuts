@@ -20,7 +20,7 @@ int socket_create(int domain, int type, int protocol)
 	return socket(domain, type, protocol);
 }
 
-int socket_bind(socktype sockfd, const struct sockaddr *addr, int addrlen)
+int socket_bind(socktype sockfd, const struct sockaddr *addr, unsigned int addrlen)
 {
 	return bind(sockfd, addr, addrlen);
 }
@@ -30,10 +30,10 @@ int socket_listen(socktype sockfd, int backlog)
 	return listen(sockfd, backlog);
 }
 
-int socket_accept(socktype sockfd, struct sockaddr *addr, int *addrlen)
+int socket_accept(socktype sockfd, struct sockaddr *addr, unsigned int *addrlen)
 {
 #if defined(PLATFORM_WINDOWS)
-	return accept(sockfd, addr, addrlen);
+	return accept(sockfd, addr, (int*) addrlen);
 #else
 	return accept(sockfd, addr, (socklen_t*) addrlen);
 #endif
