@@ -131,8 +131,13 @@ int mainloop()
 			// listen socket
 			if (FD_ISSET(sock, &fds))
 			{
-				socktype client_sock = socket_accept(sock, NULL, 0);
-				dbg_print("listensock", "(%d) accepted connection", client_sock);
+				sockaddr_in saddr;
+				unsigned int saddrlen = sizeof(saddr);
+				memset(&saddr, 0, sizeof(sockaddr_in));
+				
+				socktype client_sock = socket_accept(sock, (struct sockaddr*) &saddr, &saddrlen);
+				dbg_print("listensock", "(%d) accepted connection (%s)",
+					client_sock, inet_ntoa((struct in_addr) saddr.sin_addr));
 				
 				socket_setnonblocking(client_sock);
 				
