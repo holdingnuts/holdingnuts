@@ -15,6 +15,7 @@ public:
 		NewRound,
 		Blinds,
 		Betting,
+		AllFolded,
 		Showdown,
 	} State;
 	

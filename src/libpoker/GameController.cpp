@@ -189,6 +189,7 @@ int GameController::handleTable(Table *t)
 		int small_blind = t->getNextPlayer(t->dealer);
 		int big_blind = t->getNextPlayer(small_blind);
 		
+		Player *pDealer = t->seats[t->dealer].player;
 		Player *pSmall = t->seats[small_blind].player;
 		Player *pBig = t->seats[big_blind].player;
 		
@@ -199,8 +200,10 @@ int GameController::handleTable(Table *t)
 		pBig->chipstack -= t->blind;
 		
 		char msg[1024];
-		snprintf(msg, sizeof(msg), "Player %d is Small blind ($%d), Player %d is Big blind ($%d)",
-			pSmall->client_id, t->blind / 2, pBig->client_id, t->blind);
+		snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB ($%d), [%d] is BB ($%d)",
+			pDealer->client_id,
+			pSmall->client_id, t->blind / 2,
+			pBig->client_id, t->blind);
 		chat(t->getTableId(), msg);
 		
 		// player under the gun
@@ -331,29 +334,10 @@ int GameController::handleTable(Table *t)
 			
 			if (t->countActivePlayers() == 1)
 			{
-				// collect bets into pot
-				for (unsigned int i=0; i < t->seats.size(); i++)
-				{
-					t->pot += t->seats[i].bet;
-					t->seats[i].bet = 0.0f;
-				}
-				
-				// get last remaining player
-				Player *p = t->seats[t->getNextActivePlayer(t->cur_player)].player;
-				
-				char msg[1024];
-				snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
-				chat(t->getTableId(), msg);
-				
-				p->chipstack += t->pot;
-				t->pot = 0.0f;
-				
-				t->state = Table::NewRound;
-				t->dealer = t->getNextPlayer(t->dealer);
+				t->state = Table::AllFolded;
 			}
 			else
 			{
-			
 				// is next the player who did the last bet/action?
 				if (t->getNextPlayer(t->cur_player) == (int)t->last_bet_player)
 				{
@@ -426,10 +410,36 @@ int GameController::handleTable(Table *t)
 			}
 		}
 	}
+	else if (t->state == Table::AllFolded)
+	{
+		// collect bets into pot
+		for (unsigned int i=0; i < t->seats.size(); i++)
+		{
+			t->pot += t->seats[i].bet;
+			t->seats[i].bet = 0.0f;
+		}
+		
+		// get last remaining player
+		Player *p = t->seats[t->getNextActivePlayer(t->cur_player)].player;
+		
+		char msg[1024];
+		snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
+		chat(t->getTableId(), msg);
+		
+		p->chipstack += t->pot;
+		t->pot = 0.0f;
+		
+		t->state = Table::NewRound;
+		t->dealer = t->getNextPlayer(t->dealer);
+	}
 	else if (t->state == Table::Showdown)
 	{
 		chat(t->table_id, "state:showdown");
-		//if (last_round) t->dealer = t->getNextPlayer(t->dealer);
+		
+		// FIXME: implement
+		
+		t->state = Table::NewRound;
+		t->dealer = t->getNextPlayer(t->dealer);
 	}
 	
 	return 0;
