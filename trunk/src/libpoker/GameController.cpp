@@ -164,283 +164,302 @@ void GameController::dealRiver(Table *t)
 	chat(t->table_id, msg);
 }
 
-int GameController::handleTable(Table *t)
+void GameController::stateNewRound(Table *t)
 {
-	if (t->state == Table::NewRound)
+	dbg_print("Table", "New Round");
+	
+	t->deck.fill();
+	t->deck.shuffle();
+	
+	chat(t->getTableId(), "New round started, deck shuffled");
+	
+	t->pot = 0.0f;
+	t->state = Table::Blinds;
+}
+
+void GameController::stateBlinds(Table *t)
+{
+	// FIXME: handle non-SNG correctly (ask each player for blinds ...)
+	dbg_print("Table", "Blinds");
+	
+	t->bet_amount = (float)t->blind;
+	
+	// FIXME: heads-up rule
+	int small_blind = t->getNextPlayer(t->dealer);
+	int big_blind = t->getNextPlayer(small_blind);
+	
+	Player *pDealer = t->seats[t->dealer].player;
+	Player *pSmall = t->seats[small_blind].player;
+	Player *pBig = t->seats[big_blind].player;
+	
+	t->seats[small_blind].bet = t->blind / 2;
+	pSmall->chipstack -= t->blind / 2;
+	
+	t->seats[big_blind].bet = t->blind;
+	pBig->chipstack -= t->blind;
+	
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB ($%d), [%d] is BB ($%d)",
+		pDealer->client_id,
+		pSmall->client_id, t->blind / 2,
+		pBig->client_id, t->blind);
+	chat(t->getTableId(), msg);
+	
+	// player under the gun
+	t->cur_player = t->getNextPlayer(big_blind);
+	
+	// give out hole-cards
+	dealHole(t);
+	
+	// tell current player
+	Player *p = t->seats[t->cur_player].player;
+	client_chat(game_id, t->table_id, p->client_id, "You're under the gun!");
+	
+	t->betround = Table::Preflop;
+	t->last_bet_player = t->cur_player;
+	
+	t->state = Table::Betting;
+}
+
+void GameController::stateBetting(Table *t)
+{
+	Player *p = t->seats[t->cur_player].player;
+	bool valid_action = false;  // is action allowed?
+	
+	Player::PlayerAction action;
+	float amount;
+	
+	// has player set an action?
+	if (p->next_action.valid)
 	{
-		dbg_print("Table", "New Round");
+		action = p->next_action.action;
 		
-		t->deck.fill();
-		t->deck.shuffle();
+		dbg_print("game", "player %d choose an action", p->client_id);
 		
-		chat(t->getTableId(), "New round started, deck shuffled");
-		
-		t->pot = 0.0f;
-		t->state = Table::Blinds;
-	}
-	else if (t->state == Table::Blinds)
-	{
-		// FIXME: handle non-SNG correctly (ask each player for blinds ...)
-		dbg_print("Table", "Blinds");
-		
-		t->bet_amount = (float)t->blind;
-		
-		// FIXME: heads-up rule
-		int small_blind = t->getNextPlayer(t->dealer);
-		int big_blind = t->getNextPlayer(small_blind);
-		
-		Player *pDealer = t->seats[t->dealer].player;
-		Player *pSmall = t->seats[small_blind].player;
-		Player *pBig = t->seats[big_blind].player;
-		
-		t->seats[small_blind].bet = t->blind / 2;
-		pSmall->chipstack -= t->blind / 2;
-		
-		t->seats[big_blind].bet = t->blind;
-		pBig->chipstack -= t->blind;
-		
-		char msg[1024];
-		snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB ($%d), [%d] is BB ($%d)",
-			pDealer->client_id,
-			pSmall->client_id, t->blind / 2,
-			pBig->client_id, t->blind);
-		chat(t->getTableId(), msg);
-		
-		// player under the gun
-		t->cur_player = t->getNextPlayer(big_blind);
-		
-		// give out hole-cards
-		dealHole(t);
-		
-		// tell current player
-		Player *p = t->seats[t->cur_player].player;
-		client_chat(game_id, t->table_id, p->client_id, "You're under the gun!");
-		
-		t->betround = Table::Preflop;
-		t->last_bet_player = t->cur_player;
-		
-		t->state = Table::Betting;
-	}
-	else if (t->state == Table::Betting)
-	{
-		Player *p = t->seats[t->cur_player].player;
-		bool valid_action = false;  // is action allowed?
-		
-		Player::PlayerAction action;
-		float amount;
-		
-		// has player set an action?
-		if (p->next_action.valid)
+		if (action == Player::Fold)
+			valid_action = true;
+		else if (action == Player::Check)
 		{
-			action = p->next_action.action;
-			
-			dbg_print("game", "player %d choose an action", p->client_id);
-			
-			if (action == Player::Fold)
-				valid_action = true;
-			else if (action == Player::Check)
-			{
-				// allowed to check?
-				if (t->seats[t->cur_player].bet < t->bet_amount)
-					client_chat(game_id, t->table_id, p->client_id, "Err: You cannot check! Try call.");
-				else
-					valid_action = true;
-			}
-			else if (action == Player::Call)
-			{
-				if ((int)t->bet_amount == 0 || (int)t->bet_amount == t->seats[t->cur_player].bet)
-					client_chat(game_id, t->table_id, p->client_id, "Err: You cannot call, nothing was bet! Try check.");
-				else
-				{
-					valid_action = true;
-					amount = t->bet_amount - t->seats[t->cur_player].bet;
-				}
-			}
-			else if (action == Player::Bet)
-			{
-				if (((unsigned int)t->bet_amount > t->blind) || (t->betround != Table::Preflop && (unsigned int)t->bet_amount > 0))
-					client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet, there was already a bet! Try raise.");
-				else if (p->next_action.amount <= (unsigned int)t->bet_amount || p->next_action.amount < t->blind)
-					client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet this amount.");
-				else
-				{
-					valid_action = true;
-					amount = p->next_action.amount;
-				}
-			}
-			else if (action == Player::Raise)
-			{
-				if ((unsigned int)t->bet_amount == 0 || (unsigned int)t->bet_amount == t->blind)
-					client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise, nothing was bet! Try bet.");
-				else if (p->next_action.amount <= (unsigned int)t->bet_amount)
-					client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise this amount.");
-				else
-				{
-					valid_action = true;
-					amount = p->next_action.amount;
-				}
-			}
-			else if (action == Player::Allin)
-			{
-				valid_action = true;
-				amount = p->chipstack;
-			}
+			// allowed to check?
+			if (t->seats[t->cur_player].bet < t->bet_amount)
+				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot check! Try call.");
 			else
-				valid_action = true;  // FIXME: debugging; fix this case!
+				valid_action = true;
+		}
+		else if (action == Player::Call)
+		{
+			if ((int)t->bet_amount == 0 || (int)t->bet_amount == t->seats[t->cur_player].bet)
+				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot call, nothing was bet! Try check.");
+			else
+			{
+				valid_action = true;
+				amount = t->bet_amount - t->seats[t->cur_player].bet;
+			}
+		}
+		else if (action == Player::Bet)
+		{
+			if (((unsigned int)t->bet_amount > t->blind) || (t->betround != Table::Preflop && (unsigned int)t->bet_amount > 0))
+				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet, there was already a bet! Try raise.");
+			else if (p->next_action.amount <= (unsigned int)t->bet_amount || p->next_action.amount < t->blind)
+				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet this amount.");
+			else
+			{
+				valid_action = true;
+				amount = p->next_action.amount;
+			}
+		}
+		else if (action == Player::Raise)
+		{
+			if ((unsigned int)t->bet_amount == 0 || (unsigned int)t->bet_amount == t->blind)
+				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise, nothing was bet! Try bet.");
+			else if (p->next_action.amount <= (unsigned int)t->bet_amount)
+				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise this amount.");
+			else
+			{
+				valid_action = true;
+				amount = p->next_action.amount;
+			}
+		}
+		else if (action == Player::Allin)
+		{
+			valid_action = true;
+			amount = p->chipstack;
+		}
+		else
+			valid_action = true;  // FIXME: debugging; fix this case!
+		
+		// reset
+		p->next_action.valid = false;
+	}
+	else
+	{
+		// FIXME: handle player timeout
+	}
+	
+	if (valid_action)
+	{
+		char msg[1024];
+		
+		// perform action
+		if (action == Player::Fold)
+		{
+			t->seats[t->cur_player].in_round = false;
 			
-			// reset
-			p->next_action.valid = false;
+			snprintf(msg, sizeof(msg), "Player %d folded.", p->client_id);
+			chat(t->getTableId(), msg);
+		}
+		else if (action == Player::Check)
+		{
+			snprintf(msg, sizeof(msg), "Player %d checked.", p->client_id);
+			chat(t->getTableId(), msg);
 		}
 		else
 		{
-			// FIXME: handle player timeout
+			t->seats[t->cur_player].bet += amount;
+			p->chipstack -= amount;
+			
+			if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
+			{
+				t->last_bet_player = t->cur_player;
+				t->bet_amount = amount;
+				
+				snprintf(msg, sizeof(msg), "Player %d bet/raised/allin $%.2f.", p->client_id, amount);
+			}
+			else
+				snprintf(msg, sizeof(msg), "Player %d called $%.2f.", p->client_id, amount);
+			
+			
+			chat(t->getTableId(), msg);
 		}
 		
-		if (valid_action)
+		if (t->countActivePlayers() == 1)
 		{
-			char msg[1024];
-			
-			// perform action
-			if (action == Player::Fold)
+			t->state = Table::AllFolded;
+		}
+		else
+		{
+			// is next the player who did the last bet/action?
+			if (t->getNextPlayer(t->cur_player) == (int)t->last_bet_player)
 			{
-				t->seats[t->cur_player].in_round = false;
+				dbg_print("table", "betting round ended");
 				
-				snprintf(msg, sizeof(msg), "Player %d folded.", p->client_id);
-				chat(t->getTableId(), msg);
-			}
-			else if (action == Player::Check)
-			{
-				snprintf(msg, sizeof(msg), "Player %d checked.", p->client_id);
-				chat(t->getTableId(), msg);
-			}
-			else
-			{
-				t->seats[t->cur_player].bet += amount;
-				p->chipstack -= amount;
-				
-				if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
+				switch ((int)t->betround)
 				{
-					t->last_bet_player = t->cur_player;
-					t->bet_amount = amount;
+				case Table::Preflop:
+				{
+					// deal flop
+					dealFlop(t);
 					
-					snprintf(msg, sizeof(msg), "Player %d bet/raised/allin $%.2f.", p->client_id, amount);
+					t->betround = Table::Flop;
+					break;
 				}
-				else
-					snprintf(msg, sizeof(msg), "Player %d called $%.2f.", p->client_id, amount);
-				
-				
-				chat(t->getTableId(), msg);
-			}
-			
-			if (t->countActivePlayers() == 1)
-			{
-				t->state = Table::AllFolded;
-			}
-			else
-			{
-				// is next the player who did the last bet/action?
-				if (t->getNextPlayer(t->cur_player) == (int)t->last_bet_player)
+				case Table::Flop:
 				{
-					dbg_print("table", "betting round ended");
+					// deal turn
+					dealTurn(t);
 					
-					switch ((int)t->betround)
-					{
-					case Table::Preflop:
-					{
-						// deal flop
-						dealFlop(t);
-						
-						t->betround = Table::Flop;
-						break;
-					}
-					case Table::Flop:
-					{
-						// deal turn
-						dealTurn(t);
-						
-						t->betround = Table::Turn;
-						break;
-					}
-					case Table::Turn:
-					{
-						// deal turn
-						dealRiver(t);
-						
-						t->betround = Table::River;
-						break;
-					}
-					case Table::River:
-						t->state = Table::Showdown;
-						break;
-					}
-					
-					// collect bets into pot
-					for (unsigned int i=0; i < t->seats.size(); i++)
-					{
-						t->pot += t->seats[i].bet;
-						t->seats[i].bet = 0.0f;
-					}
-					t->bet_amount = 0.0f;
-					
-					if (t->state != Table::Showdown)
-					{
-						// set current player to SB or next active
-						t->cur_player = t->getNextActivePlayer(t->dealer);
-						Player *p = t->seats[t->cur_player].player;
-						
-						client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
-					}
-					else
-					{
-						chat(t->table_id, "Showdown");
-						
-						// the player who did last action is first to showdown
-						t->cur_player = t->last_bet_player;
-					}
-					
+					t->betround = Table::Turn;
+					break;
 				}
-				else
+				case Table::Turn:
 				{
-					t->cur_player = t->getNextActivePlayer(t->cur_player);
+					// deal turn
+					dealRiver(t);
+					
+					t->betround = Table::River;
+					break;
+				}
+				case Table::River:
+					t->state = Table::Showdown;
+					break;
+				}
+				
+				// collect bets into pot
+				for (unsigned int i=0; i < t->seats.size(); i++)
+				{
+					t->pot += t->seats[i].bet;
+					t->seats[i].bet = 0.0f;
+				}
+				t->bet_amount = 0.0f;
+				
+				if (t->state != Table::Showdown)
+				{
+					// set current player to SB or next active
+					t->cur_player = t->getNextActivePlayer(t->dealer);
 					Player *p = t->seats[t->cur_player].player;
 					
-					dbg_print("table", "next player");
 					client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
 				}
+				else
+				{
+					chat(t->table_id, "Showdown");
+					
+					// the player who did last action is first to showdown
+					t->cur_player = t->last_bet_player;
+				}
+				
+			}
+			else
+			{
+				t->cur_player = t->getNextActivePlayer(t->cur_player);
+				Player *p = t->seats[t->cur_player].player;
+				
+				dbg_print("table", "next player");
+				client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
 			}
 		}
 	}
+}
+
+void GameController::stateAllFolded(Table *t)
+{
+	// collect bets into pot
+	for (unsigned int i=0; i < t->seats.size(); i++)
+	{
+		t->pot += t->seats[i].bet;
+		t->seats[i].bet = 0.0f;
+	}
+	
+	// get last remaining player
+	Player *p = t->seats[t->getNextActivePlayer(t->cur_player)].player;
+	
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
+	chat(t->getTableId(), msg);
+	
+	p->chipstack += t->pot;
+	t->pot = 0.0f;
+	
+	t->state = Table::NewRound;
+	t->dealer = t->getNextPlayer(t->dealer);
+}
+
+void GameController::stateShowdown(Table *t)
+{
+	chat(t->table_id, "state:showdown");
+	
+	// FIXME: implement
+	
+	t->state = Table::NewRound;
+	t->dealer = t->getNextPlayer(t->dealer);
+}
+
+int GameController::handleTable(Table *t)
+{
+	if (t->state == Table::ElectDealer)
+	{
+		// FIXME: implement me
+	}
+	else if (t->state == Table::NewRound)
+		stateNewRound(t);
+	else if (t->state == Table::Blinds)
+		stateBlinds(t);
+	else if (t->state == Table::Betting)
+		stateBetting(t);
 	else if (t->state == Table::AllFolded)
-	{
-		// collect bets into pot
-		for (unsigned int i=0; i < t->seats.size(); i++)
-		{
-			t->pot += t->seats[i].bet;
-			t->seats[i].bet = 0.0f;
-		}
-		
-		// get last remaining player
-		Player *p = t->seats[t->getNextActivePlayer(t->cur_player)].player;
-		
-		char msg[1024];
-		snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
-		chat(t->getTableId(), msg);
-		
-		p->chipstack += t->pot;
-		t->pot = 0.0f;
-		
-		t->state = Table::NewRound;
-		t->dealer = t->getNextPlayer(t->dealer);
-	}
+		stateAllFolded(t);
 	else if (t->state == Table::Showdown)
-	{
-		chat(t->table_id, "state:showdown");
-		
-		// FIXME: implement
-		
-		t->state = Table::NewRound;
-		t->dealer = t->getNextPlayer(t->dealer);
-	}
+		stateShowdown(t);
 	
 	return 0;
 }
