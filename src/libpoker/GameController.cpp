@@ -97,6 +97,54 @@ bool GameController::setPlayerAction(int cid, Player::PlayerAction action, float
 	return true;
 }
 
+bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &winlist)
+{
+	vector<HandStrength> wl;
+	
+	unsigned int showdown_player = t->last_bet_player;
+	for (unsigned int i=0; i < t->countActivePlayers(); i++)
+	{
+		Player *p = t->seats[showdown_player].player;
+		
+		HandStrength strength;
+		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
+		strength.id = p->client_id;
+		
+		wl.push_back(strength);
+		
+		showdown_player = t->getNextActivePlayer(showdown_player);
+	}
+	
+	winlist.push_back(wl);
+	
+	int index=0;
+	do
+	{
+		vector<HandStrength> &tw = winlist[index];
+		vector<HandStrength> tmp;
+		
+		sort(tw.begin(), tw.end(), greater<HandStrength>());
+		
+		for (unsigned int i=tw.size()-1; i > 0; i--)
+		{
+			if (tw[i] < tw[0])
+			{
+				tmp.push_back(tw[i]);
+				tw.pop_back();
+			}
+		}
+		
+		if (!tmp.size())
+			break;
+		
+		winlist.push_back(tmp);
+		index++;
+		
+	} while(true);
+	
+	return true;
+}
+
 void GameController::dealHole(Table *t)
 {
 	for (unsigned int i = t->cur_player, c=0; c < t->seats.size(); i = t->getNextPlayer(i), c++)
@@ -232,7 +280,7 @@ void GameController::stateBlinds(Table *t)
 		pSmall->client_id, (float)t->blind / 2,
 		pBig->client_id, (float)t->blind,
 		(headsup_rule) ? "HEADS-UP" : "");
-	chat(t->getTableId(), msg);
+	chat(t->table_id, msg);
 	
 	// player under the gun
 	t->cur_player = t->getNextPlayer(big_blind);
@@ -337,12 +385,12 @@ void GameController::stateBetting(Table *t)
 		t->seats[t->cur_player].in_round = false;
 		
 		snprintf(msg, sizeof(msg), "Player %d folded.", p->client_id);
-		chat(t->getTableId(), msg);
+		chat(t->table_id, msg);
 	}
 	else if (action == Player::Check)
 	{
 		snprintf(msg, sizeof(msg), "Player %d checked.", p->client_id);
-		chat(t->getTableId(), msg);
+		chat(t->table_id, msg);
 	}
 	else
 	{
@@ -360,7 +408,7 @@ void GameController::stateBetting(Table *t)
 			snprintf(msg, sizeof(msg), "Player %d called $%.2f.", p->client_id, amount);
 		
 		
-		chat(t->getTableId(), msg);
+		chat(t->table_id, msg);
 	}
 	
 	// break here if only 1 player left
@@ -418,7 +466,16 @@ void GameController::stateBetting(Table *t)
 #endif
 		
 		// set current player to SB or next active behind SB
-		t->cur_player = t->getNextActivePlayer(t->dealer);
+		bool headsup_rule = (t->seats.size() == 2);
+		if (headsup_rule)
+		{
+			// FIXME: ugly
+			t->cur_player = t->getNextActivePlayer(t->dealer);
+			t->cur_player = t->getNextActivePlayer(t->cur_player);
+		}
+		else
+			t->cur_player = t->getNextActivePlayer(t->dealer);
+		
 		Player *p = t->seats[t->cur_player].player;
 		
 		client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
@@ -446,9 +503,11 @@ void GameController::stateAllFolded(Table *t)
 	// get last remaining player
 	Player *p = t->seats[t->getNextActivePlayer(t->cur_player)].player;
 	
+	// FIXME: ask player if he wants to show cards
+	
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
-	chat(t->getTableId(), msg);
+	chat(t->table_id, msg);
 	
 	p->chipstack += t->pot;
 	t->pot = 0.0f;
@@ -459,6 +518,8 @@ void GameController::stateAllFolded(Table *t)
 
 void GameController::stateShowdown(Table *t)
 {
+	char msg[1024];
+	
 	chat(t->table_id, "Showdown");
 	
 	// the player who did the last action is first to show
@@ -471,14 +532,57 @@ void GameController::stateShowdown(Table *t)
 		
 		HandStrength strength;
 		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
+		#if 0
+		vector<Card> cards;
+		string hsstr = "rank: ";
 		
-		char msg[1024];
+		cards.clear();
+		strength.copyRankCards(&cards);
+		for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
+			hsstr += e->getName() + ' ';
+		
+		hsstr += "kicker: ";
+		cards.clear();
+		strength.copyKickerCards(&cards);
+		for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
+			hsstr += e->getName() + ' ';
+		#endif
 		snprintf(msg, sizeof(msg), "Player [%d] has: %s",
 			p->client_id,
 			HandStrength::getRankingName(strength.getRanking()));
 		chat(t->table_id, msg);
 		
 		showdown_player = t->getNextActivePlayer(showdown_player);
+	}
+	
+	vector< vector<HandStrength> > winlist;
+	createWinlist(t, winlist);
+	
+	for (unsigned int i=0; i < winlist.size(); i++)
+	{
+		dbg_print("showdown", "--- Winlist %d---", i);
+		
+		vector<HandStrength> &tw = winlist[i];
+		
+		// FIXME: support case where further winlists are needed
+		unsigned int winner_count = tw.size();
+		float win_amount = t->pot / winner_count;
+		
+		for (unsigned int j=0; j < winner_count; j++)
+		{
+			dbg_print("showdown", "  player %d gets %.2f", tw[j].id, win_amount);
+			Player *p = findPlayer(tw[j].id);
+			p->chipstack += win_amount;
+			
+			snprintf(msg, sizeof(msg), "Winner is [%d] and wins %.2f",
+				p->client_id, win_amount);
+			
+			chat(t->table_id, msg);
+		}
+		
+		// FIXME: support case where further winlists are needed
+		t->pot = 0.0f;
+		break;
 	}
 	
 	t->state = Table::NewRound;
