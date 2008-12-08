@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "Debug.h"
 #include "GameController.hpp"
+#include "GameLogic.hpp"
 
 #include "game.hpp"
 
@@ -196,7 +197,6 @@ void GameController::stateNewRound(Table *t)
 void GameController::stateBlinds(Table *t)
 {
 	// FIXME: handle non-SNG correctly (ask each player for blinds ...)
-	dbg_print("Table", "Blinds");
 	
 	t->bet_amount = (float)t->blind;
 	
@@ -445,10 +445,27 @@ void GameController::stateAllFolded(Table *t)
 
 void GameController::stateShowdown(Table *t)
 {
-	chat(t->table_id, "state:showdown");
+	chat(t->table_id, "Showdown");
 	
-	// FIXME: implement
-	// ?? t->cur_player = t->last_bet_player;
+	// the player who did the last action is first to show
+	int showdown_player = t->last_bet_player;
+	
+	// FIXME: ask for showdown if player has the option
+	for (unsigned int i=0; i < t->countActivePlayers(); i++)
+	{
+		Player *p = t->seats[showdown_player].player;
+		
+		HandStrength strength;
+		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
+		
+		char msg[1024];
+		snprintf(msg, sizeof(msg), "Player [%d] has: %s",
+			p->client_id,
+			HandStrength::getRankingName(strength.getRanking()));
+		chat(t->table_id, msg);
+		
+		showdown_player = t->getNextActivePlayer(showdown_player);
+	}
 	
 	t->state = Table::NewRound;
 	t->dealer = t->getNextPlayer(t->dealer);
