@@ -332,81 +332,71 @@ void GameController::stateBetting(Table *t)
 			chat(t->getTableId(), msg);
 		}
 		
+		// break here if only 1 player left
 		if (t->countActivePlayers() == 1)
 		{
 			t->state = Table::AllFolded;
+			return;
+		}
+		
+		// is next the player who did the last bet/action?
+		if (t->getNextPlayer(t->cur_player) == (int)t->last_bet_player)
+		{
+			dbg_print("table", "betting round ended");
+			
+			switch ((int)t->betround)
+			{
+			case Table::Preflop:
+			{
+				// deal flop
+				dealFlop(t);
+				
+				t->betround = Table::Flop;
+				break;
+			}
+			case Table::Flop:
+			{
+				// deal turn
+				dealTurn(t);
+				
+				t->betround = Table::Turn;
+				break;
+			}
+			case Table::Turn:
+			{
+				// deal turn
+				dealRiver(t);
+				
+				t->betround = Table::River;
+				break;
+			}
+			case Table::River:
+				t->state = Table::Showdown;
+				return;
+			}
+			
+			// collect bets into pot
+			for (unsigned int i=0; i < t->seats.size(); i++)
+			{
+				t->pot += t->seats[i].bet;
+				t->seats[i].bet = 0.0f;
+			}
+			t->bet_amount = 0.0f;
+			
+			
+			// set current player to SB or next active
+			t->cur_player = t->getNextActivePlayer(t->dealer);
+			Player *p = t->seats[t->cur_player].player;
+			
+			client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
 		}
 		else
 		{
-			// is next the player who did the last bet/action?
-			if (t->getNextPlayer(t->cur_player) == (int)t->last_bet_player)
-			{
-				dbg_print("table", "betting round ended");
-				
-				switch ((int)t->betround)
-				{
-				case Table::Preflop:
-				{
-					// deal flop
-					dealFlop(t);
-					
-					t->betround = Table::Flop;
-					break;
-				}
-				case Table::Flop:
-				{
-					// deal turn
-					dealTurn(t);
-					
-					t->betround = Table::Turn;
-					break;
-				}
-				case Table::Turn:
-				{
-					// deal turn
-					dealRiver(t);
-					
-					t->betround = Table::River;
-					break;
-				}
-				case Table::River:
-					t->state = Table::Showdown;
-					break;
-				}
-				
-				// collect bets into pot
-				for (unsigned int i=0; i < t->seats.size(); i++)
-				{
-					t->pot += t->seats[i].bet;
-					t->seats[i].bet = 0.0f;
-				}
-				t->bet_amount = 0.0f;
-				
-				if (t->state != Table::Showdown)
-				{
-					// set current player to SB or next active
-					t->cur_player = t->getNextActivePlayer(t->dealer);
-					Player *p = t->seats[t->cur_player].player;
-					
-					client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
-				}
-				else
-				{
-					chat(t->table_id, "Showdown");
-					
-					// the player who did last action is first to showdown
-					t->cur_player = t->last_bet_player;
-				}
-				
-			}
-			else
-			{
-				t->cur_player = t->getNextActivePlayer(t->cur_player);
-				Player *p = t->seats[t->cur_player].player;
-				
-				dbg_print("table", "next player");
-				client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
-			}
+			t->cur_player = t->getNextActivePlayer(t->cur_player);
+			Player *p = t->seats[t->cur_player].player;
+			
+			dbg_print("table", "next player");
+			client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
 		}
 	}
 }
@@ -439,6 +429,7 @@ void GameController::stateShowdown(Table *t)
 	chat(t->table_id, "state:showdown");
 	
 	// FIXME: implement
+	// ?? t->cur_player = t->last_bet_player;
 	
 	t->state = Table::NewRound;
 	t->dealer = t->getNextPlayer(t->dealer);
