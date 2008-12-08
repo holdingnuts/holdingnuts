@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <string>
+#include <algorithm>
 
 #include "Config.h"
 #include "Debug.h"
