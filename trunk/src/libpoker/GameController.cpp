@@ -200,9 +200,21 @@ void GameController::stateBlinds(Table *t)
 	
 	t->bet_amount = (float)t->blind;
 	
-	// FIXME: heads-up rule
-	int small_blind = t->getNextPlayer(t->dealer);
-	int big_blind = t->getNextPlayer(small_blind);
+	bool headsup_rule = (t->seats.size() == 2);
+	unsigned int small_blind, big_blind;
+	
+	// heads-up rule
+	if (headsup_rule)
+	{
+		big_blind = t->getNextPlayer(t->dealer);
+		small_blind = t->getNextPlayer(big_blind);
+	}
+	else
+	{
+		small_blind = t->getNextPlayer(t->dealer);
+		big_blind = t->getNextPlayer(small_blind);
+	}
+	
 	
 	Player *pDealer = t->seats[t->dealer].player;
 	Player *pSmall = t->seats[small_blind].player;
@@ -215,10 +227,11 @@ void GameController::stateBlinds(Table *t)
 	pBig->chipstack -= t->blind;
 	
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f)",
+	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
 		pDealer->client_id,
 		pSmall->client_id, (float)t->blind / 2,
-		pBig->client_id, (float)t->blind);
+		pBig->client_id, (float)t->blind,
+		(headsup_rule) ? "HEADS-UP" : "");
 	chat(t->getTableId(), msg);
 	
 	// player under the gun
@@ -365,29 +378,26 @@ void GameController::stateBetting(Table *t)
 		switch ((int)t->betround)
 		{
 		case Table::Preflop:
-		{
 			// deal flop
 			dealFlop(t);
 			
 			t->betround = Table::Flop;
 			break;
-		}
+		
 		case Table::Flop:
-		{
 			// deal turn
 			dealTurn(t);
 			
 			t->betround = Table::Turn;
 			break;
-		}
+		
 		case Table::Turn:
-		{
 			// deal turn
 			dealRiver(t);
 			
 			t->betround = Table::River;
 			break;
-		}
+		
 		case Table::River:
 			t->state = Table::Showdown;
 			return;
@@ -407,7 +417,7 @@ void GameController::stateBetting(Table *t)
 		chat(t->table_id, msg);
 #endif
 		
-		// set current player to SB or next active
+		// set current player to SB or next active behind SB
 		t->cur_player = t->getNextActivePlayer(t->dealer);
 		Player *p = t->seats[t->cur_player].player;
 		
@@ -415,6 +425,7 @@ void GameController::stateBetting(Table *t)
 	}
 	else
 	{
+		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		Player *p = t->seats[t->cur_player].player;
 		
