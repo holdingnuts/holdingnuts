@@ -9,6 +9,9 @@
 #define DEFAULT_SERVER_PORT  12345
 #define MAX_PLAYERS  10
 
+/* server testing without real client; don't be that precise with protocol */
+#define SERVER_TESTING
+
 
 /* TODO: move to other file
    Example: 2.12.123 = 2*100000 + 12*1000 + 123 = 212123
