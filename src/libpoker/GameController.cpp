@@ -338,7 +338,7 @@ void GameController::stateBetting(Table *t)
 		}
 		else if (action == Player::Bet)
 		{
-			if (((unsigned int)t->bet_amount > t->blind) || (t->betround != Table::Preflop && (unsigned int)t->bet_amount > 0))
+			if ((unsigned int)t->bet_amount > 0)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet, there was already a bet! Try raise.");
 			else if (p->next_action.amount <= (unsigned int)t->bet_amount || p->next_action.amount < t->blind)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet this amount.");
@@ -350,7 +350,7 @@ void GameController::stateBetting(Table *t)
 		}
 		else if (action == Player::Raise)
 		{
-			if ((unsigned int)t->bet_amount == 0 || (unsigned int)t->bet_amount == t->blind)
+			if ((unsigned int)t->bet_amount == 0)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise, nothing was bet! Try bet.");
 			else if (p->next_action.amount <= (unsigned int)t->bet_amount)
 				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise this amount.");
