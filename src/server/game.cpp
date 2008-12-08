@@ -428,6 +428,8 @@ int client_execute(clientcon *client, const char *cmd)
 					a = Player::Raise;
 				else if (action == "allin")
 					a = Player::Allin;
+				else if (action == "show")
+					a = Player::Show;
 				else
 					cmderr = true;
 				
