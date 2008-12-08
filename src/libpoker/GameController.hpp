@@ -42,7 +42,14 @@ public:
 	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
 	void tick();
+	
 	int handleTable(Table *t);
+	void stateNewRound(Table *t);
+	void stateBlinds(Table *t);
+	void stateBetting(Table *t);
+	void stateAllFolded(Table *t);
+	void stateShowdown(Table *t);
+	
 	void dealHole(Table *t);
 	void dealFlop(Table *t);
 	void dealTurn(Table *t);
