@@ -14,7 +14,8 @@ public:
 		Call,
 		Bet,
 		Raise,
-		Allin
+		Allin,
+		Show
 	} PlayerAction;
 	
 	typedef struct {
