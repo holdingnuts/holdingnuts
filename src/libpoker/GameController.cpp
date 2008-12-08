@@ -532,24 +532,31 @@ void GameController::stateShowdown(Table *t)
 		
 		HandStrength strength;
 		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
-		#if 0
+		
 		vector<Card> cards;
 		string hsstr = "rank: ";
 		
 		cards.clear();
 		strength.copyRankCards(&cards);
 		for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
-			hsstr += e->getName() + ' ';
+		{
+			sprintf(msg, "%s ", e->getName());
+			hsstr += msg;
+		}
 		
 		hsstr += "kicker: ";
 		cards.clear();
 		strength.copyKickerCards(&cards);
 		for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
-			hsstr += e->getName() + ' ';
-		#endif
-		snprintf(msg, sizeof(msg), "Player [%d] has: %s",
+		{
+			sprintf(msg, "%s ", e->getName());
+			hsstr += msg;
+		}
+		
+		snprintf(msg, sizeof(msg), "Player [%d] has: %s (%s)",
 			p->client_id,
-			HandStrength::getRankingName(strength.getRanking()));
+			HandStrength::getRankingName(strength.getRanking()),
+			hsstr.c_str());
 		chat(t->table_id, msg);
 		
 		showdown_player = t->getNextActivePlayer(showdown_player);
