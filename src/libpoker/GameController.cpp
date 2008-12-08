@@ -145,6 +145,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 	return true;
 }
 
+// FIXME: SB gets first card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
 	for (unsigned int i = t->cur_player, c=0; c < t->seats.size(); i = t->getNextPlayer(i), c++)
@@ -419,7 +420,7 @@ void GameController::stateBetting(Table *t)
 	}
 	
 	// is next the player who did the last bet/action?
-	if (t->getNextPlayer(t->cur_player) == (int)t->last_bet_player)
+	if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
 	{
 		dbg_print("table", "betting round ended");
 		
@@ -476,8 +477,10 @@ void GameController::stateBetting(Table *t)
 		else
 			t->cur_player = t->getNextActivePlayer(t->dealer);
 		
-		Player *p = t->seats[t->cur_player].player;
+		// first action is at this player
+		t->last_bet_player = t->cur_player;
 		
+		Player *p = t->seats[t->cur_player].player;
 		client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
 	}
 	else
