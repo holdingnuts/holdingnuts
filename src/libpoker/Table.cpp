@@ -20,8 +20,8 @@ int Table::getNextPlayer(unsigned int pos)
 
 int Table::getNextActivePlayer(unsigned int pos)
 {
-	unsigned int cur = cur_player;
-	unsigned int start = cur;
+	unsigned int start = pos;
+	unsigned int cur = pos;
 	bool found = false;
 	
 	do
