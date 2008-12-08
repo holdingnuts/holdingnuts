@@ -9,7 +9,7 @@
 #include "CommunityCards.hpp"
 #include "Table.hpp"
 #include "Player.hpp"
-
+#include "GameLogic.hpp"
 
 // only variant "Texas Hold'em" supported yet
 
@@ -42,6 +42,8 @@ public:
 	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
 	void tick();
+	
+	bool createWinlist(Table *t, std::vector< std::vector<HandStrength> > &winlist);
 	
 	int handleTable(Table *t);
 	void stateNewRound(Table *t);

@@ -32,6 +32,8 @@ public:
 	bool operator > (const HandStrength &c) const;
 	bool operator == (const HandStrength &c) const;
 	
+	int id;  // identifier; can be used for associating player
+	
 private:
 	Ranking ranking;
 	std::vector<Card> rank;
