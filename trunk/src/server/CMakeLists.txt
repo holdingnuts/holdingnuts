@@ -24,9 +24,11 @@ IF (WIN32)
 ENDIF (WIN32)
 
 IF (WIN32)
-	add_executable (pserver pserver.cpp pserver_res.obj game.cpp)
+	add_executable (pserver pserver.cpp pserver_res.obj game.cpp
+		GameController.cpp Table.cpp)
 	target_link_libraries(pserver Poker Network System ws2_32)
 ELSE (WIN32)
-	add_executable (pserver pserver.cpp game.cpp)
+	add_executable (pserver pserver.cpp game.cpp GameController.cpp
+		Table.cpp)
 	target_link_libraries(pserver Poker Network System)
 ENDIF (WIN32)
