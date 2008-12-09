@@ -11,6 +11,8 @@ endif (UNIX)
 if (WIN32)
 	set(PLATFORM_STR  "win32")
 	add_definitions(-DPLATFORM_WINDOWS)
+	
+	FIND_PROGRAM(WINDRES NAMES windres i686-mingw32-windres)
 endif (WIN32)
 if (MACOSX)
 	set(PLATFORM_STR  "macosx")
