@@ -710,13 +710,15 @@ void GameController::tick()
 	// handle all tables
 	for (unsigned int i=0; i < tables.size(); i++)
 	{
-		int table_state;
-		table_state = handleTable(&(tables[i]));
+		Table *t = &(tables[i]);
 		
 		// table closed?
-		if (table_state < 0)
+		if (handleTable(t) < 0)
 		{
-			chat(tables[i].table_id, "Table closed");
+			Player *p = t->seats[0].player;
+			client_chat(game_id, t->table_id, p->client_id, "You won!");
+			
+			chat(t->table_id, "Table closed");
 			
 			// FIXME: what to do here?
 			started = false;
