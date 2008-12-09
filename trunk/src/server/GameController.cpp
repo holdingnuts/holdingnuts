@@ -537,8 +537,7 @@ void GameController::stateAllFolded(Table *t)
 	p->stake += t->pot;
 	t->pot = 0.0f;
 	
-	t->state = Table::NewRound;
-	t->dealer = t->getNextPlayer(t->dealer);
+	t->state = Table::EndRound;
 }
 
 void GameController::stateShowdown(Table *t)
@@ -614,8 +613,31 @@ void GameController::stateShowdown(Table *t)
 		break;
 	}
 	
-	t->state = Table::NewRound;
+	t->state = Table::EndRound;
+}
+
+void GameController::stateEndRound(Table *t)
+{
+	// remove broken players from seats
+	bool removed_player = false;
+	do
+	{
+		for (vector<Table::Seat>::iterator e = t->seats.begin(); e != t->seats.end(); e++)
+		{
+			Player *p = e->player;
+			
+			if ((int)p->stake == 0)
+			{
+				dbg_print("stateEndRound", "removed player %d", p->client_id);
+				client_chat(game_id, t->table_id, p->client_id, "You broke!");
+				
+				t->seats.erase(e);
+			}
+		}
+	} while (removed_player);
+	
 	t->dealer = t->getNextPlayer(t->dealer);
+	t->state = Table::NewRound;
 }
 
 int GameController::handleTable(Table *t)
@@ -634,6 +656,8 @@ int GameController::handleTable(Table *t)
 		stateAllFolded(t);
 	else if (t->state == Table::Showdown)
 		stateShowdown(t);
+	else if (t->state == Table::EndRound)
+		stateEndRound(t);
 	
 	return 0;
 }

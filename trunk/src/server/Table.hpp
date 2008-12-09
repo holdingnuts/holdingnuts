@@ -17,6 +17,7 @@ public:
 		Betting,
 		AllFolded,
 		Showdown,
+		EndRound
 	} State;
 	
 	typedef enum {
