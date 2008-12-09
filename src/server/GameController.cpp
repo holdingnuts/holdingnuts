@@ -623,9 +623,11 @@ void GameController::stateShowdown(Table *t)
 void GameController::stateEndRound(Table *t)
 {
 	// remove broken players from seats
-	bool removed_player = false;
+	bool removed_player;
 	do
 	{
+		removed_player = false;
+		
 		for (vector<Table::Seat>::iterator e = t->seats.begin(); e != t->seats.end(); e++)
 		{
 			Player *p = e->player;
@@ -636,7 +638,9 @@ void GameController::stateEndRound(Table *t)
 				client_chat(game_id, t->table_id, p->client_id, "You broke!");
 				
 				t->seats.erase(e);
+				
 				removed_player = true;
+				break;
 			}
 		}
 	} while (removed_player);
