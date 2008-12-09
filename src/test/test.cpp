@@ -375,7 +375,7 @@ int main(void)
 			h[i].setCards(c1, c2);
 			
 			GameLogic::getStrength(&(h[i]), &cc, &(hs[i]));
-			hs[i].id = i;
+			hs[i].setId(i);
 			
 			wl.push_back(hs[i]);
 		}
@@ -414,7 +414,7 @@ int main(void)
 			vector<HandStrength> &tw = winlist[i];
 			
 			for (unsigned int j=0; j < tw.size(); j++)
-				printf("Rank %d = player %d\n", j, tw[j].id); fflush(stdout);
+				printf("Rank %d = player %d\n", j, tw[j].getId()); fflush(stdout);
 		}
 		
 	#if 0

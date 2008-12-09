@@ -28,16 +28,19 @@ public:
 	void copyRankCards(std::vector<Card> *v) { v->insert(v->end(), rank.begin(), rank.end()); };
 	void copyKickerCards(std::vector<Card> *v) { v->insert(v->end(), kicker.begin(), kicker.end()); };
 	
+	void setId(int rid) { id = rid; };
+	int getId() const { return id; };
+	
 	bool operator < (const HandStrength &c) const;
 	bool operator > (const HandStrength &c) const;
 	bool operator == (const HandStrength &c) const;
-	
-	int id;  // identifier; can be used for associating player
 	
 private:
 	Ranking ranking;
 	std::vector<Card> rank;
 	std::vector<Card> kicker;
+	
+	int id;  // identifier; can be used for associating player
 };
 
 class GameLogic
