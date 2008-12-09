@@ -91,6 +91,13 @@ bool GameController::setPlayerAction(int cid, Player::PlayerAction action, float
 	if (!p)
 		return false;
 	
+	// reset a previous set action
+	if (action == Player::ResetAction)
+	{
+		p->next_action.valid = false;
+		return true;
+	}
+	
 	p->next_action.valid = true;
 	p->next_action.action = action;
 	p->next_action.amount = amount;
