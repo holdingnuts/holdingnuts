@@ -1,0 +1,40 @@
+Protocol specification (client<->server)
+
+################################################################################
+[[SERVER]]
+################################################################################
+
+* protocol-init message:
+PSERVER <version> <client-id>
+
+* client-command responses:
+OK [<code>] [<text>]
+ERR [<code>] [<text>]
+
+* server messages:
+MSG <from> <sender-name> <message>        # from := { -1 | <game-id>:<table-id> | <client-id> }    # -1 is server
+CLIENTINFO <client-id> <type>:<value> [...]
+SNAP <snap-type> <id> [<snap-data> ...]   # snap-type := { game | table }
+NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
+
+
+################################################################################
+[[CLIENT]]
+################################################################################
+
+* protocol-init response:
+PCLIENT <version>
+
+* client commands:
+INFO <type>:<value> [...]      # type := { name | location }
+CHAT <to> <str>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 is foyer
+REQUEST gamelist
+REQUEST gameinfo <game-id>
+REQUEST clientinfo <client-id> [...]
+REGISTER <game-id>    # register to a game
+UNREGISTER <game-id>
+ACTION <game-id> <action> [<amount>]      # action := { check | fold | call | bet | raise | allin | reset }
+SUBSCRIBE <game-id>:<table-id>   # retrieve instant data from table
+UNSUBSCRIBE <game-id>:<table-id>
+AUTH <type> <password>    # type := { -1 | <game-id> }    # -1 is server-auth
+QUIT [<code>] [<text>]
