@@ -2,6 +2,7 @@
 #define _GAMECONTROLLER_H
 
 #include <vector>
+#include <ctime>
 
 #include "Card.hpp"
 #include "Deck.hpp"
@@ -67,6 +68,8 @@ private:
 	
 	std::vector<Player> players;
 	std::vector<Table> tables;
+	
+	time_t timeout_start;
 };
 
 

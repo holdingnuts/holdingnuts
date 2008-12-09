@@ -91,7 +91,7 @@ bool GameController::setPlayerAction(int cid, Player::PlayerAction action, float
 	if (!p)
 		return false;
 	
-	// reset a previous set action
+	// reset a previously set action
 	if (action == Player::ResetAction)
 	{
 		p->next_action.valid = false;
@@ -153,7 +153,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 	return true;
 }
 
-// FIXME: SB gets first card; not very important because it doesn't really matter
+// FIXME: SB gets first (one) card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
 	for (unsigned int i = t->cur_player, c=0; c < t->seats.size(); i = t->getNextPlayer(i), c++)
@@ -293,6 +293,7 @@ void GameController::stateBlinds(Table *t)
 	
 	// player under the gun
 	t->cur_player = t->getNextPlayer(big_blind);
+	timeout_start = time(NULL);
 	
 	// give out hole-cards
 	dealHole(t);
@@ -379,7 +380,18 @@ void GameController::stateBetting(Table *t)
 	}
 	else
 	{
-		// FIXME: handle player timeout
+		// handle player timeout
+		const int timeout = 30;
+		if ((int)difftime(time(NULL), timeout_start) > timeout)
+		{
+			// auto-action: fold, or check if possible
+			if (t->seats[t->cur_player].bet < t->bet_amount)
+				action = Player::Fold;
+			else
+				action = Player::Check;
+			
+			allowed_action = true;
+		}
 	}
 	
 	
@@ -489,6 +501,8 @@ void GameController::stateBetting(Table *t)
 		else
 			t->cur_player = t->getNextActivePlayer(t->dealer);
 		
+		timeout_start = time(NULL);
+		
 		// first action is at this player
 		t->last_bet_player = t->cur_player;
 		
@@ -499,9 +513,9 @@ void GameController::stateBetting(Table *t)
 	{
 		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
-		Player *p = t->seats[t->cur_player].player;
+		timeout_start = time(NULL);
 		
-		dbg_print("table", "next player");
+		Player *p = t->seats[t->cur_player].player;
 		client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
 	}
 }
