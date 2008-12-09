@@ -430,6 +430,8 @@ int client_execute(clientcon *client, const char *cmd)
 					a = Player::Allin;
 				else if (action == "show")
 					a = Player::Show;
+				else if (action == "reset")
+					a = Player::ResetAction;
 				else
 					cmderr = true;
 				
