@@ -109,7 +109,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 		
 		HandStrength strength;
 		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
-		strength.id = p->client_id;
+		strength.setId(p->client_id);
 		
 		wl.push_back(strength);
 		
@@ -585,8 +585,7 @@ void GameController::stateShowdown(Table *t)
 		
 		for (unsigned int j=0; j < winner_count; j++)
 		{
-			dbg_print("showdown", "  player %d gets %.2f", tw[j].id, win_amount);
-			Player *p = findPlayer(tw[j].id);
+			Player *p = findPlayer(tw[j].getId());
 			p->chipstack += win_amount;
 			
 			snprintf(msg, sizeof(msg), "Winner is [%d] and wins %.2f",
