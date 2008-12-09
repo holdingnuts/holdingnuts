@@ -636,6 +636,7 @@ void GameController::stateEndRound(Table *t)
 				client_chat(game_id, t->table_id, p->client_id, "You broke!");
 				
 				t->seats.erase(e);
+				removed_player = true;
 			}
 		}
 	} while (removed_player);
