@@ -103,8 +103,8 @@ int mainloop()
 		gameloop();
 		
 		struct timeval timeout;  /* timeout for select */
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 0;
+		timeout.tv_sec  = SERVER_SELECT_TIMEOUT_SEC;
+		timeout.tv_usec = SERVER_SELECT_TIMEOUT_USEC;
 		
 		FD_ZERO(&fds);
 		
