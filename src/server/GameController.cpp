@@ -33,7 +33,7 @@ bool GameController::addPlayer(int client_id)
 	
 	Player p;
 	p.client_id = client_id;
-	p.chipstack = 1500.0f;
+	p.stake = 1500.0f;
 	p.next_action.valid = false;
 	
 	players.push_back(p);
@@ -239,7 +239,7 @@ void GameController::stateNewRound(Table *t)
 		Player *p = t->seats[i].player;
 		
 		char tmp[128];
-		snprintf(tmp, sizeof(tmp), "[%d]=%0.2f ", p->client_id, p->chipstack);
+		snprintf(tmp, sizeof(tmp), "[%d]=%0.2f ", p->client_id, p->stake);
 		ststr += tmp;
 	}
 	chat(t->table_id, ststr.c_str());
@@ -278,10 +278,10 @@ void GameController::stateBlinds(Table *t)
 	Player *pBig = t->seats[big_blind].player;
 	
 	t->seats[small_blind].bet = t->blind / 2;
-	pSmall->chipstack -= t->blind / 2;
+	pSmall->stake -= t->blind / 2;
 	
 	t->seats[big_blind].bet = t->blind;
-	pBig->chipstack -= t->blind;
+	pBig->stake -= t->blind;
 	
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
@@ -372,7 +372,7 @@ void GameController::stateBetting(Table *t)
 		else if (action == Player::Allin)
 		{
 			allowed_action = true;
-			amount = p->chipstack;
+			amount = p->stake;
 		}
 		
 		// reset player action
@@ -415,12 +415,12 @@ void GameController::stateBetting(Table *t)
 	}
 	else
 	{
-		// player can't bet/raise more than this chipstack
-		if (amount > p->chipstack)
-			amount = p->chipstack;
+		// player can't bet/raise more than this stake
+		if (amount > p->stake)
+			amount = p->stake;
 		
 		t->seats[t->cur_player].bet += amount;
-		p->chipstack -= amount;
+		p->stake -= amount;
 		
 		if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
 		{
@@ -534,7 +534,7 @@ void GameController::stateAllFolded(Table *t)
 	snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
 	chat(t->table_id, msg);
 	
-	p->chipstack += t->pot;
+	p->stake += t->pot;
 	t->pot = 0.0f;
 	
 	t->state = Table::NewRound;
@@ -601,7 +601,7 @@ void GameController::stateShowdown(Table *t)
 		for (unsigned int j=0; j < winner_count; j++)
 		{
 			Player *p = findPlayer(tw[j].getId());
-			p->chipstack += win_amount;
+			p->stake += win_amount;
 			
 			snprintf(msg, sizeof(msg), "Winner is [%d] and wins %.2f",
 				p->client_id, win_amount);

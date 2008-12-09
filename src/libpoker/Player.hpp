@@ -30,7 +30,7 @@ public:
 private:
 	int client_id;
 	
-	float chipstack;
+	float stake;
 	
 	HoleCards holecards;
 	
