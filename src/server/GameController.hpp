@@ -52,6 +52,7 @@ public:
 	void stateBetting(Table *t);
 	void stateAllFolded(Table *t);
 	void stateShowdown(Table *t);
+	void stateEndRound(Table *t);
 	
 	void dealHole(Table *t);
 	void dealFlop(Table *t);
