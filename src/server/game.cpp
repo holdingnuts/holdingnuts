@@ -194,7 +194,7 @@ int client_execute(clientcon *client, const char *cmd)
 	t.parse(cmd);  // parse the command line
 	
 	if (!t.getCount())
-		return -1;
+		return 0;
 	
 	dbg_print("clientsock", "(%d) executing '%s'", s, cmd);
 	
