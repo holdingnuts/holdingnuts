@@ -9,6 +9,9 @@
 #define DEFAULT_SERVER_PORT  12345
 #define MAX_PLAYERS  10
 
+#define SERVER_SELECT_TIMEOUT_SEC   0
+#define SERVER_SELECT_TIMEOUT_USEC  150000  /* 150ms */
+
 /* server testing without real client; don't be that precise with protocol */
 #define SERVER_TESTING
 
