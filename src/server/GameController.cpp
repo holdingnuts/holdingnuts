@@ -720,6 +720,8 @@ void GameController::tick()
 			
 			// FIXME: what to do here?
 			started = false;
+			players.clear();
+			tables.clear();
 		}
 	}
 }
