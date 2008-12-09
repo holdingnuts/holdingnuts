@@ -148,7 +148,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 		winlist.push_back(tmp);
 		index++;
 		
-	} while(true);
+	} while (true);
 	
 	return true;
 }
@@ -493,11 +493,7 @@ void GameController::stateBetting(Table *t)
 		// set current player to SB or next active behind SB
 		bool headsup_rule = (t->seats.size() == 2);
 		if (headsup_rule)
-		{
-			// FIXME: ugly
-			t->cur_player = t->getNextActivePlayer(t->dealer);
-			t->cur_player = t->getNextActivePlayer(t->cur_player);
-		}
+			t->cur_player = t->getNextActivePlayer(t->getNextActivePlayer(t->dealer));
 		else
 			t->cur_player = t->getNextActivePlayer(t->dealer);
 		
@@ -596,8 +592,6 @@ void GameController::stateShowdown(Table *t)
 	
 	for (unsigned int i=0; i < winlist.size(); i++)
 	{
-		dbg_print("showdown", "--- Winlist %d---", i);
-		
 		vector<HandStrength> &tw = winlist[i];
 		
 		// FIXME: support case where further winlists are needed
@@ -628,7 +622,7 @@ int GameController::handleTable(Table *t)
 {
 	if (t->state == Table::ElectDealer)
 	{
-		// FIXME: implement me
+		// TODO: implement me
 	}
 	else if (t->state == Table::NewRound)
 		stateNewRound(t);
@@ -655,7 +649,7 @@ void GameController::tick()
 			
 			started = true;
 			
-			// FIXME: support more than 1 table
+			// TODO: support more than 1 table
 			const int tid = 0;
 			Table table;
 			table.setTableId(tid);
@@ -681,7 +675,5 @@ void GameController::tick()
 	
 	// handle all tables
 	for (unsigned int i=0; i < tables.size(); i++)
-	{
 		handleTable(&(tables[i]));
-	}
 }
