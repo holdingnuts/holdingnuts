@@ -318,8 +318,12 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
-	// has player set an action?
-	if (p->next_action.valid)
+	if ((int)p->stake == 0)  // player is allin and has no more options
+	{
+		action = Player::Check;
+		allowed_action = true;
+	}
+	else if (p->next_action.valid)  // has player set an action?
 	{
 		action = p->next_action.action;
 		
@@ -657,7 +661,13 @@ int GameController::handleTable(Table *t)
 	else if (t->state == Table::Showdown)
 		stateShowdown(t);
 	else if (t->state == Table::EndRound)
+	{
 		stateEndRound(t);
+		
+		// only 1 player left? close table
+		if (t->seats.size() == 1)
+			return -1;
+	}
 	
 	return 0;
 }
@@ -699,5 +709,17 @@ void GameController::tick()
 	
 	// handle all tables
 	for (unsigned int i=0; i < tables.size(); i++)
-		handleTable(&(tables[i]));
+	{
+		int table_state;
+		table_state = handleTable(&(tables[i]));
+		
+		// table closed?
+		if (table_state < 0)
+		{
+			chat(tables[i].table_id, "Table closed");
+			
+			// FIXME: what to do here?
+			started = false;
+		}
+	}
 }
