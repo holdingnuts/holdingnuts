@@ -124,34 +124,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 		showdown_player = t->getNextActivePlayer(showdown_player);
 	}
 	
-	winlist.push_back(wl);
-	
-	int index=0;
-	do
-	{
-		vector<HandStrength> &tw = winlist[index];
-		vector<HandStrength> tmp;
-		
-		sort(tw.begin(), tw.end(), greater<HandStrength>());
-		
-		for (unsigned int i=tw.size()-1; i > 0; i--)
-		{
-			if (tw[i] < tw[0])
-			{
-				tmp.push_back(tw[i]);
-				tw.pop_back();
-			}
-		}
-		
-		if (!tmp.size())
-			break;
-		
-		winlist.push_back(tmp);
-		index++;
-		
-	} while (true);
-	
-	return true;
+	return GameLogic::getWinList(wl, winlist);
 }
 
 // FIXME: SB gets first (one) card; not very important because it doesn't really matter

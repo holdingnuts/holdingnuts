@@ -264,6 +264,38 @@ bool GameLogic::isFullHouse(vector<Card> *allcards, vector<Card> *rank)
 	return is_fullhouse;
 }
 
+bool GameLogic::getWinList(vector<HandStrength> &hands, vector< vector<HandStrength> > &winlist)
+{
+	winlist.clear();
+	winlist.push_back(hands);
+	
+	unsigned int index=0;
+	do
+	{
+		vector<HandStrength> &tw = winlist[index];
+		vector<HandStrength> tmp;
+		
+		sort(tw.begin(), tw.end(), greater<HandStrength>());
+		
+		for (unsigned int i=tw.size()-1; i > 0; i--)
+		{
+			if (tw[i] < tw[0])
+			{
+				tmp.push_back(tw[i]);
+				tw.pop_back();
+			}
+		}
+		
+		if (!tmp.size())
+			break;
+		
+		winlist.push_back(tmp);
+		index++;
+		
+	} while (true);
+	
+	return true;
+}
 
 const char* HandStrength::getRankingName(Ranking r)
 {
