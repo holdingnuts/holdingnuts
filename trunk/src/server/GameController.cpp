@@ -429,8 +429,11 @@ void GameController::stateBetting(Table *t)
 		
 		if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
 		{
-			t->last_bet_player = t->cur_player;
-			t->bet_amount = t->seats[t->cur_player].bet;
+			if (amount > t->bet_amount /* && amount > bet_minimum*/ )
+			{
+				t->last_bet_player = t->cur_player;
+				t->bet_amount = t->seats[t->cur_player].bet;
+			}
 			
 			snprintf(msg, sizeof(msg), "Player %d bet/raised/allin $%.2f.", p->client_id, amount);
 		}
