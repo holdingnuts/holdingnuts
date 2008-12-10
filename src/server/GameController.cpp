@@ -691,6 +691,8 @@ void GameController::tick()
 			table.state = Table::NewRound;
 			tables.push_back(table);
 			
+			snap(-1, SnapGameState, "start");
+			
 			snprintf(msg, sizeof(msg), "Game %d has been started. You're at table %d.", game_id, tid);
 			chat(-1, msg);
 		}
@@ -709,12 +711,13 @@ void GameController::tick()
 			Player *p = t->seats[0].player;
 			chat(p->client_id, t->table_id, "You won!");
 			
-			chat(t->table_id, "Table closed");
-			
 			// FIXME: what to do here?
 			started = false;
 			players.clear();
 			tables.clear();
+			
+			chat(t->table_id, "Table closed");
+			snap(-1, SnapGameState, "end");
 		}
 	}
 }
