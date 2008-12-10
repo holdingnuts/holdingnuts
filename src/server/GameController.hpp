@@ -39,6 +39,9 @@ public:
 	Player* findPlayer(int cid);
 	
 	void chat(int tid, const char* msg);
+	void chat(int cid, int tid, const char* msg);
+	void snap(int tid, int sid, const char* msg);
+	void snap(int cid, int tid, int sid, const char* msg);
 	
 	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
