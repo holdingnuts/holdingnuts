@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <string>
+#include <cstring>   // FIXME: try to remove this one
 #include <algorithm>
 
 #include "Config.h"
