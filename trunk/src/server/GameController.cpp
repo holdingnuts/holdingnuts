@@ -13,10 +13,6 @@
 
 using namespace std;
 
-extern clientcon* get_client_by_sock(socktype sock);
-extern bool client_chat(int from_gid, int from_tid, int to, const char *msg);
-
-
 GameController::GameController()
 {
 	game_id = -1;

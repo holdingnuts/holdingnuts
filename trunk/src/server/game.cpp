@@ -185,6 +185,19 @@ bool client_chat(int from_gid, int from_tid, int to, const char *msg)
 	return true;
 }
 
+bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg)
+{
+	char data[1024];
+	
+	snprintf(data, sizeof(data), "SNAP %d:%d %d %s",
+		from_gid, from_tid, sid, msg);
+	
+	if (get_client_by_sock((socktype)to))
+		send_msg((socktype)to, data);
+	
+	return true;
+}
+
 int client_execute(clientcon *client, const char *cmd)
 {
 	socktype s = client->sock;
