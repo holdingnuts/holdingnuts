@@ -1,6 +1,8 @@
 #ifndef _GAMELOGIC_H
 #define _GAMELOGIC_H
 
+#include <vector>
+
 #include "Card.hpp"
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
@@ -57,8 +59,6 @@ public:
 	static bool isFullHouse(std::vector<Card> *allcards, std::vector<Card> *rank);
 	
 	static bool getWinList(std::vector<HandStrength> &hands, std::vector< std::vector<HandStrength> > &winlist);
-private:
-	
 };
 
 
