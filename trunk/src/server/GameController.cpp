@@ -81,6 +81,22 @@ void GameController::chat(int tid, const char* msg)
 		client_chat(game_id, tid, e->client_id, msg);
 }
 
+void GameController::chat(int cid, int tid, const char* msg)
+{
+	client_chat(game_id, tid, cid, msg);
+}
+
+void GameController::snap(int tid, int sid, const char* msg)
+{
+	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)
+		client_snapshot(game_id, tid, e->client_id, sid, msg);
+}
+
+void GameController::snap(int cid, int tid, int sid, const char* msg)
+{
+	client_snapshot(game_id, tid, cid, sid, msg);
+}
+
 bool GameController::setPlayerAction(int cid, Player::PlayerAction action, float amount)
 {
 	Player *p = findPlayer(cid);
@@ -143,7 +159,7 @@ void GameController::dealHole(Table *t)
 		snprintf(msg, sizeof(msg), "Your hole-cards: [%s %s]",
 			card1, card2);
 		
-		client_chat(game_id, t->table_id, p->client_id, msg);
+		chat(p->client_id, t->table_id, msg);
 	}
 }
 
@@ -270,7 +286,7 @@ void GameController::stateBlinds(Table *t)
 	
 	// tell current player
 	Player *p = t->seats[t->cur_player].player;
-	client_chat(game_id, t->table_id, p->client_id, "You're under the gun!");
+	chat(p->client_id, t->table_id, "You're under the gun!");
 	
 	t->betround = Table::Preflop;
 	t->last_bet_player = t->cur_player;
@@ -305,14 +321,14 @@ void GameController::stateBetting(Table *t)
 		{
 			// allowed to check?
 			if (t->seats[t->cur_player].bet < t->bet_amount)
-				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot check! Try call.");
+				chat(p->client_id, t->table_id, "Err: You cannot check! Try call.");
 			else
 				allowed_action = true;
 		}
 		else if (action == Player::Call)
 		{
 			if ((int)t->bet_amount == 0 || (int)t->bet_amount == t->seats[t->cur_player].bet)
-				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot call, nothing was bet! Try check.");
+				chat(p->client_id, t->table_id, "Err: You cannot call, nothing was bet! Try check.");
 			else
 			{
 				allowed_action = true;
@@ -322,9 +338,9 @@ void GameController::stateBetting(Table *t)
 		else if (action == Player::Bet)
 		{
 			if ((unsigned int)t->bet_amount > 0)
-				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet, there was already a bet! Try raise.");
+				chat(p->client_id, t->table_id, "Err: You cannot bet, there was already a bet! Try raise.");
 			else if (p->next_action.amount <= (unsigned int)t->bet_amount || p->next_action.amount < t->blind)
-				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot bet this amount.");
+				chat(p->client_id, t->table_id, "Err: You cannot bet this amount.");
 			else
 			{
 				allowed_action = true;
@@ -334,9 +350,9 @@ void GameController::stateBetting(Table *t)
 		else if (action == Player::Raise)
 		{
 			if ((unsigned int)t->bet_amount == 0)
-				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise, nothing was bet! Try bet.");
+				chat(p->client_id, t->table_id, "Err: You cannot raise, nothing was bet! Try bet.");
 			else if (p->next_action.amount <= (unsigned int)t->bet_amount)
-				client_chat(game_id, t->table_id, p->client_id, "Err: You cannot raise this amount.");
+				chat(p->client_id, t->table_id, "Err: You cannot raise this amount.");
 			else
 			{
 				allowed_action = true;
@@ -480,7 +496,7 @@ void GameController::stateBetting(Table *t)
 		t->last_bet_player = t->cur_player;
 		
 		Player *p = t->seats[t->cur_player].player;
-		client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
+		chat(p->client_id, t->table_id, "It's your turn!");
 	}
 	else
 	{
@@ -489,7 +505,7 @@ void GameController::stateBetting(Table *t)
 		timeout_start = time(NULL);
 		
 		Player *p = t->seats[t->cur_player].player;
-		client_chat(game_id, t->table_id, p->client_id, "It's your turn!");
+		chat(p->client_id, t->table_id, "It's your turn!");
 	}
 }
 
@@ -608,7 +624,7 @@ void GameController::stateEndRound(Table *t)
 			if ((int)p->stake == 0)
 			{
 				dbg_print("stateEndRound", "removed player %d", p->client_id);
-				client_chat(game_id, t->table_id, p->client_id, "You broke!");
+				chat(p->client_id, t->table_id, "You broke!");
 				
 				t->seats.erase(e);
 				
@@ -694,7 +710,7 @@ void GameController::tick()
 		if (handleTable(t) < 0)
 		{
 			Player *p = t->seats[0].player;
-			client_chat(game_id, t->table_id, p->client_id, "You won!");
+			chat(p->client_id, t->table_id, "You won!");
 			
 			chat(t->table_id, "Table closed");
 			
