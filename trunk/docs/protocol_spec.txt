@@ -33,7 +33,7 @@ REQUEST gameinfo <game-id>
 REQUEST clientinfo <client-id> [...]
 REGISTER <game-id>    # register to a game
 UNREGISTER <game-id>
-ACTION <game-id> <action> [<amount>]      # action := { check | fold | call | bet | raise | allin | reset }
+ACTION <game-id> <action> [<amount>]      # action := { check | fold | call | bet | raise | allin | reset | away | back }
 SUBSCRIBE <game-id>:<table-id>   # retrieve instant data from table
 UNSUBSCRIBE <game-id>:<table-id>
 AUTH <type> <password>    # type := { -1 | <game-id> }    # -1 is server-auth
