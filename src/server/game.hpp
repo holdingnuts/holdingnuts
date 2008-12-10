@@ -5,18 +5,6 @@
 #include "Platform.h"
 #include "Network.h"
 
-#if 0
-typedef enum {
-	Collecting=1,
-	Playing
-} gamestate;
-
-typedef enum {
-	Settings=0x1,
-	Foyer=0x2,
-} snaptype;
-#endif
-
 
 typedef enum {
 	Connected = 0x01,
@@ -37,5 +25,19 @@ typedef struct {
 	unsigned int version;
 	char name[64];
 } clientcon;
+
+
+typedef enum {
+	SnapGameState=1,
+	SnapTable,
+	SnapPlayerStats
+} snaptype;
+
+
+
+clientcon* get_client_by_sock(socktype sock);
+bool client_chat(int from_gid, int from_tid, int to, const char *msg);
+bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg);
+
 
 #endif /* _GAME_H */
