@@ -1,5 +1,3 @@
-#include <cstdio>
-
 #include "GameDebug.hpp"
 #include "CommunityCards.hpp"
 
