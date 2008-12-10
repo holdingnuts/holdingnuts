@@ -13,6 +13,10 @@
 
 using namespace std;
 
+// temporary buffer for chat/snap data
+char msg[1024];
+
+
 GameController::GameController()
 {
 	game_id = -1;
@@ -153,7 +157,7 @@ void GameController::dealHole(Table *t)
 		t->deck.pop(c2);
 		p->holecards.setCards(c1, c2);
 		
-		char card1[3], card2[3], msg[1024];
+		char card1[3], card2[3];
 		strcpy(card1, c1.getName());
 		strcpy(card2, c2.getName());
 		snprintf(msg, sizeof(msg), "Your hole-cards: [%s %s]",
@@ -171,7 +175,7 @@ void GameController::dealFlop(Table *t)
 	t->deck.pop(f3);
 	t->communitycards.setFlop(f1, f2, f3);
 	
-	char card1[3], card2[3], card3[3], msg[1024];
+	char card1[3], card2[3], card3[3];
 	strcpy(card1, f1.getName());
 	strcpy(card2, f2.getName());
 	strcpy(card3, f3.getName());
@@ -187,7 +191,7 @@ void GameController::dealTurn(Table *t)
 	t->deck.pop(tc);
 	t->communitycards.setTurn(tc);
 	
-	char card[3], msg[1024];
+	char card[3];
 	strcpy(card, tc.getName());
 	snprintf(msg, sizeof(msg), "The turn: [%s]",
 		card);
@@ -201,7 +205,7 @@ void GameController::dealRiver(Table *t)
 	t->deck.pop(r);
 	t->communitycards.setRiver(r);
 	
-	char card[3], msg[1024];
+	char card[3];
 	strcpy(card, r.getName());
 	snprintf(msg, sizeof(msg), "The river: [%s]",
 		card);
@@ -269,7 +273,6 @@ void GameController::stateBlinds(Table *t)
 	t->seats[big_blind].bet = t->blind;
 	pBig->stake -= t->blind;
 	
-	char msg[1024];
 	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
 		pDealer->client_id,
 		pSmall->client_id, (float)t->blind / 2,
@@ -296,8 +299,6 @@ void GameController::stateBlinds(Table *t)
 
 void GameController::stateBetting(Table *t)
 {
-	char msg[1024];
-	
 	Player *p = t->seats[t->cur_player].player;
 	bool allowed_action = false;  // is action allowed?
 	
@@ -523,7 +524,6 @@ void GameController::stateAllFolded(Table *t)
 	
 	// FIXME: ask player if he wants to show cards
 	
-	char msg[1024];
 	snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
 	chat(t->table_id, msg);
 	
@@ -535,8 +535,6 @@ void GameController::stateAllFolded(Table *t)
 
 void GameController::stateShowdown(Table *t)
 {
-	char msg[1024];
-	
 	chat(t->table_id, "Showdown");
 	
 	// the player who did the last action is first to show
@@ -693,7 +691,6 @@ void GameController::tick()
 			table.state = Table::NewRound;
 			tables.push_back(table);
 			
-			char msg[1024];
 			snprintf(msg, sizeof(msg), "Game %d has been started. You're at table %d.", game_id, tid);
 			chat(-1, msg);
 		}
