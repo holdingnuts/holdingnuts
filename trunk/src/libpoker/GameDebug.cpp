@@ -18,8 +18,6 @@
  */
 
 
-#include <cstdio>
-
 #include "GameDebug.hpp"
 
 using namespace std;
