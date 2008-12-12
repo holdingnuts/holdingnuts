@@ -81,7 +81,9 @@ public:
 	void dealFlop(Table *t);
 	void dealTurn(Table *t);
 	void dealRiver(Table *t);
-
+	
+	bool isAllin(Table *t);
+	
 private:
 	int game_id;
 	
