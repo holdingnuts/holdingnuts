@@ -31,19 +31,12 @@
 
 #include "Config.h"
 #include "Platform.h"
-#include "Network.h"
-
 #include "Debug.h"
 
+#include "Network.h"
+#include "game.hpp"
 
 using namespace std;
-
-extern int gameloop();
-extern void get_sock_vector(vector<socktype> &vec);
-extern bool client_add(socktype sock);
-extern bool client_remove(socktype sock);
-extern int client_handle(socktype sock);
-extern int send_msg(socktype sock, const char *msg);
 
 
 socktype fdset_get_descriptor(fd_set *fds)
@@ -105,7 +98,7 @@ int listensock_create(unsigned int port, int backlog)
 int mainloop()
 {
 	int listenfd;
-	if ((listenfd = listensock_create(DEFAULT_SERVER_PORT, 3)) < 0)
+	if ((listenfd = listensock_create(DEFAULT_SERVER_PORT, SERVER_LISTEN_BACKLOG)) < 0)
 	{
 		dbg_print("listensock", "(%d) error creating socket", listenfd);
 		return 1;
@@ -161,17 +154,9 @@ int mainloop()
 				
 				socket_setnonblocking(client_sock);
 				
-				// TODO: handle server-full
 				client_add(client_sock);
 				
 				FD_CLR(sock, &fds);
-				
-				// send initial data
-				char msg[1024];
-				snprintf(msg, sizeof(msg), "PSERVER %d %d",
-					VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
-					client_sock);
-				send_msg(client_sock, msg);
 			}
 			else
 			{
@@ -203,7 +188,7 @@ int mainloop()
 
 int main(int argc, char **argv)
 {
-	dbg_print("main", "server version %d.%d.%d",
+	dbg_print("main", "HoldingNuts pserver (version %d.%d.%d)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	
 #if not defined(PLATFORM_WINDOWS)
