@@ -29,6 +29,7 @@ friend class GameController;
 
 public:
 	typedef enum {
+		None,
 		ResetAction,
 		Check,
 		Fold,

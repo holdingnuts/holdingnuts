@@ -163,6 +163,26 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 	return GameLogic::getWinList(wl, winlist);
 }
 
+// all (or except one) players are allin
+bool GameController::isAllin(Table *t)
+{
+	unsigned int count = 0;
+	
+	for (unsigned int i=0; i < t->seats.size(); i++)
+	{
+		if (t->seats[i].in_round)
+		{
+			Player *p = t->seats[i].player;
+			
+			if ((int)p->stake == 0)
+				count++;
+		}
+	}
+	
+	return (count >= t->seats.size() - 1);
+}
+
+
 // FIXME: SB gets first (one) card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
@@ -325,7 +345,12 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
-	if ((int)p->stake == 0)  // player is allin and has no more options
+	if (isAllin(t))  // all (or all-1) players are allin
+	{
+		action = Player::None;
+		allowed_action = true;
+	}
+	else if ((int)p->stake == 0)  // player is allin and has no more options
 	{
 		action = Player::Check;
 		allowed_action = true;
@@ -412,7 +437,11 @@ void GameController::stateBetting(Table *t)
 	
 	
 	// perform action
-	if (action == Player::Fold)
+	if (action == Player::None)
+	{
+		// do nothing
+	}
+	else if (action == Player::Fold)
 	{
 		t->seats[t->cur_player].in_round = false;
 		
