@@ -21,6 +21,8 @@
 #ifndef _GAME_H
 #define _GAME_H
 
+#include <vector>
+
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
@@ -54,7 +56,14 @@ typedef enum {
 } snaptype;
 
 
+// used by pserver.cpp
+int gameloop();
+void get_sock_vector(std::vector<socktype> &vec);
+bool client_add(socktype sock);
+bool client_remove(socktype sock);
+int client_handle(socktype sock);
 
+// used by GameController.cpp
 clientcon* get_client_by_sock(socktype sock);
 bool client_chat(int from_gid, int from_tid, int to, const char *msg);
 bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg);

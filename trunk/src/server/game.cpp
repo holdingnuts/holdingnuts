@@ -75,9 +75,25 @@ clientcon* get_client_by_sock(socktype sock)
 	return NULL;
 }
 
+int send_msg(socktype sock, const char *msg)
+{
+	const int bufsize = 1024;
+	char buf[bufsize];
+	int len = snprintf(buf, bufsize, "%s\r\n", msg);
+	int bytes = socket_write(sock, buf, len);
+	
+	// FIXME: send remaining bytes if not all have been sent
+	if (len != bytes)
+		dbg_print("clientsock", "(%d) warning: not all bytes written (%d != %d)", sock, len, bytes);
+	
+	return bytes;
+}
+
 bool client_add(socktype sock)
 {
 	clientcon client;
+	
+	// FIXME: handle case when server is full
 	
 	memset(&client, 0, sizeof(client));
 	client.sock = sock;
@@ -91,6 +107,13 @@ bool client_add(socktype sock)
 	snprintf(client.name, sizeof(client.name), "client_%d", sock);
 	
 	clients.push_back(client);
+	
+	// send initial data
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "PSERVER %d %d",
+		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
+		client.sock);
+	send_msg(client.sock, msg);
 	
 	return true;
 }
@@ -125,20 +148,6 @@ bool client_remove(socktype sock)
 	}
 	
 	return true;
-}
-
-int send_msg(socktype sock, const char *msg)
-{
-	const int bufsize = 1024;
-	char buf[bufsize];
-	int len = snprintf(buf, bufsize, "%s\r\n", msg);
-	int bytes = socket_write(sock, buf, len);
-	
-	// FIXME: send remaining bytes if not all have been sent
-	if (len != bytes)
-		dbg_print("clientsock", "(%d) warning: not all bytes written (%d != %d)", sock, len, bytes);
-	
-	return bytes;
 }
 
 bool send_ok(socktype sock, int code=0, const char *str="")
@@ -644,26 +653,6 @@ int update_foyer_snapshot()
 
 int gameloop()
 {
-#if 0
-	// create and initialize a gamecontroller
-	if (!game)
-	{
-		game = new GameController();
-		game->setPlayerMax(2);
-	}
-	
-	if (snap_update)
-	{
-		if (snap_update & Foyer)
-		{
-			update_foyer_snapshot();
-			send_snapshot(Foyer);
-		}
-		
-		snap_update = 0x0;
-	}
-#endif
-	
 	// initially add a game for debugging purpose
 	if (!games.size())
 	{
