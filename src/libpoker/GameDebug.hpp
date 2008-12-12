@@ -21,6 +21,7 @@
 #ifndef _GAMEDEBUG_H
 #define _GAMEDEBUG_H
 
+#include <cstdio>
 #include <vector>
 
 #include "Card.hpp"
