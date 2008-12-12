@@ -59,6 +59,11 @@ int socket_accept(socktype sockfd, struct sockaddr *addr, unsigned int *addrlen)
 #endif
 }
 
+int socket_connect(socktype sockfd, const struct sockaddr *addr, unsigned int addrlen)
+{
+	return connect(sockfd, addr, addrlen);
+}
+
 int socket_close(socktype fd)
 {
 #if defined(PLATFORM_WINDOWS)
