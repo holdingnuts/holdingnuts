@@ -345,7 +345,7 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
-	if (isAllin(t))  // all (or all-1) players are allin
+	if (isAllin(t))  // all (or all except one) players are allin
 	{
 		action = Player::None;
 		allowed_action = true;
@@ -417,7 +417,7 @@ void GameController::stateBetting(Table *t)
 	else
 	{
 		// handle player timeout
-		const int timeout = 30;
+		const int timeout = 60;   // FIXME: configurable
 		if ((int)difftime(time(NULL), timeout_start) > timeout)
 		{
 			// auto-action: fold, or check if possible
@@ -464,6 +464,7 @@ void GameController::stateBetting(Table *t)
 		
 		if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
 		{
+			// only re-open betting round if amount greater than table-bet
 			if (amount > t->bet_amount /* && amount > bet_minimum*/ )
 			{
 				t->last_bet_player = t->cur_player;
@@ -491,6 +492,8 @@ void GameController::stateBetting(Table *t)
 	{
 		dbg_print("table", "betting round ended");
 		
+		// FIXME: show cards if isAllin() == true
+		
 		switch ((int)t->betround)
 		{
 		case Table::Preflop:
@@ -508,7 +511,7 @@ void GameController::stateBetting(Table *t)
 			break;
 		
 		case Table::Turn:
-			// deal turn
+			// deal river
 			dealRiver(t);
 			
 			t->betround = Table::River;
