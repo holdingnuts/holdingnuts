@@ -39,6 +39,15 @@
 
 using namespace std;
 
+typedef struct {
+	socktype sock;
+	
+	char msgbuf[1024];
+	int buflen;
+} servercon;
+
+servercon srv;
+
 char server_address[256];
 
 #if 0
@@ -56,50 +65,64 @@ int send_msg(socktype sock, const char *msg)
 	
 	return bytes;
 }
+#endif
 
+int server_execute(const char *cmd)
+{
+	dbg_print("execute", "_%s_", cmd);
+	
+	return 0;
+}
 
 // returns zero if no cmd was found or no bytes remaining after exec
-int server_parsebuffer(clientcon *client)
+int server_parsebuffer()
 {
-	//dbg_print("clientsock", "(%d) parse (bufferlen=%d)", client->sock, client->buflen);
+	//dbg_print("clientsock", "(%d) parse (bufferlen=%d)", srv.sock, srv.buflen);
 	
 	int found_nl = -1;
-	for (int i=0; i < client->buflen; i++)
+	for (int i=0; i < srv.buflen; i++)
 	{
-		if (client->msgbuf[i] == '\r')
-			client->msgbuf[i] = ' ';  // debugging purpose
-		else if (client->msgbuf[i] == '\n')
+		if (srv.msgbuf[i] == '\r')
+			srv.msgbuf[i] = ' ';  // space won't hurt
+		else if (srv.msgbuf[i] == '\n')
 		{
 			found_nl = i;
 			break;
 		}
 	}
 	
+	int retval = 0;
+	
 	// is there a command in queue?
 	if (found_nl != -1)
 	{
 		// extract command
-		char cmd[sizeof(client->msgbuf)];
-		memcpy(cmd, client->msgbuf, found_nl);
+		char cmd[sizeof(srv.msgbuf)];
+		memcpy(cmd, srv.msgbuf, found_nl);
 		cmd[found_nl] = '\0';
 		
-		dbg_print("clientsock", "(%d) command: '%s' (len=%d)", client->sock, cmd, found_nl);
-		//server_execute(client, cmd);
-		
-		// move the rest to front
-		memmove(client->msgbuf, client->msgbuf + found_nl + 1, client->buflen - (found_nl + 1));
-		client->buflen -= found_nl + 1;
-		//dbg_print("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", client->sock, client->buflen);
-		
-		return client->buflen;
+		//dbg_print("clientsock", "(%d) command: '%s' (len=%d)", srv.sock, cmd, found_nl);
+		if (server_execute(cmd) != -1)  // client quitted ?
+		{
+			// move the rest to front
+			memmove(srv.msgbuf, srv.msgbuf + found_nl + 1, srv.buflen - (found_nl + 1));
+			srv.buflen -= found_nl + 1;
+			//dbg_print("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", srv.sock, srv.buflen);
+			
+			retval = srv.buflen;
+		}
+		else
+			retval = 0;
 	}
 	else
-		return 0;
+		retval = 0;
+	
+	return retval;
 }
-#endif
 
-int server_handle(socktype sock)
+int server_handle()
 {
+	socktype sock = srv.sock;
 	char buf[1024];
 	int bytes;
 	
@@ -110,21 +133,19 @@ int server_handle(socktype sock)
 	
 	dbg_print("connectsock", "(%d) DATA len=%d", sock, bytes);
 	
-#if 0
-	if (client->buflen + bytes > (int)sizeof(client->msgbuf))
+	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
 	{
 		dbg_print("clientsock", "(%d) error: buffer size exceeded", sock);
-		client->buflen = 0;
+		srv.buflen = 0;
 	}
 	else
 	{
-		memcpy(client->msgbuf + client->buflen, buf, bytes);
-		client->buflen += bytes;
+		memcpy(srv.msgbuf + srv.buflen, buf, bytes);
+		srv.buflen += bytes;
 		
 		// parse and execute all commands in queue
-		while (client_parsebuffer(client));
+		while (server_parsebuffer());
 	}
-#endif
 	
 	return bytes;
 }
@@ -299,6 +320,11 @@ int mainloop()
 		}
 	}
 	
+	
+	memset(&srv, 0, sizeof(srv));
+	srv.sock = sock;
+	
+	
 	for (;;)
 	{
 		// handle game
@@ -329,7 +355,7 @@ int mainloop()
 			
 			if (FD_ISSET(sock, &fds))
 			{
-				int status = server_handle(sock);
+				int status = server_handle();
 				if (status <= 0)
 				{
 					dbg_print("connectsock", "(%d) closed connection (%d: %s)", sock, errno, strerror(errno));
