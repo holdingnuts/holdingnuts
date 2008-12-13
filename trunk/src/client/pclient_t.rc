@@ -5,4 +5,4 @@
 
 #define IDI_APPICON   102
 
-IDI_APPICON   ICON    "pserver.ico"
+IDI_APPICON   ICON    "pclient_t.ico"
