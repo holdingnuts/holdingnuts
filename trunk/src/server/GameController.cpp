@@ -291,8 +291,8 @@ void GameController::stateBlinds(Table *t)
 	bool headsup_rule = (t->seats.size() == 2);
 	unsigned int small_blind, big_blind;
 	
-	// heads-up rule
-	if (headsup_rule)
+	// determine who is SB and BB
+	if (headsup_rule)   // heads-up rule: only 2 players remain, so swap blinds
 	{
 		big_blind = t->getNextPlayer(t->dealer);
 		small_blind = t->getNextPlayer(big_blind);
@@ -303,16 +303,17 @@ void GameController::stateBlinds(Table *t)
 		big_blind = t->getNextPlayer(small_blind);
 	}
 	
-	
 	Player *pDealer = t->seats[t->dealer].player;
 	Player *pSmall = t->seats[small_blind].player;
 	Player *pBig = t->seats[big_blind].player;
 	
+	// set the player's SB and BB   FIXME: handle allin/not-enough-stake case
 	t->seats[small_blind].bet = t->blind / 2;
 	pSmall->stake -= t->blind / 2;
 	
 	t->seats[big_blind].bet = t->blind;
 	pBig->stake -= t->blind;
+	
 	
 	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
 		pDealer->client_id,
@@ -323,6 +324,9 @@ void GameController::stateBlinds(Table *t)
 	
 	// player under the gun
 	t->cur_player = t->getNextPlayer(big_blind);
+	t->last_bet_player = t->cur_player;
+	
+	// initialize the player's timeout
 	timeout_start = time(NULL);
 	
 	// give out hole-cards
@@ -333,7 +337,6 @@ void GameController::stateBlinds(Table *t)
 	chat(p->client_id, t->table_id, "You're under the gun!");
 	
 	t->betround = Table::Preflop;
-	t->last_bet_player = t->cur_player;
 	
 	t->state = Table::Betting;
 }
@@ -346,7 +349,7 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
-	if (t->nomoreaction)  // early showdown, no more action at table allowed
+	if (t->nomoreaction)  // early showdown, no more action at table possible
 	{
 		action = Player::None;
 		allowed_action = true;
@@ -460,6 +463,7 @@ void GameController::stateBetting(Table *t)
 		if (amount > p->stake)
 			amount = p->stake;
 		
+		// move chips from player's stake to seat-bet
 		t->seats[t->cur_player].bet += amount;
 		p->stake -= amount;
 		
@@ -481,24 +485,28 @@ void GameController::stateBetting(Table *t)
 		chat(t->table_id, msg);
 	}
 	
-	// break here if only 1 player left
+	// all players except one folded, so end this hand
 	if (t->countActivePlayers() == 1)
 	{
 		t->state = Table::AllFolded;
 		return;
 	}
 	
-	// is next the player who did the last bet/action?
+	// is next the player who did the last bet/action? if yes, end this betting round
 	if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
 	{
 		dbg_print("table", "betting round ended");
 		
-		// FIXME: show up cards
-		if (isAllin(t))   // all (or all except one) players are allin
+		// all (or all except one) players are allin
+		if (isAllin(t))
 		{
+			// no further action at table possible
 			t->nomoreaction = true;
+			
+			// FIXME: show up cards
 		}
 		
+		// which betting round is next?
 		switch ((int)t->betround)
 		{
 		case Table::Preflop:
@@ -523,6 +531,7 @@ void GameController::stateBetting(Table *t)
 			break;
 		
 		case Table::River:
+			// end of hand, do showdown
 			t->state = Table::Showdown;
 			return;
 		}
@@ -541,16 +550,17 @@ void GameController::stateBetting(Table *t)
 		chat(t->table_id, msg);
 #endif
 		
-		// set current player to SB or next active behind SB
+		// set current player to SB (or next active behind SB)
 		bool headsup_rule = (t->seats.size() == 2);
 		if (headsup_rule)
 			t->cur_player = t->getNextActivePlayer(t->getNextActivePlayer(t->dealer));
 		else
 			t->cur_player = t->getNextActivePlayer(t->dealer);
 		
+		// re-initialize the player's timeout
 		timeout_start = time(NULL);
 		
-		// first action is at this player
+		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
 		
 		Player *p = t->seats[t->cur_player].player;

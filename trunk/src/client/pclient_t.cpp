@@ -83,6 +83,7 @@ int server_execute(const char *cmd)
 	string command;
 	t.getNext(command);
 	
+	// FIXME: state; check if this is really a pserver
 	if (command == "PSERVER")
 	{
 		unsigned int version = string2int(t.getNext());
