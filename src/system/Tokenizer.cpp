@@ -113,10 +113,21 @@ bool Tokenizer::parse(string str, string sep)
 bool Tokenizer::getNext(string &str)
 {
 	if (index == tokens.size())
+	{
+		str = "";
 		return false;
+	}
 	
 	str = tokens[index++];
 	return true;
+}
+
+string Tokenizer::getNext()
+{
+	if (index == tokens.size())
+		return "";
+	
+	return tokens[index++];
 }
 
 string Tokenizer::operator[](const unsigned int i) const
