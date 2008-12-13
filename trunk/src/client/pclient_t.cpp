@@ -181,17 +181,75 @@ int connectsock_create(const char *server, unsigned int port)
 	return sock;
 }
 
+int client_execute(const char *cmd)
+{
+	dbg_print("client_execute", "len=%d text=%s", (int)strlen(cmd), cmd);
+	
+	return 0;
+}
+
+#if defined (PLATFORM_WINDOWS)
+// non-blocking windows console input handling
+int input_handle()
+{
+	static char inpBuf[1024] = "";
+	static unsigned int inpBufLen = 0;
+	
+	//http://api.farmanager.com/en/winapi/readconsoleinput.html
+	//http://api.farmanager.com/en/winapi/input_record.html
+	//http://api.farmanager.com/en/winapi/key_event_record.html
+	
+	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+	if (WaitForSingleObject(hStdin, 10) != WAIT_TIMEOUT)
+	{
+		
+		char buf;
+		INPUT_RECORD inr;
+		DWORD numRead;
+		ReadConsoleInput(hStdin, &inr, 1, &numRead);
+		
+		if (inr.EventType == KEY_EVENT && inr.Event.KeyEvent.bKeyDown)
+		{
+			buf = inr.Event.KeyEvent.uChar.AsciiChar;
+			//dbg_print("windows", "got input: %c 0x%x", buf, buf);
+			
+			if (buf == '\r')
+			{
+				inpBuf[inpBufLen] = '\0';
+				fprintf(stdout, "\r\n"); fflush(stdout);
+				
+				client_execute(inpBuf);
+				
+				inpBufLen = 0;
+			}
+			else
+			{
+				if (buf)
+				{
+					fprintf(stdout, "%c", buf); fflush(stdout);
+					inpBuf[inpBufLen++] = buf;
+				}
+			}
+		}
+	}
+	
+	return 0;
+}
+#else
 int input_handle()
 {
 	const unsigned int max_input = 1024;
 	char input[max_input];
 	
 	fgets(input, max_input, stdin);
+	input[strlen(input)-1] = '\0';
 	
-	dbg_print("input", "len=%d text=%s", (int)strlen(input), input);
+	//dbg_print("input", "len=%d text=%s", (int)strlen(input), input);
+	client_execute(input);
 	
 	return 0;
 }
+#endif
 
 int gameloop()
 {
@@ -255,47 +313,8 @@ int mainloop()
 		/* add stdin and connected-socket to the fd-set */
 #if not defined(PLATFORM_WINDOWS)
 		FD_SET(STDIN_FILENO, &fds);
-#else	
-		static char inpBuf[1024] = "";
-		static unsigned int inpBufLen = 0;
-		
-		//http://api.farmanager.com/en/winapi/readconsoleinput.html
-		//http://api.farmanager.com/en/winapi/input_record.html
-		//http://api.farmanager.com/en/winapi/key_event_record.html
-		
-		HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-		if (WaitForSingleObject(hStdin, 10) != WAIT_TIMEOUT)
-		{
-			
-			char buf;
-			//ReadFile(GetStdHandle(STD_INPUT_HANDLE), &buf, 1, 0, NULL );
-			INPUT_RECORD inr;
-			DWORD numRead;
-			ReadConsoleInput( hStdin, &inr, 1, &numRead );
-			//ReadConsole(hStdin, &buf, 1, &numRead, 0);
-			
-			if (inr.EventType == KEY_EVENT && inr.Event.KeyEvent.bKeyDown)
-			{
-				buf = inr.Event.KeyEvent.uChar.AsciiChar;
-				//dbg_print("windows", "got input: %c 0x%x", buf, buf);
-				
-				if (buf == '\r')
-				{
-					inpBuf[inpBufLen] = '\0';
-					printf("\r\n");
-					dbg_print("windows", "text: _%s_", inpBuf);
-					inpBufLen = 0;
-				}
-				else
-				{
-					if (buf /*!inr.Event.KeyEvent.dwControlKeyState*/)
-					{
-						printf("%c", buf);
-						inpBuf[inpBufLen++] = buf;
-					}
-				}
-			}
-		}
+#else
+		input_handle();
 #endif
 		FD_SET(sock, &fds);
 		max = sock;
