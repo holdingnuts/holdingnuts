@@ -533,7 +533,7 @@ int client_parsebuffer(clientcon *client)
 	for (int i=0; i < client->buflen; i++)
 	{
 		if (client->msgbuf[i] == '\r')
-			client->msgbuf[i] = ' ';  // debugging purpose
+			client->msgbuf[i] = ' ';  // space won't hurt
 		else if (client->msgbuf[i] == '\n')
 		{
 			found_nl = i;
