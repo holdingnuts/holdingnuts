@@ -32,6 +32,6 @@ add_executable (
 
 target_link_libraries(
 	pclient_t
-	Poker Network
+	Poker Network System
 	${aux_lib}
 )

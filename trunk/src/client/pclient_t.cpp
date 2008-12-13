@@ -34,6 +34,7 @@
 #include "Platform.h"
 #include "Network.h"
 
+#include "Tokenizer.hpp"
 #include "Debug.h"
 
 
@@ -49,27 +50,80 @@ typedef struct {
 servercon srv;
 
 char server_address[256];
+int my_cid, my_gid, my_tid;
 
-#if 0
-int send_msg(socktype sock, const char *msg)
+int send_msg(const char *msg)
 {
 	const int bufsize = 1024;
 	char buf[bufsize];
 	int len = snprintf(buf, bufsize, "%s\n", msg);
-	int bytes = socket_write(sock, buf, len);
+	int bytes = socket_write(srv.sock, buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
 	
 	if (len != bytes)
-		dbg_print("clientsock", "(%d) warning: not all bytes written (%d != %d)", sock, len, bytes);
+		dbg_print("connectsock", "(%d) warning: not all bytes written (%d != %d)", srv.sock, len, bytes);
 	
 	return bytes;
 }
-#endif
 
 int server_execute(const char *cmd)
 {
-	dbg_print("execute", "_%s_", cmd);
+	char msg[1024];
+	
+	Tokenizer t;
+	t.parse(cmd);  // parse the command line
+	
+	if (!t.getCount())
+		return 0;
+	
+	//dbg_print("server", "executing '%s'", cmd);
+	
+	// get first arg
+	string command;
+	t.getNext(command);
+	
+	if (command == "PSERVER")
+	{
+		unsigned int version = string2int(t.getNext());
+		my_cid = string2int(t.getNext());
+		
+		dbg_print("server", "Server running version %d.%d.%d. Your client ID is %d",
+			VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
+			my_cid);
+		
+		snprintf(msg, sizeof(msg), "PCLIENT %d",
+			VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION));
+		
+		send_msg(msg);
+		
+		// TODO: send user info
+	}
+	else if (command == "OK")
+	{
+		
+	}
+	else if (command == "ERR")
+	{
+		dbg_print("server", "last cmd error!");
+	}
+	else if (command == "GAMELIST")
+	{
+		dbg_print("server", "list of games: %s", cmd);
+	}
+	else if (command == "MSG")
+	{
+		string chatmsg;
+		for (unsigned int i=3; i < t.getCount(); i++)
+			chatmsg += t[i] + ' ';
+		
+		dbg_print("chat", "[%s]: %s", t[2].c_str(), chatmsg.c_str());
+	}
+	else
+	{
+		dbg_print("server", "unknown cmd: %s", cmd);
+	}
+	
 	
 	return 0;
 }
@@ -102,7 +156,7 @@ int server_parsebuffer()
 		cmd[found_nl] = '\0';
 		
 		//dbg_print("clientsock", "(%d) command: '%s' (len=%d)", srv.sock, cmd, found_nl);
-		if (server_execute(cmd) != -1)  // client quitted ?
+		if (server_execute(cmd) != -1)
 		{
 			// move the rest to front
 			memmove(srv.msgbuf, srv.msgbuf + found_nl + 1, srv.buflen - (found_nl + 1));
@@ -131,7 +185,7 @@ int server_handle()
 		return bytes;
 	
 	
-	dbg_print("connectsock", "(%d) DATA len=%d", sock, bytes);
+	//dbg_print("connectsock", "(%d) DATA len=%d", sock, bytes);
 	
 	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
 	{
@@ -179,32 +233,56 @@ int connectsock_create(const char *server, unsigned int port)
 	
 	socket_setnonblocking(sock);
 	
-	// FIXME: check for immediate error
 	socket_connect(sock, (struct sockaddr*)&addr, sizeof(addr));
 	
-#if 0
-	time_t timeout_start = time(NULL);
+	// FIXME: check for immediate error
+	//if (status == -1 && (errno != EINPROGRESS || errno != EWOULDBLOCK))
 	
-	int status;
-	
-	do
-	{
-		status = socket_connect(sock, (struct sockaddr*)&addr, sizeof(addr));
-		
-		if (status >= 0)
-			break;
-	}
-	while ((int)difftime(time(NULL), timeout_start) < CLIENT_CONNECT_TIMEOUT);
-	
-	if (status < 0)
-		return status;
-#endif
 	return sock;
 }
 
 int client_execute(const char *cmd)
 {
-	dbg_print("client_execute", "len=%d text=%s", (int)strlen(cmd), cmd);
+	char msg[1024];
+	
+	Tokenizer t;
+	t.parse(cmd);  // parse the command line
+	
+	if (!t.getCount())
+		return 0;
+	
+	//dbg_print("input", "executing '%s'", cmd);
+	
+	// get first arg
+	string command;
+	t.getNext(command);
+	
+	if (command == "register")
+	{
+		int gid = string2int(t.getNext());
+		
+		my_gid = gid;  // FIXME
+		
+		snprintf(msg, sizeof(msg), "REGISTER %d", gid);
+		send_msg(msg);
+	}
+	else if (command == "gamelist")
+	{
+		send_msg("REQUEST gamelist");
+	}
+	else if (command == "reset" || command == "fold" || command == "check" || command == "call")
+	{
+		snprintf(msg, sizeof(msg), "ACTION %d %s", my_gid, command.c_str());
+		send_msg(msg);
+	}
+	else if (command == "bet" || command == "raise")
+	{
+		snprintf(msg, sizeof(msg), "ACTION %d %s %s",
+			my_gid, command.c_str(), t[1].c_str());
+		send_msg(msg);
+	}
+	else
+		dbg_print("input", "unknown cmd: %s", cmd);
 	
 	return 0;
 }
