@@ -37,6 +37,9 @@
 #define SERVER_TESTING
 
 
+#define CLIENT_CONNECT_TIMEOUT     10
+
+
 /* TODO: move to other file
    Example: 2.12.123 = 2*100000 + 12*1000 + 123 = 212123
  */
