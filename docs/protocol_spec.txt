@@ -14,6 +14,7 @@ ERR [<code>] [<text>]
 * server messages:
 MSG <from> <sender-name> <message>        # from := { -1 | <game-id>:<table-id> | <client-id> }    # -1 is server
 CLIENTINFO <client-id> <type>:<value> [...]
+GAMELIST <game-info>
 SNAP <game-id>:<table-id> <snap-type> [<snap-data> ...]   # snap-type := { game | table }
 NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
 

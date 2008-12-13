@@ -34,7 +34,7 @@
 #define SERVER_SELECT_TIMEOUT_USEC  150000  /* 150ms */
 
 /* server testing without real client; don't be that precise with protocol */
-#define SERVER_TESTING
+//#define SERVER_TESTING
 
 
 #define CLIENT_CONNECT_TIMEOUT     10
