@@ -29,6 +29,7 @@ class Tokenizer
 public:
 	bool parse(std::string str, std::string sep = " \t\n");
 	bool getNext(std::string &str);
+	std::string getNext();
 	unsigned int getCount() const { return tokens.size(); };
 	std::string operator[](const unsigned int i) const;
 
