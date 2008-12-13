@@ -278,6 +278,7 @@ void GameController::stateNewRound(Table *t)
 	chat(t->table_id, "New round started, deck shuffled");
 	
 	t->pot = 0.0f;
+	t->nomoreaction = false;
 	t->state = Table::Blinds;
 }
 
@@ -345,7 +346,7 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
-	if (isAllin(t))  // all (or all except one) players are allin
+	if (t->nomoreaction)  // early showdown, no more action at table allowed
 	{
 		action = Player::None;
 		allowed_action = true;
@@ -492,7 +493,11 @@ void GameController::stateBetting(Table *t)
 	{
 		dbg_print("table", "betting round ended");
 		
-		// FIXME: show cards if isAllin() == true
+		// FIXME: show up cards
+		if (isAllin(t))   // all (or all except one) players are allin
+		{
+			t->nomoreaction = true;
+		}
 		
 		switch ((int)t->betround)
 		{

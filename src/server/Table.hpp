@@ -71,6 +71,7 @@ private:
 	CommunityCards communitycards;
 	
 	State state;
+	bool nomoreaction;
 	BettingRound betround;
 	
 	unsigned int blind;
