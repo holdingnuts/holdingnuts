@@ -270,7 +270,8 @@ int client_execute(const char *cmd)
 	{
 		send_msg("REQUEST gamelist");
 	}
-	else if (command == "reset" || command == "fold" || command == "check" || command == "call")
+	else if (command == "reset" || command == "fold" || command == "check" ||
+		 command == "call" || command == "allin")
 	{
 		snprintf(msg, sizeof(msg), "ACTION %d %s", my_gid, command.c_str());
 		send_msg(msg);
@@ -325,8 +326,23 @@ int input_handle()
 			{
 				if (buf)
 				{
-					fprintf(stdout, "%c", buf); fflush(stdout);
-					inpBuf[inpBufLen++] = buf;
+					if (buf == '\b')
+					{
+						if (inpBufLen)
+						{
+							inpBufLen--;
+							fprintf(stdout, "\b \b"); fflush(stdout);
+						}
+					}
+					else
+					{
+						// prevent buffer-overflow
+						if (inpBufLen == sizeof(inpBuf) -1)
+							inpBufLen = 0;
+						
+						fprintf(stdout, "%c", buf); fflush(stdout);
+						inpBuf[inpBufLen++] = buf;
+					}
 				}
 			}
 		}
