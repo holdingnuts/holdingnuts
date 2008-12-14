@@ -163,6 +163,15 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 	return GameLogic::getWinList(wl, winlist);
 }
 
+void GameController::sendTableSnapshot(Table *t)
+{
+	// <betting-round> <dealer>:<SB>:<BB>:<action> seat1:<cid>:<in-round>:<stake>:<bet> ... pot1:<size> ...
+	snprintf(msg, sizeof(msg), "%d %d:%d:%d:%d",
+		(int)t->betround, t->dealer, t->sb, t->bb, t->cur_player);
+	
+	snap(t->table_id, SnapTable, msg);
+}
+
 // all (or except one) players are allin
 bool GameController::isAllin(Table *t)
 {
@@ -289,29 +298,28 @@ void GameController::stateBlinds(Table *t)
 	t->bet_amount = (float)t->blind;
 	
 	bool headsup_rule = (t->seats.size() == 2);
-	unsigned int small_blind, big_blind;
 	
 	// determine who is SB and BB
 	if (headsup_rule)   // heads-up rule: only 2 players remain, so swap blinds
 	{
-		big_blind = t->getNextPlayer(t->dealer);
-		small_blind = t->getNextPlayer(big_blind);
+		t->bb = t->getNextPlayer(t->dealer);
+		t->sb = t->getNextPlayer(t->bb);
 	}
 	else
 	{
-		small_blind = t->getNextPlayer(t->dealer);
-		big_blind = t->getNextPlayer(small_blind);
+		t->sb = t->getNextPlayer(t->dealer);
+		t->bb = t->getNextPlayer(t->sb);
 	}
 	
 	Player *pDealer = t->seats[t->dealer].player;
-	Player *pSmall = t->seats[small_blind].player;
-	Player *pBig = t->seats[big_blind].player;
+	Player *pSmall = t->seats[t->sb].player;
+	Player *pBig = t->seats[t->bb].player;
 	
 	// set the player's SB and BB   FIXME: handle allin/not-enough-stake case
-	t->seats[small_blind].bet = t->blind / 2;
+	t->seats[t->sb].bet = t->blind / 2;
 	pSmall->stake -= t->blind / 2;
 	
-	t->seats[big_blind].bet = t->blind;
+	t->seats[t->bb].bet = t->blind;
 	pBig->stake -= t->blind;
 	
 	
@@ -323,7 +331,7 @@ void GameController::stateBlinds(Table *t)
 	chat(t->table_id, msg);
 	
 	// player under the gun
-	t->cur_player = t->getNextPlayer(big_blind);
+	t->cur_player = t->getNextPlayer(t->bb);
 	t->last_bet_player = t->cur_player;
 	
 	// initialize the player's timeout
@@ -337,6 +345,7 @@ void GameController::stateBlinds(Table *t)
 	chat(p->client_id, t->table_id, "You're under the gun!");
 	
 	t->betround = Table::Preflop;
+	sendTableSnapshot(t);
 	
 	t->state = Table::Betting;
 }
@@ -489,6 +498,7 @@ void GameController::stateBetting(Table *t)
 	if (t->countActivePlayers() == 1)
 	{
 		t->state = Table::AllFolded;
+		sendTableSnapshot(t);
 		return;
 	}
 	
@@ -563,6 +573,8 @@ void GameController::stateBetting(Table *t)
 		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
 		
+		sendTableSnapshot(t);
+		
 		Player *p = t->seats[t->cur_player].player;
 		chat(p->client_id, t->table_id, "It's your turn!");
 	}
@@ -571,6 +583,8 @@ void GameController::stateBetting(Table *t)
 		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		timeout_start = time(NULL);
+		
+		sendTableSnapshot(t);
 		
 		Player *p = t->seats[t->cur_player].player;
 		chat(p->client_id, t->table_id, "It's your turn!");
@@ -598,6 +612,8 @@ void GameController::stateAllFolded(Table *t)
 	t->pot = 0.0f;
 	
 	t->state = Table::EndRound;
+	
+	sendTableSnapshot(t);
 }
 
 void GameController::stateShowdown(Table *t)
@@ -672,6 +688,8 @@ void GameController::stateShowdown(Table *t)
 	}
 	
 	t->state = Table::EndRound;
+	
+	sendTableSnapshot(t);
 }
 
 void GameController::stateEndRound(Table *t)

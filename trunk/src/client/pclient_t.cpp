@@ -453,6 +453,9 @@ int mainloop()
 				int status = server_handle();
 				if (status <= 0)
 				{
+					if (!status)
+						errno = 0;
+					
 					dbg_print("connectsock", "(%d) closed connection (%d: %s)", sock, errno, strerror(errno));
 					socket_close(sock);
 					
