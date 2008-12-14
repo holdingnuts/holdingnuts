@@ -84,6 +84,8 @@ public:
 	
 	bool isAllin(Table *t);
 	
+	void sendTableSnapshot(Table *t);
+	
 private:
 	int game_id;
 	

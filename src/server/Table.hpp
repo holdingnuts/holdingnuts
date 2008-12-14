@@ -77,7 +77,7 @@ private:
 	unsigned int blind;
 	
 	std::vector<Seat> seats;
-	unsigned int dealer;
+	unsigned int dealer, sb, bb;
 	unsigned int cur_player;
 	unsigned int last_bet_player;
 	

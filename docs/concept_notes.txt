@@ -54,3 +54,10 @@ server chats by
 * [-1] -> [-1]       foyer message to all
 * [-1] -> [cid]      foyer message to specific client
 * [gid:tid] -> [-1]  table message to all
+
+
+Snapshots:
+----------
+
+Table:
+<betting-round> <dealer>:<SB>:<BB>:<action> seat1:<cid>:<in-round>:<stake>:<bet> ... pot1:<size> ...
