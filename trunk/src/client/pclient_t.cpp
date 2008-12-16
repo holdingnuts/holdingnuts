@@ -33,10 +33,12 @@
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
+#include "Protocol.h"
 
 #include "Tokenizer.hpp"
 #include "Debug.h"
 
+#include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
 
 using namespace std;
 
@@ -119,6 +121,31 @@ int server_execute(const char *cmd)
 			chatmsg += t[i] + ' ';
 		
 		dbg_print("chat", "[%s]: %s", t[2].c_str(), chatmsg.c_str());
+	}
+	else if (command == "SNAP")
+	{
+		string from = t.getNext();
+		snaptype snap = (snaptype)string2int(t.getNext());
+		
+		switch ((int)snap)
+		{
+		case SnapGameState:
+			{
+				string sstate = t.getNext();
+				
+				if (sstate == "start")
+					dbg_print("game", "game has been started");
+				else if (sstate == "end")
+					dbg_print("game", "game ended");
+			}
+			break;
+		
+		case SnapTable:
+			{
+				dbg_print("snap", "%s", cmd);
+			}
+			break;
+		}
 	}
 	else
 	{

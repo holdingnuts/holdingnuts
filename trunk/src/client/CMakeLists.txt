@@ -3,6 +3,7 @@ include_directories (
 	${POKER_SOURCE_DIR}/src/network
 	${POKER_SOURCE_DIR}/src/libpoker
 	${POKER_SOURCE_DIR}/src/system
+	${POKER_SOURCE_DIR}/src/server
 	${POKER_SOURCE_DIR}/src/client
 )
 link_directories(
