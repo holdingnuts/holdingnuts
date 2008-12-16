@@ -26,7 +26,7 @@
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
-
+#include "Protocol.h"
 
 typedef enum {
 	Connected = 0x01,
@@ -48,12 +48,6 @@ typedef struct {
 	char name[64];
 } clientcon;
 
-
-typedef enum {
-	SnapGameState=1,
-	SnapTable,
-	SnapPlayerStats
-} snaptype;
 
 
 // used by pserver.cpp

@@ -165,9 +165,10 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 
 void GameController::sendTableSnapshot(Table *t)
 {
-	// <betting-round> <dealer>:<SB>:<BB>:<action> seat1:<cid>:<in-round>:<stake>:<bet> ... pot1:<size> ...
-	snprintf(msg, sizeof(msg), "%d %d:%d:%d:%d",
-		(int)t->betround, t->dealer, t->sb, t->bb, t->cur_player);
+	// <state>:<betting-round> <dealer>:<SB>:<BB>:<action> seat1:<cid>:<in-round>:<stake>:<bet> ... pot1:<size> ...
+	
+	snprintf(msg, sizeof(msg), "%d:%d %d:%d:%d:%d",
+		t->state, t->betround, t->dealer, t->sb, t->bb, t->cur_player);
 	
 	snap(t->table_id, SnapTable, msg);
 }
@@ -778,8 +779,7 @@ void GameController::tick()
 			
 			snap(-1, SnapGameState, "start");
 			
-			snprintf(msg, sizeof(msg), "Game %d has been started. You're at table %d.", game_id, tid);
-			chat(-1, msg);
+			// FIXME: tell client its table-no
 		}
 		
 		return;
@@ -801,7 +801,6 @@ void GameController::tick()
 			players.clear();
 			tables.clear();
 			
-			chat(t->table_id, "Table closed");
 			snap(-1, SnapGameState, "end");
 		}
 	}
