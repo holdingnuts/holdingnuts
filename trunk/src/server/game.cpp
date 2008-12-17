@@ -36,9 +36,6 @@
 
 using namespace std;
 
-
-unsigned int snap_update = 0x0;
-
 ////////////////////////
 vector<GameController*> games;
 
@@ -602,51 +599,6 @@ int client_handle(socktype sock)
 	
 	return bytes;
 }
-
-#if 0
-int send_snapshot(snaptype type)
-{
-	char msg[1024];
-	
-	if (type == Foyer)
-	{
-		snprintf(msg, sizeof(msg), "SNAP foyer %s", foyer_snapshot.c_str());
-	}
-	else if (type == Table)
-	{
-		strcpy(msg, "SNAP table ");
-	}
-	
-	// send all clients current game-state
-	for (unsigned int i=0; i < clients.size(); i++)
-		send_msg(clients[i].sock, msg);
-	
-	return 0;
-}
-
-int update_foyer_snapshot()
-{
-	foyer_snapshot.clear();
-	
-	for (unsigned int i=0; i < clients.size(); i++)
-	{
-		//if (!(clients[i].state & SentInfo))
-		//	continue;
-		
-		char tmp[100];
-		snprintf(tmp, sizeof(tmp), "%d:%c:%s ",
-			clients[i].sock,
-			(clients[i].state & IsPlayer) ? '*' : '-',
-			clients[i].name);
-		
-		foyer_snapshot += tmp;
-	}
-	
-	dbg_print("snapshot", "foyer size: %d", (int)foyer_snapshot.length());
-	
-	return 0;
-}
-#endif
 
 int gameloop()
 {
