@@ -48,6 +48,7 @@ public:
 	} BettingRound;
 	
 	typedef struct {
+		unsigned int seat_no;
 		Player *player;
 		float bet;
 		bool in_round;

@@ -33,8 +33,8 @@
 #define SERVER_SELECT_TIMEOUT_SEC   0
 #define SERVER_SELECT_TIMEOUT_USEC  150000  /* 150ms */
 
-/* server testing without real client; don't be that precise with protocol */
-//#define SERVER_TESTING
+/* server testing; verbose messages */
+#define SERVER_TESTING
 
 
 #define CLIENT_CONNECT_TIMEOUT     10
