@@ -27,6 +27,7 @@
 #include "Debug.h"
 #include "GameController.hpp"
 #include "GameLogic.hpp"
+#include "Card.hpp"
 
 #include "game.hpp"
 
@@ -165,10 +166,49 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 
 void GameController::sendTableSnapshot(Table *t)
 {
-	// <state>:<betting-round> <dealer>:<SB>:<BB>:<action> seat1:<cid>:<in-round>:<stake>:<bet> ... pot1:<size> ...
+	// build community-cards string
+	vector<Card> cards;
+	string scards;
 	
-	snprintf(msg, sizeof(msg), "%d:%d %d:%d:%d:%d",
-		t->state, t->betround, t->dealer, t->sb, t->bb, t->cur_player);
+	t->communitycards.copyCards(&cards);
+	
+	for (unsigned int i=0; i < cards.size(); i++)
+	{
+		scards += cards[i].getName();
+		
+		if (i < cards.size() -1)
+			scards += ':';
+	}
+	
+	
+	// build seats
+	string sseats;
+	for (unsigned int i=0; i < t->seats.size(); i++)
+	{
+		Table::Seat *s = &(t->seats[i]);
+		Player *p = s->player;
+		
+		char tmp[1024];
+		
+		snprintf(tmp, sizeof(tmp),
+			"s%d:%d:%c:%.2f",
+			s->seat_no, p->client_id, s->in_round ? '*' : '-', p->stake);
+		
+		sseats += tmp;
+		
+		if (i < t->seats.size() -1)
+			sseats += ' ';
+	}
+	
+	snprintf(msg, sizeof(msg),
+		"%d:%d "           // <state>:<betting-round>
+		"%d:%d:%d:%d "     // <dealer>:<SB>:<BB>:<current>
+		"cc:%s "           // <community-cards>
+		"%s",              // seats
+		t->state, t->betround,
+		t->dealer, t->sb, t->bb, t->cur_player,
+		scards.c_str(),
+		sseats.c_str());
 	
 	snap(t->table_id, SnapTable, msg);
 }
@@ -269,6 +309,8 @@ void GameController::stateNewRound(Table *t)
 	
 	t->deck.fill();
 	t->deck.shuffle();
+	
+	t->communitycards.clear();
 
 #ifdef SERVER_TESTING
 	chat(t->table_id, "---------------------------------------------");
@@ -769,6 +811,7 @@ void GameController::tick()
 			{
 				Table::Seat seat;
 				memset(&seat, 1, sizeof(Table::Seat));
+				seat.seat_no = i;
 				seat.player = &(players[i]);
 				table.seats.push_back(seat);
 			}

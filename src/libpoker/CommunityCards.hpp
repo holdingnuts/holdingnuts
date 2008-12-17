@@ -41,6 +41,8 @@ public:
 	bool setTurn(Card c);
 	bool setRiver(Card c);
 	
+	void clear() { cards.clear(); };
+	
 	void copyCards(std::vector<Card> *v) { v->insert(v->end(), cards.begin(), cards.end()); };
 	
 	void debug();
