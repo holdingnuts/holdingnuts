@@ -70,3 +70,137 @@ unsigned int Table::countActivePlayers()
 	
 	return count;
 }
+
+bool Table::isPlayerInvolvedInPot(Pot *pot, Player *p)
+{
+	for (unsigned int i=0; i < pot->players.size(); i++)
+	{
+		if (pot->players[i] == p)
+			return true;
+	}
+	
+	return false;
+}
+
+unsigned int Table::getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &wl)
+{
+	unsigned int involved_count = 0;
+	
+	for (unsigned int i=0; i < pot->players.size(); i++)
+	{
+		int cid = pot->players[i]->getClientId();
+		
+		for (unsigned int j=0; j < wl.size(); j++)
+		{
+			if (wl[j].getId() == cid)
+				involved_count++;
+		}
+	}
+	
+	return involved_count;
+}
+
+void Table::collectBets()
+{
+	// FIXME: return if there are no bets
+	
+	do
+	{
+		Pot *cur_pot = &(pots[pots.size() - 1]);
+		
+		if (cur_pot->final)
+		{
+			Pot pot;
+			pot.amount = 0.0f;
+			pot.final = false;
+			pots.push_back(pot);
+			
+			cur_pot = &(pots[pots.size() - 1]);
+		}
+		
+		// find smallest bet
+		float smallest_bet = 0.0f;
+		int smallest_bet_index = -1;
+		//unsigned int involved_players = 0;
+		
+		for (unsigned int i=0; i < seats.size(); i++)
+		{
+			// skip folded and already handled players
+			if (!seats[i].in_round || (int)seats[i].bet == 0)
+				continue;
+			
+			//involved_players++;
+			
+			// set an initial value
+			if ((int)smallest_bet == 0)
+				smallest_bet = seats[i].bet;
+			else if (seats[i].bet < smallest_bet)
+			{
+				smallest_bet = seats[i].bet;
+				smallest_bet_index = i;
+			}
+		}
+		
+		dbg_print("collectBets", "smallest_bet: %d = %.2f", smallest_bet_index, smallest_bet);
+		
+		// all player bets are the same
+		if (smallest_bet_index == -1)
+		{
+			for (unsigned int i=0; i < seats.size(); i++)
+			{
+				// skip folded and already handled players
+				if (!seats[i].in_round || (int)seats[i].bet == 0)
+					continue;
+				
+				// collect the bet into pot
+				cur_pot->amount += seats[i].bet;
+				seats[i].bet = 0.0f;
+				
+				// mark pot as final if at least one player is allin
+				Player *p = seats[i].player;
+				if ((int)p->getStake() == 0)
+					cur_pot->final = true;
+				
+				// set player involved in pot
+				if (!isPlayerInvolvedInPot(cur_pot, p))
+					cur_pot->players.push_back(p);
+			}
+			
+			// get outa here
+			break;
+		}
+		else  // side-pot needed
+		{
+			cur_pot->final = true;
+			
+			for (unsigned int i=0; i < seats.size(); i++)
+			{
+				// skip folded and already handled players
+				if (!seats[i].in_round || (int)seats[i].bet == 0)
+					continue;
+				
+				cur_pot->amount += smallest_bet;
+				seats[i].bet -= smallest_bet;
+				
+				// set player involved in pot
+				Player *p = seats[i].player;
+				if (!isPlayerInvolvedInPot(cur_pot, p))
+					cur_pot->players.push_back(p);
+			}
+		}
+	} while (true);
+
+#ifdef DEBUG
+	for (unsigned int i=0; i < pots.size(); i++)
+	{
+		dbg_print("pot", "#%d: amount=%0.2f players=%d",
+			i+1, pots[i].amount, (int)pots[i].players.size());
+		
+		for (unsigned int j=0; j < pots[i].players.size(); j++)
+		{
+			Player *p = pots[i].players[j];
+			dbg_print("pot", "    player %d", p->getClientId());
+		}
+	}
+#endif
+}
