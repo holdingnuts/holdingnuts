@@ -20,7 +20,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <ctime>
 
 #if not defined(PLATFORM_WINDOWS)
