@@ -22,6 +22,8 @@
 #define _DEBUG_H
 
 #if (1) //DEBUG
+#include <stdio.h>
+
 # define dbg_print(level, s, args...) \
 	do { fprintf(stderr, "[%s]: "s"\n", level, ##args) ; fflush(stderr); } while(0)
 #else
