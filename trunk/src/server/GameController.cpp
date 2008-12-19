@@ -408,7 +408,7 @@ void GameController::stateBetting(Table *t)
 	}
 	else if ((int)p->stake == 0)  // player is allin and has no more options
 	{
-		action = Player::Check;
+		action = Player::None;
 		allowed_action = true;
 	}
 	else if (p->next_action.valid)  // has player set an action?
