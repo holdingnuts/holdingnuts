@@ -257,24 +257,40 @@ int test_gamecontroller()
 {
 	GameController game;
 	
-	game.setPlayerMax(3);
+	game.setPlayerMax(4);
 	game.addPlayer(0);
 	game.setPlayerStake(0, 100.0f);
 	game.addPlayer(1);
-	game.setPlayerStake(1, 10.0f);
+	game.setPlayerStake(1, 20.0f);
 	game.addPlayer(2);
-	game.setPlayerStake(2, 40.0f);
+	game.setPlayerStake(2, 50.0f);
+	game.addPlayer(3);
+	game.setPlayerStake(3, 30.0f);
 	
-	game.tick();
-	game.tick();
+	game.tick();  // New round started
+	game.tick();  // 0: You're under the gun!
+	
+	// [Pre-Flop]
+	game.setPlayerAction(3, Player::Allin, 0.0f);
+	game.tick();  // 1: It's your turn!
+	
+	game.setPlayerAction(0, Player::Call, 0.0f);
+	game.tick();  // 1: It's your turn!
+	
+	game.setPlayerAction(1, Player::Allin, 0.0f);
+	game.tick();  // 2: It's your turn!
+	
+	game.setPlayerAction(2, Player::Allin, 0.0f);
+	game.tick();  // 3: It's your turn!
+	
+	game.tick();  // p3 is allin, no action
 	
 	game.setPlayerAction(0, Player::Call, 0.0f);
 	game.tick();
 	
-	game.setPlayerAction(1, Player::Call, 0.0f);
-	game.tick();
-	
-	game.setPlayerAction(2, Player::Check, 0.0f);
+	game.tick();  // p1 is allin, no action
+	game.tick();game.tick();game.tick();game.tick();game.tick();game.tick();
+	game.tick();game.tick();game.tick();game.tick();game.tick();game.tick();
 	game.tick();
 	
 	return 0;

@@ -48,6 +48,9 @@ public:
 	
 	Player();
 	
+	float getStake() const { return stake; };
+	int getClientId() const { return client_id; };
+	
 private:
 	int client_id;
 	

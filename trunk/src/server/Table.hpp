@@ -24,6 +24,7 @@
 #include "Deck.hpp"
 #include "CommunityCards.hpp"
 #include "Player.hpp"
+#include "GameLogic.hpp"
 
 class Table
 {
@@ -54,6 +55,12 @@ public:
 		bool in_round;
 	} Seat;
 	
+	typedef struct {
+		float amount;
+		std::vector<Player*> players;
+		bool final;
+	} Pot;
+	
 	Table();
 	
 	bool setTableId(int tid) { table_id = tid; return true; };
@@ -62,6 +69,10 @@ public:
 	int getNextPlayer(unsigned int pos);
 	int getNextActivePlayer(unsigned int pos);
 	unsigned int countActivePlayers();
+	
+	void collectBets();
+	bool isPlayerInvolvedInPot(Pot *pot, Player *p);
+	unsigned int getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &wl);
 	
 	void tick();
 	
@@ -83,7 +94,7 @@ private:
 	unsigned int last_bet_player;
 	
 	float bet_amount;
-	float pot;
+	std::vector<Pot> pots;
 };
 
 

@@ -200,15 +200,37 @@ void GameController::sendTableSnapshot(Table *t)
 			sseats += ' ';
 	}
 	
+	
+	// assemble pots string
+	string spots;
+	for (unsigned int i=0; i < t->pots.size(); i++)
+	{
+		Table::Pot *pot = &(t->pots[i]);
+		
+		char tmp[1024];
+		
+		snprintf(tmp, sizeof(tmp),
+			"p%d:%.2f",
+			i, pot->amount);
+		
+		spots += tmp;
+		
+		if (i < t->pots.size() -1)
+			spots += ' ';
+	}
+	
+	
 	snprintf(msg, sizeof(msg),
 		"%d:%d "           // <state>:<betting-round>
 		"%d:%d:%d:%d "     // <dealer>:<SB>:<BB>:<current>
 		"cc:%s "           // <community-cards>
-		"%s",              // seats
+		"%s "              // seats
+		"%s",              // pots
 		t->state, t->betround,
 		t->dealer, t->sb, t->bb, t->cur_player,
 		scards.c_str(),
-		sseats.c_str());
+		sseats.c_str(),
+		spots.c_str());
 	
 	snap(t->table_id, SnapTable, msg);
 }
@@ -329,7 +351,13 @@ void GameController::stateNewRound(Table *t)
 	
 	chat(t->table_id, "New round started, deck shuffled");
 	
-	t->pot = 0.0f;
+	// clear old pots and create initial main pot
+	t->pots.clear();
+	Table::Pot pot;
+	pot.amount = 0.0f;
+	pot.final = false;
+	t->pots.push_back(pot);
+	
 	t->nomoreaction = false;
 	t->state = Table::Blinds;
 }
@@ -590,18 +618,10 @@ void GameController::stateBetting(Table *t)
 		}
 		
 		// collect bets into pot
-		for (unsigned int i=0; i < t->seats.size(); i++)
-		{
-			t->pot += t->seats[i].bet;
-			t->seats[i].bet = 0.0f;
-		}
+		t->collectBets();
+		
 		t->bet_amount = 0.0f;
 		
-#ifdef SERVER_TESTING
-		// pot-size message
-		snprintf(msg, sizeof(msg), "Pot size: %.2f", t->pot);
-		chat(t->table_id, msg);
-#endif
 		
 		// set current player to SB (or next active behind SB)
 		bool headsup_rule = (t->seats.size() == 2);
@@ -637,22 +657,17 @@ void GameController::stateBetting(Table *t)
 void GameController::stateAllFolded(Table *t)
 {
 	// collect bets into pot
-	for (unsigned int i=0; i < t->seats.size(); i++)
-	{
-		t->pot += t->seats[i].bet;
-		t->seats[i].bet = 0.0f;
-	}
+	t->collectBets();
 	
 	// get last remaining player
 	Player *p = t->seats[t->getNextActivePlayer(t->cur_player)].player;
 	
 	// FIXME: ask player if he wants to show cards
 	
-	snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pot);
+	snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pots[0].amount);
 	chat(t->table_id, msg);
 	
-	p->stake += t->pot;
-	t->pot = 0.0f;
+	p->stake += t->pots[0].amount;
 	
 	t->state = Table::EndRound;
 	
@@ -703,32 +718,55 @@ void GameController::stateShowdown(Table *t)
 		showdown_player = t->getNextActivePlayer(showdown_player);
 	}
 	
+	
+	// determine winners
 	vector< vector<HandStrength> > winlist;
 	createWinlist(t, winlist);
 	
 	for (unsigned int i=0; i < winlist.size(); i++)
 	{
 		vector<HandStrength> &tw = winlist[i];
+		const unsigned int winner_count = tw.size();
 		
-		// FIXME: support case where further winlists are needed
-		unsigned int winner_count = tw.size();
-		float win_amount = t->pot / winner_count;
-		
-		for (unsigned int j=0; j < winner_count; j++)
+		// for each pot
+		for (unsigned int poti=0; poti < t->pots.size(); poti++)
 		{
-			Player *p = findPlayer(tw[j].getId());
-			p->stake += win_amount;
+			Table::Pot *pot = &(t->pots[poti]);
+			unsigned int involved_count = t->getInvolvedInPotCount(pot, tw);
 			
-			snprintf(msg, sizeof(msg), "Winner is [%d] and wins %.2f",
-				p->client_id, win_amount);
+			float cashout_amount = 0.0f;
 			
-			chat(t->table_id, msg);
+			// for each winning-player
+			for (unsigned int pi=0; pi < winner_count; pi++)
+			{
+				Player *p = findPlayer(tw[pi].getId());
+				// skip pot if player not involved in it
+				if (!t->isPlayerInvolvedInPot(pot, p))
+					continue;
+#ifdef DEBUG
+				dbg_print("winlist", "wl #%d: player #%d: pot #%d: involved-count=%d",
+					i+1, pi+1, poti+1, involved_count);
+#endif
+				float win_amount = pot->amount / involved_count;
+				
+				if ((int) win_amount > 0)
+				{
+					p->stake += win_amount;
+					cashout_amount += win_amount;
+					
+					snprintf(msg, sizeof(msg),
+						"Player [%d] wins pot #%d with %.2f",
+						p->client_id, poti+1, win_amount);
+					chat(t->table_id, msg);
+				}
+			}
+			
+			pot->amount -= cashout_amount;
 		}
-		
-		// FIXME: support case where further winlists are needed
-		t->pot = 0.0f;
-		break;
 	}
+	
+	t->pots.clear();
+	
 	
 	t->state = Table::EndRound;
 	
