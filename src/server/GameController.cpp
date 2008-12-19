@@ -386,12 +386,25 @@ void GameController::stateBlinds(Table *t)
 	Player *pSmall = t->seats[t->sb].player;
 	Player *pBig = t->seats[t->bb].player;
 	
-	// set the player's SB and BB   FIXME: handle allin/not-enough-stake case
-	t->seats[t->sb].bet = t->blind / 2;
-	pSmall->stake -= t->blind / 2;
 	
-	t->seats[t->bb].bet = t->blind;
-	pBig->stake -= t->blind;
+	// set the player's SB
+	float amount = t->blind / 2;
+	
+	if (amount > pSmall->stake)
+		amount = pSmall->stake;
+	
+	t->seats[t->sb].bet = amount;
+	pSmall->stake -= amount;
+	
+	
+	// set the player's BB
+	amount = t->blind;
+	
+	if (amount > pBig->stake)
+		amount = pBig->stake;
+	
+	t->seats[t->bb].bet = amount;
+	pBig->stake -= amount;
 	
 	
 	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
