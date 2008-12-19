@@ -86,6 +86,10 @@ public:
 	
 	void sendTableSnapshot(Table *t);
 	
+#ifdef DEBUG
+	void setPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
+#endif
+	
 private:
 	int game_id;
 	
