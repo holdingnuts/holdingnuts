@@ -166,7 +166,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 
 void GameController::sendTableSnapshot(Table *t)
 {
-	// build community-cards string
+	// assemble community-cards string
 	vector<Card> cards;
 	string scards;
 	
@@ -181,7 +181,7 @@ void GameController::sendTableSnapshot(Table *t)
 	}
 	
 	
-	// build seats
+	// assemble seats string
 	string sseats;
 	for (unsigned int i=0; i < t->seats.size(); i++)
 	{
@@ -824,8 +824,8 @@ void GameController::tick()
 			
 			// FIXME: tell client its table-no
 		}
-		
-		return;
+		else
+			return;
 	}
 	
 	// handle all tables
