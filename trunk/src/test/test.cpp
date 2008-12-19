@@ -35,6 +35,8 @@
 #include "CommunityCards.hpp"
 #include "GameLogic.hpp"
 
+#include "GameController.hpp"
+
 using namespace std;
 
 int test_card1()
@@ -233,6 +235,51 @@ int test_winlist1()
 	return 0;
 }
 
+// ****** test: gamecontroller *********
+bool client_chat(int from, int to, const char *msg)
+{
+	dbg_print("msg", "%d: %s", to, msg);
+	return true;
+}
+
+bool client_chat(int from_gid, int from_tid, int to, const char *msg)
+{
+	return client_chat(-1, to, msg);
+}
+
+bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg)
+{
+	dbg_print("snap", "%d: [%d] %s", to, sid, msg);
+	return true;
+}
+
+int test_gamecontroller()
+{
+	GameController game;
+	
+	game.setPlayerMax(3);
+	game.addPlayer(0);
+	game.setPlayerStake(0, 100.0f);
+	game.addPlayer(1);
+	game.setPlayerStake(1, 10.0f);
+	game.addPlayer(2);
+	game.setPlayerStake(2, 40.0f);
+	
+	game.tick();
+	game.tick();
+	
+	game.setPlayerAction(0, Player::Call, 0.0f);
+	game.tick();
+	
+	game.setPlayerAction(1, Player::Call, 0.0f);
+	game.tick();
+	
+	game.setPlayerAction(2, Player::Check, 0.0f);
+	game.tick();
+	
+	return 0;
+}
+
 int main(void)
 {
 	printf("Poker-test; running on ");
@@ -264,6 +311,10 @@ int main(void)
 
 #if 0
 	test_winlist1();
+#endif
+
+#if 1
+	test_gamecontroller();
 #endif
 
 	return 0;
