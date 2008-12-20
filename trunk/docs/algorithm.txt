@@ -1,0 +1,45 @@
+Algorithm: Example for Side-Pots
+================================
+
+		A = 100
+	D = 30		B = 20
+		C = 50
+
+Player C is Allin, all other players call.
+
+player		-20	-10
+-------------------------------------
+A	50	30	20
+B	20	0	-
+C	50	30	20
+D	30	10	0
+-------------------------------------
+bets	150	70	40
+-------------------------------------
+pots		80	30	40
+		Main	Side 1	Side 2
+		ABCD	ACD	AC
+
+
+
+Algorithm: Example for Winning-List
+===================================
+
+Hands := { 3, 5, 4, 5 }
+
+sort Hands ->
+	W1 := { 5, 5, 4, 3 }
+
+compare each hand with first hand, begin with last hand -> 3 with 5, 4 with 5, 5 with 5
+move all hands smaller than first hand to next winning-list
+	W2 := { 3, 4 }
+sort again ->
+	W2 := {4, 3 }
+
+compare again -> 3 < 4
+	W3 := { 3 }
+
+Result:
+	W1 := { 5, 5 }
+	W2 := { 4 }
+	W3 := { 3 }
