@@ -632,9 +632,6 @@ void GameController::stateBetting(Table *t)
 		t->last_bet_player = t->cur_player;
 		
 		sendTableSnapshot(t);
-		
-		Player *p = t->seats[t->cur_player].player;
-		chat(p->client_id, t->table_id, "It's your turn!");
 	}
 	else
 	{
@@ -643,10 +640,14 @@ void GameController::stateBetting(Table *t)
 		timeout_start = time(NULL);
 		
 		sendTableSnapshot(t);
-		
-		Player *p = t->seats[t->cur_player].player;
-		chat(p->client_id, t->table_id, "It's your turn!");
 	}
+	
+#ifdef SERVER_TESTING
+	// tell player it's his turn
+	p = t->seats[t->cur_player].player;
+	if (!t->nomoreaction && (int)p->stake != 0)
+		chat(p->client_id, t->table_id, "It's your turn!");
+#endif /* SERVER_TESTING */
 }
 
 void GameController::stateAllFolded(Table *t)
