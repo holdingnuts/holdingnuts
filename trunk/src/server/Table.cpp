@@ -169,59 +169,45 @@ void Table::collectBets()
 		}
 		
 		
-		// all player bets are the same
-		if (smallest_bet_index == -1)
+		// collect the bet of each player
+		for (unsigned int i=0; i < seats.size(); i++)
 		{
-			for (unsigned int i=0; i < seats.size(); i++)
+			// skip already handled players
+			if ((int)seats[i].bet == 0)
+				continue;
+			
+			// collect the bet into pot
+			if (smallest_bet_index == -1)
 			{
-				// skip already handled players
-				if ((int)seats[i].bet == 0)
-					continue;
-				
-				// collect the bet into pot
 				cur_pot->amount += seats[i].bet;
 				seats[i].bet = 0.0f;
-				
-				// skip folded players
-				if (!seats[i].in_round)
-					continue;
-				
-				// mark pot as final if at least one player is allin
-				Player *p = seats[i].player;
-				if ((int)p->getStake() == 0)
-					cur_pot->final = true;
-				
-				// set player involved in pot
-				if (!isPlayerInvolvedInPot(cur_pot, p))
-					cur_pot->players.push_back(p);
 			}
-			
-			// get outa here
-			break;
-		}
-		else  // side-pot needed
-		{
-			cur_pot->final = true;
-			
-			for (unsigned int i=0; i < seats.size(); i++)
+			else
 			{
-				// skip already handled players
-				if ((int)seats[i].bet == 0)
-					continue;
-				
 				cur_pot->amount += smallest_bet;
 				seats[i].bet -= smallest_bet;
-				
-				// skip folded players
-				if (!seats[i].in_round)
-					continue;
-				
-				// set player involved in pot
-				Player *p = seats[i].player;
-				if (!isPlayerInvolvedInPot(cur_pot, p))
-					cur_pot->players.push_back(p);
 			}
+			
+			// skip folded players
+			if (!seats[i].in_round)
+				continue;
+			
+			// mark pot as final if at least one player is allin
+			Player *p = seats[i].player;
+			if ((int)p->getStake() == 0)
+				cur_pot->final = true;
+			
+			// set player 'involved in pot'
+			if (!isPlayerInvolvedInPot(cur_pot, p))
+				cur_pot->players.push_back(p);
 		}
+		
+		
+		if (smallest_bet_index == -1)  // all player bets are the same, end here
+			break;
+		else
+			cur_pot->final = true; // side-pot, new pot needed in any case
+		
 	} while (true);
 
 #ifdef DEBUG
