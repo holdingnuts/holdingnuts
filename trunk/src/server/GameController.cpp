@@ -191,8 +191,8 @@ void GameController::sendTableSnapshot(Table *t)
 		char tmp[1024];
 		
 		snprintf(tmp, sizeof(tmp),
-			"s%d:%d:%c:%.2f",
-			s->seat_no, p->client_id, s->in_round ? '*' : '-', p->stake);
+			"s%d:%d:%c:%.2f:%.2f",
+			s->seat_no, p->client_id, s->in_round ? '*' : '-', p->stake, s->bet);
 		
 		sseats += tmp;
 		
@@ -494,6 +494,7 @@ void GameController::stateBetting(Table *t)
 	else
 	{
 		// handle player timeout
+#ifndef SERVER_TESTING
 		const int timeout = 60;   // FIXME: configurable
 		if ((int)difftime(time(NULL), timeout_start) > timeout)
 		{
@@ -505,6 +506,7 @@ void GameController::stateBetting(Table *t)
 			
 			allowed_action = true;
 		}
+#endif /* SERVER_TESTING */
 	}
 	
 	
