@@ -75,11 +75,14 @@ unsigned int Table::countActivePlayers()
 bool Table::isAllin()
 {
 	unsigned int count = 0;
+	unsigned int active_players = 0;
 	
 	for (unsigned int i=0; i < seats.size(); i++)
 	{
 		if (seats[i].in_round)
 		{
+			active_players++;
+			
 			Player *p = seats[i].player;
 			
 			if ((int)p->getStake() == 0)
@@ -87,7 +90,7 @@ bool Table::isAllin()
 		}
 	}
 	
-	return (count >= seats.size() - 1);
+	return (count >= active_players - 1);
 }
 
 bool Table::isPlayerInvolvedInPot(Pot *pot, Player *p)
