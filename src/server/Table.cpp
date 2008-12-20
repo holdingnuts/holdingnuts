@@ -102,22 +102,17 @@ unsigned int Table::getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &w
 
 void Table::collectBets()
 {
-	// FIXME: return if there are no bets
-	
 	do
 	{
 		// find smallest bet
 		float smallest_bet = 0.0f;
 		int smallest_bet_index = -1;
-		//unsigned int involved_players = 0;
 		
 		for (unsigned int i=0; i < seats.size(); i++)
 		{
 			// skip folded and already handled players
 			if (!seats[i].in_round || (int)seats[i].bet == 0)
 				continue;
-			
-			//involved_players++;
 			
 			// set an initial value
 			if ((int)smallest_bet == 0)
@@ -132,13 +127,15 @@ void Table::collectBets()
 #ifdef DEBUG
 		dbg_print("collectBets", "smallest_bet: %d = %.2f", smallest_bet_index, smallest_bet);
 #endif
-		// there are no bets
+		// there are no bets, do nothing
 		if ((int)smallest_bet == 0)
 			return;
 		
 		
+		// last pot is current pot
 		Pot *cur_pot = &(pots[pots.size() - 1]);
 		
+		// if current pot is final, create a new one
 		if (cur_pot->final)
 		{
 			Pot pot;
