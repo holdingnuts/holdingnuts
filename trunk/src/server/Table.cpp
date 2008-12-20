@@ -106,18 +106,6 @@ void Table::collectBets()
 	
 	do
 	{
-		Pot *cur_pot = &(pots[pots.size() - 1]);
-		
-		if (cur_pot->final)
-		{
-			Pot pot;
-			pot.amount = 0.0f;
-			pot.final = false;
-			pots.push_back(pot);
-			
-			cur_pot = &(pots[pots.size() - 1]);
-		}
-		
 		// find smallest bet
 		float smallest_bet = 0.0f;
 		int smallest_bet_index = -1;
@@ -141,7 +129,26 @@ void Table::collectBets()
 			}
 		}
 		
+#ifdef DEBUG
 		dbg_print("collectBets", "smallest_bet: %d = %.2f", smallest_bet_index, smallest_bet);
+#endif
+		// there are no bets
+		if ((int)smallest_bet == 0)
+			return;
+		
+		
+		Pot *cur_pot = &(pots[pots.size() - 1]);
+		
+		if (cur_pot->final)
+		{
+			Pot pot;
+			pot.amount = 0.0f;
+			pot.final = false;
+			pots.push_back(pot);
+			
+			cur_pot = &(pots[pots.size() - 1]);
+		}
+		
 		
 		// all player bets are the same
 		if (smallest_bet_index == -1)
