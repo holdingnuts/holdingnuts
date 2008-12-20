@@ -171,13 +171,17 @@ void Table::collectBets()
 		{
 			for (unsigned int i=0; i < seats.size(); i++)
 			{
-				// skip folded and already handled players
-				if (!seats[i].in_round || (int)seats[i].bet == 0)
+				// skip already handled players
+				if ((int)seats[i].bet == 0)
 					continue;
 				
 				// collect the bet into pot
 				cur_pot->amount += seats[i].bet;
 				seats[i].bet = 0.0f;
+				
+				// skip folded players
+				if (!seats[i].in_round)
+					continue;
 				
 				// mark pot as final if at least one player is allin
 				Player *p = seats[i].player;
@@ -198,12 +202,16 @@ void Table::collectBets()
 			
 			for (unsigned int i=0; i < seats.size(); i++)
 			{
-				// skip folded and already handled players
-				if (!seats[i].in_round || (int)seats[i].bet == 0)
+				// skip already handled players
+				if ((int)seats[i].bet == 0)
 					continue;
 				
 				cur_pot->amount += smallest_bet;
 				seats[i].bet -= smallest_bet;
+				
+				// skip folded players
+				if (!seats[i].in_round)
+					continue;
 				
 				// set player involved in pot
 				Player *p = seats[i].player;
@@ -224,6 +232,11 @@ void Table::collectBets()
 			Player *p = pots[i].players[j];
 			dbg_print("pot", "    player %d", p->getClientId());
 		}
+	}
+	
+	for (unsigned int i=0; i < seats.size(); i++)
+	{
+		dbg_print("seat-bets", "seat-%d: %.2f", i, seats[i].bet);
 	}
 #endif
 }
