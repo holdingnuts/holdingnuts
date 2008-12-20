@@ -69,6 +69,7 @@ public:
 	int getNextPlayer(unsigned int pos);
 	int getNextActivePlayer(unsigned int pos);
 	unsigned int countActivePlayers();
+	bool isAllin();
 	
 	void collectBets();
 	bool isPlayerInvolvedInPot(Pot *pot, Player *p);

@@ -82,8 +82,6 @@ public:
 	void dealTurn(Table *t);
 	void dealRiver(Table *t);
 	
-	bool isAllin(Table *t);
-	
 	void sendTableSnapshot(Table *t);
 	
 #ifdef DEBUG

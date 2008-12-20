@@ -235,26 +235,6 @@ void GameController::sendTableSnapshot(Table *t)
 	snap(t->table_id, SnapTable, msg);
 }
 
-// all (or except one) players are allin
-bool GameController::isAllin(Table *t)
-{
-	unsigned int count = 0;
-	
-	for (unsigned int i=0; i < t->seats.size(); i++)
-	{
-		if (t->seats[i].in_round)
-		{
-			Player *p = t->seats[i].player;
-			
-			if ((int)p->stake == 0)
-				count++;
-		}
-	}
-	
-	return (count >= t->seats.size() - 1);
-}
-
-
 // FIXME: SB gets first (one) card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
@@ -592,7 +572,7 @@ void GameController::stateBetting(Table *t)
 		dbg_print("table", "betting round ended");
 		
 		// all (or all except one) players are allin
-		if (isAllin(t))
+		if (t->isAllin())
 		{
 			// no further action at table possible
 			t->nomoreaction = true;
