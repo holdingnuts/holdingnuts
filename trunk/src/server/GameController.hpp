@@ -53,6 +53,7 @@ public:
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() { return max_players; };
 	unsigned int getPlayerCount() { return players.size(); };
+	bool getPlayerList(std::vector<int> &client_list) const;
 	
 	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);
@@ -70,6 +71,7 @@ public:
 	bool createWinlist(Table *t, std::vector< std::vector<HandStrength> > &winlist);
 	
 	int handleTable(Table *t);
+	void stateGameStart(Table *t);
 	void stateNewRound(Table *t);
 	void stateBlinds(Table *t);
 	void stateBetting(Table *t);
@@ -99,6 +101,7 @@ private:
 	std::vector<Player> players;
 	std::vector<Table> tables;
 	
+	time_t game_start;
 	time_t timeout_start;
 };
 

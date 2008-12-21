@@ -4,7 +4,7 @@
 typedef enum {
 	SnapGameState=1,
 	SnapTable,
-	SnapPlayerStats
+	SnapHoleCards
 } snaptype;
 
 #endif /* _PROTOCOL_H */
