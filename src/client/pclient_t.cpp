@@ -155,10 +155,12 @@ void print_table()
 		}
 	}
 	
-	printf("\n--------------------------------------------------------------------------------\n");
-	
-	printf("  Your cards: %s   Board: %s\n",
-		holecards.c_str(), table.communitycards.substr(3).c_str());
+	if (table.state != Table::Blinds)
+	{
+		printf("\n--------------------------------------------------------------------------------\n");
+		printf("  Your cards: %s   Board: %s\n",
+			holecards.c_str(), table.communitycards.substr(3).c_str());
+	}
 	
 	printf("================================================================================\n");
 	
