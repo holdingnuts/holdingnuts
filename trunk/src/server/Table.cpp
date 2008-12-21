@@ -128,7 +128,7 @@ void Table::collectBets()
 	{
 		// find smallest bet
 		float smallest_bet = 0.0f;
-		int smallest_bet_index = -1;
+		bool need_sidepot = false;
 		
 		for (unsigned int i=0; i < seats.size(); i++)
 		{
@@ -136,18 +136,20 @@ void Table::collectBets()
 			if (!seats[i].in_round || (int)seats[i].bet == 0)
 				continue;
 			
-			// set an initial value
-			if ((int)smallest_bet == 0)
+			if ((int)smallest_bet == 0)   // set an initial value
 				smallest_bet = seats[i].bet;
-			else if (seats[i].bet < smallest_bet)
+			else if (seats[i].bet < smallest_bet)  // new smallest bet
 			{
 				smallest_bet = seats[i].bet;
-				smallest_bet_index = i;
+				need_sidepot = true;
 			}
+			else if (seats[i].bet > smallest_bet)  // bets are not equal,
+				need_sidepot = true;           // so there must be a smallest bet
 		}
 		
+		
 #ifdef DEBUG
-		dbg_print("collectBets", "smallest_bet: %d = %.2f", smallest_bet_index, smallest_bet);
+		dbg_print("collectBets", "smallest_bet: %s = %.2f", need_sidepot ? "true" : "false", smallest_bet);
 #endif
 		// there are no bets, do nothing
 		if ((int)smallest_bet == 0)
@@ -176,8 +178,16 @@ void Table::collectBets()
 			if ((int)seats[i].bet == 0)
 				continue;
 			
+			// collect bet of folded players and skip them
+			if (!seats[i].in_round)
+			{
+				cur_pot->amount += seats[i].bet;
+				seats[i].bet = 0.0f;
+				continue;
+			}
+			
 			// collect the bet into pot
-			if (smallest_bet_index == -1)
+			if (!need_sidepot)
 			{
 				cur_pot->amount += seats[i].bet;
 				seats[i].bet = 0.0f;
@@ -187,10 +197,6 @@ void Table::collectBets()
 				cur_pot->amount += smallest_bet;
 				seats[i].bet -= smallest_bet;
 			}
-			
-			// skip folded players
-			if (!seats[i].in_round)
-				continue;
 			
 			// mark pot as final if at least one player is allin
 			Player *p = seats[i].player;
@@ -203,10 +209,8 @@ void Table::collectBets()
 		}
 		
 		
-		if (smallest_bet_index == -1)  // all player bets are the same, end here
+		if (!need_sidepot)  // all player bets are the same, end here
 			break;
-		else
-			cur_pot->final = true; // side-pot, new pot needed in any case
 		
 	} while (true);
 
