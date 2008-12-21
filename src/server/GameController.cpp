@@ -566,6 +566,10 @@ void GameController::stateBetting(Table *t)
 	{
 		t->seats[t->cur_player].in_round = false;
 		
+		// set 'last action' to next player
+		if (t->cur_player == t->last_bet_player)
+			t->last_bet_player = t->getNextActivePlayer(t->last_bet_player);
+		
 		snprintf(msg, sizeof(msg), "Player %d folded.", p->client_id);
 		chat(t->table_id, msg);
 	}
@@ -715,6 +719,9 @@ void GameController::stateAllFolded(Table *t)
 void GameController::stateShowdown(Table *t)
 {
 	chat(t->table_id, "Showdown");
+	
+	// collect bets into pot
+	t->collectBets();
 	
 	// the player who did the last action is first to show
 	unsigned int showdown_player = t->last_bet_player;
