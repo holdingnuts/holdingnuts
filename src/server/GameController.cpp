@@ -566,10 +566,6 @@ void GameController::stateBetting(Table *t)
 	{
 		t->seats[t->cur_player].in_round = false;
 		
-		// set 'last action' to next player
-		if (t->cur_player == t->last_bet_player)
-			t->last_bet_player = t->getNextActivePlayer(t->last_bet_player);
-		
 		snprintf(msg, sizeof(msg), "Player %d folded.", p->client_id);
 		chat(t->table_id, msg);
 	}
@@ -681,6 +677,10 @@ void GameController::stateBetting(Table *t)
 	}
 	else
 	{
+		// preflop: if player UTG folds, set 'last action' to next player
+		if (action == Player::Fold && t->cur_player == t->last_bet_player)
+			t->last_bet_player = t->getNextActivePlayer(t->last_bet_player);
+
 		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		timeout_start = time(NULL);
