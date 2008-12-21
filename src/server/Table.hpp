@@ -32,6 +32,7 @@ friend class GameController;
 
 public:
 	typedef enum {
+		GameStart,
 		ElectDealer,
 		NewRound,
 		Blinds,

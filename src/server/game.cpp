@@ -371,6 +371,28 @@ int client_execute(clientcon *client, const char *cmd)
 				
 				send_msg(s, msg);
 			}
+			else if (request == "playerlist")
+			{
+				int gid = string2int(t.getNext());
+				
+				GameController *g;
+				if ((g = get_game_by_id(gid)))
+				{
+					vector<int> client_list;
+					g->getPlayerList(client_list);
+					
+					string slist;
+					for (unsigned int i=0; i < client_list.size(); i++)
+					{
+						char tmp[10];
+						snprintf(tmp, sizeof(tmp), "%d ", client_list[i]);
+						slist += tmp;
+					}
+					
+					snprintf(msg, sizeof(msg), "PLAYERLIST %d %s", gid, slist.c_str());
+					send_msg(s, msg);
+				}
+			}
 			else
 				cmderr = true;
 		}

@@ -100,6 +100,16 @@ bool GameController::setPlayerMax(unsigned int max)
 	return true;
 }
 
+bool GameController::getPlayerList(vector<int> &client_list) const
+{
+	client_list.clear();
+	
+	for (unsigned int i=0; i < players.size(); i++)
+		client_list.push_back(players[i].client_id);
+	
+	return true;
+}
+
 void GameController::chat(int tid, const char* msg)
 {
 	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)
@@ -226,8 +236,8 @@ void GameController::sendTableSnapshot(Table *t)
 		"cc:%s "           // <community-cards>
 		"%s "              // seats
 		"%s",              // pots
-		t->state, t->betround,
-		t->dealer, t->sb, t->bb, t->cur_player,
+		t->state, (t->state == Table::Betting) ? t->betround : -1,
+		t->seats[t->dealer].seat_no, t->seats[t->sb].seat_no, t->seats[t->bb].seat_no, t->seats[t->cur_player].seat_no,
 		scards.c_str(),
 		sseats.c_str(),
 		spots.c_str());
@@ -256,6 +266,23 @@ void GameController::dealHole(Table *t)
 			card1, card2);
 		
 		chat(p->client_id, t->table_id, msg);
+		
+		
+		// holecard snapshot
+		vector<Card> cards;
+		string scards;
+		
+		p->holecards.copyCards(&cards);
+		
+		for (unsigned int i=0; i < cards.size(); i++)
+		{
+			scards += cards[i].getName();
+			
+			if (i < cards.size() -1)
+				scards += ':';
+		}
+		
+		snap(p->client_id, t->table_id, SnapHoleCards, scards.c_str());
 	}
 }
 
@@ -305,6 +332,13 @@ void GameController::dealRiver(Table *t)
 	chat(t->table_id, msg);
 }
 
+void GameController::stateGameStart(Table *t)
+{
+	const int timeout = 2;   // FIXME: configurable
+	if ((int)difftime(time(NULL), game_start) > timeout)
+		t->state = Table::NewRound;
+}
+
 void GameController::stateNewRound(Table *t)
 {
 	dbg_print("Table", "New Round");
@@ -327,9 +361,10 @@ void GameController::stateNewRound(Table *t)
 		ststr += tmp;
 	}
 	chat(t->table_id, ststr.c_str());
-#endif
 	
 	chat(t->table_id, "New round started, deck shuffled");
+#endif
+	
 	
 	// clear old pots and create initial main pot
 	t->pots.clear();
@@ -362,7 +397,13 @@ void GameController::stateBlinds(Table *t)
 		t->bb = t->getNextPlayer(t->sb);
 	}
 	
-	Player *pDealer = t->seats[t->dealer].player;
+	// player under the gun
+	t->cur_player = t->getNextPlayer(t->bb);
+	t->last_bet_player = t->cur_player;
+	
+	sendTableSnapshot(t);
+	
+	
 	Player *pSmall = t->seats[t->sb].player;
 	Player *pBig = t->seats[t->bb].player;
 	
@@ -386,6 +427,8 @@ void GameController::stateBlinds(Table *t)
 	t->seats[t->bb].bet = amount;
 	pBig->stake -= amount;
 	
+#ifdef SERVER_TESTING
+	Player *pDealer = t->seats[t->dealer].player;
 	
 	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
 		pDealer->client_id,
@@ -393,10 +436,7 @@ void GameController::stateBlinds(Table *t)
 		pBig->client_id, (float)t->blind,
 		(headsup_rule) ? "HEADS-UP" : "");
 	chat(t->table_id, msg);
-	
-	// player under the gun
-	t->cur_player = t->getNextPlayer(t->bb);
-	t->last_bet_player = t->cur_player;
+#endif /* SERVER_TESTING */
 	
 	// initialize the player's timeout
 	timeout_start = time(NULL);
@@ -404,14 +444,16 @@ void GameController::stateBlinds(Table *t)
 	// give out hole-cards
 	dealHole(t);
 	
+#ifdef SERVER_TESTING
 	// tell current player
 	Player *p = t->seats[t->cur_player].player;
 	chat(p->client_id, t->table_id, "You're under the gun!");
-	
-	t->betround = Table::Preflop;
-	sendTableSnapshot(t);
+#endif /* SERVER_TESTING */
 	
 	t->state = Table::Betting;
+	t->betround = Table::Preflop;
+	
+	sendTableSnapshot(t);
 }
 
 void GameController::stateBetting(Table *t)
@@ -800,7 +842,9 @@ void GameController::stateEndRound(Table *t)
 
 int GameController::handleTable(Table *t)
 {
-	if (t->state == Table::ElectDealer)
+	if (t->state == Table::GameStart)
+		stateGameStart(t);
+	else if (t->state == Table::ElectDealer)
 	{
 		// TODO: implement me
 	}
@@ -851,8 +895,10 @@ void GameController::tick()
 			}
 			table.dealer = 0;
 			table.blind = 10;
-			table.state = Table::NewRound;
+			table.state = Table::GameStart;
 			tables.push_back(table);
+			
+			game_start = time(NULL);
 			
 			snap(-1, SnapGameState, "start");
 			

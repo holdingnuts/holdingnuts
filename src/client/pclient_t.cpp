@@ -28,6 +28,7 @@
 #endif
 
 #include <vector>
+#include <map>
 #include <string>
 
 #include "Config.h"
@@ -53,6 +54,117 @@ servercon srv;
 
 char server_address[256];
 int my_cid, my_gid, my_tid;
+string holecards;
+
+typedef struct {
+	char name[255];
+} playerinfo;
+
+typedef struct {
+	bool valid;
+	int client_id;
+	float bet;
+	float stake;
+	int flags;
+} seatinfo;
+
+typedef struct {
+	int state;
+	int betting_round;
+	unsigned int s_dealer;
+	unsigned int s_sb;
+	unsigned int s_bb;
+	unsigned int s_cur;
+	vector<float> pots;
+	string communitycards;
+} tableinfo;
+
+const unsigned int seat_max = 10;
+seatinfo seats[seat_max];
+map<int,playerinfo> players;
+tableinfo table;
+
+char* get_player_name_by_cid(int cid)
+{
+	return players[cid].name;
+}
+
+char* get_player_name_by_seat(int seat)
+{
+	return players[seats[seat].client_id].name;
+}
+
+void print_table()
+{
+	printf("================================================================================\n");
+	
+	const unsigned int print_max = seat_max - 5;
+	
+	for (unsigned int i=0; i < print_max; i++)
+	{
+		if (seats[i].valid)
+			printf("%11s[%2d] ", get_player_name_by_seat(i), seats[i].client_id);
+		else
+			printf("%15s ", "-");
+	}
+	
+	printf("\n");
+	
+	for (unsigned int i=0; i < print_max; i++)
+	{
+		string buttons;
+		if (table.s_dealer == i)
+			buttons += " (D)";
+		if (table.s_sb == i)
+			buttons += " (SB)";
+		if (table.s_bb == i)
+			buttons += " (BB)";
+		if (table.s_cur == i)
+			buttons += " (*)";
+		printf("%15s ", seats[i].valid ? buttons.c_str() : "-");
+	}
+	
+	printf("\n");
+	
+	for (unsigned int i=0; i < print_max; i++)
+	{
+		if (seats[i].valid)
+			printf("%15.2f ", seats[i].stake);
+		else
+			printf("%15s ", "-");
+	}
+	
+	if (table.state == Table::Betting)
+	{
+		for (unsigned int i=0; i < print_max; i++)
+		{
+			if (seats[i].valid)
+				printf("%15.2f ", seats[i].bet);
+			else
+				printf("%15s ", "-");
+		}
+	}
+	
+	if (true) // table.state == Table::Betting && table.betting_round != Table::Preflop)
+	{
+		printf("\n--------------------------------------------------------------------------------\n");
+		
+		for (unsigned int i=0; i < table.pots.size(); i++)
+		{
+			printf("Pot #%d: %.2f  ", i+1, table.pots[i]);
+		}
+	}
+	
+	printf("\n--------------------------------------------------------------------------------\n");
+	
+	printf("  Your cards: %s   Board: %s\n",
+		holecards.c_str(), table.communitycards.substr(3).c_str());
+	
+	printf("================================================================================\n");
+	
+	if (seats[table.s_cur].client_id == my_cid)
+		printf("It's your turn!\n");
+}
 
 int send_msg(const char *msg)
 {
@@ -114,6 +226,48 @@ int server_execute(const char *cmd)
 	{
 		dbg_print("server", "list of games: %s", cmd);
 	}
+	else if (command == "PLAYERLIST")
+	{
+		/*int gid =*/ string2int(t.getNext());
+		
+		string scid;
+		string sreq;
+		while (t.getNext(scid))
+		{
+			sreq += scid;
+			sreq += ' ';
+		}
+		
+		snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq.c_str());
+		send_msg(msg);
+	}
+	else if (command == "CLIENTINFO")
+	{
+		int cid = string2int(t.getNext());
+		
+		playerinfo pi;
+		memset(&pi, 0, sizeof(pi));
+		
+		//pi.client_id = cid;
+		
+		string sinfo;
+		while (t.getNext(sinfo))
+		{
+			Tokenizer it;
+			it.parse(sinfo, ":");
+			
+			string itype = it.getNext();
+			string ivalue = it.getNext();
+			
+			if (itype == "name")
+			{
+				snprintf(pi.name, sizeof(pi.name), "%s", ivalue.c_str());
+			}
+		}
+		
+		//update_player_info(&pi);
+		players[cid] = pi;
+	}
 	else if (command == "MSG")
 	{
 		string chatmsg;
@@ -125,6 +279,11 @@ int server_execute(const char *cmd)
 	else if (command == "SNAP")
 	{
 		string from = t.getNext();
+		Tokenizer ft;
+		ft.parse(from, ":");
+		int gid = string2int(ft.getNext());
+		//int tid = string2int(ft.getNext());
+		
 		snaptype snap = (snaptype)string2int(t.getNext());
 		
 		switch ((int)snap)
@@ -134,7 +293,13 @@ int server_execute(const char *cmd)
 				string sstate = t.getNext();
 				
 				if (sstate == "start")
+				{
 					dbg_print("game", "game has been started");
+					char msg[1024];
+					snprintf(msg, sizeof(msg), "REQUEST playerlist %d",
+						gid);
+					send_msg(msg);
+				}
 				else if (sstate == "end")
 					dbg_print("game", "game ended");
 			}
@@ -142,9 +307,91 @@ int server_execute(const char *cmd)
 		
 		case SnapTable:
 			{
-				dbg_print("snap", "%s", cmd);
+				//dbg_print("snap", "%s", cmd);
+				
+				Tokenizer st;
+				
+				// state:betting_round
+				string tmp = t.getNext();
+				st.parse(tmp, ":");
+				
+				table.state = string2int(st.getNext());
+				table.betting_round = string2int(st.getNext());
+				
+				// dealer:sb:bb:current
+				tmp = t.getNext();
+				st.parse(tmp, ":");
+				table.s_dealer = string2int(st.getNext());
+				table.s_sb = string2int(st.getNext());
+				table.s_bb = string2int(st.getNext());
+				table.s_cur = string2int(st.getNext());
+				
+				// community-cards
+				table.communitycards = t.getNext();
+				
+				// seats
+				memset(seats, 0, seat_max*sizeof(seatinfo));
+				
+				tmp = t.getNext();
+				do {
+					//dbg_print("seat", "%s", tmp.c_str());
+					
+					Tokenizer st;
+					st.parse(tmp, ":");
+					
+					unsigned int seat_no = string2int(st.getNext().substr(1));
+					
+					seatinfo si;
+					memset(&si, 0, sizeof(si));
+					
+					si.valid = true;
+					si.client_id = string2int(st.getNext());
+					st.getNext();  // in_round
+					si.stake = string2float(st.getNext());
+					si.bet = string2float(st.getNext());
+					
+					if (seat_no < seat_max)
+						seats[seat_no] = si;
+					
+					tmp = t.getNext();
+				} while (tmp[0] == 's');
+				
+				
+				table.pots.clear();
+				
+				// pots
+				do {
+					//dbg_print("pot", "%s", tmp.c_str());
+					Tokenizer pt;
+					pt.parse(tmp, ":");
+					
+					pt.getNext();   // pot-no; unused
+					float potsize = string2float(pt.getNext());
+					table.pots.push_back(potsize);
+					
+					tmp = t.getNext();
+				} while (tmp[0] == 'p');
+				
+				
+				if (table.state == Table::Blinds)
+				{
+					printf("\n\n\n------- New Round -------\n");
+					holecards.clear();
+				}
+				
+				if (table.state != Table::EndRound)
+					print_table();
 			}
 			break;
+		
+		case SnapHoleCards:
+			{
+				holecards = t.getNext();
+			}
+			break;
+		
+		default:
+			dbg_print("server", "unknown snaptype: %s", cmd);
 		}
 	}
 	else
@@ -308,6 +555,12 @@ int client_execute(const char *cmd)
 	{
 		snprintf(msg, sizeof(msg), "ACTION %d %s %s",
 			my_gid, command.c_str(), t[1].c_str());
+		send_msg(msg);
+	}
+	else if (command == "name")
+	{
+		string name = t.getNext();
+		snprintf(msg, sizeof(msg), "INFO name:%s", name.c_str());
 		send_msg(msg);
 	}
 	else
