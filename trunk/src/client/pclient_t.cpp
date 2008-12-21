@@ -65,7 +65,7 @@ typedef struct {
 	int client_id;
 	float bet;
 	float stake;
-	int flags;
+	bool in_round;
 } seatinfo;
 
 typedef struct {
@@ -112,16 +112,21 @@ void print_table()
 	
 	for (unsigned int i=0; i < print_max; i++)
 	{
-		string buttons;
-		if (table.s_dealer == i)
-			buttons += " (D)";
-		if (table.s_sb == i)
-			buttons += " (SB)";
-		if (table.s_bb == i)
-			buttons += " (BB)";
-		if (table.s_cur == i)
-			buttons += " (*)";
-		printf("%15s ", seats[i].valid ? buttons.c_str() : "-");
+		if (seats[i].valid)
+		{
+			string buttons;
+			if (table.s_dealer == i)
+				buttons += " (D)";
+			if (table.s_sb == i)
+				buttons += " (SB)";
+			if (table.s_bb == i)
+				buttons += " (BB)";
+			if (table.s_cur == i)
+				buttons += " (*)";
+			printf("%15s ", buttons.c_str());
+		}
+		else
+			printf("%15s ", "-");
 	}
 	
 	printf("\n");
@@ -134,38 +139,46 @@ void print_table()
 			printf("%15s ", "-");
 	}
 	
+	printf("\n");
+	
 	if (table.state == Table::Betting)
 	{
 		for (unsigned int i=0; i < print_max; i++)
 		{
-			if (seats[i].valid)
+			if (seats[i].valid && seats[i].in_round)
 				printf("%15.2f ", seats[i].bet);
 			else
 				printf("%15s ", "-");
 		}
+		
+		printf("\n");
 	}
 	
-	if (true) // table.state == Table::Betting && table.betting_round != Table::Preflop)
+	if (table.state != Table::Blinds) // table.state == Table::Betting && table.betting_round != Table::Preflop)
 	{
-		printf("\n--------------------------------------------------------------------------------\n");
+		printf("--------------------------------------------------------------------------------\n");
 		
+		printf("  ");
 		for (unsigned int i=0; i < table.pots.size(); i++)
 		{
 			printf("Pot #%d: %.2f  ", i+1, table.pots[i]);
 		}
+		
+		printf("\n");
 	}
 	
 	if (table.state != Table::Blinds)
 	{
-		printf("\n--------------------------------------------------------------------------------\n");
+		printf("--------------------------------------------------------------------------------\n");
 		printf("  Your cards: %s   Board: %s\n",
-			holecards.c_str(), table.communitycards.substr(3).c_str());
+			holecards.c_str(),
+			table.communitycards.substr(3).c_str());
 	}
 	
 	printf("================================================================================\n");
 	
-	if (seats[table.s_cur].client_id == my_cid)
-		printf("It's your turn!\n");
+	if (seats[table.s_cur].client_id == my_cid && (int)seats[table.s_cur].stake != 0)
+		printf("\n*** It's your turn! ***\n");
 }
 
 int send_msg(const char *msg)
@@ -348,7 +361,8 @@ int server_execute(const char *cmd)
 					
 					si.valid = true;
 					si.client_id = string2int(st.getNext());
-					st.getNext();  // in_round
+					if (st.getNext() == "*")
+						si.in_round = true;
 					si.stake = string2float(st.getNext());
 					si.bet = string2float(st.getNext());
 					
