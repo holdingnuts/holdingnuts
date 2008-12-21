@@ -334,9 +334,13 @@ void GameController::dealRiver(Table *t)
 
 void GameController::stateGameStart(Table *t)
 {
+#ifndef SERVER_TESTING
 	const int timeout = 2;   // FIXME: configurable
 	if ((int)difftime(time(NULL), game_start) > timeout)
 		t->state = Table::NewRound;
+#else
+	t->state = Table::NewRound;
+#endif
 }
 
 void GameController::stateNewRound(Table *t)
@@ -613,6 +617,9 @@ void GameController::stateBetting(Table *t)
 	// is next the player who did the last bet/action? if yes, end this betting round
 	if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
 	{
+		// collect bets into pot
+		t->collectBets();
+		
 		dbg_print("table", "betting round ended");
 		
 		// all (or all except one) players are allin
@@ -654,9 +661,8 @@ void GameController::stateBetting(Table *t)
 			return;
 		}
 		
-		// collect bets into pot
-		t->collectBets();
 		
+		// reset the highest bet-amount
 		t->bet_amount = 0.0f;
 		
 		
