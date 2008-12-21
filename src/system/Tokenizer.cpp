@@ -143,3 +143,8 @@ int string2int(string s, unsigned int base)
 	char *ptr;
 	return strtol(s.c_str(), &ptr, base);
 }
+
+float string2float(string s)
+{
+	return strtof(s.c_str(), NULL);
+}
