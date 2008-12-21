@@ -1,0 +1,63 @@
+IDEAS
+================================================================================
+
+game-list:
+	- games
+		- id
+		- game-title
+		- type
+		- limits (blinds, players)
+
+game-info:
+	- tables
+		- id
+		- player-count
+	- players
+		- id
+		- stack
+
+client-info:
+	- requested client-IDs
+		- name
+		- joined tables
+
+
+
+flow client
+-----------
+
+* connect to server
+* check server-response and version (PSERVER)
+* introduce (PCLIENT)
+	* check response (OK)   // ERR?
+* send user info (INFO)
+	* check response (OK/ERR)
+* request game list (?)
+	* check response (OK/ERR)
+	* eval and show game list
+* chat to foyer (CHAT f Hi there)
+	* check response (OK/ERR)
+	* show own message
+* request game info for game:0 (?)
+	* check response (OK/ERR)
+	* show game info
+* request client-info for all players in game:0 (????)
+
+
+
+clients can chat to
+* [cid]      one another specific client
+* [-1]       to foyer (all clients)
+* [gid:tid]  to table of a specific game (all players on table)
+
+server chats by
+* [-1] -> [-1]       foyer message to all
+* [-1] -> [cid]      foyer message to specific client
+* [gid:tid] -> [-1]  table message to all
+
+
+Snapshots:
+----------
+
+Table:
+<state>:<betting-round> <dealer>:<SB>:<BB>:<current> <community-cards> s0:<cid>:<in-round>:<stake>:<bet><action><shown-hole-cards> ... p0:<size> ...
