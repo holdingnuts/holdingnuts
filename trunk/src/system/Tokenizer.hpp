@@ -41,6 +41,7 @@ private:
 
 // FIXME: move to somewhere else
 int string2int(std::string s, unsigned int base = 0);
+float string2float(std::string s);
 
 #endif /* _TOKENIZER_H */
 
