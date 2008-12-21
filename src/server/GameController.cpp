@@ -591,7 +591,7 @@ void GameController::stateBetting(Table *t)
 		if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
 		{
 			// only re-open betting round if amount greater than table-bet
-			if (amount > t->bet_amount /* && amount > bet_minimum*/ )
+			if (t->seats[t->cur_player].bet > t->bet_amount /* && amount > bet_minimum*/ )
 			{
 				t->last_bet_player = t->cur_player;
 				t->bet_amount = t->seats[t->cur_player].bet;
@@ -613,6 +613,7 @@ void GameController::stateBetting(Table *t)
 		sendTableSnapshot(t);
 		return;
 	}
+	
 	
 	// is next the player who did the last bet/action? if yes, end this betting round
 	if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
