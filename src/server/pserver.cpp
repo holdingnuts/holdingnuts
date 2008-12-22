@@ -126,18 +126,17 @@ int mainloop()
 		max = sock;
 		
 		/* add control clients to select-SET */
-		vector<socktype> sockvec;
-		get_sock_vector(sockvec);
-		
-		for (unsigned i=0; i < sockvec.size(); i++)
+		vector<clientcon> &clientvec = get_client_vector();
+		for (unsigned int i=0; i < clientvec.size(); i++)
 		{
-			socktype client_sock = sockvec[i];
+			socktype client_sock = clientvec[i].sock;
 			FD_SET(client_sock, &fds);
 			
 			if (client_sock > max)
 				max = client_sock;
 		}
-
+		
+		
 		// are there any modified descriptors?
 		if (select(max + 1, &fds, NULL, NULL, &timeout))
 		{
