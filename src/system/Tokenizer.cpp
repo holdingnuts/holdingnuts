@@ -24,7 +24,7 @@
 
 using namespace std;
 
-bool isSep(char ch, string sep)
+bool Tokenizer::isSep(char ch, string sep)
 {
 	for (unsigned int i=0; i < sep.length(); i++)
 	{
@@ -130,6 +130,34 @@ string Tokenizer::getNext()
 	return tokens[index++];
 }
 
+string Tokenizer::getTillEnd(char sep)
+{
+	if (index == tokens.size())
+		return "";
+	
+	string scompl;
+	for (unsigned int i=index; i < tokens.size(); i++)
+	{
+		scompl += tokens[i];
+		if (i < tokens.size() - 1)
+			scompl += sep;
+	}
+	
+	index = tokens.size();
+	
+	return scompl;
+}
+
+int Tokenizer::getNextInt()
+{
+	return string2int(getNext());
+}
+
+float Tokenizer::getNextFloat()
+{
+	return string2float(getNext());
+}
+
 string Tokenizer::operator[](const unsigned int i) const
 {
 	if (i < tokens.size())
@@ -138,13 +166,13 @@ string Tokenizer::operator[](const unsigned int i) const
 		return "";
 }
 
-int string2int(string s, unsigned int base)
+int Tokenizer::string2int(string s, unsigned int base)
 {
 	char *ptr;
 	return strtol(s.c_str(), &ptr, base);
 }
 
-float string2float(string s)
+float Tokenizer::string2float(string s)
 {
 	return strtof(s.c_str(), NULL);
 }
