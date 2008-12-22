@@ -52,13 +52,12 @@ typedef struct {
 
 // used by pserver.cpp
 int gameloop();
-void get_sock_vector(std::vector<socktype> &vec);
+std::vector<clientcon>& get_client_vector();
 bool client_add(socktype sock);
 bool client_remove(socktype sock);
 int client_handle(socktype sock);
 
 // used by GameController.cpp
-clientcon* get_client_by_sock(socktype sock);
 bool client_chat(int from_gid, int from_tid, int to, const char *msg);
 bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg);
 

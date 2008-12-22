@@ -55,12 +55,9 @@ GameController* get_game_by_id(int gid)
 vector<clientcon> clients;
 
 // for pserver.cpp filling FD_SET
-void get_sock_vector(vector<socktype> &vec)
+vector<clientcon>& get_client_vector()
 {
-	vec.clear();
-	
-	for (vector<clientcon>::iterator e = clients.begin(); e != clients.end(); e++)
-		vec.push_back(e->sock);
+	return clients;
 }
 
 clientcon* get_client_by_sock(socktype sock)
