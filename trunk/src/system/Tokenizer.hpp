@@ -30,8 +30,16 @@ public:
 	bool parse(std::string str, std::string sep = " \t\n");
 	bool getNext(std::string &str);
 	std::string getNext();
+	std::string getTillEnd(char sep=' ');
+	int getNextInt();
+	float getNextFloat();
+	
 	unsigned int getCount() const { return tokens.size(); };
 	std::string operator[](const unsigned int i) const;
+	
+	static bool isSep(char ch, std::string sep);
+	static int string2int(std::string s, unsigned int base = 0);
+	static float string2float(std::string s);
 
 private:
 	std::vector<std::string> tokens;
@@ -40,8 +48,8 @@ private:
 
 
 // FIXME: move to somewhere else
-int string2int(std::string s, unsigned int base = 0);
-float string2float(std::string s);
+
+
 
 #endif /* _TOKENIZER_H */
 
