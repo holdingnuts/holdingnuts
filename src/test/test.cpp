@@ -67,6 +67,19 @@ int test_card2()
 	return 0;
 }
 
+int test_card3()
+{
+	Card c("Jh");
+	
+	printf("Card face=%c suit=%c => %s\n",
+		c.getFaceSymbol(),
+		c.getSuitSymbol(),
+		c.getName()
+		);
+	
+	return 0;
+}
+
 int test_deck1()
 {
 	Deck *d = new Deck();
@@ -316,6 +329,7 @@ int main(void)
 #if 0
 	test_card1();
 	test_card2();
+	test_card3();
 #endif
 	
 #if 0
@@ -331,8 +345,8 @@ int main(void)
 	test_winlist1();
 #endif
 
-#if 1
-	//test_gamecontroller1();
+#if 0
+	test_gamecontroller1();
 #endif
 
 	return 0;
