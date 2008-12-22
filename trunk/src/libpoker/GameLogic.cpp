@@ -56,7 +56,9 @@ bool GameLogic::getStrength(HoleCards *hole, CommunityCards *community, HandStre
 	// sort them descending
 	sort(allcards.begin(), allcards.end(), greater<Card>());
 	
+#if 0
 	print_cards("AllCards", &allcards);
+#endif
 	
 	// clear rank and kicker
 	rank->clear();
