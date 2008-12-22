@@ -306,7 +306,7 @@ int client_execute(clientcon *client, const char *cmd)
 			{
 				snprintf(msg, sizeof(msg),
 					"client '%s' (%d) joined foyer",
-					client->name, client->sock);
+					client->name, client->id);
 				
 				client_chat(-1, -1, msg);
 			}
@@ -445,23 +445,6 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 			send_err(s);
 	}
-#if 0
-	else if (command == "UNREGISTER")
-	{
-		// FIXME: remove player from list when quitting
-		if (game->removePlayer((int) s))
-		{
-			send_ok(s);
-			dbg_print("game", "player %d parted game (%d/%d)", s,
-				game->getPlayerCount(), game->getPlayerMax());
-			
-			client->state &= ~IsPlayer;
-			snap_update |= Foyer;
-		}
-		else
-			send_err(s);
-	}
-#endif
 	else if (command == "ACTION")
 	{
 		if (argcount < 2)
