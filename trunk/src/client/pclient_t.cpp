@@ -33,11 +33,16 @@
 
 #include "Config.h"
 #include "Platform.h"
+#include "Debug.h"
 #include "Network.h"
 #include "Protocol.h"
 
+#include "Card.hpp"
+#include "HoleCards.hpp"
+#include "CommunityCards.hpp"
+#include "GameLogic.hpp"
+
 #include "Tokenizer.hpp"
-#include "Debug.h"
 
 #include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
 
@@ -53,7 +58,7 @@ typedef struct {
 servercon srv;
 
 char server_address[256];
-int my_cid, my_gid, my_tid;
+int my_cid = -1, my_gid = -1, my_tid = -1;
 string holecards;
 
 typedef struct {
@@ -84,26 +89,80 @@ seatinfo seats[seat_max];
 map<int,playerinfo> players;
 tableinfo table;
 
-char* get_player_name_by_cid(int cid)
+const char* get_player_name_by_cid(int cid)
 {
 	return players[cid].name;
 }
 
-char* get_player_name_by_seat(int seat)
+const char* get_player_name_by_seat(int seat)
 {
 	return players[seats[seat].client_id].name;
 }
 
+
+bool get_hand_strength(string hole, string board, string *sstring)
+{
+	Tokenizer ct;
+	ct.parse(hole, ":");
+	
+	Card ch1(ct.getNext().c_str());
+	Card ch2(ct.getNext().c_str());
+	
+	HoleCards h;
+	h.setCards(ch1, ch2);
+	
+	CommunityCards cc;
+	ct.parse(board, ":");
+	
+	if (ct.getCount() >= 3)
+	{
+		Card cf1(ct.getNext().c_str());
+		Card cf2(ct.getNext().c_str());
+		Card cf3(ct.getNext().c_str());
+		
+		cc.setFlop(cf1, cf2, cf3);
+	}
+	
+	if (ct.getCount() >= 4)
+	{
+		Card ct1(ct.getNext().c_str());
+		
+		cc.setTurn(ct1);
+	}
+	
+	if (ct.getCount() == 5)
+	{
+		Card cr1(ct.getNext().c_str());
+		
+		cc.setRiver(cr1);
+	}
+	
+	HandStrength hs;
+	GameLogic::getStrength(&h, &cc, &hs);
+	
+	*sstring = HandStrength::getRankingName(hs.getRanking());
+	
+	return true;
+}
+
+
 void print_table()
 {
 	printf("================================================================================\n");
+	
+	int my_seat = -1;
 	
 	const unsigned int print_max = seat_max - 5;
 	
 	for (unsigned int i=0; i < print_max; i++)
 	{
 		if (seats[i].valid)
+		{
+			if (seats[i].client_id == my_cid)
+				my_seat = i;
+			
 			printf("%11s[%2d] ", get_player_name_by_seat(i), seats[i].client_id);
+		}
 		else
 			printf("%15s ", "-");
 	}
@@ -169,10 +228,14 @@ void print_table()
 	
 	if (table.state != Table::Blinds)
 	{
+		string sstrength;
+		get_hand_strength(holecards, table.communitycards, &sstrength);
+		
 		printf("--------------------------------------------------------------------------------\n");
-		printf("  Your cards: %s   Board: %s\n",
+		printf("  Your cards: %s   Board: %s   (Strength: %s)\n",
 			holecards.c_str(),
-			table.communitycards.substr(3).c_str());
+			table.communitycards.c_str(),
+			(my_seat != -1 && seats[my_seat].in_round) ? sstrength.c_str() : "<folded>");
 	}
 	
 	printf("================================================================================\n");
@@ -337,7 +400,7 @@ int server_execute(const char *cmd)
 				table.s_cur = st.getNextInt();
 				
 				// community-cards
-				table.communitycards = t.getNext();
+				table.communitycards = t.getNext().substr(3);
 				
 				// seats
 				memset(seats, 0, seat_max*sizeof(seatinfo));
@@ -564,14 +627,21 @@ int client_execute(const char *cmd)
 	}
 	else if (command == "bet" || command == "raise")
 	{
-		snprintf(msg, sizeof(msg), "ACTION %d %s %s",
-			my_gid, command.c_str(), t[1].c_str());
+		snprintf(msg, sizeof(msg), "ACTION %d %s %.2f",
+			my_gid, command.c_str(), t.getNextFloat());
 		send_msg(msg);
 	}
 	else if (command == "name")
 	{
 		string name = t.getNext();
 		snprintf(msg, sizeof(msg), "INFO name:%s", name.c_str());
+		send_msg(msg);
+	}
+	else if (command == "chat")
+	{
+		int to = t.getNextInt();
+		string chatmsg = t.getTillEnd();
+		snprintf(msg, sizeof(msg), "CHAT %d %s", to, chatmsg.c_str());
 		send_msg(msg);
 	}
 	else
