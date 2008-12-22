@@ -53,6 +53,7 @@ GameController* get_game_by_id(int gid)
 
 ////////////////////////
 vector<clientcon> clients;
+unsigned int cid_counter = 0;
 
 // for pserver.cpp filling FD_SET
 vector<clientcon>& get_client_vector()
@@ -64,6 +65,15 @@ clientcon* get_client_by_sock(socktype sock)
 {
 	for (unsigned int i=0; i < clients.size(); i++)
 		if (clients[i].sock == sock)
+			return &(clients[i]);
+	
+	return NULL;
+}
+
+clientcon* get_client_by_id(int cid)
+{
+	for (unsigned int i=0; i < clients.size(); i++)
+		if (clients[i].id == cid)
 			return &(clients[i]);
 	
 	return NULL;
@@ -91,11 +101,12 @@ bool client_add(socktype sock)
 	
 	memset(&client, 0, sizeof(client));
 	client.sock = sock;
+	client.id = cid_counter++;
 	
 	// set initial state
 	client.state |= Connected;
 	
-	snprintf(client.name, sizeof(client.name), "client_%d", sock);
+	snprintf(client.name, sizeof(client.name), "client_%d", client.id);
 	
 	clients.push_back(client);
 	
@@ -103,7 +114,7 @@ bool client_add(socktype sock)
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "PSERVER %d %d",
 		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
-		client.sock);
+		client.id);
 	send_msg(client.sock, msg);
 	
 	return true;
@@ -167,7 +178,7 @@ bool client_chat(int from, int to, const char *msg)
 	}
 	else
 	{
-		clientcon* fromclient = get_client_by_sock((socktype)from);
+		clientcon* fromclient = get_client_by_id(from);
 		
 		snprintf(data, sizeof(data), "MSG %d %s %s",
 			from,
@@ -182,8 +193,9 @@ bool client_chat(int from, int to, const char *msg)
 	}
 	else
 	{
-		if (get_client_by_sock((socktype)to))
-			send_msg((socktype)to, data);
+		clientcon* toclient = get_client_by_id(to);
+		if (toclient)
+			send_msg(toclient->sock, data);
 		else
 			return false;
 	}
@@ -199,8 +211,9 @@ bool client_chat(int from_gid, int from_tid, int to, const char *msg)
 	snprintf(data, sizeof(data), "MSG %d:%d %s %s",
 		from_gid, from_tid, (from_tid == -1) ? "game" : "table", msg);
 	
-	if (get_client_by_sock((socktype)to))
-		send_msg((socktype)to, data);
+	clientcon* toclient = get_client_by_id(to);
+	if (toclient)
+		send_msg(toclient->sock, data);
 	
 	return true;
 }
@@ -212,8 +225,9 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 	snprintf(data, sizeof(data), "SNAP %d:%d %d %s",
 		from_gid, from_tid, sid, msg);
 	
-	if (get_client_by_sock((socktype)to))
-		send_msg((socktype)to, data);
+	clientcon* toclient = get_client_by_id(to);
+	if (toclient)
+		send_msg(toclient->sock, data);
 	
 	return true;
 }
@@ -311,7 +325,7 @@ int client_execute(clientcon *client, const char *cmd)
 			int dest = t.getNextInt();  // FIXME: chat to table
 			string chatmsg = t.getTillEnd();
 			
-			if (!client_chat(s, dest, chatmsg.c_str()))
+			if (!client_chat(client->id, dest, chatmsg.c_str()))
 				cmderr = true;
 		}
 		
@@ -336,7 +350,7 @@ int client_execute(clientcon *client, const char *cmd)
 				{
 					socktype cid = Tokenizer::string2int(scid);
 					clientcon *client;
-					if ((client = get_client_by_sock(cid)))
+					if ((client = get_client_by_id(cid)))
 					{
 						snprintf(msg, sizeof(msg),
 							"CLIENTINFO %d name:%s",
@@ -407,13 +421,13 @@ int client_execute(clientcon *client, const char *cmd)
 			GameController *g;
 			if ((g = get_game_by_id(gid)))
 			{
-				g->removePlayer(s);
+				g->removePlayer(client->id);
 				
-				if (g->addPlayer(s))
+				if (g->addPlayer(client->id))
 				{
 					snprintf(msg, sizeof(msg),
 						"player %d joined game %d (%d/%d)",
-						s, gid,
+						client->id, gid,
 						g->getPlayerCount(), g->getPlayerMax());
 					
 					dbg_print("game", "%s", msg);
@@ -486,7 +500,7 @@ int client_execute(clientcon *client, const char *cmd)
 					cmderr = true;
 				
 				if (!cmderr)
-					g->setPlayerAction(s, a, amount);
+					g->setPlayerAction(client->id, a, amount);
 			}
 			else
 				cmderr = true;

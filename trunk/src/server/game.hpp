@@ -38,6 +38,7 @@ typedef enum {
 
 typedef struct {
 	socktype sock;
+	int id;
 	//time_t lastdata;
 	
 	char msgbuf[1024];
