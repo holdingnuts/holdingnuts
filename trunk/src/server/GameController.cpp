@@ -684,7 +684,8 @@ void GameController::stateBetting(Table *t)
 	}
 	else
 	{
-		// preflop: if player UTG folds, set 'last action' to next player
+		// preflop: if player on whom the last action was (e.g. UTG) folds,
+		// assign 'last action' to next active player
 		if (action == Player::Fold && t->cur_player == t->last_bet_player)
 			t->last_bet_player = t->getNextActivePlayer(t->last_bet_player);
 
