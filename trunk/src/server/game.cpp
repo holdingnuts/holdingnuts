@@ -419,8 +419,13 @@ int client_execute(clientcon *client, const char *cmd)
 				
 				if (g->addPlayer(s))
 				{
-					dbg_print("game", "player %d joined game (%d/%d)",
-						s, g->getPlayerCount(), g->getPlayerMax());
+					snprintf(msg, sizeof(msg),
+						"player %d joined game %d (%d/%d)",
+						s, gid,
+						g->getPlayerCount(), g->getPlayerMax());
+					
+					dbg_print("game", "%s", msg);
+					client_chat(-1, -1, msg);
 				}
 				else
 					cmderr = true;
@@ -629,7 +634,7 @@ int gameloop()
 	{
 		GameController *g = new GameController();
 		g->setGameId(0);
-		g->setPlayerMax(2);
+		g->setPlayerMax(3);
 		games.push_back(g);
 	}
 	
