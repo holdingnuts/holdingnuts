@@ -246,7 +246,7 @@ int client_execute(clientcon *client, const char *cmd)
 	{
 		if (command == "PCLIENT")
 		{
-			unsigned int version = string2int(t[1]);
+			unsigned int version = t.getNextInt();
 			if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
 				VERSION_GETMINOR(version) != VERSION_MINOR)
 			{
@@ -311,11 +311,9 @@ int client_execute(clientcon *client, const char *cmd)
 			cmderr = true;
 		else
 		{
-			string chatmsg;
-			for (unsigned int i=2; i < t.getCount(); i++)
-				chatmsg += t[i] + ' ';
+			int dest = t.getNextInt();  // FIXME: chat to table
+			string chatmsg = t.getTillEnd();
 			
-			int dest = string2int(t[1]);  // FIXME: chat to table
 			if (!client_chat(s, dest, chatmsg.c_str()))
 				cmderr = true;
 		}
@@ -339,7 +337,7 @@ int client_execute(clientcon *client, const char *cmd)
 				string scid;
 				while (t.getNext(scid))   // FIXME: have maximum for count of requests
 				{
-					socktype cid = string2int(scid);
+					socktype cid = Tokenizer::string2int(scid);
 					clientcon *client;
 					if ((client = get_client_by_sock(cid)))
 					{
@@ -373,7 +371,7 @@ int client_execute(clientcon *client, const char *cmd)
 			}
 			else if (request == "playerlist")
 			{
-				int gid = string2int(t.getNext());
+				int gid = t.getNextInt();
 				
 				GameController *g;
 				if ((g = get_game_by_id(gid)))
@@ -408,10 +406,7 @@ int client_execute(clientcon *client, const char *cmd)
 			cmderr = true;
 		else
 		{
-			string sgid;
-			t.getNext(sgid);
-			
-			int gid = string2int(sgid);
+			int gid = t.getNextInt();
 			GameController *g;
 			if ((g = get_game_by_id(gid)))
 			{
@@ -462,10 +457,7 @@ int client_execute(clientcon *client, const char *cmd)
 			cmderr = true;
 		else
 		{
-			string sgid;
-			t.getNext(sgid);
-			
-			int gid = string2int(sgid);
+			int gid = t.getNextInt();
 			GameController *g;
 			if ((g = get_game_by_id(gid)))
 			{
@@ -473,9 +465,7 @@ int client_execute(clientcon *client, const char *cmd)
 				t.getNext(action);
 				
 				string samount;
-				float amount = 0.0f;
-				if (t.getNext(samount))
-					amount = (float)string2int(samount);  // FIXME: convert to float
+				float amount = t.getNextFloat();
 				
 				Player::PlayerAction a;
 				
@@ -516,7 +506,7 @@ int client_execute(clientcon *client, const char *cmd)
 			cmderr = true;
 		else
 		{
-			int type = string2int(t[1]);  // FIXME: -1=server | other=game_id
+			int type = t.getNextInt();  // FIXME: -1=server | other=game_id
 			
 			snprintf(msg, sizeof(msg), "auth on %d", type);
 			

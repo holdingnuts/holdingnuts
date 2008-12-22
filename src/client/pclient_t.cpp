@@ -215,8 +215,8 @@ int server_execute(const char *cmd)
 	// FIXME: state; check if this is really a pserver
 	if (command == "PSERVER")
 	{
-		unsigned int version = string2int(t.getNext());
-		my_cid = string2int(t.getNext());
+		unsigned int version = t.getNextInt();
+		my_cid = t.getNextInt();
 		
 		dbg_print("server", "Server running version %d.%d.%d. Your client ID is %d",
 			VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
@@ -243,22 +243,16 @@ int server_execute(const char *cmd)
 	}
 	else if (command == "PLAYERLIST")
 	{
-		/*int gid =*/ string2int(t.getNext());
+		/*int gid =*/ t.getNextInt();
 		
-		string scid;
-		string sreq;
-		while (t.getNext(scid))
-		{
-			sreq += scid;
-			sreq += ' ';
-		}
+		string sreq = t.getTillEnd();
 		
 		snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq.c_str());
 		send_msg(msg);
 	}
 	else if (command == "CLIENTINFO")
 	{
-		int cid = string2int(t.getNext());
+		int cid = t.getNextInt();
 		
 		playerinfo pi;
 		memset(&pi, 0, sizeof(pi));
@@ -285,21 +279,22 @@ int server_execute(const char *cmd)
 	}
 	else if (command == "MSG")
 	{
-		string chatmsg;
-		for (unsigned int i=3; i < t.getCount(); i++)
-			chatmsg += t[i] + ' ';
+		/*int from =*/ t.getNextInt();
+		string sfrom = t.getNext();
 		
-		dbg_print("chat", "[%s]: %s", t[2].c_str(), chatmsg.c_str());
+		string chatmsg = t.getTillEnd();
+		
+		dbg_print("chat", "[%s]: %s", sfrom.c_str(), chatmsg.c_str());
 	}
 	else if (command == "SNAP")
 	{
 		string from = t.getNext();
 		Tokenizer ft;
 		ft.parse(from, ":");
-		int gid = string2int(ft.getNext());
-		//int tid = string2int(ft.getNext());
+		int gid = ft.getNextInt();
+		/*int tid =*/ ft.getNextInt();
 		
-		snaptype snap = (snaptype)string2int(t.getNext());
+		snaptype snap = (snaptype)t.getNextInt();
 		
 		switch ((int)snap)
 		{
@@ -330,16 +325,16 @@ int server_execute(const char *cmd)
 				string tmp = t.getNext();
 				st.parse(tmp, ":");
 				
-				table.state = string2int(st.getNext());
-				table.betting_round = string2int(st.getNext());
+				table.state = st.getNextInt();
+				table.betting_round = st.getNextInt();
 				
 				// dealer:sb:bb:current
 				tmp = t.getNext();
 				st.parse(tmp, ":");
-				table.s_dealer = string2int(st.getNext());
-				table.s_sb = string2int(st.getNext());
-				table.s_bb = string2int(st.getNext());
-				table.s_cur = string2int(st.getNext());
+				table.s_dealer = st.getNextInt();
+				table.s_sb = st.getNextInt();
+				table.s_bb = st.getNextInt();
+				table.s_cur = st.getNextInt();
 				
 				// community-cards
 				table.communitycards = t.getNext();
@@ -354,17 +349,17 @@ int server_execute(const char *cmd)
 					Tokenizer st;
 					st.parse(tmp, ":");
 					
-					unsigned int seat_no = string2int(st.getNext().substr(1));
+					unsigned int seat_no = Tokenizer::string2int(st.getNext().substr(1));
 					
 					seatinfo si;
 					memset(&si, 0, sizeof(si));
 					
 					si.valid = true;
-					si.client_id = string2int(st.getNext());
+					si.client_id = st.getNextInt();
 					if (st.getNext() == "*")
 						si.in_round = true;
-					si.stake = string2float(st.getNext());
-					si.bet = string2float(st.getNext());
+					si.stake = st.getNextFloat();
+					si.bet = st.getNextFloat();
 					
 					if (seat_no < seat_max)
 						seats[seat_no] = si;
@@ -382,7 +377,7 @@ int server_execute(const char *cmd)
 					pt.parse(tmp, ":");
 					
 					pt.getNext();   // pot-no; unused
-					float potsize = string2float(pt.getNext());
+					float potsize = pt.getNextFloat();
 					table.pots.push_back(potsize);
 					
 					tmp = t.getNext();
@@ -550,7 +545,7 @@ int client_execute(const char *cmd)
 	
 	if (command == "register")
 	{
-		int gid = string2int(t.getNext());
+		int gid = t.getNextInt();
 		
 		my_gid = gid;  // FIXME
 		
