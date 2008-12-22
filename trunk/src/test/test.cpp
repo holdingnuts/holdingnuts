@@ -253,7 +253,13 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 	return true;
 }
 
-int test_gamecontroller()
+void do_ticks(GameController *game, unsigned int ticks=30)
+{
+	for (unsigned int i=0; i < ticks; i++)
+		game->tick();
+}
+
+int test_gamecontroller1()
 {
 	GameController game;
 	
@@ -267,34 +273,30 @@ int test_gamecontroller()
 	game.addPlayer(3);
 	game.setPlayerStake(3, 30.0f);
 	
-	game.tick();  // New round started
-	game.tick();  // 0: You're under the gun!
+	do_ticks(&game);  // New round started // 0: You're under the gun!
 	
 	// [Pre-Flop]
 	game.setPlayerAction(3, Player::Allin, 0.0f);
-	game.tick();  // 1: It's your turn!
+	do_ticks(&game);  // 1: It's your turn!
 	
 	game.setPlayerAction(0, Player::Call, 0.0f);
-	game.tick();  // 1: It's your turn!
+	do_ticks(&game);  // 1: It's your turn!
 	
 	game.setPlayerAction(1, Player::Allin, 0.0f);
-	game.tick();  // 2: It's your turn!
+	do_ticks(&game);  // 2: It's your turn!
 	
 	game.setPlayerAction(2, Player::Allin, 0.0f);
-	game.tick();  // 3: It's your turn!
+	do_ticks(&game);  // 3: It's your turn!
 	
-	game.tick();  // p3 is allin, no action
+	do_ticks(&game);  // p3 is allin, no action
 	
 	game.setPlayerAction(0, Player::Call, 0.0f);
-	game.tick();
 	
-	game.tick();  // p1 is allin, no action
-	game.tick();game.tick();game.tick();game.tick();game.tick();game.tick();
-	game.tick();game.tick();game.tick();game.tick();game.tick();game.tick();
-	game.tick();
+	do_ticks(&game);  // p1 is allin, no action
 	
 	return 0;
 }
+
 
 int main(void)
 {
@@ -330,7 +332,7 @@ int main(void)
 #endif
 
 #if 1
-	test_gamecontroller();
+	//test_gamecontroller1();
 #endif
 
 	return 0;
