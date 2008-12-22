@@ -46,10 +46,4 @@ private:
 	unsigned int index;
 };
 
-
-// FIXME: move to somewhere else
-
-
-
 #endif /* _TOKENIZER_H */
-
