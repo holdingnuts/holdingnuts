@@ -55,7 +55,7 @@ public:
 	
 	Card();
 	Card(Face f, Suit s);
-	//Card(const char* str);
+	Card(const char *str);
 	
 	void getValue(Face *f, Suit *s) const;
 	Face getFace() const { return face; };
@@ -69,6 +69,9 @@ public:
 	bool operator >  (const Card &c) const { return (getFace() > c.getFace()); };
 	bool operator == (const Card &c) const { return (getFace() == c.getFace()); };
 	
+	static Face convertFaceSymbol(char fsym);
+	static Suit convertSuitSymbol(char ssym);
+
 private:
 	Face face;
 	Suit suit;

@@ -20,16 +20,33 @@
 
 #include "Card.hpp"
 
+
+static const char face_symbols[] = {
+	'2', '3', '4', '5', '6', '7', '8', '9',
+	'T', 'J', 'Q', 'K', 'A'
+};
+
+static const char suit_symbols[] = {
+	'c', 'd', 'h', 's'
+};
+
+
 Card::Card()
 {
-	face = Two;
-	suit = Clubs;
+	face = Card::FirstFace;
+	suit = Card::FirstSuit;
 }
 
 Card::Card(Face f, Suit s)
 {
 	face = f;
 	suit = s;
+}
+
+Card::Card(const char *str)
+{
+	face = convertFaceSymbol(str[0]);
+	suit = convertSuitSymbol(str[1]);
 }
 
 void Card::getValue(Face *f, Suit *s) const
@@ -42,21 +59,12 @@ void Card::getValue(Face *f, Suit *s) const
 }
 
 char Card::getFaceSymbol() const
-{
-	static const char face_symbols[] = {
-		'2', '3', '4', '5', '6', '7', '8', '9',
-		'T', 'J', 'Q', 'K', 'A'
-	};
-	
+{	
 	return face_symbols[face - Card::FirstFace];
 }
 
 char Card::getSuitSymbol() const
 {
-	static const char suit_symbols[] = {
-		'c', 'd', 'h', 's'
-	};
-	
 	return suit_symbols[suit - Card::FirstSuit];
 }
 
@@ -69,4 +77,33 @@ const char* Card::getName() const
 	card_name[2] = '\0';
 	
 	return card_name;
+}
+
+Card::Face Card::convertFaceSymbol(char fsym)
+{
+	for (unsigned int i=Card::FirstFace; i <= Card::LastFace; i++)
+		if (fsym == face_symbols[i - Card::FirstFace])
+			return (Card::Face)i;
+		
+	return Card::FirstFace;
+}
+
+Card::Suit Card::convertSuitSymbol(char ssym)
+{
+#if 0
+	switch (ssym)
+	{
+	case 'c':  return Card::Clubs;
+	case 'd':  return Card::Diamonds;
+	case 'h':  return Card::Hearts;
+	case 's':  return Card::Spades;
+	default:   return Card::FirstSuit;
+	}
+#else
+	for (unsigned int i=Card::FirstSuit; i <= Card::LastSuit; i++)
+		if (ssym == suit_symbols[i - Card::FirstSuit])
+			return (Card::Suit)i;
+		
+	return Card::FirstSuit;
+#endif
 }
