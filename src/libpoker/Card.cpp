@@ -90,20 +90,9 @@ Card::Face Card::convertFaceSymbol(char fsym)
 
 Card::Suit Card::convertSuitSymbol(char ssym)
 {
-#if 0
-	switch (ssym)
-	{
-	case 'c':  return Card::Clubs;
-	case 'd':  return Card::Diamonds;
-	case 'h':  return Card::Hearts;
-	case 's':  return Card::Spades;
-	default:   return Card::FirstSuit;
-	}
-#else
 	for (unsigned int i=Card::FirstSuit; i <= Card::LastSuit; i++)
 		if (ssym == suit_symbols[i - Card::FirstSuit])
 			return (Card::Suit)i;
 		
 	return Card::FirstSuit;
-#endif
 }
