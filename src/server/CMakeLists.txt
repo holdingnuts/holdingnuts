@@ -1,14 +1,14 @@
 include_directories (
-	${POKER_SOURCE_DIR}/src
-	${POKER_SOURCE_DIR}/src/network
-	${POKER_SOURCE_DIR}/src/libpoker
-	${POKER_SOURCE_DIR}/src/system
-	${POKER_SOURCE_DIR}/src/server
+	${HOLDINGNUTS_SOURCE_DIR}/src
+	${HOLDINGNUTS_SOURCE_DIR}/src/network
+	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
+	${HOLDINGNUTS_SOURCE_DIR}/src/system
+	${HOLDINGNUTS_SOURCE_DIR}/src/server
 )
 link_directories(
-	${POKER_SOURCE_DIR}/src/network
-	${POKER_SOURCE_DIR}/src/libpoker
-	${POKER_SOURCE_DIR}/src/system
+	${HOLDINGNUTS_SOURCE_DIR}/src/network
+	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
+	${HOLDINGNUTS_SOURCE_DIR}/src/system
 )
 
 IF (WIN32)

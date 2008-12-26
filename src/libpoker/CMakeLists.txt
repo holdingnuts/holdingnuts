@@ -1,6 +1,6 @@
 include_directories (
-	${POKER_SOURCE_DIR}/src
-	${POKER_SOURCE_DIR}/src/libpoker
+	${HOLDINGNUTS_SOURCE_DIR}/src
+	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 )
 
 add_library(Poker

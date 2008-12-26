@@ -38,7 +38,7 @@ add_definitions(-Wall)  #-pedantic #-DPLATFORM_STR=${PLATFORM_STR}
 
 ################################################################################
 
-project (POKER)
+project (HOLDINGNUTS)
 
 add_subdirectory (src)
 
