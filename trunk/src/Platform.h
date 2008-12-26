@@ -21,7 +21,7 @@
 #ifndef _PLATFORM_H
 #define _PLATFORM_H
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(_MSC_VER)
 # define snprintf _snprintf
 #endif
 
