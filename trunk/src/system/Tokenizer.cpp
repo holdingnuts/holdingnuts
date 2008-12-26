@@ -174,5 +174,5 @@ int Tokenizer::string2int(string s, unsigned int base)
 
 float Tokenizer::string2float(string s)
 {
-	return strtof(s.c_str(), NULL);
+	return (float)strtod(s.c_str(), NULL);
 }

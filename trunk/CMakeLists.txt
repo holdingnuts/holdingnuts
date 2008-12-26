@@ -12,7 +12,11 @@ if (WIN32)
 	set(PLATFORM_STR  "win32")
 	add_definitions(-DPLATFORM_WINDOWS)
 	
-	FIND_PROGRAM(WINDRES NAMES windres i686-mingw32-windres)
+	IF (MINGW)
+		FIND_PROGRAM(WINDRES NAMES windres i686-mingw32-windres)
+	ELSE (MINGW)
+		# FIXME: find VC resource compiler
+	ENDIF (MINGW)
 endif (WIN32)
 if (MACOSX)
 	set(PLATFORM_STR  "macosx")

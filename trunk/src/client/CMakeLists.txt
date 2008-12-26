@@ -13,17 +13,24 @@ link_directories(
 )
 
 IF (WIN32)
-	# http://sources.redhat.com/binutils/docs-2.15/binutils/windres.html
-	# http://www.resedit.net
-	ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/pclient_t_res.obj
-		COMMAND ${WINDRES}
-		-I${CMAKE_CURRENT_SOURCE_DIR}
-		-o ${CMAKE_CURRENT_BINARY_DIR}/pclient_t_res.obj
-		< ${CMAKE_CURRENT_SOURCE_DIR}/pclient_t.rc
-	)
-	
-	LIST(APPEND aux_obj pclient_t_res.obj)
-	LIST(APPEND aux_lib ws2_32)
+	IF (MINGW)
+		LIST(APPEND aux_lib ws2_32)
+		
+		# http://sources.redhat.com/binutils/docs-2.15/binutils/windres.html
+		# http://www.resedit.net
+		ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/pclient_t_res.obj
+			COMMAND ${WINDRES}
+			-I${CMAKE_CURRENT_SOURCE_DIR}
+			-o ${CMAKE_CURRENT_BINARY_DIR}/pclient_t_res.obj
+			< ${CMAKE_CURRENT_SOURCE_DIR}/pclient_t.rc
+		)
+		
+		LIST(APPEND aux_obj pclient_t_res.obj)
+	ELSE (MINGW)
+		LIST(APPEND aux_lib wsock32)
+		
+		# FIXME: use VC resource compiler rc.exe
+	ENDIF (MINGW)
 ENDIF (WIN32)
 
 add_executable (

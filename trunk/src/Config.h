@@ -21,6 +21,8 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+#include "Platform.h"
+
 /* version(major,minor,revision) */
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     0
