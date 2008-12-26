@@ -21,14 +21,16 @@
 #ifndef _DEBUG_H
 #define _DEBUG_H
 
-#if (1) //DEBUG
 #include <stdio.h>
+
+#ifndef _MSC_VER
 
 # define dbg_print(level, s, args...) \
 	do { fprintf(stderr, "[%s]: "s"\n", level, ##args) ; fflush(stderr); } while(0)
-#else
-# define dbg_print(level, s, args...)
-#endif
+#else /* _MSC_VER */
+# define dbg_print(level, s, ...) \
+	do { fprintf(stderr, "[%s]: "s"\n", level, __VA_ARGS__) ; fflush(stderr); } while(0)
+#endif /* _MSC_VER */
 
 #endif /* _DEBUG_H */
 
