@@ -1,3 +1,3 @@
-include_directories (${POKER_SOURCE_DIR}/src ${POKER_SOURCE_DIR}/src/network)
+include_directories (${HOLDINGNUTS_SOURCE_DIR}/src ${HOLDINGNUTS_SOURCE_DIR}/src/network)
 
 add_library(Network Network.c)

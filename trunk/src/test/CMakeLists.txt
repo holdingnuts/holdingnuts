@@ -1,16 +1,16 @@
 include_directories (
-	${POKER_SOURCE_DIR}/src
-	${POKER_SOURCE_DIR}/src/network
-	${POKER_SOURCE_DIR}/src/libpoker
-	${POKER_SOURCE_DIR}/src/system
-	${POKER_SOURCE_DIR}/src/server
-	${POKER_SOURCE_DIR}/src/test
+	${HOLDINGNUTS_SOURCE_DIR}/src
+	${HOLDINGNUTS_SOURCE_DIR}/src/network
+	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
+	${HOLDINGNUTS_SOURCE_DIR}/src/system
+	${HOLDINGNUTS_SOURCE_DIR}/src/server
+	${HOLDINGNUTS_SOURCE_DIR}/src/test
 	
 )
 link_directories(
-	${POKER_SOURCE_DIR}/src/network
-	${POKER_SOURCE_DIR}/src/libpoker
-	${POKER_SOURCE_DIR}/src/system
+	${HOLDINGNUTS_SOURCE_DIR}/src/network
+	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
+	${HOLDINGNUTS_SOURCE_DIR}/src/system
 )
 
 add_executable (test
@@ -23,5 +23,5 @@ target_link_libraries(test Poker)
 add_executable (simulator simulator.cpp)
 target_link_libraries(simulator Poker)
 
-add_executable (system system.cpp)
-target_link_libraries(system System)
+add_executable (systest system.cpp)
+target_link_libraries(systest System)
