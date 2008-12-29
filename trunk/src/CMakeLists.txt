@@ -1,6 +1,6 @@
 IF (WIN32)
 IF (MINGW)
-	MESSAGE("using windres resource compiler")
+	#MESSAGE("using windres resource compiler")
 	# http://sourceware.org/binutils/docs/binutils/windres.html
 	FIND_PROGRAM(WINDRES NAMES windres i686-mingw32-windres)
 ELSE (MINGW)

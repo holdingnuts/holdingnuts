@@ -22,7 +22,7 @@ IF (NOT PLATFORM_STR)
  add_definitions(-DPLATFORM_UNIX)
 ENDIF (NOT PLATFORM_STR)
 
-MESSAGE("Target platform is ${PLATFORM_STR}")
+#MESSAGE("Target platform is ${PLATFORM_STR}")
 
 ################################################################################
 

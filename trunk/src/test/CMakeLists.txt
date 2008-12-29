@@ -25,3 +25,20 @@ target_link_libraries(simulator Poker)
 
 add_executable (systest system.cpp)
 target_link_libraries(systest System)
+
+
+IF (WIN32)
+	IF (MINGW)
+		LIST(APPEND aux_lib ws2_32)
+	ELSE (MINGW)
+		LIST(APPEND aux_lib wsock32)
+	ENDIF (MINGW)
+ENDIF (WIN32)
+
+add_executable ( pclient_t pclient_t.cpp )
+
+target_link_libraries(
+	pclient_t
+	Poker Network System
+	${aux_lib}
+)
