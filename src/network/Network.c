@@ -120,6 +120,17 @@ int socket_setnonblocking(socktype sock)
 	return 0;
 }
 
+int network_isinprogress()
+{
+#if defined(PLATFORM_WINDOWS)
+	int wserrno = WSAGetLastError();
+	
+	return (wserrno == WSAEWOULDBLOCK || wserrno == WSAEINPROGRESS);
+#else
+	return (errno == EWOULDBLOCK || errno == EINPROGRESS);
+#endif
+}
+
 int network_init()
 {
 #if defined(PLATFORM_WINDOWS)
