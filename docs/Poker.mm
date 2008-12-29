@@ -1,14 +1,15 @@
-<map version="0.8.1">
+<map version="0.8.0">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1227561562664" ID="Freemind_Link_1044411146" MODIFIED="1227563085950" TEXT="Project&#xa;Poker">
+<node CREATED="1227561562664" ID="Freemind_Link_1044411146" MODIFIED="1230387009176" TEXT="HoldingNuts">
 <node CREATED="1227561595953" HGAP="47" ID="_" MODIFIED="1227563064430" POSITION="right" STYLE="bubble" TEXT="Server" VSHIFT="-53">
 <font BOLD="true" NAME="SansSerif" SIZE="12"/>
 <node CREATED="1227561958333" ID="Freemind_Link_415456859" MODIFIED="1227561963009" TEXT="Foyer"/>
 <node CREATED="1227562007357" ID="Freemind_Link_1632228434" MODIFIED="1227562017673" TEXT="Spectators"/>
+<node CREATED="1230387116986" ID="Freemind_Link_1506379247" MODIFIED="1230387130606" TEXT="Multi games each multiple tables"/>
 </node>
 <node CREATED="1227561846285" HGAP="68" ID="Freemind_Link_1907418401" MODIFIED="1227563061950" POSITION="left" STYLE="bubble" TEXT="Client" VSHIFT="-62">
 <font BOLD="true" NAME="SansSerif" SIZE="12"/>
-<node CREATED="1227562043437" ID="Freemind_Link_929778671" MODIFIED="1227562087782" TEXT="Multiple tables&#xa;(connections)"/>
+<node CREATED="1227562043437" ID="Freemind_Link_929778671" MODIFIED="1230387102235" TEXT="Multiple tables"/>
 <node CREATED="1227562407213" ID="Freemind_Link_1629183679" MODIFIED="1227562498761" TEXT="SDL based client">
 <node CREATED="1227562505661" ID="Freemind_Link_27426620" MODIFIED="1227562541666" TEXT="plain but themable GUI"/>
 </node>
