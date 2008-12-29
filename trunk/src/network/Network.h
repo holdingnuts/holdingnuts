@@ -38,6 +38,7 @@
 #include <arpa/inet.h>
 #endif
 
+
 #if defined __cplusplus
         extern "C" {
 #endif
@@ -60,6 +61,8 @@ int socket_write(socktype fd, const void *buf, size_t count);
 
 int socket_setopt(socktype s, int level, int optname, const void *optval, int optlen);
 int socket_setnonblocking(socktype sock);
+
+int network_isinprogress();
 
 int network_init();
 int network_shutdown();
