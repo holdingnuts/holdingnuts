@@ -341,10 +341,17 @@ void GameController::stateGameStart(Table *t)
 #else
 	t->state = Table::NewRound;
 #endif
+	round_start = time(NULL);
 }
 
 void GameController::stateNewRound(Table *t)
 {
+#ifndef SERVER_TESTING
+	const int timeout = 2;   // FIXME: configurable
+	if ((int)difftime(time(NULL), round_start) < timeout)
+		return;
+#endif
+	
 	dbg_print("Table", "New Round");
 	
 	t->deck.fill();
@@ -497,7 +504,11 @@ void GameController::stateBetting(Table *t)
 		else if (action == Player::Call)
 		{
 			if ((int)t->bet_amount == 0 || (int)t->bet_amount == t->seats[t->cur_player].bet)
-				chat(p->client_id, t->table_id, "Err: You cannot call, nothing was bet! Try check.");
+			{
+				//chat(p->client_id, t->table_id, "Err: You cannot call, nothing was bet! Try check.");
+				action = Player::Check;
+				allowed_action = true;
+			}
 			else
 			{
 				allowed_action = true;
@@ -519,7 +530,12 @@ void GameController::stateBetting(Table *t)
 		else if (action == Player::Raise)
 		{
 			if ((unsigned int)t->bet_amount == 0)
-				chat(p->client_id, t->table_id, "Err: You cannot raise, nothing was bet! Try bet.");
+			{
+				//chat(p->client_id, t->table_id, "Err: You cannot raise, nothing was bet! Try bet.");
+				action = Player::Bet;
+				amount = p->next_action.amount - t->seats[t->cur_player].bet;
+				allowed_action = true;
+			}
 			else if (p->next_action.amount <= (unsigned int)t->bet_amount)
 				chat(p->client_id, t->table_id, "Err: You cannot raise this amount.");
 			else
@@ -880,6 +896,8 @@ int GameController::handleTable(Table *t)
 		// only 1 player left? close table
 		if (t->seats.size() == 1)
 			return -1;
+		
+		round_start = time(NULL);
 	}
 	
 	return 0;
@@ -915,9 +933,7 @@ void GameController::tick()
 			
 			game_start = time(NULL);
 			
-			snap(-1, SnapGameState, "start");
-			
-			// FIXME: tell client its table-no
+			snap(tid, SnapGameState, "start");
 		}
 		else
 			return;
