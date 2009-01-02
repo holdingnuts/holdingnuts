@@ -21,6 +21,8 @@
 #ifndef _WTABLE_H
 #define _WTABLE_H
 
+#include <vector>
+
 #include <QApplication>
 #include <QWidget>
 #include <QFont>
@@ -33,19 +35,45 @@
 #include <QButtonGroup>
 #include <QSlider>
 
-class WTable : public QWidget
+#include "Card.hpp"
+#include "HoleCards.hpp"
+#include "CommunityCards.hpp"
+#include "GameLogic.hpp"
+#include "Player.hpp"
+
+
+typedef struct {
+	bool valid;
+	int client_id;
+	float bet;
+	float stake;
+	bool in_round;
+	//HoleCards holecards;
+} seatinfo;
+
+typedef struct {
+	int state;
+	int betting_round;
+	unsigned int s_dealer;
+	unsigned int s_sb;
+	unsigned int s_bb;
+	unsigned int s_cur;
+	std::vector<float> pots;
+	CommunityCards communitycards;
+	seatinfo seats[10];
+} table_snapshot;
+
+
+class WPicture : public QLabel
 {
 Q_OBJECT
 
 public:
-	WTable(QWidget *parent = 0);
-
-	
-private slots:
-	
-
+	WPicture(const char *filename, QWidget *parent = 0);
+	void loadImage(const char *filename);
 private:
-	
+	//int heightForWidth ( int w );
+
 };
 
 
@@ -56,13 +84,53 @@ Q_OBJECT
 public:
 	WSeat(unsigned int id, QWidget *parent = 0);
 
+	void setName(QString name);
+	void setStake(float amount);
+	void setAction(Player::PlayerAction action, float amount);
+	void setCurrent(bool cur);
+	void setValid(bool valid);
 	
 private slots:
 	
 
 private:
-	
+	QLabel *lblCaption;
+	QLabel *lblStake;
+	WPicture *card1, *card2;
+	QLabel *lblAction;
 };
+
+
+class WTable : public QWidget
+{
+Q_OBJECT
+
+public:
+	WTable(int gid, int tid, QWidget *parent = 0);
+	void updateView();
+	
+	
+
+protected:
+	void closeEvent(QCloseEvent *event);
+
+private slots:
+	void actionFold();
+	void actionCheckCall();
+	void actionBetRaise();
+
+private:
+	int gid;
+	int tid;
+	
+	QLineEdit *editAmount;
+	
+	WSeat *wseats[10];
+	
+	QLabel *lblPots;
+	WPicture *cc[5];
+};
+
 
 
 #endif /* _WTABLE_H */

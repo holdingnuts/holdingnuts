@@ -28,23 +28,19 @@
 
 #include "Config.h"
 #include "Debug.h"
-#include "Network.h"
+#include "Protocol.h"
 #include "Tokenizer.hpp"
+
+#include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
 
 #include "pclient.hpp"
 
 using namespace std;
 
-struct servercon {
-	socktype sock;
-	
-	char msgbuf[1024];
-	int buflen;
-	
-	int cid;   // our client-id assigned by server
-} srv;
+servercon srv;
 
-
+map<int,playerinfo> players;
+map<int,gameinfo> games;
 //////////////
 
 
@@ -74,8 +70,8 @@ int server_execute(const char *cmd)
 		return 0;
 	
 	//dbg_print("server", "executing '%s'", cmd);
-	QString log(cmd);
-	((PClient*)qApp)->wMain->addLog(log);
+	//QString log(cmd);
+	//((PClient*)qApp)->wMain->addLog(log);
 	
 	// get first arg
 	string command;
@@ -96,7 +92,12 @@ int server_execute(const char *cmd)
 		
 		send_msg(msg);
 		
-		// TODO: send user info
+		
+		// send user info
+		snprintf(msg, sizeof(msg), "INFO name:%s",
+			((PClient*)qApp)->wMain->getUsername().toStdString().c_str());
+		
+		send_msg(msg);
 	}
 	else if (command == "OK")
 	{
@@ -117,6 +118,211 @@ int server_execute(const char *cmd)
 		QString qchatmsg(QString::fromStdString(chatmsg));
 		
 		((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
+	}
+	else if (command == "SNAP")
+	{
+		string from = t.getNext();
+		Tokenizer ft;
+		ft.parse(from, ":");
+		int gid = ft.getNextInt();
+		int tid = ft.getNextInt();
+		
+		snaptype snap = (snaptype)t.getNextInt();
+		
+		switch ((int)snap)
+		{
+		case SnapGameState:
+			{
+				string sstate = t.getNext();
+				
+				if (sstate == "start")
+				{
+					dbg_print("game", "game has been started");
+					
+					games[gid].registered = true;
+					games[gid].tables[tid].sitting = true;
+					games[gid].tables[tid].subscribed = true;
+					games[gid].tables[tid].window = new WTable(gid, tid);
+					games[gid].tables[tid].window->show();
+					
+					char msg[1024];
+					snprintf(msg, sizeof(msg), "REQUEST playerlist %d",
+						gid);
+					send_msg(msg);
+				}
+				else if (sstate == "end")
+					dbg_print("game", "game ended");
+			}
+			break;
+		case SnapTable:
+			{
+				//dbg_print("snap", "%s", cmd);
+				table_snapshot &table = games[gid].tables[tid].snap;
+				HoleCards &holecards = games[gid].tables[tid].holecards;
+				
+				Tokenizer st;
+				
+				// state:betting_round
+				string tmp = t.getNext();
+				st.parse(tmp, ":");
+				
+				table.state = st.getNextInt();
+				table.betting_round = st.getNextInt();
+				
+				// dealer:sb:bb:current
+				tmp = t.getNext();
+				st.parse(tmp, ":");
+				table.s_dealer = st.getNextInt();
+				table.s_sb = st.getNextInt();
+				table.s_bb = st.getNextInt();
+				table.s_cur = st.getNextInt();
+				
+				// community-cards
+				{
+					//table.communitycards = t.getNext().substr(3);
+					string board = t.getNext().substr(3);
+					CommunityCards &cc = table.communitycards;
+					
+					Tokenizer ct;
+					ct.parse(board, ":");
+					
+					if (ct.getCount() == 0)
+						cc.clear();
+					
+					if (ct.getCount() >= 3)
+					{
+						Card cf1(ct.getNext().c_str());
+						Card cf2(ct.getNext().c_str());
+						Card cf3(ct.getNext().c_str());
+						
+						cc.setFlop(cf1, cf2, cf3);
+					}
+					
+					if (ct.getCount() >= 4)
+					{
+						Card ct1(ct.getNext().c_str());
+						
+						cc.setTurn(ct1);
+					}
+					
+					if (ct.getCount() == 5)
+					{
+						Card cr1(ct.getNext().c_str());
+						
+						cc.setRiver(cr1);
+					}
+				}
+				
+				// table.seats
+				const unsigned int seat_max = 10;
+				memset(table.seats, 0, seat_max*sizeof(seatinfo));
+				
+				tmp = t.getNext();
+				do {
+					//dbg_print("seat", "%s", tmp.c_str());
+					
+					Tokenizer st;
+					st.parse(tmp, ":");
+					
+					unsigned int seat_no = Tokenizer::string2int(st.getNext().substr(1));
+					
+					seatinfo si;
+					memset(&si, 0, sizeof(si));
+					
+					si.valid = true;
+					si.client_id = st.getNextInt();
+					if (st.getNext() == "*")
+						si.in_round = true;
+					si.stake = st.getNextFloat();
+					si.bet = st.getNextFloat();
+					
+					if (seat_no < seat_max)
+						table.seats[seat_no] = si;
+					
+					tmp = t.getNext();
+				} while (tmp[0] == 's');
+				
+				
+				table.pots.clear();
+				
+				// pots
+				do {
+					//dbg_print("pot", "%s", tmp.c_str());
+					Tokenizer pt;
+					pt.parse(tmp, ":");
+					
+					pt.getNext();   // pot-no; unused
+					float potsize = pt.getNextFloat();
+					table.pots.push_back(potsize);
+					
+					tmp = t.getNext();
+				} while (tmp[0] == 'p');
+				
+				
+				if (table.state == Table::Blinds)
+				{
+					holecards.clear();
+				}
+				
+				if (games[gid].tables[tid].window)
+					games[gid].tables[tid].window->updateView();
+			}
+			break;
+		
+		case SnapHoleCards:
+			{
+				HoleCards &h = games[gid].tables[tid].holecards;
+				
+				string hole = t.getNext();
+				
+				Tokenizer ct;
+				ct.parse(hole, ":");
+				
+				Card ch1(ct.getNext().c_str());
+				Card ch2(ct.getNext().c_str());
+				
+				h.setCards(ch1, ch2);
+				
+				if (games[gid].tables[tid].window)
+					games[gid].tables[tid].window->updateView();
+			}
+			break;
+		
+		}
+	}
+	else if (command == "PLAYERLIST")
+	{
+		/* from */ t.getNextInt();
+		
+		string sreq = t.getTillEnd();
+		
+		snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq.c_str());
+		send_msg(msg);
+	}
+	else if (command == "CLIENTINFO")
+	{
+		int cid = t.getNextInt();
+		
+		playerinfo pi;
+		memset(&pi, 0, sizeof(pi));
+		
+		string sinfo;
+		while (t.getNext(sinfo))
+		{
+			Tokenizer it;
+			it.parse(sinfo, ":");
+			
+			string itype = it.getNext();
+			string ivalue = it.getNext();
+			
+			if (itype == "name")
+			{
+				snprintf(pi.name, sizeof(pi.name), "%s", ivalue.c_str());
+			}
+		}
+		
+		//update_player_info(&pi);
+		players[cid] = pi;
 	}
 	
 	return 0;
@@ -241,10 +447,6 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 {
 	connected = false;
 	connecting = false;
-	
-	wMain = new WMain();
-	wMain->updateConnectionStatus();
-	wMain->show();
 }
 
 bool PClient::doConnect(QString strServer, unsigned int port)
@@ -289,6 +491,47 @@ void PClient::doClose()
 	
 	wMain->addLog(tr("Connection closed."));
 	wMain->updateConnectionStatus();
+}
+
+void PClient::doRegister(int gid)
+{
+	char msg[1024];
+	
+	if (!connected)
+		return;
+	
+	snprintf(msg, sizeof(msg), "REGISTER %d",
+		gid);
+		
+	send_msg(msg);
+}
+
+bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
+{
+	if (!connected)
+		return false;
+	
+	const char *saction = "";
+	switch ((int) action)
+	{
+	case Player::Fold:
+		saction = "fold";
+		break;
+	case Player::Call:
+		saction = "call";
+		break;
+	case Player::Raise:
+		saction = "raise";
+		break;
+	}
+	
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "ACTION %d %s %0.2f",
+		gid, saction, amount);
+	
+	send_msg(msg);
+	
+	return true;
 }
 
 void PClient::slotConnectTimeout()
@@ -347,8 +590,22 @@ void PClient::chatAll(QString text)
 		return;
 	
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "CHAT %d %s", -1, text.toStdString().c_str());
+	snprintf(msg, sizeof(msg), "CHAT %d %s", -1, text.simplified().toStdString().c_str());
 	send_msg(msg);
+}
+
+int PClient::getTableInfo(int gid, int tid, tableinfo *info)
+{
+	*info = games[gid].tables[tid];
+	
+	return 0;
+}
+
+int PClient::getPlayerInfo(int cid, playerinfo *info)
+{
+	*info = players[cid];
+	
+	return 0;
 }
 
 int main(int argc, char **argv)
@@ -364,6 +621,19 @@ int main(int argc, char **argv)
 	network_init();
 	
 	PClient app(argc, argv);
+	
+	QDir::setCurrent("data");
+	
+	QTranslator myappTranslator;
+	QString locale = QLocale::system().name().left(2);
+	myappTranslator.load("i18n/hn_" + locale);
+	dbg_print("main", "Using locale: %s", locale.toStdString().c_str());
+	app.installTranslator(&myappTranslator);
+	
+	app.wMain = new WMain();
+	app.wMain->updateConnectionStatus();
+	app.wMain->show();
+	
 	int retval = app.exec();
 	
 	network_shutdown();

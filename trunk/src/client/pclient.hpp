@@ -21,11 +21,57 @@
 #ifndef _PCLIENT_H
 #define _PCLIENT_H
 
+#include <string>
+#include <vector>
+#include <map>
+
 #include <QApplication>
+#include <QTranslator>
+#include <QLocale>
 #include <QSocketNotifier>
 #include <QTimer>
+#include <QDir>
+
+#include "Network.h"
+
+#include "Card.hpp"
+#include "HoleCards.hpp"
+#include "CommunityCards.hpp"
+#include "GameLogic.hpp"
+#include "Player.hpp"
 
 #include "WMain.hpp"
+#include "WTable.hpp"
+
+
+typedef struct {
+	socktype sock;
+	
+	char msgbuf[1024];
+	int buflen;
+	
+	int cid;   // our client-id assigned by server
+} servercon;
+
+typedef struct {
+	char name[255];
+} playerinfo;
+
+
+typedef struct {
+	bool sitting;
+	bool subscribed;
+	table_snapshot snap;
+	HoleCards holecards;
+	WTable *window;
+} tableinfo;
+
+typedef struct {
+	bool registered;
+	std::map<int,tableinfo> tables;
+} gameinfo;
+
+
 
 class PClient : public QApplication
 {
@@ -39,6 +85,13 @@ public:
 	
 	bool isConnected() const { return connected || connecting; };
 	void chatAll(QString text);
+	
+	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
+	
+	void doRegister(int gid);
+	
+	int getTableInfo(int gid, int tid, tableinfo *info);
+	int getPlayerInfo(int cid, playerinfo *info);
 	
 	WMain *wMain;
 	

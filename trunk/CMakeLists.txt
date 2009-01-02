@@ -24,6 +24,8 @@ ENDIF (NOT PLATFORM_STR)
 
 #MESSAGE("Target platform is ${PLATFORM_STR}")
 
+option (UPDATE_TRANSLATIONS "Update source translations")
+
 ################################################################################
 
 if (DEBUG)

@@ -44,8 +44,13 @@ void WMain::actionClose()
 
 void WMain::actionTest()
 {
-	WTable *table = new WTable();
+	WTable *table = new WTable(0, 0);
 	table->show();
+}
+
+void WMain::actionRegister()
+{
+	((PClient*)qApp)->doRegister(0);
 }
 
 void WMain::slotSrvTextChanged()
@@ -60,7 +65,7 @@ void WMain::actionChat()
 {
 	if (editChat->text().length())
 	{
-		((PClient*)qApp)->chatAll(editChat->text().simplified());
+		((PClient*)qApp)->chatAll(editChat->text());
 		editChat->clear();
 		editChat->setFocus();
 	}
@@ -100,12 +105,36 @@ void WMain::addChat(QString from, QString text)
 	editChatLog->insertPlainText(": " + text + "\r\n");
 }
 
+QString WMain::getUsername()
+{
+	return editUsername->text();
+}
+
 WMain::WMain(QWidget *parent) : QWidget(parent)
 {
 	//setFixedSize(200, 120);
 	setWindowTitle("HoldingNuts foyer");
 	
+	QGroupBox *groupInfo = new QGroupBox(tr("User info"));
+	
+	QLabel *lblUsername = new QLabel(tr("Username:"), this);
+	editUsername = new QLineEdit(tr("JohnDoe"), this);
+	
+	QGridLayout *lInfo = new QGridLayout();
+	lInfo->addWidget(lblUsername, 0, 0);
+	lInfo->addWidget(editUsername, 0, 1);
+	
+	groupInfo->setLayout(lInfo);
+	
+	////
+	
 	QGroupBox *groupSrv = new QGroupBox(tr("Connection"));
+	
+	QLabel *lblHost = new QLabel(tr("Host:"), this);
+	
+	editSrvAddr = new QLineEdit(this);
+	editSrvAddr->setText("localhost");
+	connect(editSrvAddr, SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
 	
 	btnConnect = new QPushButton(tr("Connect"), this);
 	btnConnect->setEnabled(false);
@@ -114,18 +143,16 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	btnClose = new QPushButton(tr("Close"), this);
 	btnClose->setEnabled(false);
 	connect(btnClose, SIGNAL(clicked()), this, SLOT(actionClose()));
-	
-	editSrvAddr = new QLineEdit(this);
-	editSrvAddr->setText("localhost");
-	connect(editSrvAddr, SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
-	
+		
 	QHBoxLayout *lsrvinp = new QHBoxLayout();
+	lsrvinp->addWidget(lblHost);
 	lsrvinp->addWidget(editSrvAddr);
 	lsrvinp->addWidget(btnConnect);
 	lsrvinp->addWidget(btnClose);
 	
 	editLog = new QTextEdit(this);
 	editLog->setReadOnly(true);
+	editLog->setFixedHeight(60);
 	
 	QVBoxLayout *lsrv = new QVBoxLayout();
 	lsrv->addLayout(lsrvinp);
@@ -156,14 +183,19 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	groupChat->setLayout(lchat);
 	/////////////////////
 	
+	QPushButton *btnRegister = new QPushButton(tr("Register"), this);
+	connect(btnRegister, SIGNAL(clicked()), this, SLOT(actionRegister()));
+	
 	QPushButton *btnTest = new QPushButton(tr("Test"), this);
 	connect(btnTest, SIGNAL(clicked()), this, SLOT(actionTest()));
 	
 	/////////////////////
 	
 	QVBoxLayout *layout = new QVBoxLayout();
+	layout->addWidget(groupInfo);
 	layout->addWidget(groupSrv);
 	layout->addWidget(groupChat);
+	layout->addWidget(btnRegister);
 	layout->addWidget(btnTest);
 	setLayout(layout);
 }
