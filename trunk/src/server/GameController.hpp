@@ -102,6 +102,7 @@ private:
 	std::vector<Table> tables;
 	
 	time_t game_start;
+	time_t round_start;
 	time_t timeout_start;
 };
 
