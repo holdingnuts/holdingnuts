@@ -41,15 +41,19 @@ public:
 	void addLog(QString line);
 	void addChat(QString from, QString text);
 	void updateConnectionStatus();
-	
+	QString getUsername();
+
 private slots:
 	void actionConnect();
 	void actionClose();
-	void actionTest();
 	void actionChat();
 	void slotSrvTextChanged();
+	void actionRegister();
+	void actionTest();
 
 private:
+	QLineEdit *editUsername;
+	
 	QLineEdit *editSrvAddr;
 	QPushButton *btnConnect, *btnClose;
 	

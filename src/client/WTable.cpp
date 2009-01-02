@@ -26,8 +26,16 @@
 
 #include "pclient.hpp"
 
-WTable::WTable(QWidget *parent) : QWidget(parent)
+using namespace std;
+
+
+WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 {
+	this->gid = gid;
+	this->tid = tid;
+	
+	setWindowTitle("HoldingNuts table");
+	//setAttribute(Qt::WA_DeleteOnClose); // FIXME:
 /*
 	0	1	2	3	4	5	6	7	8	9	10
 0			_						_		
@@ -39,7 +47,8 @@ WTable::WTable(QWidget *parent) : QWidget(parent)
 */
 	QGridLayout *grid_seats = new QGridLayout();
 	
-	QLabel *lDealer = new QLabel("Dealer", this);
+	QLabel *lDealer = new QLabel(tr("Dealer"), this);
+	lDealer->setAlignment(Qt::AlignCenter);
 	grid_seats->addWidget(lDealer, 1, 5);
 	
 	QLabel *lSpacer1 = new QLabel(" ", this);
@@ -68,32 +77,54 @@ WTable::WTable(QWidget *parent) : QWidget(parent)
 	
 	for (int i=0; i < seatcount; i++)
 	{
-		WSeat *seat = new WSeat(i, this);
-		grid_seats->addWidget(seat, seats[i].row, seats[i].col);
+		wseats[i] = new WSeat(i, this);
+		grid_seats->addWidget(wseats[i], seats[i].row, seats[i].col);
 	}
+	
+	lblPots = new QLabel("Pots", this);
+	lblPots->setAlignment(Qt::AlignCenter);
+	grid_seats->addWidget(lblPots, 3, 5);
+	
+	QHBoxLayout *lCC = new QHBoxLayout();
+	for (unsigned int i=0; i < 5; i++)
+	{
+		cc[i] = new WPicture("gfx/cards/back.png", this);
+		cc[i]->setFixedSize(40, 57);
+		lCC->addWidget(cc[i]);
+	}
+	
+	grid_seats->addLayout(lCC, 2, 4, 1, 3);
 	
 	///////
 	
 	QHBoxLayout *lActions = new QHBoxLayout();
 	
-	QButtonGroup *btngrpActions = new QButtonGroup();
-	btngrpActions->setExclusive(true);
+	//QButtonGroup *btngrpActions = new QButtonGroup();
+	//btngrpActions->setExclusive(true);
 	
 	QPushButton *btnFold = new QPushButton(tr("Fold"), this);
-	btnFold->setCheckable(true);
-	QPushButton *btnCheckCall = new QPushButton(tr("Check/Call"), this);
-	btnCheckCall->setCheckable(true);
-	QPushButton *btnBetRaise = new QPushButton(tr("Bet/Raise"), this);
-	btnBetRaise->setCheckable(true);
+	//btnFold->setCheckable(true);
+	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
 	
-	btngrpActions->addButton(btnFold);
-	btngrpActions->addButton(btnCheckCall);
-	btngrpActions->addButton(btnBetRaise);
+	QPushButton *btnCheckCall = new QPushButton(tr("Check/Call"), this);
+	//btnCheckCall->setCheckable(true);
+	connect(btnCheckCall, SIGNAL(clicked()), this, SLOT(actionCheckCall()));
+	
+	QPushButton *btnBetRaise = new QPushButton(tr("Bet/Raise"), this);
+	connect(btnBetRaise, SIGNAL(clicked()), this, SLOT(actionBetRaise()));
+	
+	//btnBetRaise->setCheckable(true);
+	
+	//btngrpActions->addButton(btnFold);
+	//btngrpActions->addButton(btnCheckCall);
+	//btngrpActions->addButton(btnBetRaise);
 	
 	QVBoxLayout *lAmount = new QVBoxLayout();
 	
-	QLineEdit *editAmount = new QLineEdit("0", this);
+	editAmount = new QLineEdit("0", this);
+	editAmount->setAlignment(Qt::AlignRight);
 	QSlider *sliderAmount = new QSlider(Qt::Horizontal, this);
+	sliderAmount->setEnabled(false);
 	
 	lAmount->addWidget(editAmount);
 	lAmount->addWidget(sliderAmount);
@@ -103,34 +134,202 @@ WTable::WTable(QWidget *parent) : QWidget(parent)
 	lActions->addWidget(btnBetRaise);
 	lActions->addLayout(lAmount);
 	
-	///////
+	QWidget *wActions = new QWidget(this);
+	//wActions->setPalette(Qt::gray);
+	//wActions->setAutoFillBackground(true);
+	wActions->setFixedSize(350, 60);
+	wActions->setLayout(lActions);
 	
-	QGridLayout *layout = new QGridLayout();
-	layout->addLayout(grid_seats, 1, 0);
-	layout->setRowStretch(1, 90);
-	layout->addLayout(lActions, 2, 0);
-	layout->setRowStretch(2, 1);
-
+	
+	/////
+	
+	QVBoxLayout *layout = new QVBoxLayout();
+	layout->addLayout(grid_seats, 90);
+	layout->addWidget(wActions, 1, Qt::AlignCenter);
+	
 	setLayout(layout);
+}
+
+void WTable::updateView()
+{
+	tableinfo info;
+	((PClient*)qApp)->getTableInfo(gid, tid, &info);
+	
+	for (unsigned int i=0; i < 10; i++)
+	{
+		seatinfo *seat = &(info.snap.seats[i]);
+		
+		if (seat->valid)
+		{
+			int cid = seat->client_id;
+			playerinfo pinfo;
+			((PClient*)qApp)->getPlayerInfo(cid, &pinfo);
+			
+			wseats[i]->setName(pinfo.name);
+			
+			wseats[i]->setStake(seat->stake);
+			
+			if (seat->in_round)
+				wseats[i]->setAction(Player::Check /* FIXME */, seat->bet);
+			else
+				wseats[i]->setAction(Player::Fold, 0.0f);
+			
+			if (i == info.snap.s_cur)
+				wseats[i]->setCurrent(true);
+			else
+				wseats[i]->setCurrent(false);
+			
+			wseats[i]->setValid(true);
+		}
+		else
+		{
+			wseats[i]->setValid(false);
+		}
+	}
+	
+	// Pots
+	QString spots;
+	for (unsigned int i=0; i < info.snap.pots.size(); i++)
+	{
+		char spot[128];
+		snprintf(spot, sizeof(spot), "Pot %d: %.2f", i+1, info.snap.pots[i]);
+		spots += spot;
+		spots += "  ";
+	}
+	lblPots->setText(spots);
+	
+	// CommunityCards
+	vector<Card> allcards;
+	info.snap.communitycards.copyCards(&allcards);
+	unsigned int cardcount = allcards.size();
+	for (unsigned int i=0; i < 5; i++)
+	{
+		if (cardcount < i + 1)
+		{
+			cc[i]->loadImage("gfx/cards/blank.png");
+		}
+		else
+		{
+			char filename[1024];
+			snprintf(filename, sizeof(filename), "gfx/cards/%s.png", allcards[i].getName());
+			cc[i]->loadImage(filename);
+		}
+	}
+}
+
+void WTable::closeEvent(QCloseEvent *event)
+{
+	((PClient*)qApp)->wMain->addLog("table window closed");
+}
+
+void WTable::actionFold()
+{
+	((PClient*)qApp)->doSetAction(gid, Player::Fold);
+}
+
+void WTable::actionCheckCall()
+{
+	((PClient*)qApp)->doSetAction(gid, Player::Call);
+}
+
+void WTable::actionBetRaise()
+{
+	float amount = editAmount->text().toFloat();
+	((PClient*)qApp)->doSetAction(gid, Player::Raise, amount);
 }
 
 WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
 {
 	setPalette(Qt::gray);
 	setAutoFillBackground(true);
+	setFixedSize(70, 120);
 	
-	QVBoxLayout *layout = new QVBoxLayout();
-	
-	QLabel *lblCaption = new QLabel(tr("Seat"), this);
+	lblCaption = new QLabel("Seat", this);
 	lblCaption->setAlignment(Qt::AlignCenter);
-	QLabel *lblStake = new QLabel(tr("123.45"), this);
+	lblStake = new QLabel("0.00", this);
 	lblStake->setAlignment(Qt::AlignCenter);
-	QLabel *lblAction = new QLabel(tr("Action"), this);
+	lblAction = new QLabel("Action", this);
 	lblAction->setAlignment(Qt::AlignCenter);
 	
+	///////
+	
+	card1 = new WPicture("gfx/cards/back.png", this);
+	card1->setFixedSize(28, 40);
+	card2 = new WPicture("gfx/cards/back.png", this);
+	card2->setFixedSize(28, 40);
+	
+	QHBoxLayout *lCards = new QHBoxLayout();
+	lCards->addWidget(card1);
+	lCards->addWidget(card2);
+	
+	QVBoxLayout *layout = new QVBoxLayout();
 	layout->addWidget(lblCaption);
+	layout->addLayout(lCards);
 	layout->addWidget(lblStake);
 	layout->addWidget(lblAction);
-	
 	setLayout(layout);
 }
+
+void WSeat::setValid(bool valid)
+{
+	lblCaption->setVisible(valid);
+	lblStake->setVisible(valid);
+	lblAction->setVisible(valid);
+	card1->setVisible(valid);
+	card2->setVisible(valid);
+}
+
+void WSeat::setName(QString name)
+{
+	lblCaption->setText(name);
+}
+
+void WSeat::setStake(float amount)
+{
+	QString samount;
+	samount.setNum(amount, 'f', 2);
+	lblStake->setText(samount);
+}
+
+void WSeat::setAction(Player::PlayerAction action, float amount)
+{
+	QString samount;
+	samount.setNum(amount, 'f', 2);
+	
+	if (action == Player::Fold)
+		lblAction->setText("Folded");
+	else
+		lblAction->setText(samount);
+}
+
+void WSeat::setCurrent(bool cur)
+{
+	if (cur)
+		setPalette(Qt::green);
+	else
+		setPalette(Qt::gray);
+}
+
+WPicture::WPicture(const char *filename, QWidget *parent) : QLabel(parent)
+{
+	setBackgroundRole(QPalette::Base);
+	//setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	//sizePolicy().hasHeightForWidth();
+	setScaledContents(true);
+	
+	QImage image(filename);
+	setPixmap(QPixmap::fromImage(image));
+}
+
+void WPicture::loadImage(const char *filename)
+{
+	QImage image(filename);
+	setPixmap(QPixmap::fromImage(image));
+}
+
+/*
+int WPicture::heightForWidth ( int w )
+{
+	return -1;
+}
+*/

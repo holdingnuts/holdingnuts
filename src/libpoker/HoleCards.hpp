@@ -31,6 +31,7 @@ public:
 	HoleCards();
 	
 	bool setCards(Card c1, Card c2);
+	void clear() { cards.clear(); };
 	
 	void copyCards(std::vector<Card> *v) { v->insert(v->end(), cards.begin(), cards.end()); };
 	

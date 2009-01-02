@@ -22,8 +22,8 @@ IF (WIN32)
 		#	-o ${CMAKE_CURRENT_BINARY_DIR}/pclient_res.obj
 		#	< ${CMAKE_CURRENT_SOURCE_DIR}/pclient.rc
 		#)
-		
-		LIST(APPEND aux_obj pclient_t_res.obj)
+		#
+		#LIST(APPEND aux_obj pclient_res.obj)
 	ELSE (MINGW)
 		LIST(APPEND aux_lib wsock32)
 		
@@ -60,7 +60,29 @@ target_link_libraries (
    pclient
    Poker Network System
    ${QT_LIBRARIES}
+   ${aux_lib}
 ##   ${SDL_LIBRARY}
 ##   ${SDLIMAGE_LIBRARY}
 ##   SDLmain
 )
+
+############################################################
+
+#http://www.cmake.org/Wiki/CMake:How_To_Build_Qt4_Software
+#http://doc.trolltech.com/4.3/i18n.html
+
+file (GLOB TRANSLATIONS_FILES *.ts)
+
+file (GLOB SRC_FILES *.cpp *.hpp)
+
+set (FILES_TO_TRANSLATE ${SRC_FILES})
+
+if (UPDATE_TRANSLATIONS)
+  qt4_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
+else (UPDATE_TRANSLATIONS)
+  qt4_add_translation(QM_FILES ${TRANSLATIONS_FILES})
+endif (UPDATE_TRANSLATIONS) 
+
+add_custom_target (translations DEPENDS ${QM_FILES})
+
+install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/data/i18n)

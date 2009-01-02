@@ -93,65 +93,6 @@ int send_msg(socktype sock, const char *msg)
 	return bytes;
 }
 
-bool client_add(socktype sock)
-{
-	clientcon client;
-	
-	// FIXME: handle case when server is full
-	
-	memset(&client, 0, sizeof(client));
-	client.sock = sock;
-	client.id = cid_counter++;
-	
-	// set initial state
-	client.state |= Connected;
-	
-	snprintf(client.name, sizeof(client.name), "client_%d", client.id);
-	
-	clients.push_back(client);
-	
-	// send initial data
-	char msg[1024];
-	snprintf(msg, sizeof(msg), "PSERVER %d %d",
-		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
-		client.id);
-	send_msg(client.sock, msg);
-	
-	return true;
-}
-
-bool client_remove(socktype sock)
-{
-	for (vector<clientcon>::iterator client = clients.begin(); client != clients.end(); client++)
-	{
-		if (client->sock == sock)
-		{
-			socket_close(client->sock);
-			
-			if (client->state & SentInfo)
-			{
-#if 0
-				if (game->removePlayer((int) client->sock))
-				{
-					dbg_print("game", "player %d parted game (%d/%d)", client->sock,
-						game->getPlayerCount(), game->getPlayerMax());
-				}
-
-				
-				snap_update |= Foyer;
-#endif
-			}
-			
-			dbg_print("clientsock", "(%d) connection closed", client->sock);
-			
-			clients.erase(client);
-			break;
-		}
-	}
-	
-	return true;
-}
-
 bool send_ok(socktype sock, int code=0, const char *str="")
 {
 	char msg[128];
@@ -232,6 +173,70 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 	return true;
 }
 
+bool client_add(socktype sock)
+{
+	clientcon client;
+	
+	// FIXME: handle case when server is full
+	
+	memset(&client, 0, sizeof(client));
+	client.sock = sock;
+	client.id = cid_counter++;
+	
+	// set initial state
+	client.state |= Connected;
+	
+	snprintf(client.name, sizeof(client.name), "client_%d", client.id);
+	
+	clients.push_back(client);
+	
+	// send initial data
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "PSERVER %d %d",
+		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
+		client.id);
+	send_msg(client.sock, msg);
+	
+	return true;
+}
+
+bool client_remove(socktype sock)
+{
+	char msg[1024];
+	
+	for (vector<clientcon>::iterator client = clients.begin(); client != clients.end(); client++)
+	{
+		if (client->sock == sock)
+		{
+			socket_close(client->sock);
+			
+			bool send_msg = false;
+			if (client->state & SentInfo)
+			{
+				// TODO: remove player from unstarted games
+				
+				snprintf(msg, sizeof(msg),
+					"'%s' (%d) left foyer",
+					client->name, client->id);
+				
+				send_msg = true;
+			}
+			
+			dbg_print("clientsock", "(%d) connection closed", client->sock);
+			
+			clients.erase(client);
+			
+			// send client-left-msg to all remaining clients
+			if (send_msg)
+				client_chat(-1, -1, msg);
+			
+			break;
+		}
+	}
+	
+	return true;
+}
+
 int client_execute(clientcon *client, const char *cmd)
 {
 	socktype s = client->sock;
@@ -305,7 +310,7 @@ int client_execute(clientcon *client, const char *cmd)
 			if (!(client->state & SentInfo))
 			{
 				snprintf(msg, sizeof(msg),
-					"client '%s' (%d) joined foyer",
+					"'%s' (%d) joined foyer",
 					client->name, client->id);
 				
 				client_chat(-1, -1, msg);
@@ -426,8 +431,8 @@ int client_execute(clientcon *client, const char *cmd)
 				if (g->addPlayer(client->id))
 				{
 					snprintf(msg, sizeof(msg),
-						"player %d joined game %d (%d/%d)",
-						client->id, gid,
+						"'%s' (%d) joined game %d (%d/%d)",
+						client->name, client->id, gid,
 						g->getPlayerCount(), g->getPlayerMax());
 					
 					dbg_print("game", "%s", msg);
