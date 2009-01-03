@@ -92,6 +92,7 @@ public:
 	
 	int getTableInfo(int gid, int tid, tableinfo *info);
 	int getPlayerInfo(int cid, playerinfo *info);
+	int getMyCId();
 	
 	WMain *wMain;
 	

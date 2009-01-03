@@ -608,6 +608,11 @@ int PClient::getPlayerInfo(int cid, playerinfo *info)
 	return 0;
 }
 
+int PClient::getMyCId()
+{
+	return srv.cid;
+}
+
 int main(int argc, char **argv)
 {
 	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d)",

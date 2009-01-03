@@ -88,8 +88,8 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	QHBoxLayout *lCC = new QHBoxLayout();
 	for (unsigned int i=0; i < 5; i++)
 	{
-		cc[i] = new WPicture("gfx/cards/back.png", this);
-		cc[i]->setFixedSize(40, 57);
+		cc[i] = new WPicture("gfx/deck/default/back.png", this);
+		cc[i]->setFixedSize(45, 60);
 		lCC->addWidget(cc[i]);
 	}
 	
@@ -152,6 +152,8 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 
 void WTable::updateView()
 {
+	int my_cid = ((PClient*)qApp)->getMyCId();
+	
 	tableinfo info;
 	((PClient*)qApp)->getTableInfo(gid, tid, &info);
 	
@@ -170,9 +172,34 @@ void WTable::updateView()
 			wseats[i]->setStake(seat->stake);
 			
 			if (seat->in_round)
+			{
 				wseats[i]->setAction(Player::Check /* FIXME */, seat->bet);
+				
+				if (my_cid == cid)
+				{
+					vector<Card> allcards;
+					info.holecards.copyCards(&allcards);
+					
+					if (allcards.size() == 2)
+					{
+						char card1[3], card2[3];
+						strcpy(card1, allcards[0].getName());
+						strcpy(card2, allcards[1].getName());
+						wseats[i]->setCards(card1, card2);
+					}
+					else
+						wseats[i]->setCards("blank", "blank");
+				}
+				else
+				{
+					wseats[i]->setCards("back", "back");
+				}
+			}
 			else
+			{
 				wseats[i]->setAction(Player::Fold, 0.0f);
+				wseats[i]->setCards("blank", "blank");
+			}
 			
 			if (i == info.snap.s_cur)
 				wseats[i]->setCurrent(true);
@@ -206,12 +233,12 @@ void WTable::updateView()
 	{
 		if (cardcount < i + 1)
 		{
-			cc[i]->loadImage("gfx/cards/blank.png");
+			cc[i]->loadImage("gfx/deck/default/blank.png");
 		}
 		else
 		{
 			char filename[1024];
-			snprintf(filename, sizeof(filename), "gfx/cards/%s.png", allcards[i].getName());
+			snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", allcards[i].getName());
 			cc[i]->loadImage(filename);
 		}
 	}
@@ -242,7 +269,7 @@ WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
 {
 	setPalette(Qt::gray);
 	setAutoFillBackground(true);
-	setFixedSize(70, 120);
+	setFixedSize(110, 140);
 	
 	lblCaption = new QLabel("Seat", this);
 	lblCaption->setAlignment(Qt::AlignCenter);
@@ -252,11 +279,12 @@ WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
 	lblAction->setAlignment(Qt::AlignCenter);
 	
 	///////
-	
-	card1 = new WPicture("gfx/cards/back.png", this);
-	card1->setFixedSize(28, 40);
-	card2 = new WPicture("gfx/cards/back.png", this);
-	card2->setFixedSize(28, 40);
+	const int sx = 45;
+	const int sy = 60;
+	card1 = new WPicture("gfx/deck/default/back.png", this);
+	card1->setFixedSize(sx, sy);
+	card2 = new WPicture("gfx/deck/default/back.png", this);
+	card2->setFixedSize(sx, sy);
 	
 	QHBoxLayout *lCards = new QHBoxLayout();
 	lCards->addWidget(card1);
@@ -308,6 +336,17 @@ void WSeat::setCurrent(bool cur)
 		setPalette(Qt::green);
 	else
 		setPalette(Qt::gray);
+}
+
+void WSeat::setCards(const char *c1, const char *c2)
+{
+	char filename[1024];
+	
+	snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", c1);
+	card1->loadImage(filename);
+	
+	snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", c2);
+	card2->loadImage(filename);
 }
 
 WPicture::WPicture(const char *filename, QWidget *parent) : QLabel(parent)

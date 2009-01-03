@@ -88,6 +88,7 @@ public:
 	void setStake(float amount);
 	void setAction(Player::PlayerAction action, float amount);
 	void setCurrent(bool cur);
+	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
 	
 private slots:
