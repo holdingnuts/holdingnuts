@@ -31,6 +31,7 @@
 #include <QSocketNotifier>
 #include <QTimer>
 #include <QDir>
+#include <QRegExp>
 
 #include "Network.h"
 
