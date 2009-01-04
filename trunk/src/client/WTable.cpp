@@ -282,7 +282,7 @@ void WTable::actionBetRaise()
 	((PClient*)qApp)->getTableInfo(gid, tid, &info);
 	table_snapshot *snap = &info.snap;
 	
-	if (snap->my_seat != -1)
+	if (snap->my_seat == -1)
 		return;
 	
 	if (amount == snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
