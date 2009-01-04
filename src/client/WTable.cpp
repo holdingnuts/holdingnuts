@@ -34,8 +34,6 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	this->gid = gid;
 	this->tid = tid;
 	
-	my_stake = 0.0f;
-	
 	setWindowTitle("HoldingNuts table");
 	//setAttribute(Qt::WA_DeleteOnClose); // FIXME:
 /*
@@ -187,9 +185,6 @@ void WTable::updateView()
 			
 			wseats[i]->setStake(seat->stake);
 			
-			if (my_cid == cid)
-				my_stake = seat->stake;
-			
 			if (seat->in_round)
 			{
 				wseats[i]->setAction(Player::Check /* FIXME */, seat->bet);
@@ -287,14 +282,22 @@ void WTable::actionBetRaise()
 void WTable::slotBetValue(int value)
 {
 	QString svalue;
+	float max_bet = 0.0f;
 	float amount;
+	tableinfo info;
+	
+	((PClient*)qApp)->getTableInfo(gid, tid, &info);
+	table_snapshot *snap = &info.snap;
+	
+	if (snap->my_seat != -1)
+		max_bet = snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet;
 	
 	if (!value)
 		amount = 0.0f;
 	else if (value == 100)
-		amount = my_stake;
+		amount = max_bet;
 	else
-		amount = (int)(my_stake * value / 100);
+		amount = (int)(max_bet * value / 100);
 	
 	svalue.setNum(amount, 'f', 2);
 	editAmount->setText(svalue);

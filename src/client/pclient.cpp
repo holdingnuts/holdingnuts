@@ -214,6 +214,8 @@ int server_execute(const char *cmd)
 				}
 				
 				// table.seats
+				table.my_seat = -1;
+				
 				const unsigned int seat_max = 10;
 				memset(table.seats, 0, seat_max*sizeof(seatinfo));
 				
@@ -231,6 +233,10 @@ int server_execute(const char *cmd)
 					
 					si.valid = true;
 					si.client_id = st.getNextInt();
+					
+					if (si.client_id == srv.cid)
+						table.my_seat = seat_no;
+					
 					if (st.getNext() == "*")
 						si.in_round = true;
 					si.stake = st.getNextFloat();

@@ -61,6 +61,7 @@ typedef struct {
 	std::vector<float> pots;
 	CommunityCards communitycards;
 	seatinfo seats[10];
+	int my_seat;
 } table_snapshot;
 
 
@@ -132,8 +133,6 @@ private:
 	
 	QLabel *lblPots;
 	WPicture *cc[5];
-	
-	float my_stake;
 };
 
 
