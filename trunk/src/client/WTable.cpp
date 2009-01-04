@@ -276,7 +276,19 @@ void WTable::actionCheckCall()
 void WTable::actionBetRaise()
 {
 	float amount = editAmount->text().toFloat();
-	((PClient*)qApp)->doSetAction(gid, Player::Raise, amount);
+	
+	tableinfo info;
+	
+	((PClient*)qApp)->getTableInfo(gid, tid, &info);
+	table_snapshot *snap = &info.snap;
+	
+	if (snap->my_seat != -1)
+		return;
+	
+	if (amount == snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
+		((PClient*)qApp)->doSetAction(gid, Player::Allin, 0.0f);
+	else
+		((PClient*)qApp)->doSetAction(gid, Player::Raise, amount);
 }
 
 void WTable::slotBetValue(int value)

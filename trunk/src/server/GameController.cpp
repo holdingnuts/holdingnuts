@@ -393,6 +393,7 @@ void GameController::stateBlinds(Table *t)
 	// FIXME: handle non-SNG correctly (ask each player for blinds ...)
 	
 	t->bet_amount = (float)t->blind;
+	t->last_bet_amount = 0.0f;
 	
 	bool headsup_rule = (t->seats.size() == 2);
 	
@@ -475,6 +476,12 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
+	float minimum_bet;
+	if ((int) t->bet_amount == 0)
+		minimum_bet = t->blind;
+	else
+		minimum_bet = t->bet_amount + (t->bet_amount - t->last_bet_amount);
+	
 	if (t->nomoreaction)  // early showdown, no more action at table possible
 	{
 		action = Player::None;
@@ -506,8 +513,10 @@ void GameController::stateBetting(Table *t)
 			if ((int)t->bet_amount == 0 || (int)t->bet_amount == t->seats[t->cur_player].bet)
 			{
 				//chat(p->client_id, t->table_id, "Err: You cannot call, nothing was bet! Try check.");
-				action = Player::Check;
-				allowed_action = true;
+				
+				// retry with this action
+				p->next_action.action = Player::Check;
+				return;
 			}
 			else
 			{
@@ -519,8 +528,8 @@ void GameController::stateBetting(Table *t)
 		{
 			if ((unsigned int)t->bet_amount > 0)
 				chat(p->client_id, t->table_id, "Err: You cannot bet, there was already a bet! Try raise.");
-			else if (p->next_action.amount <= (unsigned int)t->bet_amount || p->next_action.amount < t->blind)
-				chat(p->client_id, t->table_id, "Err: You cannot bet this amount.");
+			else if (p->next_action.amount < minimum_bet)
+				chat(p->client_id, t->table_id, "Err: You cannot bet this amount. Minimum-bet is Big Blind.");
 			else
 			{
 				allowed_action = true;
@@ -532,11 +541,12 @@ void GameController::stateBetting(Table *t)
 			if ((unsigned int)t->bet_amount == 0)
 			{
 				//chat(p->client_id, t->table_id, "Err: You cannot raise, nothing was bet! Try bet.");
-				action = Player::Bet;
-				amount = p->next_action.amount - t->seats[t->cur_player].bet;
-				allowed_action = true;
+				
+				// retry with this action
+				p->next_action.action = Player::Bet;
+				return;
 			}
-			else if (p->next_action.amount <= (unsigned int)t->bet_amount)
+			else if (p->next_action.amount < minimum_bet)
 				chat(p->client_id, t->table_id, "Err: You cannot raise this amount.");
 			else
 			{
@@ -607,9 +617,10 @@ void GameController::stateBetting(Table *t)
 		if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
 		{
 			// only re-open betting round if amount greater than table-bet
-			if (t->seats[t->cur_player].bet > t->bet_amount /* && amount > bet_minimum*/ )
+			if (t->seats[t->cur_player].bet > t->bet_amount && t->seats[t->cur_player].bet >= minimum_bet)
 			{
 				t->last_bet_player = t->cur_player;
+				t->last_bet_amount = t->bet_amount;
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
@@ -681,6 +692,7 @@ void GameController::stateBetting(Table *t)
 		
 		// reset the highest bet-amount
 		t->bet_amount = 0.0f;
+		t->last_bet_amount = 0.0f;
 		
 		
 		// set current player to SB (or next active behind SB)

@@ -96,6 +96,7 @@ private:
 	unsigned int last_bet_player;
 	
 	float bet_amount;
+	float last_bet_amount;
 	std::vector<Pot> pots;
 };
 
