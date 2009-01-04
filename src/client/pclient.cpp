@@ -109,13 +109,40 @@ int server_execute(const char *cmd)
 	}
 	else if (command == "MSG")
 	{
-		/*int from =*/ t.getNextInt();
+		string idfrom = t.getNext();
+		Tokenizer ft;
+		ft.parse(idfrom, ":");
+		
+		int from;
+		int gid, tid;
+		bool gmsg = false;
+		if (ft.getCount() >= 2)
+		{
+			gmsg = true;
+			gid = ft.getNextInt();
+			tid = ft.getNextInt();
+		}
+		else
+			from = ft.getNextInt();
+		
 		string sfrom = t.getNext();
 		
 		string chatmsg = t.getTillEnd();
 		
 		QString qsfrom(QString::fromStdString(sfrom));
 		QString qchatmsg(QString::fromStdString(chatmsg));
+		
+		if (gmsg || from == -1)
+		{
+			QRegExp rx("\\[(\\d+)\\]");
+			while (rx.indexIn(qchatmsg) != -1)
+			{
+				QString scid = rx.cap(1);
+				QString name = players[scid.toInt()].name;  // FIXME: fill in '???' for unknown player
+				
+				qchatmsg.replace(rx, "'" + name + "'");
+			}
+		}
 		
 		((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
 	}

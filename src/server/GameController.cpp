@@ -586,12 +586,12 @@ void GameController::stateBetting(Table *t)
 	{
 		t->seats[t->cur_player].in_round = false;
 		
-		snprintf(msg, sizeof(msg), "Player %d folded.", p->client_id);
+		snprintf(msg, sizeof(msg), "[%d] folded.", p->client_id);
 		chat(t->table_id, msg);
 	}
 	else if (action == Player::Check)
 	{
-		snprintf(msg, sizeof(msg), "Player %d checked.", p->client_id);
+		snprintf(msg, sizeof(msg), "[%d] checked.", p->client_id);
 		chat(t->table_id, msg);
 	}
 	else
@@ -613,10 +613,10 @@ void GameController::stateBetting(Table *t)
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
-			snprintf(msg, sizeof(msg), "Player %d bet/raised/allin $%.2f.", p->client_id, amount);
+			snprintf(msg, sizeof(msg), "[%d] bet/raised/allin $%.2f.", p->client_id, amount);
 		}
 		else
-			snprintf(msg, sizeof(msg), "Player %d called $%.2f.", p->client_id, amount);
+			snprintf(msg, sizeof(msg), "[%d] called $%.2f.", p->client_id, amount);
 		
 		
 		chat(t->table_id, msg);
@@ -730,7 +730,7 @@ void GameController::stateAllFolded(Table *t)
 	
 	// FIXME: ask player if he wants to show cards
 	
-	snprintf(msg, sizeof(msg), "Player %d wins %.2f", p->client_id, t->pots[0].amount);
+	snprintf(msg, sizeof(msg), "[%d] wins %.2f", p->client_id, t->pots[0].amount);
 	chat(t->table_id, msg);
 	
 	p->stake += t->pots[0].amount;
@@ -778,7 +778,7 @@ void GameController::stateShowdown(Table *t)
 			hsstr += msg;
 		}
 		
-		snprintf(msg, sizeof(msg), "Player [%d] has: %s (%s)",
+		snprintf(msg, sizeof(msg), "[%d] has: %s (%s)",
 			p->client_id,
 			HandStrength::getRankingName(strength.getRanking()),
 			hsstr.c_str());
@@ -824,7 +824,7 @@ void GameController::stateShowdown(Table *t)
 					cashout_amount += win_amount;
 					
 					snprintf(msg, sizeof(msg),
-						"Player [%d] wins pot #%d with %.2f",
+						"[%d] wins pot #%d with %.2f",
 						p->client_id, poti+1, win_amount);
 					chat(t->table_id, msg);
 				}
