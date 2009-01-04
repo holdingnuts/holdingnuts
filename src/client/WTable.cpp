@@ -34,6 +34,8 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	this->gid = gid;
 	this->tid = tid;
 	
+	my_stake = 0.0f;
+	
 	setWindowTitle("HoldingNuts table");
 	//setAttribute(Qt::WA_DeleteOnClose); // FIXME:
 /*
@@ -53,8 +55,8 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	
 	QLabel *lSpacer1 = new QLabel(" ", this);
 	QLabel *lSpacer2 = new QLabel(" ", this);
-	grid_seats->addWidget(lSpacer1, 0, 2);
-	grid_seats->addWidget(lSpacer2, 0, 8);
+	grid_seats->addWidget(lSpacer1, 1, 2);
+	grid_seats->addWidget(lSpacer2, 1, 8);
 	
 	struct seatinfo {
 		QString name;
@@ -123,8 +125,17 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	
 	editAmount = new QLineEdit("0", this);
 	editAmount->setAlignment(Qt::AlignRight);
-	QSlider *sliderAmount = new QSlider(Qt::Horizontal, this);
-	sliderAmount->setEnabled(false);
+	
+	
+	sliderAmount = new QSlider(Qt::Horizontal, this);
+	//sliderAmount->setEnabled(false);
+	sliderAmount->setTickPosition(QSlider::TicksBothSides);
+	sliderAmount->setTickInterval(10);
+	sliderAmount->setSingleStep(1);
+	sliderAmount->setMinimum(0);
+	sliderAmount->setMaximum(100);
+	connect(sliderAmount, SIGNAL(valueChanged(int)), this, SLOT(slotBetValue(int)));
+	
 	
 	lAmount->addWidget(editAmount);
 	lAmount->addWidget(sliderAmount);
@@ -140,11 +151,16 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	wActions->setFixedSize(350, 60);
 	wActions->setLayout(lActions);
 	
-	
+	QLabel *wTable = new QLabel(this);
+	wTable->setLayout(grid_seats);
+	//wTable->setBackgroundRole(QPalette::Base);
+	wTable->setScaledContents(true);
+	QImage image("gfx/table/default.png");
+	wTable->setPixmap(QPixmap::fromImage(image));
 	/////
 	
 	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addLayout(grid_seats, 90);
+	layout->addWidget(wTable, 90);
 	layout->addWidget(wActions, 1, Qt::AlignCenter);
 	
 	setLayout(layout);
@@ -170,6 +186,9 @@ void WTable::updateView()
 			wseats[i]->setName(pinfo.name);
 			
 			wseats[i]->setStake(seat->stake);
+			
+			if (my_cid == cid)
+				my_stake = seat->stake;
 			
 			if (seat->in_round)
 			{
@@ -265,6 +284,24 @@ void WTable::actionBetRaise()
 	((PClient*)qApp)->doSetAction(gid, Player::Raise, amount);
 }
 
+void WTable::slotBetValue(int value)
+{
+	QString svalue;
+	float amount;
+	
+	if (!value)
+		amount = 0.0f;
+	else if (value == 100)
+		amount = my_stake;
+	else
+		amount = (int)(my_stake * value / 100);
+	
+	svalue.setNum(amount, 'f', 2);
+	editAmount->setText(svalue);
+}
+
+
+
 WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
 {
 	setPalette(Qt::gray);
@@ -300,6 +337,8 @@ WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
 
 void WSeat::setValid(bool valid)
 {
+	setAutoFillBackground(valid);
+	
 	lblCaption->setVisible(valid);
 	lblStake->setVisible(valid);
 	lblAction->setVisible(valid);
@@ -356,8 +395,7 @@ WPicture::WPicture(const char *filename, QWidget *parent) : QLabel(parent)
 	//sizePolicy().hasHeightForWidth();
 	setScaledContents(true);
 	
-	QImage image(filename);
-	setPixmap(QPixmap::fromImage(image));
+	loadImage(filename);
 }
 
 void WPicture::loadImage(const char *filename)

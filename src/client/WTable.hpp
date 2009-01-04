@@ -119,17 +119,21 @@ private slots:
 	void actionFold();
 	void actionCheckCall();
 	void actionBetRaise();
+	void slotBetValue(int value);
 
 private:
 	int gid;
 	int tid;
 	
 	QLineEdit *editAmount;
+	QSlider *sliderAmount;
 	
 	WSeat *wseats[10];
 	
 	QLabel *lblPots;
 	WPicture *cc[5];
+	
+	float my_stake;
 };
 
 
