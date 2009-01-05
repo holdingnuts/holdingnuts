@@ -132,6 +132,7 @@ int server_execute(const char *cmd)
 		QString qsfrom(QString::fromStdString(sfrom));
 		QString qchatmsg(QString::fromStdString(chatmsg));
 		
+		// replace all occurrences of "[cid]" in server-msg with player-name
 		if (gmsg || from == -1)
 		{
 			QRegExp rx("\\[(\\d+)\\]");
@@ -184,8 +185,13 @@ int server_execute(const char *cmd)
 		case SnapTable:
 			{
 				//dbg_print("snap", "%s", cmd);
-				table_snapshot &table = games[gid].tables[tid].snap;
-				HoleCards &holecards = games[gid].tables[tid].holecards;
+				tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+				
+				if (!tinfo)
+					return 0;
+				
+				table_snapshot &table = tinfo->snap;
+				HoleCards &holecards = tinfo->holecards;
 				
 				Tokenizer st;
 				
@@ -297,14 +303,19 @@ int server_execute(const char *cmd)
 					holecards.clear();
 				}
 				
-				if (games[gid].tables[tid].window)
-					games[gid].tables[tid].window->updateView();
+				if (tinfo->window)
+					tinfo->window->updateView();
 			}
 			break;
 		
 		case SnapHoleCards:
 			{
-				HoleCards &h = games[gid].tables[tid].holecards;
+				tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+				
+				if (!tinfo)
+					return 0;
+				
+				HoleCards &h = tinfo->holecards;
 				
 				string hole = t.getNext();
 				
@@ -316,8 +327,8 @@ int server_execute(const char *cmd)
 				
 				h.setCards(ch1, ch2);
 				
-				if (games[gid].tables[tid].window)
-					games[gid].tables[tid].window->updateView();
+				if (tinfo->window)
+					tinfo->window->updateView();
 			}
 			break;
 		
@@ -556,6 +567,12 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 	case Player::Raise:
 		saction = "raise";
 		break;
+	case Player::Allin:
+		saction = "allin";
+		break;
+	case Player::ResetAction:
+		saction = "reset";
+		break;
 	}
 	
 	char msg[1024];
@@ -627,18 +644,20 @@ void PClient::chatAll(QString text)
 	send_msg(msg);
 }
 
-int PClient::getTableInfo(int gid, int tid, tableinfo *info)
+tableinfo* PClient::getTableInfo(int gid, int tid)
 {
-	*info = games[gid].tables[tid];
-	
-	return 0;
+	if (games.find(gid) != games.end() && games[gid].tables.find(tid) != games[gid].tables.end())
+		return &(games[gid].tables[tid]);
+	else
+		return 0;
 }
 
-int PClient::getPlayerInfo(int cid, playerinfo *info)
+playerinfo* PClient::getPlayerInfo(int cid)
 {
-	*info = players[cid];
-	
-	return 0;
+	if (players.find(cid) != players.end())
+		return &(players[cid]);
+	else
+		return 0;
 }
 
 int PClient::getMyCId()

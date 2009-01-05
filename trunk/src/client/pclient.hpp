@@ -91,8 +91,8 @@ public:
 	
 	void doRegister(int gid);
 	
-	int getTableInfo(int gid, int tid, tableinfo *info);
-	int getPlayerInfo(int cid, playerinfo *info);
+	tableinfo* getTableInfo(int gid, int tid);
+	playerinfo* getPlayerInfo(int cid);
 	int getMyCId();
 	
 	WMain *wMain;
