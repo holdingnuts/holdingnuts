@@ -214,7 +214,7 @@ void Table::collectBets()
 		
 	} while (true);
 
-#ifdef DEBUG
+#if 0
 	for (unsigned int i=0; i < pots.size(); i++)
 	{
 		dbg_print("pot", "#%d: amount=%0.2f players=%d",

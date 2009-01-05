@@ -48,7 +48,7 @@ typedef struct {
 	float bet;
 	float stake;
 	bool in_round;
-	//HoleCards holecards;
+	HoleCards holecards;
 } seatinfo;
 
 typedef struct {

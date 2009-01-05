@@ -177,8 +177,8 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 void GameController::sendTableSnapshot(Table *t)
 {
 	// assemble community-cards string
-	vector<Card> cards;
 	string scards;
+	vector<Card> cards;
 	
 	t->communitycards.copyCards(&cards);
 	
@@ -198,15 +198,30 @@ void GameController::sendTableSnapshot(Table *t)
 		Table::Seat *s = &(t->seats[i]);
 		Player *p = s->player;
 		
-		char tmp[1024];
+		// assemble hole-cards string
+		string shole;
+		if (t->nomoreaction || s->showcards)
+		{
+			vector<Card> cards;
 		
+			p->holecards.copyCards(&cards);
+			
+			for (unsigned int i=0; i < cards.size(); i++)
+				shole += cards[i].getName();
+		}
+		else
+			shole = "-";
+		
+		char tmp[1024];
 		snprintf(tmp, sizeof(tmp),
-			"s%d:%d:%c:%.2f:%.2f",
+			"s%d:%d:%c:%.2f:%.2f:%c:%s",
 			s->seat_no,
 			p->client_id,
 			s->in_round ? '*' : '-',
 			p->stake,
-			s->bet);
+			s->bet,
+			'X' /* FIXME: action */,
+			shole.c_str());
 		
 		sseats += tmp;
 		
@@ -274,6 +289,8 @@ void GameController::dealHole(Table *t)
 	for (unsigned int i = t->cur_player, c=0; c < t->seats.size(); i = t->getNextPlayer(i), c++)
 	{
 		t->seats[i].in_round = true;
+		t->seats[i].showcards = false;
+		
 		Player *p = t->seats[i].player;
 		
 		HoleCards h;
@@ -370,7 +387,7 @@ void GameController::stateGameStart(Table *t)
 void GameController::stateNewRound(Table *t)
 {
 #ifndef SERVER_TESTING
-	const int timeout = 2;   // FIXME: configurable
+	const int timeout = 4;   // FIXME: configurable
 	if ((int)difftime(time(NULL), round_start) < timeout)
 		return;
 #endif
@@ -476,6 +493,9 @@ void GameController::stateBlinds(Table *t)
 	// initialize the player's timeout
 	timeout_start = time(NULL);
 	
+	// initialize bet-round delay
+	betround_start = time(NULL);
+	
 	// give out hole-cards
 	dealHole(t);
 	
@@ -493,6 +513,13 @@ void GameController::stateBlinds(Table *t)
 
 void GameController::stateBetting(Table *t)
 {
+	// have delay before each action
+#ifndef SERVER_TESTING
+	const int timeout = 1;
+	if ((int)difftime(time(NULL), betround_start) < timeout)
+		return;
+#endif
+	
 	Player *p = t->seats[t->cur_player].player;
 	bool allowed_action = false;  // is action allowed?
 	
@@ -697,8 +724,6 @@ void GameController::stateBetting(Table *t)
 		{
 			// no further action at table possible
 			t->nomoreaction = true;
-			
-			// FIXME: show up cards
 		}
 		
 		// which betting round is next?
@@ -736,6 +761,8 @@ void GameController::stateBetting(Table *t)
 		t->bet_amount = 0.0f;
 		t->last_bet_amount = 0.0f;
 		
+		// re-initialize bet-round delay
+		betround_start = time(NULL);
 		
 		// set current player to SB (or next active behind SB)
 		bool headsup_rule = (t->seats.size() == 2);
@@ -762,6 +789,9 @@ void GameController::stateBetting(Table *t)
 		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		timeout_start = time(NULL);
+		
+		// re-initialize bet-round delay
+		betround_start = time(NULL);
 		
 		sendTableSnapshot(t);
 	}
@@ -807,6 +837,8 @@ void GameController::stateShowdown(Table *t)
 	// FIXME: ask for showdown if player has the option
 	for (unsigned int i=0; i < t->countActivePlayers(); i++)
 	{
+		t->seats[showdown_player].showcards = true; // FIXME: ask first
+		
 		Player *p = t->seats[showdown_player].player;
 		
 		HandStrength strength;
