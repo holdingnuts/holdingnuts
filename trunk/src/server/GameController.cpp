@@ -202,7 +202,11 @@ void GameController::sendTableSnapshot(Table *t)
 		
 		snprintf(tmp, sizeof(tmp),
 			"s%d:%d:%c:%.2f:%.2f",
-			s->seat_no, p->client_id, s->in_round ? '*' : '-', p->stake, s->bet);
+			s->seat_no,
+			p->client_id,
+			s->in_round ? '*' : '-',
+			p->stake,
+			s->bet);
 		
 		sseats += tmp;
 		
@@ -230,14 +234,33 @@ void GameController::sendTableSnapshot(Table *t)
 	}
 	
 	
+	// assemble 'whose-turn' string
+	string sturn;
+	if (t->state == Table::GameStart ||
+		t->state == Table::ElectDealer ||
+		t->state == Table::NewRound)
+	{
+		sturn = "-1";
+	}
+	else
+	{
+		char tmp[128];
+		snprintf(tmp, sizeof(tmp), "%d:%d:%d:%d",
+			t->seats[t->dealer].seat_no,
+			t->seats[t->sb].seat_no,
+			t->seats[t->bb].seat_no,
+			t->seats[t->cur_player].seat_no);
+		sturn = tmp;
+	}
+	
 	snprintf(msg, sizeof(msg),
 		"%d:%d "           // <state>:<betting-round>
-		"%d:%d:%d:%d "     // <dealer>:<SB>:<BB>:<current>
+		"%s "              // <dealer>:<SB>:<BB>:<current>
 		"cc:%s "           // <community-cards>
 		"%s "              // seats
 		"%s",              // pots
 		t->state, (t->state == Table::Betting) ? t->betround : -1,
-		t->seats[t->dealer].seat_no, t->seats[t->sb].seat_no, t->seats[t->bb].seat_no, t->seats[t->cur_player].seat_no,
+		sturn.c_str(),
 		scards.c_str(),
 		sseats.c_str(),
 		spots.c_str());
@@ -335,7 +358,7 @@ void GameController::dealRiver(Table *t)
 void GameController::stateGameStart(Table *t)
 {
 #ifndef SERVER_TESTING
-	const int timeout = 2;   // FIXME: configurable
+	const int timeout = 5;   // FIXME: configurable
 	if ((int)difftime(time(NULL), game_start) > timeout)
 		t->state = Table::NewRound;
 #else
@@ -801,7 +824,7 @@ void GameController::stateShowdown(Table *t)
 			hsstr += msg;
 		}
 		
-		snprintf(msg, sizeof(msg), "[%d] has: %s (%s)",
+		snprintf(msg, sizeof(msg), "[%d] has %s (%s)",
 			p->client_id,
 			HandStrength::getRankingName(strength.getRanking()),
 			hsstr.c_str());
@@ -957,6 +980,7 @@ void GameController::tick()
 			game_start = time(NULL);
 			
 			snap(tid, SnapGameState, "start");
+			sendTableSnapshot(&(tables[tables.size()-1]));
 		}
 		else
 			return;

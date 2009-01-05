@@ -165,14 +165,17 @@ int server_execute(const char *cmd)
 				
 				if (sstate == "start")
 				{
-					dbg_print("game", "game has been started");
+					((PClient*)qApp)->wMain->addChat("foyer", "game has been started");
 					
 					games[gid].registered = true;
 					games[gid].tables[tid].sitting = true;
 					games[gid].tables[tid].subscribed = true;
 					games[gid].tables[tid].window = new WTable(gid, tid);
-					games[gid].tables[tid].window->show();
 					
+					// show table after some delay (give time to retrieve player-info)
+					QTimer::singleShot(2000, games[gid].tables[tid].window, SLOT(slotShow()));
+					
+					// request the player-list of the game
 					char msg[1024];
 					snprintf(msg, sizeof(msg), "REQUEST playerlist %d",
 						gid);
@@ -184,7 +187,10 @@ int server_execute(const char *cmd)
 			break;
 		case SnapTable:
 			{
-				//dbg_print("snap", "%s", cmd);
+				#ifdef DEBUG
+				dbg_print("snap", "%s", cmd);
+				#endif
+				
 				tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
 				
 				if (!tinfo)
