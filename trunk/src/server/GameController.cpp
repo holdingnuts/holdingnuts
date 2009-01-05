@@ -975,7 +975,7 @@ void GameController::tick()
 			for (unsigned int i=0; i < players.size(); i++)
 			{
 				Table::Seat seat;
-				memset(&seat, 1, sizeof(Table::Seat));
+				memset(&seat, 0, sizeof(Table::Seat));
 				seat.seat_no = i;
 				seat.player = &(players[i]);
 				table.seats.push_back(seat);
