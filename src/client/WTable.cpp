@@ -168,20 +168,26 @@ void WTable::updateView()
 {
 	int my_cid = ((PClient*)qApp)->getMyCId();
 	
-	tableinfo info;
-	((PClient*)qApp)->getTableInfo(gid, tid, &info);
+	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+	
+	if (!tinfo)
+		return;
+	
+	table_snapshot *snap = &(tinfo->snap);
 	
 	for (unsigned int i=0; i < 10; i++)
 	{
-		seatinfo *seat = &(info.snap.seats[i]);
+		seatinfo *seat = &(snap->seats[i]);
 		
 		if (seat->valid)
 		{
 			int cid = seat->client_id;
-			playerinfo pinfo;
-			((PClient*)qApp)->getPlayerInfo(cid, &pinfo);
+			playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
 			
-			wseats[i]->setName(pinfo.name);
+			if (pinfo)
+				wseats[i]->setName(pinfo->name);
+			else
+				wseats[i]->setName("???");
 			
 			wseats[i]->setStake(seat->stake);
 			
@@ -192,7 +198,7 @@ void WTable::updateView()
 				if (my_cid == cid)
 				{
 					vector<Card> allcards;
-					info.holecards.copyCards(&allcards);
+					tinfo->holecards.copyCards(&allcards);
 					
 					if (allcards.size() == 2)
 					{
@@ -215,7 +221,7 @@ void WTable::updateView()
 				wseats[i]->setCards("blank", "blank");
 			}
 			
-			if (i == info.snap.s_cur)
+			if (i == snap->s_cur)
 				wseats[i]->setCurrent(true);
 			else
 				wseats[i]->setCurrent(false);
@@ -230,10 +236,10 @@ void WTable::updateView()
 	
 	// Pots
 	QString spots;
-	for (unsigned int i=0; i < info.snap.pots.size(); i++)
+	for (unsigned int i=0; i < snap->pots.size(); i++)
 	{
 		char spot[128];
-		snprintf(spot, sizeof(spot), "Pot %d: %.2f", i+1, info.snap.pots[i]);
+		snprintf(spot, sizeof(spot), "Pot %d: %.2f", i+1, snap->pots[i]);
 		spots += spot;
 		spots += "  ";
 	}
@@ -241,7 +247,7 @@ void WTable::updateView()
 	
 	// CommunityCards
 	vector<Card> allcards;
-	info.snap.communitycards.copyCards(&allcards);
+	snap->communitycards.copyCards(&allcards);
 	unsigned int cardcount = allcards.size();
 	for (unsigned int i=0; i < 5; i++)
 	{
@@ -277,16 +283,18 @@ void WTable::actionBetRaise()
 {
 	float amount = editAmount->text().toFloat();
 	
-	tableinfo info;
+	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
 	
-	((PClient*)qApp)->getTableInfo(gid, tid, &info);
-	table_snapshot *snap = &info.snap;
+	if (!tinfo)
+		return;
+	
+	table_snapshot *snap = &(tinfo->snap);
 	
 	if (snap->my_seat == -1)
 		return;
 	
 	if (amount == snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
-		((PClient*)qApp)->doSetAction(gid, Player::Allin, 0.0f);
+		((PClient*)qApp)->doSetAction(gid, Player::Allin);
 	else
 		((PClient*)qApp)->doSetAction(gid, Player::Raise, amount);
 }
@@ -296,10 +304,13 @@ void WTable::slotBetValue(int value)
 	QString svalue;
 	float max_bet = 0.0f;
 	float amount;
-	tableinfo info;
 	
-	((PClient*)qApp)->getTableInfo(gid, tid, &info);
-	table_snapshot *snap = &info.snap;
+	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+	
+	if (!tinfo)
+		return;
+	
+	table_snapshot *snap = &(tinfo->snap);
 	
 	if (snap->my_seat != -1)
 		max_bet = snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet;
