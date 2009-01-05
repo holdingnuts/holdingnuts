@@ -19,6 +19,18 @@ SNAP <game-id>:<table-id> <snap-type> [<snap-data> ...]   # snap-type := { game 
 NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
 
 
+[Snapshots]
+================================================================================
+
+SnapTable:
+	<state>:<betting-round>
+	<dealer>:<SB>:<BB>:<current>
+	cc:<community-cards>
+	s0:<cid>:<in-round>:<stake>:<bet>:<action>:<shown-hole-cards> ...
+	p0:<size> ...
+
+
+
 ################################################################################
 [[CLIENT]]
 ################################################################################
