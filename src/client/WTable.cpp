@@ -212,7 +212,18 @@ void WTable::updateView()
 				}
 				else
 				{
-					wseats[i]->setCards("back", "back");
+					vector<Card> allcards;
+					seat->holecards.copyCards(&allcards);
+					
+					if (allcards.size())
+					{
+						char card1[3], card2[3];
+						strcpy(card1, allcards[0].getName());
+						strcpy(card2, allcards[1].getName());
+						wseats[i]->setCards(card1, card2);
+					}
+					else
+						wseats[i]->setCards("back", "back");
 				}
 			}
 			else

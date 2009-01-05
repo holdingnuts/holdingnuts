@@ -54,6 +54,7 @@ public:
 		Player *player;
 		float bet;
 		bool in_round;
+		bool showcards;
 	} Seat;
 	
 	typedef struct {

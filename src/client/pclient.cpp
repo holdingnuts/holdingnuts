@@ -281,6 +281,17 @@ int server_execute(const char *cmd)
 					si.stake = st.getNextFloat();
 					si.bet = st.getNextFloat();
 					
+					/*si.action = */ st.getNext();
+					string shole = st.getNext();
+					if (shole.length() == 4)
+					{
+						Card h1(shole.substr(0, 2).c_str());
+						Card h2(shole.substr(2, 2).c_str());
+						si.holecards.setCards(h1, h2);
+					}
+					else
+						si.holecards.clear();
+					
 					if (seat_no < seat_max)
 						table.seats[seat_no] = si;
 					

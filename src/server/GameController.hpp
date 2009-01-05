@@ -103,6 +103,7 @@ private:
 	
 	time_t game_start;
 	time_t round_start;
+	time_t betround_start;
 	time_t timeout_start;
 };
 
