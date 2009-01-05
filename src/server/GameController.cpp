@@ -664,7 +664,7 @@ void GameController::stateBetting(Table *t)
 			if (action == Player::Bet)
 				snprintf(msg, sizeof(msg), "[%d] bet %.2f.", p->client_id, t->bet_amount);
 			else if (action == Player::Raise)
-				snprintf(msg, sizeof(msg), "[%d] raised %.2f to %.2f.", p->client_id, amount, t->bet_amount);
+				snprintf(msg, sizeof(msg), "[%d] raised to %.2f.", p->client_id, t->bet_amount);
 			else // allin
 				snprintf(msg, sizeof(msg), "[%d] went allin with %.2f.", p->client_id, t->seats[t->cur_player].bet);
 		}
