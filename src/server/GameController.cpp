@@ -527,7 +527,7 @@ void GameController::stateBetting(Table *t)
 		{
 			// allowed to check?
 			if (t->seats[t->cur_player].bet < t->bet_amount)
-				chat(p->client_id, t->table_id, "Err: You cannot check! Try call.");
+				chat(p->client_id, t->table_id, "Error: You cannot check! Try call.");
 			else
 				allowed_action = true;
 		}
@@ -556,9 +556,13 @@ void GameController::stateBetting(Table *t)
 		else if (action == Player::Bet)
 		{
 			if ((unsigned int)t->bet_amount > 0)
-				chat(p->client_id, t->table_id, "Err: You cannot bet, there was already a bet! Try raise.");
+				chat(p->client_id, t->table_id, "Error: You cannot bet, there was already a bet! Try raise.");
 			else if (p->next_action.amount < minimum_bet)
-				chat(p->client_id, t->table_id, "Err: You cannot bet this amount. Minimum-bet is Big Blind.");
+			{
+				snprintf(msg, sizeof(msg), "Error: You cannot bet this amount. Minimum bet is %.2f.",
+					minimum_bet);
+				chat(p->client_id, t->table_id, msg);
+			}
 			else
 			{
 				allowed_action = true;
@@ -576,7 +580,11 @@ void GameController::stateBetting(Table *t)
 				return;
 			}
 			else if (p->next_action.amount < minimum_bet)
-				chat(p->client_id, t->table_id, "Err: You cannot raise this amount.");
+			{
+				snprintf(msg, sizeof(msg), "Error: You cannot raise this amount. Minimum bet is %.2f.",
+					minimum_bet);
+				chat(p->client_id, t->table_id, msg);
+			}
 			else
 			{
 				allowed_action = true;
