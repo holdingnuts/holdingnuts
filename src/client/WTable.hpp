@@ -121,6 +121,7 @@ private slots:
 	void actionCheckCall();
 	void actionBetRaise();
 	void slotBetValue(int value);
+	void slotShow();
 
 private:
 	int gid;

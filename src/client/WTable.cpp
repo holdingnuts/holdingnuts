@@ -326,6 +326,11 @@ void WTable::slotBetValue(int value)
 	editAmount->setText(svalue);
 }
 
+void WTable::slotShow()
+{
+	updateView();
+	show();
+}
 
 
 WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
