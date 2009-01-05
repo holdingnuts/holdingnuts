@@ -518,6 +518,12 @@ void GameController::stateBetting(Table *t)
 				p->next_action.action = Player::Check;
 				return;
 			}
+			else if (t->bet_amount > t->seats[t->cur_player].bet + p->stake)
+			{
+				// simply convert this action to allin
+				p->next_action.action = Player::Allin;
+				return;
+			}
 			else
 			{
 				allowed_action = true;
@@ -614,20 +620,25 @@ void GameController::stateBetting(Table *t)
 		t->seats[t->cur_player].bet += amount;
 		p->stake -= amount;
 		
-		if (action == Player::Bet || action == Player::Raise || (action == Player::Allin && amount > (unsigned int)t->bet_amount))
+		if (action == Player::Bet || action == Player::Raise || action == Player::Allin)
 		{
 			// only re-open betting round if amount greater than table-bet
 			if (t->seats[t->cur_player].bet > t->bet_amount && t->seats[t->cur_player].bet >= minimum_bet)
 			{
 				t->last_bet_player = t->cur_player;
-				t->last_bet_amount = t->bet_amount;
+				t->last_bet_amount = t->bet_amount;     // needed for minimum-bet
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
-			snprintf(msg, sizeof(msg), "[%d] bet/raised/allin $%.2f.", p->client_id, amount);
+			if (action == Player::Bet)
+				snprintf(msg, sizeof(msg), "[%d] bet %.2f.", p->client_id, t->bet_amount);
+			else if (action == Player::Raise)
+				snprintf(msg, sizeof(msg), "[%d] raised %.2f to %.2f.", p->client_id, amount, t->bet_amount);
+			else // allin
+				snprintf(msg, sizeof(msg), "[%d] went allin with %.2f.", p->client_id, t->seats[t->cur_player].bet);
 		}
 		else
-			snprintf(msg, sizeof(msg), "[%d] called $%.2f.", p->client_id, amount);
+			snprintf(msg, sizeof(msg), "[%d] called %.2f.", p->client_id, amount);
 		
 		
 		chat(t->table_id, msg);
