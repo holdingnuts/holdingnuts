@@ -533,6 +533,7 @@ void GameController::stateBetting(Table *t)
 	
 	Player *p = t->seats[t->cur_player].player;
 	bool allowed_action = false;  // is action allowed?
+	bool auto_action = false;
 	
 	Player::PlayerAction action;
 	float amount;
@@ -648,6 +649,7 @@ void GameController::stateBetting(Table *t)
 				action = Player::Check;
 			
 			allowed_action = true;
+			auto_action = true;
 		}
 #endif /* SERVER_TESTING */
 	}
@@ -667,12 +669,12 @@ void GameController::stateBetting(Table *t)
 	{
 		t->seats[t->cur_player].in_round = false;
 		
-		snprintf(msg, sizeof(msg), "[%d] folded.", p->client_id);
+		snprintf(msg, sizeof(msg), "[%d]%s folded.", p->client_id, auto_action ? " was" : "");
 		chat(t->table_id, msg);
 	}
 	else if (action == Player::Check)
 	{
-		snprintf(msg, sizeof(msg), "[%d] checked.", p->client_id);
+		snprintf(msg, sizeof(msg), "[%d]%s checked.", p->client_id, auto_action ? " was" : "");
 		chat(t->table_id, msg);
 	}
 	else
