@@ -233,3 +233,11 @@ void Table::collectBets()
 	}
 #endif
 }
+
+float Table::determineMinimumBet() const
+{
+	if ((int) bet_amount == 0)
+		return blind;
+	else
+		return bet_amount + (bet_amount - last_bet_amount);
+}

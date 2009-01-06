@@ -77,6 +77,8 @@ public:
 	bool isPlayerInvolvedInPot(Pot *pot, Player *p);
 	unsigned int getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &wl);
 	
+	float determineMinimumBet() const;
+	
 	void tick();
 	
 private:

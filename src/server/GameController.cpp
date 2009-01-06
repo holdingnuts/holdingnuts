@@ -260,25 +260,36 @@ void GameController::sendTableSnapshot(Table *t)
 	else
 	{
 		char tmp[128];
-		snprintf(tmp, sizeof(tmp), "%d:%d:%d:%d",
+		snprintf(tmp, sizeof(tmp), "%d:%d:%d:%d:%d",
 			t->seats[t->dealer].seat_no,
 			t->seats[t->sb].seat_no,
 			t->seats[t->bb].seat_no,
-			t->seats[t->cur_player].seat_no);
+			t->seats[t->cur_player].seat_no,
+			t->seats[t->last_bet_player].seat_no);
 		sturn = tmp;
 	}
+	
+	
+	float minimum_bet;
+	if (t->state == Table::Betting)
+		minimum_bet = t->determineMinimumBet();
+	else
+		minimum_bet = 0.0f;
+	
 	
 	snprintf(msg, sizeof(msg),
 		"%d:%d "           // <state>:<betting-round>
 		"%s "              // <dealer>:<SB>:<BB>:<current>
 		"cc:%s "           // <community-cards>
 		"%s "              // seats
-		"%s",              // pots
+		"%s "              // pots
+		"%.2f",            // minimum bet
 		t->state, (t->state == Table::Betting) ? t->betround : -1,
 		sturn.c_str(),
 		scards.c_str(),
 		sseats.c_str(),
-		spots.c_str());
+		spots.c_str(),
+		minimum_bet);
 	
 	snap(t->table_id, SnapTable, msg);
 }
@@ -526,11 +537,7 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
-	float minimum_bet;
-	if ((int) t->bet_amount == 0)
-		minimum_bet = t->blind;
-	else
-		minimum_bet = t->bet_amount + (t->bet_amount - t->last_bet_amount);
+	float minimum_bet = t->determineMinimumBet();
 	
 	if (t->nomoreaction)  // early showdown, no more action at table possible
 	{

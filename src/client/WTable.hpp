@@ -58,7 +58,9 @@ typedef struct {
 	unsigned int s_sb;
 	unsigned int s_bb;
 	unsigned int s_cur;
+	unsigned int s_lastbet;
 	std::vector<float> pots;
+	float minimum_bet;
 	CommunityCards communitycards;
 	seatinfo seats[10];
 	int my_seat;

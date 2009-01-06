@@ -215,6 +215,7 @@ int server_execute(const char *cmd)
 				table.s_sb = st.getNextInt();
 				table.s_bb = st.getNextInt();
 				table.s_cur = st.getNextInt();
+				table.s_lastbet = st.getNextInt();
 				
 				// community-cards
 				{
@@ -313,6 +314,9 @@ int server_execute(const char *cmd)
 					
 					tmp = t.getNext();
 				} while (tmp[0] == 'p');
+				
+				
+				table.minimum_bet = Tokenizer::string2float(tmp);
 				
 				
 				if (table.state == Table::Blinds)

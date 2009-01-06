@@ -15,20 +15,22 @@ ERR [<code>] [<text>]
 MSG <from> <sender-name> <message>        # from := { -1 | <game-id>:<table-id> | <client-id> }    # -1 is server
 CLIENTINFO <client-id> <type>:<value> [...]
 GAMELIST <game-info>
-SNAP <game-id>:<table-id> <snap-type> [<snap-data> ...]   # snap-type := { game | table }
+SNAP <game-id>:<table-id> <snap-type> [<snap-data> ...]   # snap-type := { SnapGameState | SnapTable | SnapHoleCards }
 NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
 
 
 [Snapshots]
 ================================================================================
 
-SnapTable:
-	<state>:<betting-round>
-	<dealer>:<SB>:<BB>:<current>
-	cc:<community-cards>
-	s0:<cid>:<in-round>:<stake>:<bet>:<action>:<shown-hole-cards> ...
-	p0:<size> ...
-
+SnapTable data:
+	<state>:<betting-round> \
+	<dealer>:<SB>:<BB>:<current>:<last-bet-player> \
+	cc:<community-cards> \
+	s0:<cid>:<flags>:<stake>:<bet>:<exec-action>:<shown-hole-cards> ... \
+	p0:<size> ... \
+	<minimum-bet>
+	
+	flags := { in-round || sitout }
 
 
 ################################################################################
