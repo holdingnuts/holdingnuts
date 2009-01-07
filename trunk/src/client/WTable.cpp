@@ -113,6 +113,10 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	QPushButton *btnBetRaise = new QPushButton(tr("Bet/Raise"), this);
 	connect(btnBetRaise, SIGNAL(clicked()), this, SLOT(actionBetRaise()));
 	
+	// FIXME:
+	QPushButton *btnShow = new QPushButton(tr("Show"), this);
+	connect(btnShow, SIGNAL(clicked()), this, SLOT(actionShow()));
+	
 	//btnBetRaise->setCheckable(true);
 	
 	//btngrpActions->addButton(btnFold);
@@ -141,12 +145,15 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	lActions->addWidget(btnFold);
 	lActions->addWidget(btnCheckCall);
 	lActions->addWidget(btnBetRaise);
+	
+	lActions->addWidget(btnShow);
+	
 	lActions->addLayout(lAmount);
 	
 	QWidget *wActions = new QWidget(this);
 	//wActions->setPalette(Qt::gray);
 	//wActions->setAutoFillBackground(true);
-	wActions->setFixedSize(350, 60);
+	wActions->setFixedSize(450, 60);
 	wActions->setLayout(lActions);
 	
 	QLabel *wTable = new QLabel(this);
@@ -308,6 +315,11 @@ void WTable::actionBetRaise()
 		((PClient*)qApp)->doSetAction(gid, Player::Allin);
 	else
 		((PClient*)qApp)->doSetAction(gid, Player::Raise, amount);
+}
+
+void WTable::actionShow()
+{
+	((PClient*)qApp)->doSetAction(gid, Player::Show);
 }
 
 void WTable::slotBetValue(int value)

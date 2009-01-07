@@ -75,6 +75,7 @@ public:
 	void stateNewRound(Table *t);
 	void stateBlinds(Table *t);
 	void stateBetting(Table *t);
+	void stateAskShow(Table *t);
 	void stateAllFolded(Table *t);
 	void stateShowdown(Table *t);
 	void stateEndRound(Table *t);

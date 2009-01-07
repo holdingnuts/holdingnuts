@@ -37,6 +37,7 @@ public:
 		NewRound,
 		Blinds,
 		Betting,
+		AskShow,
 		AllFolded,
 		Showdown,
 		EndRound
