@@ -591,6 +591,9 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 	case Player::Allin:
 		saction = "allin";
 		break;
+	case Player::Show:
+		saction = "show";
+		break;
 	case Player::ResetAction:
 		saction = "reset";
 		break;

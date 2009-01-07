@@ -510,11 +510,12 @@ void GameController::stateBlinds(Table *t)
 	// give out hole-cards
 	dealHole(t);
 	
-#ifdef SERVER_TESTING
-	// tell current player
+	
+	// tell player 'under the gun' it's his turn
 	Player *p = t->seats[t->cur_player].player;
-	chat(p->client_id, t->table_id, "You're under the gun!");
-#endif /* SERVER_TESTING */
+	snprintf(msg, sizeof(msg), "[%d], it's your turn!", p->client_id);
+	chat(p->client_id, t->table_id, msg);
+	
 	
 	t->state = Table::Betting;
 	t->betround = Table::Preflop;
@@ -679,7 +680,7 @@ void GameController::stateBetting(Table *t)
 	}
 	else
 	{
-		// player can't bet/raise more than this stake
+		// player can't bet/raise more than his stake
 		if (amount > p->stake)
 			amount = p->stake;
 		
@@ -714,7 +715,17 @@ void GameController::stateBetting(Table *t)
 	// all players except one folded, so end this hand
 	if (t->countActivePlayers() == 1)
 	{
-		t->state = Table::AllFolded;
+		// collect bets into pot
+		t->collectBets();
+		
+		t->state = Table::AskShow;
+		
+		// set last remaining player as current player
+		t->cur_player = t->getNextActivePlayer(t->cur_player);
+		
+		// initialize the player's timeout
+		timeout_start = time(NULL);
+		
 		sendTableSnapshot(t);
 		return;
 	}
@@ -739,29 +750,38 @@ void GameController::stateBetting(Table *t)
 		switch ((int)t->betround)
 		{
 		case Table::Preflop:
-			// deal flop
-			dealFlop(t);
-			
 			t->betround = Table::Flop;
+			dealFlop(t);
 			break;
 		
 		case Table::Flop:
-			// deal turn
-			dealTurn(t);
-			
 			t->betround = Table::Turn;
+			dealTurn(t);
 			break;
 		
 		case Table::Turn:
-			// deal river
-			dealRiver(t);
-			
 			t->betround = Table::River;
+			dealRiver(t);
 			break;
 		
 		case Table::River:
+			// collect bets into pot
+			t->collectBets();
+			
 			// end of hand, do showdown
-			t->state = Table::Showdown;
+			t->state = Table::AskShow;
+			
+			// last_bet_player MUST show his hand
+			t->seats[t->last_bet_player].showcards = true;
+			
+			// set the player behind last action as current player
+			t->cur_player = t->getNextActivePlayer(t->last_bet_player);
+			
+			// initialize the player's timeout
+			timeout_start = time(NULL);
+			
+			sendTableSnapshot(t);
+			
 			return;
 		}
 		
@@ -769,9 +789,6 @@ void GameController::stateBetting(Table *t)
 		// reset the highest bet-amount
 		t->bet_amount = 0.0f;
 		t->last_bet_amount = 0.0f;
-		
-		// re-initialize bet-round delay
-		betround_start = time(NULL);
 		
 		// set current player to SB (or next active behind SB)
 		bool headsup_rule = (t->seats.size() == 2);
@@ -782,6 +799,9 @@ void GameController::stateBetting(Table *t)
 		
 		// re-initialize the player's timeout
 		timeout_start = time(NULL);
+		
+		// re-initialize bet-round delay
+		betround_start = time(NULL);
 		
 		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
@@ -805,21 +825,93 @@ void GameController::stateBetting(Table *t)
 		sendTableSnapshot(t);
 	}
 	
-#ifdef SERVER_TESTING
+	
 	// tell player it's his turn
 	p = t->seats[t->cur_player].player;
 	if (!t->nomoreaction && (int)p->stake != 0)
-		chat(p->client_id, t->table_id, "It's your turn!");
-#endif /* SERVER_TESTING */
+	{
+		snprintf(msg, sizeof(msg), "[%d], it's your turn!", p->client_id);
+		chat(p->client_id, t->table_id, msg);
+	}
+}
+
+void GameController::stateAskShow(Table *t)
+{
+	bool chose_action = false;
+	
+	Player *p = t->seats[t->cur_player].player;
+	
+	if (p->next_action.valid)  // has player set an action?
+	{
+		if (p->next_action.action == Player::Fold)
+		{
+			// muck cards
+			chose_action = true;
+		}
+		else if (p->next_action.action == Player::Show)
+		{
+			// show cards
+			t->seats[t->cur_player].showcards = true;
+			
+			chose_action = true;
+		}
+		else  // should never happen
+			p->next_action.valid = false;
+	}
+	else
+	{
+		// handle player timeout
+		const int timeout = 4;   // FIXME: configurable
+		if ((int)difftime(time(NULL), timeout_start) > timeout)
+		{
+			// default on showdown is "to show"
+			// Note: client needs to determine if it's hand is
+			//       already lost and needs to fold if wanted
+			if (t->countActivePlayers() > 1)
+				t->seats[t->cur_player].showcards = true;
+			
+			chose_action = true;
+		}
+	}
+	
+	// return here if no action chosen till now
+	if (!chose_action)
+		return;
+	
+	// all-players-(except-one)-folded or showdown?
+	if (t->countActivePlayers() == 1)
+	{
+		t->state = Table::AllFolded;
+		
+		sendTableSnapshot(t);
+	}
+	else
+	{
+		// player is out if he don't want to show his cards
+		if (t->seats[t->cur_player].showcards == false)
+			t->seats[t->cur_player].in_round = false;
+		
+		sendTableSnapshot(t);
+		
+		if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
+		{
+			t->state = Table::Showdown;
+			return;
+		}
+		else
+		{
+			// find next player
+			t->cur_player = t->getNextActivePlayer(t->cur_player);
+			
+			timeout_start = time(NULL);
+		}
+	}
 }
 
 void GameController::stateAllFolded(Table *t)
 {
-	// collect bets into pot
-	t->collectBets();
-	
 	// get last remaining player
-	Player *p = t->seats[t->getNextActivePlayer(t->cur_player)].player;
+	Player *p = t->seats[t->cur_player].player;
 	
 	// FIXME: ask player if he wants to show cards
 	
@@ -837,17 +929,11 @@ void GameController::stateShowdown(Table *t)
 {
 	chat(t->table_id, "Showdown");
 	
-	// collect bets into pot
-	t->collectBets();
-	
-	// the player who did the last action is first to show
+	// the player who did the last action is first
 	unsigned int showdown_player = t->last_bet_player;
 	
-	// FIXME: ask for showdown if player has the option
 	for (unsigned int i=0; i < t->countActivePlayers(); i++)
 	{
-		t->seats[showdown_player].showcards = true; // FIXME: ask first
-		
 		Player *p = t->seats[showdown_player].player;
 		
 		HandStrength strength;
@@ -904,6 +990,7 @@ void GameController::stateShowdown(Table *t)
 			for (unsigned int pi=0; pi < winner_count; pi++)
 			{
 				Player *p = findPlayer(tw[pi].getId());
+				
 				// skip pot if player not involved in it
 				if (!t->isPlayerInvolvedInPot(pot, p))
 					continue;
@@ -911,11 +998,15 @@ void GameController::stateShowdown(Table *t)
 				dbg_print("winlist", "wl #%d: player #%d: pot #%d: involved-count=%d",
 					i+1, pi+1, poti+1, involved_count);
 #endif
+				// pot is divided by number of players involved in
 				float win_amount = pot->amount / involved_count;
 				
 				if ((int) win_amount > 0)
 				{
+					// transfer winning amount to player
 					p->stake += win_amount;
+					
+					// count up overall cashed-out
 					cashout_amount += win_amount;
 					
 					snprintf(msg, sizeof(msg),
@@ -925,10 +1016,12 @@ void GameController::stateShowdown(Table *t)
 				}
 			}
 			
+			// reduce pot about the overall cashed-out
 			pot->amount -= cashout_amount;
 		}
 	}
 	
+	// reset all pots
 	t->pots.clear();
 	
 	
@@ -949,6 +1042,7 @@ void GameController::stateEndRound(Table *t)
 		{
 			Player *p = e->player;
 			
+			// player has no stake left
 			if ((int)p->stake == 0)
 			{
 				dbg_print("stateEndRound", "removed player %d", p->client_id);
@@ -980,6 +1074,8 @@ int GameController::handleTable(Table *t)
 		stateBlinds(t);
 	else if (t->state == Table::Betting)
 		stateBetting(t);
+	else if (t->state == Table::AskShow)
+		stateAskShow(t);
 	else if (t->state == Table::AllFolded)
 		stateAllFolded(t);
 	else if (t->state == Table::Showdown)
