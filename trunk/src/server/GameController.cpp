@@ -913,8 +913,6 @@ void GameController::stateAllFolded(Table *t)
 	// get last remaining player
 	Player *p = t->seats[t->cur_player].player;
 	
-	// FIXME: ask player if he wants to show cards
-	
 	snprintf(msg, sizeof(msg), "[%d] wins %.2f", p->client_id, t->pots[0].amount);
 	chat(t->table_id, msg);
 	
