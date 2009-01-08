@@ -925,43 +925,45 @@ void GameController::stateAllFolded(Table *t)
 
 void GameController::stateShowdown(Table *t)
 {
-	chat(t->table_id, "Showdown");
-	
 	// the player who did the last action is first
 	unsigned int showdown_player = t->last_bet_player;
 	
+	// determine and send out hand-strength messages
 	for (unsigned int i=0; i < t->countActivePlayers(); i++)
 	{
-		Player *p = t->seats[showdown_player].player;
-		
-		HandStrength strength;
-		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
-		
-		vector<Card> cards;
-		string hsstr = "rank: ";
-		
-		cards.clear();
-		strength.copyRankCards(&cards);
-		for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
+		if (t->seats[showdown_player].showcards)
 		{
-			sprintf(msg, "%s ", e->getName());
-			hsstr += msg;
+			Player *p = t->seats[showdown_player].player;
+			
+			HandStrength strength;
+			GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
+			
+			vector<Card> cards;
+			string hsstr = "rank: ";
+			
+			cards.clear();
+			strength.copyRankCards(&cards);
+			for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
+			{
+				sprintf(msg, "%s ", e->getName());
+				hsstr += msg;
+			}
+			
+			hsstr += "kicker: ";
+			cards.clear();
+			strength.copyKickerCards(&cards);
+			for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
+			{
+				sprintf(msg, "%s ", e->getName());
+				hsstr += msg;
+			}
+			
+			snprintf(msg, sizeof(msg), "[%d] has %s (%s)",
+				p->client_id,
+				HandStrength::getRankingName(strength.getRanking()),
+				hsstr.c_str());
+			chat(t->table_id, msg);
 		}
-		
-		hsstr += "kicker: ";
-		cards.clear();
-		strength.copyKickerCards(&cards);
-		for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
-		{
-			sprintf(msg, "%s ", e->getName());
-			hsstr += msg;
-		}
-		
-		snprintf(msg, sizeof(msg), "[%d] has %s (%s)",
-			p->client_id,
-			HandStrength::getRankingName(strength.getRanking()),
-			hsstr.c_str());
-		chat(t->table_id, msg);
 		
 		showdown_player = t->getNextActivePlayer(showdown_player);
 	}
