@@ -43,7 +43,7 @@ GameController::GameController()
 	game_id = -1;
 	
 	started = false;
-	max_players = MAX_PLAYERS;
+	max_players = 10;
 	
 	type = SNG;
 }
@@ -93,7 +93,7 @@ Player* GameController::findPlayer(int cid)
 
 bool GameController::setPlayerMax(unsigned int max)
 {
-	if (max < 2 || max > MAX_PLAYERS)
+	if (max < 2)
 		return false;
 	
 	max_players = max;

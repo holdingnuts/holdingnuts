@@ -22,6 +22,7 @@
 #define _GAME_H
 
 #include <vector>
+#include <ctime>
 
 #include "Config.h"
 #include "Platform.h"
@@ -32,8 +33,7 @@ typedef enum {
 	Connected = 0x01,
 	Introduced = 0x02,
 	SentInfo = 0x04,
-	Authed = 0x08,
-	IsPlayer = 0x10
+	Authed = 0x08
 } clientstate;
 
 typedef struct {
@@ -41,20 +41,28 @@ typedef struct {
 	int id;
 	//time_t lastdata;
 	
+	sockaddr_in saddr;
+	
 	char msgbuf[1024];
 	int buflen;
 	
 	unsigned int state;
 	unsigned int version;
+	char uuid[40];  // 16*2 + 4 sep + \0 = 37
 	char name[64];
 } clientcon;
 
+typedef struct {
+	int id;
+	//sockaddr_in saddr;
+	time_t logout_time;
+} clientcon_archive;
 
 
 // used by pserver.cpp
 int gameloop();
 std::vector<clientcon>& get_client_vector();
-bool client_add(socktype sock);
+bool client_add(socktype sock, sockaddr_in *saddr);
 bool client_remove(socktype sock);
 int client_handle(socktype sock);
 

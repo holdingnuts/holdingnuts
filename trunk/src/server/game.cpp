@@ -23,6 +23,7 @@
 #include <cstring>
 
 #include <vector>
+#include <map>
 #include <string>
 
 #include "Config.h"
@@ -54,6 +55,8 @@ GameController* get_game_by_id(int gid)
 ////////////////////////
 vector<clientcon> clients;
 unsigned int cid_counter = 0;
+
+map<string,clientcon_archive> con_archive;
 
 // for pserver.cpp filling FD_SET
 vector<clientcon>& get_client_vector()
@@ -173,7 +176,7 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 	return true;
 }
 
-bool client_add(socktype sock)
+bool client_add(socktype sock, sockaddr_in *saddr)
 {
 	clientcon client;
 	
@@ -181,21 +184,13 @@ bool client_add(socktype sock)
 	
 	memset(&client, 0, sizeof(client));
 	client.sock = sock;
-	client.id = cid_counter++;
+	client.saddr = *saddr;
+	client.id = -1;
 	
 	// set initial state
 	client.state |= Connected;
 	
-	snprintf(client.name, sizeof(client.name), "client_%d", client.id);
-	
 	clients.push_back(client);
-	
-	// send initial data
-	char msg[1024];
-	snprintf(msg, sizeof(msg), "PSERVER %d %d",
-		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
-		client.id);
-	send_msg(client.sock, msg);
 	
 	return true;
 }
@@ -220,6 +215,16 @@ bool client_remove(socktype sock)
 					client->name, client->id);
 				
 				send_msg = true;
+				
+				// save client-con in archive
+				string uuid = client->uuid;
+				
+				if (uuid.length())
+				{
+					con_archive[uuid].id = client->id;
+					con_archive[uuid].logout_time = time(NULL);
+					//con_archive[uuid].saddr = client->saddr;
+				}
 			}
 			
 			dbg_print("clientsock", "(%d) connection closed", client->sock);
@@ -248,7 +253,7 @@ int client_execute(clientcon *client, const char *cmd)
 	if (!t.getCount())
 		return 0;
 	
-	dbg_print("clientsock", "(%d) executing '%s'", s, cmd);
+	//dbg_print("clientsock", "(%d) executing '%s'", s, cmd);
 	
 	unsigned int argcount = t.getCount() - 1;
 	
@@ -263,6 +268,8 @@ int client_execute(clientcon *client, const char *cmd)
 		if (command == "PCLIENT")
 		{
 			unsigned int version = t.getNextInt();
+			string uuid = t.getNext();
+			
 			if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
 				VERSION_GETMINOR(version) != VERSION_MINOR)
 			{
@@ -273,7 +280,25 @@ int client_execute(clientcon *client, const char *cmd)
 			{
 				client->version = version;
 				client->state |= Introduced;
-				send_ok(s);
+				
+				snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
+				
+				// re-assign cid if this client was previously connected (and cid isn't already connected)
+				if (uuid.length() && con_archive.find(uuid) != con_archive.end() && !get_client_by_id(con_archive[uuid].id))
+					client->id = con_archive[uuid].id;
+				else
+					client->id = cid_counter++;
+				
+				// set temporary client name
+				snprintf(client->name, sizeof(client->name), "client_%d", client->id);
+				
+				
+				// send 'introduced response'
+				snprintf(msg, sizeof(msg), "PSERVER %d %d",
+					VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
+					client->id);
+					
+				send_msg(client->sock, msg);
 			}
 		}
 		else
@@ -633,6 +658,8 @@ int gameloop()
 		GameController *g = *e;
 		g->tick();
 	}
+	
+	// TODO: delete all expired archived connection-data (con_archive)
 	
 	return 0;
 }

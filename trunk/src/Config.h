@@ -25,18 +25,25 @@
 #include "Platform.h"
 
 
+/* the default port the server is listening on */
 #define DEFAULT_SERVER_PORT  12345
-#define MAX_PLAYERS  10
 
-#define SERVER_LISTEN_BACKLOG       3
-#define SERVER_SELECT_TIMEOUT_SEC   0
-#define SERVER_SELECT_TIMEOUT_USEC  150000  /* 150ms */
+/* the hard-limit of clients which can connect */
+#define SERVER_CLIENT_HARDLIMIT  250
 
-/* server testing; verbose messages */
-//#define SERVER_TESTING
+/* max pending connections for listening socket */
+#define SERVER_LISTEN_BACKLOG  3
+
+/* time to wait for an action on the non-blocking sockets (in millisecs) */
+#define SERVER_SELECT_TIMEOUT_USEC  150000
+
+/* server testing mode (define to enable) */
+#undef SERVER_TESTING
 
 
-#define CLIENT_CONNECT_TIMEOUT     10
+
+/* timeout for connection attempt to server (in seconds) */
+#define CLIENT_CONNECT_TIMEOUT  10
 
 
 #endif /* _CONFIG_H */

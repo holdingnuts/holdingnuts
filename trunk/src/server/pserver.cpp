@@ -116,7 +116,7 @@ int mainloop()
 		gameloop();
 		
 		struct timeval timeout;  /* timeout for select */
-		timeout.tv_sec  = SERVER_SELECT_TIMEOUT_SEC;
+		timeout.tv_sec  = 0;
 		timeout.tv_usec = SERVER_SELECT_TIMEOUT_USEC;
 		
 		FD_ZERO(&fds);
@@ -153,7 +153,7 @@ int mainloop()
 				
 				socket_setnonblocking(client_sock);
 				
-				client_add(client_sock);
+				client_add(client_sock, &saddr);
 				
 				FD_CLR(sock, &fds);
 			}
