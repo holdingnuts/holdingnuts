@@ -221,6 +221,7 @@ bool client_remove(socktype sock)
 				
 				if (uuid.length())
 				{
+					// FIXME: only add max. 3 entries for each IP
 					con_archive[uuid].id = client->id;
 					con_archive[uuid].logout_time = time(NULL);
 					//con_archive[uuid].saddr = client->saddr;
