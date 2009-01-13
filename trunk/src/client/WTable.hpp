@@ -30,15 +30,19 @@
 #include <QLineEdit>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QStackedLayout>
 #include <QLabel>
 #include <QTextEdit>
 #include <QButtonGroup>
+#include <QCheckBox>
 #include <QSlider>
+#include <QPalette>
 
 #include "Card.hpp"
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
 #include "GameLogic.hpp"
+#include "Table.hpp"
 #include "Player.hpp"
 
 
@@ -80,7 +84,7 @@ private:
 };
 
 
-class WSeat : public QWidget
+class WSeat : public QLabel
 {
 Q_OBJECT
 
@@ -89,10 +93,12 @@ public:
 
 	void setName(QString name);
 	void setStake(float amount);
-	void setAction(Player::PlayerAction action, float amount);
+	void setAction(Player::PlayerAction action, float amount=0.0f);
 	void setCurrent(bool cur);
 	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
+	WPicture *card1, *card2;   // FIXME: :)
+	WPicture *scard1, *scard2;
 	
 private slots:
 	
@@ -100,12 +106,11 @@ private slots:
 private:
 	QLabel *lblCaption;
 	QLabel *lblStake;
-	WPicture *card1, *card2;
 	QLabel *lblAction;
 };
 
 
-class WTable : public QWidget
+class WTable : public QLabel
 {
 Q_OBJECT
 
@@ -117,6 +122,8 @@ public:
 
 protected:
 	void closeEvent(QCloseEvent *event);
+	void resizeEvent(QResizeEvent * event);
+	void arrangeItems();
 
 private slots:
 	void actionFold();
@@ -125,18 +132,23 @@ private slots:
 	void actionShow();
 	void slotBetValue(int value);
 	void slotShow();
+	void slotTest();
 
 private:
 	int gid;
 	int tid;
 	
+	QStackedLayout *stlayActions;
 	QLineEdit *editAmount;
 	QSlider *sliderAmount;
+	
+	QLabel *wTable;
 	
 	WSeat *wseats[10];
 	
 	QLabel *lblPots;
 	WPicture *cc[5];
+	QWidget *wCC;
 };
 
 
