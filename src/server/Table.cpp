@@ -148,7 +148,7 @@ void Table::collectBets()
 		}
 		
 		
-#ifdef DEBUG
+#if 0
 		dbg_print("collectBets", "smallest_bet: %s = %.2f", need_sidepot ? "true" : "false", smallest_bet);
 #endif
 		// there are no bets, do nothing
