@@ -29,99 +29,41 @@
 using namespace std;
 
 
-WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
+WTable::WTable(int gid, int tid, QWidget *parent) : QLabel(parent)
 {
 	this->gid = gid;
 	this->tid = tid;
 	
+	//setAttribute(Qt::WA_DeleteOnClose); // FIXME: implement correctly
+	
 	setWindowTitle("HoldingNuts table");
-	//setAttribute(Qt::WA_DeleteOnClose); // FIXME:
-/*
-	0	1	2	3	4	5	6	7	8	9	10
-0			_						_		
-1				S		D		S			
-2		S								S	
-3	S										S
-4		S								S	
-5					S		S				
-*/
-	QGridLayout *grid_seats = new QGridLayout();
+	setMinimumSize(520, 450);
 	
-	QLabel *lDealer = new QLabel(tr("Dealer"), this);
-	lDealer->setAlignment(Qt::AlignCenter);
-	grid_seats->addWidget(lDealer, 1, 5);
-	
-	QLabel *lSpacer1 = new QLabel(" ", this);
-	QLabel *lSpacer2 = new QLabel(" ", this);
-	grid_seats->addWidget(lSpacer1, 1, 2);
-	grid_seats->addWidget(lSpacer2, 1, 8);
-	
-	struct seatinfo {
-		QString name;
-		int col;  // x
-		int row;  // y
-	} seats[] = {
-		{ "Seat 1",  7, 1 },
-		{ "Seat 2",  9, 2 },
-		{ "Seat 3",  10, 3 },
-		{ "Seat 4",  9, 4 },
-		{ "Seat 5",  6, 5 },
-		{ "Seat 6",  4, 5 },
-		{ "Seat 7",  1, 4 },
-		{ "Seat 8",  0, 3 },
-		{ "Seat 9",  1, 2 },
-		{ "Seat 10", 3, 1 }
-	};
-	
-	const int seatcount = sizeof(seats) / sizeof(seats[0]);
-	
-	for (int i=0; i < seatcount; i++)
-	{
-		wseats[i] = new WSeat(i, this);
-		grid_seats->addWidget(wseats[i], seats[i].row, seats[i].col);
-	}
-	
-	lblPots = new QLabel("Pots", this);
-	lblPots->setAlignment(Qt::AlignCenter);
-	grid_seats->addWidget(lblPots, 3, 5);
-	
-	QHBoxLayout *lCC = new QHBoxLayout();
-	for (unsigned int i=0; i < 5; i++)
-	{
-		cc[i] = new WPicture("gfx/deck/default/back.png", this);
-		cc[i]->setFixedSize(45, 60);
-		lCC->addWidget(cc[i]);
-	}
-	
-	grid_seats->addLayout(lCC, 2, 4, 1, 3);
+	// set window-background
+	QImage bgimage("gfx/table/background.png");
+	setPixmap(QPixmap::fromImage(bgimage));
+	setScaledContents(true);
 	
 	///////
 	
-	QHBoxLayout *lActions = new QHBoxLayout();
-	
-	//QButtonGroup *btngrpActions = new QButtonGroup();
-	//btngrpActions->setExclusive(true);
-	
 	QPushButton *btnFold = new QPushButton(tr("Fold"), this);
-	//btnFold->setCheckable(true);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
 	
 	QPushButton *btnCheckCall = new QPushButton(tr("Check/Call"), this);
-	//btnCheckCall->setCheckable(true);
 	connect(btnCheckCall, SIGNAL(clicked()), this, SLOT(actionCheckCall()));
 	
 	QPushButton *btnBetRaise = new QPushButton(tr("Bet/Raise"), this);
 	connect(btnBetRaise, SIGNAL(clicked()), this, SLOT(actionBetRaise()));
 	
-	// FIXME:
 	QPushButton *btnShow = new QPushButton(tr("Show"), this);
 	connect(btnShow, SIGNAL(clicked()), this, SLOT(actionShow()));
 	
-	//btnBetRaise->setCheckable(true);
+	QPushButton *btnMuck = new QPushButton(tr("Muck"), this);
+	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionFold()));
 	
-	//btngrpActions->addButton(btnFold);
-	//btngrpActions->addButton(btnCheckCall);
-	//btngrpActions->addButton(btnBetRaise);
+	
+	QCheckBox *chkFold = new QCheckBox(tr("Fold"), this);
+	
 	
 	QVBoxLayout *lAmount = new QVBoxLayout();
 	
@@ -142,33 +84,172 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QWidget(parent)
 	lAmount->addWidget(editAmount);
 	lAmount->addWidget(sliderAmount);
 	
+	QHBoxLayout *lActions = new QHBoxLayout();
 	lActions->addWidget(btnFold);
 	lActions->addWidget(btnCheckCall);
 	lActions->addWidget(btnBetRaise);
-	
-	lActions->addWidget(btnShow);
-	
 	lActions->addLayout(lAmount);
 	
-	QWidget *wActions = new QWidget(this);
+	QHBoxLayout *lPreActions = new QHBoxLayout();
+	lPreActions->addWidget(chkFold);
+	
+	QHBoxLayout *lPostActions = new QHBoxLayout();
+	lPostActions->addWidget(btnMuck);
+	lPostActions->addWidget(btnShow);
+	
+	
+	stlayActions = new QStackedLayout();
+	QWidget *pageActions = new QWidget(this);
+	QWidget *pagePreActions = new QWidget(this);
+	QWidget *pagePostActions = new QWidget(this);
+	QWidget *pageNoActions = new QWidget(this);
+	
+	pageActions->setLayout(lActions);
+	pagePreActions->setLayout(lPreActions);
+	pagePostActions->setLayout(lPostActions);
+	
+	stlayActions->addWidget(pageActions);
+	stlayActions->addWidget(pagePreActions);
+	stlayActions->addWidget(pagePostActions);
+	stlayActions->addWidget(pageNoActions);
+	
+	
+	
+	QLabel *wActions = new QLabel(this);
 	//wActions->setPalette(Qt::gray);
 	//wActions->setAutoFillBackground(true);
-	wActions->setFixedSize(450, 60);
-	wActions->setLayout(lActions);
+	QImage aimage("gfx/table/actions.png");
+	wActions->setPixmap(QPixmap::fromImage(aimage));
+	wActions->setScaledContents(true);
+	wActions->setFixedSize(400, 60);
+	wActions->setLayout(stlayActions);
 	
-	QLabel *wTable = new QLabel(this);
-	wTable->setLayout(grid_seats);
+	wTable = new QLabel(this);
 	//wTable->setBackgroundRole(QPalette::Base);
+	//wTable->setMinimumSize(300, 300);
+	wTable->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	wTable->setScaledContents(true);
 	QImage image("gfx/table/default.png");
 	wTable->setPixmap(QPixmap::fromImage(image));
 	/////
 	
+	QWidget *wSpacer = new QWidget(this);
+	wSpacer->setFixedHeight(50);
+	
 	QVBoxLayout *layout = new QVBoxLayout();
+	layout->addWidget(wSpacer);
 	layout->addWidget(wTable, 90);
 	layout->addWidget(wActions, 1, Qt::AlignCenter);
 	
 	setLayout(layout);
+	
+	
+	////////
+	
+	wCC = new QWidget(this);
+	wCC->setFixedSize(300, 80);  // FIXME
+	
+	QHBoxLayout *lCC = new QHBoxLayout();
+	for (unsigned int i=0; i < 5; i++)
+	{
+		cc[i] = new WPicture("gfx/deck/default/back.png", this);
+		cc[i]->setFixedSize(45, 60);
+		lCC->addWidget(cc[i]);
+	}
+	
+	wCC->setLayout(lCC);
+	
+	///////
+	
+	const int seatcount = 10;
+	for (int i=0; i < seatcount; i++)
+		wseats[i] = new WSeat(i, this);
+	
+	////////
+	
+	lblPots = new QLabel("Pots", this);
+	lblPots->setAlignment(Qt::AlignCenter);
+	
+	////////
+	
+	// update the window
+	arrangeItems();
+}
+
+void WTable::arrangeItems()
+{
+	enum splacement { SRight, SBelow, SLeft, SAbove };
+	
+	struct seatinfo {
+		int col;  // x
+		int row;  // y
+		splacement place;
+	} seats[] = {
+		// col  row     placement
+		{ 7,	0,	SBelow },	// seat 1
+		{ 9,	1,	SLeft },	// seat 2
+		{ 10,	2,	SLeft },	// seat 3
+		{ 9,	3,	SLeft },	// seat 4
+		{ 7,	4,	SAbove },	// seat 5
+		{ 3,	4,	SAbove },	// seat 6
+		{ 1,	3,	SRight },	// seat 7
+		{ 0,	2,	SRight },	// seat 8
+		{ 1,	1,	SRight },	// seat 9
+		{ 3,	0,	SBelow }	// seat 10
+	};
+	
+	int offset_x = wTable->x();
+	int offset_y = wTable->y();
+	int twidth = wTable->width();
+	int theight = wTable->height();
+	int cols_num = 11;
+	int rows_num = 5;
+	int cell_w = twidth / cols_num;
+	int cell_h = theight / rows_num;
+	
+	
+	const int seatcount = sizeof(seats) / sizeof(seats[0]);
+	
+	for (int i=0; i < seatcount; i++)
+	{
+		wseats[i]->move(
+			offset_x + seats[i].col * cell_w + cell_w / 2 - wseats[i]->width() / 2,
+			offset_y + seats[i].row * cell_h + cell_h / 2 - wseats[i]->height() / 2);
+		
+		
+		int cw = wseats[i]->scard1->width();
+		int ch = wseats[i]->scard1->height();
+		int cx, cy;
+		
+		if (seats[i].place == SLeft || seats[i].place == SRight)
+		{
+			cx = wseats[i]->x() + (seats[i].place == SLeft ? -cw : wseats[i]->width());
+			cy = wseats[i]->y();
+	
+		}
+		else if (seats[i].place == SBelow ||seats[i].place == SAbove)
+		{
+			cx = wseats[i]->x();
+			cy = wseats[i]->y() + (seats[i].place == SBelow ? wseats[i]->height() : -ch);
+		}
+		
+		wseats[i]->scard1->move(cx, cy);
+		wseats[i]->scard2->move(cx + 5, cy);
+		
+		////
+		cx = wseats[i]->x();
+		cy = wseats[i]->y() - wseats[i]->card1->height();
+		wseats[i]->card1->move(cx, cy);
+		wseats[i]->card2->move(cx + 10, cy);
+	}
+	
+	
+	// community-cards
+	wCC->move(offset_x + twidth/2 - wCC->width() /2, offset_y + theight/2 - wCC->height() /2);
+	
+	// pots
+	lblPots->move(offset_x + twidth/2 - lblPots->width() /2, wCC->y() + wCC->height() + 10);
+	
 }
 
 void WTable::updateView()
@@ -216,6 +297,9 @@ void WTable::updateView()
 					}
 					else
 						wseats[i]->setCards("blank", "blank");
+					
+					wseats[i]->scard1->setVisible(false);
+					wseats[i]->scard2->setVisible(false);
 				}
 				else
 				{
@@ -231,11 +315,22 @@ void WTable::updateView()
 					}
 					else
 						wseats[i]->setCards("back", "back");
+					
+					if (snap->state == Table::Showdown || snap->state == Table::EndRound)
+					{
+						wseats[i]->card1->setVisible(true);
+						wseats[i]->card2->setVisible(true);
+					}
+					else
+					{
+						wseats[i]->card1->setVisible(false);
+						wseats[i]->card2->setVisible(false);
+					}
 				}
 			}
 			else
 			{
-				wseats[i]->setAction(Player::Fold, 0.0f);
+				wseats[i]->setAction(Player::Fold);
 				wseats[i]->setCards("blank", "blank");
 			}
 			
@@ -248,6 +343,11 @@ void WTable::updateView()
 		}
 		else
 		{
+			wseats[i]->card1->setVisible(false);
+			wseats[i]->card2->setVisible(false);
+			wseats[i]->scard1->setVisible(false);
+			wseats[i]->scard2->setVisible(false);
+			
 			wseats[i]->setValid(false);
 		}
 	}
@@ -278,6 +378,38 @@ void WTable::updateView()
 			char filename[1024];
 			snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", allcards[i].getName());
 			cc[i]->loadImage(filename);
+		}
+	}
+	
+	
+	if (snap->my_seat != -1)
+	{
+		// minimum bet
+		QString svalue;
+		if (snap->minimum_bet > snap->seats[snap->my_seat].stake)
+			svalue.setNum(snap->seats[snap->my_seat].stake, 'f', 2);
+		else
+			svalue.setNum(snap->minimum_bet, 'f', 2);
+		editAmount->setText(svalue);
+		
+		// show correct actions
+		if (!snap->seats[snap->my_seat].in_round ||
+			snap->state == Table::Showdown ||
+			snap->state == Table::EndRound)
+		{
+			stlayActions->setCurrentIndex(3);
+		}
+		else
+		{
+			if (snap->state == Table::AskShow)
+				stlayActions->setCurrentIndex(2);
+			else
+			{
+				if ((int)snap->s_cur == snap->my_seat)
+					stlayActions->setCurrentIndex(0);
+				else
+					stlayActions->setCurrentIndex(1);
+			}
 		}
 	}
 }
@@ -320,12 +452,16 @@ void WTable::actionBetRaise()
 void WTable::actionShow()
 {
 	((PClient*)qApp)->doSetAction(gid, Player::Show);
+	
+	// debug
+	//slotTest();
 }
 
 void WTable::slotBetValue(int value)
 {
 	QString svalue;
 	float max_bet = 0.0f;
+	float min_bet;
 	float amount;
 	
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
@@ -336,14 +472,26 @@ void WTable::slotBetValue(int value)
 	table_snapshot *snap = &(tinfo->snap);
 	
 	if (snap->my_seat != -1)
+	{
 		max_bet = snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet;
+		min_bet = snap->minimum_bet;
+	}
 	
 	if (!value)
 		amount = 0.0f;
 	else if (value == 100)
 		amount = max_bet;
 	else
-		amount = (int)(max_bet * value / 100);
+	{
+		if (value <= 50)  // wieder range for small bets (half slider = 25% of stake)
+			amount = (int)((max_bet * 25 / 100) * value * 2 / 100);
+		else
+			amount = (int)(max_bet * value / 100);
+	}
+	
+	amount += min_bet;
+	if (amount > max_bet)
+		amount = max_bet;
 	
 	svalue.setNum(amount, 'f', 2);
 	editAmount->setText(svalue);
@@ -355,12 +503,28 @@ void WTable::slotShow()
 	show();
 }
 
-
-WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
+void WTable::slotTest()
 {
-	setPalette(Qt::gray);
-	setAutoFillBackground(true);
-	setFixedSize(110, 140);
+	QWidget *w = cc[0];
+	w->move(w->x()+10, w->y()+10);
+	
+	QTimer::singleShot(100, this, SLOT(slotTest()));
+}
+
+void WTable::resizeEvent(QResizeEvent * event)
+{
+	arrangeItems();
+}
+
+WSeat::WSeat(unsigned int id, QWidget *parent) : QLabel(parent)
+{
+	//setPalette(Qt::gray);
+	//setAutoFillBackground(true);
+	setFixedSize(100, 70);
+	
+	QImage image("gfx/table/seat.png");
+	setPixmap(QPixmap::fromImage(image));
+	setScaledContents(true);
 	
 	lblCaption = new QLabel("Seat", this);
 	lblCaption->setAlignment(Qt::AlignCenter);
@@ -370,20 +534,28 @@ WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
 	lblAction->setAlignment(Qt::AlignCenter);
 	
 	///////
-	const int sx = 45;
-	const int sy = 60;
-	card1 = new WPicture("gfx/deck/default/back.png", this);
+	int sx = 45;
+	int sy = 60;
+	card1 = new WPicture("gfx/deck/default/back.png", parent);
 	card1->setFixedSize(sx, sy);
-	card2 = new WPicture("gfx/deck/default/back.png", this);
+	card2 = new WPicture("gfx/deck/default/back.png", parent);
 	card2->setFixedSize(sx, sy);
 	
-	QHBoxLayout *lCards = new QHBoxLayout();
-	lCards->addWidget(card1);
-	lCards->addWidget(card2);
+	// miniature cards
+	sx = 17;
+	sy = 25;
+	scard1 = new WPicture("gfx/deck/default/back.png", parent);
+	scard1->setFixedSize(sx, sy);
+	scard2 = new WPicture("gfx/deck/default/back.png", parent);
+	scard2->setFixedSize(sx, sy);
+	
+	//QHBoxLayout *lCards = new QHBoxLayout();
+	//lCards->addWidget(card1);
+	//lCards->addWidget(card2);
 	
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->addWidget(lblCaption);
-	layout->addLayout(lCards);
+	//layout->addLayout(lCards);
 	layout->addWidget(lblStake);
 	layout->addWidget(lblAction);
 	setLayout(layout);
@@ -391,13 +563,14 @@ WSeat::WSeat(unsigned int id, QWidget *parent) : QWidget(parent)
 
 void WSeat::setValid(bool valid)
 {
-	setAutoFillBackground(valid);
-	
 	lblCaption->setVisible(valid);
 	lblStake->setVisible(valid);
 	lblAction->setVisible(valid);
+	/*
 	card1->setVisible(valid);
 	card2->setVisible(valid);
+	scard1->setVisible(valid);
+	scard2->setVisible(valid);*/
 }
 
 void WSeat::setName(QString name)
@@ -425,10 +598,14 @@ void WSeat::setAction(Player::PlayerAction action, float amount)
 
 void WSeat::setCurrent(bool cur)
 {
+	QImage image;
+	
 	if (cur)
-		setPalette(Qt::green);
+		image.load("gfx/table/seat_current.png");
 	else
-		setPalette(Qt::gray);
+		image.load("gfx/table/seat.png");
+	
+	setPixmap(QPixmap::fromImage(image));
 }
 
 void WSeat::setCards(const char *c1, const char *c2)
@@ -437,14 +614,16 @@ void WSeat::setCards(const char *c1, const char *c2)
 	
 	snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", c1);
 	card1->loadImage(filename);
+	scard1->loadImage(filename);
 	
 	snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", c2);
 	card2->loadImage(filename);
+	scard2->loadImage(filename);
 }
 
 WPicture::WPicture(const char *filename, QWidget *parent) : QLabel(parent)
 {
-	setBackgroundRole(QPalette::Base);
+	//setBackgroundRole(QPalette::Base);
 	//setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 	//sizePolicy().hasHeightForWidth();
 	setScaledContents(true);
