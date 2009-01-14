@@ -16,14 +16,14 @@ IF (WIN32)
 	IF (MINGW)
 		LIST(APPEND aux_lib ws2_32)
 		
-		#ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/pclient_res.obj
-		#	COMMAND ${WINDRES}
-		#	-I${CMAKE_CURRENT_SOURCE_DIR}
-		#	-o ${CMAKE_CURRENT_BINARY_DIR}/pclient_res.obj
-		#	< ${CMAKE_CURRENT_SOURCE_DIR}/pclient.rc
-		#)
-		#
-		#LIST(APPEND aux_obj pclient_res.obj)
+		ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/pclient_res.obj
+			COMMAND ${WINDRES}
+			-I${CMAKE_CURRENT_SOURCE_DIR}
+			-o ${CMAKE_CURRENT_BINARY_DIR}/pclient_res.obj
+			< ${CMAKE_CURRENT_SOURCE_DIR}/pclient.rc
+		)
+		
+		LIST(APPEND aux_obj pclient_res.obj)
 	ELSE (MINGW)
 		LIST(APPEND aux_lib wsock32)
 		
@@ -53,7 +53,7 @@ QT4_WRAP_CPP(sources_MOC pclient.hpp WMain.hpp WTable.hpp)
 add_executable (
 	pclient
 	WIN32    # when building for windows: do not show the console window
-	pclient.cpp WMain.cpp WTable.cpp ${sources_MOC}
+	pclient.cpp ${aux_obj} WMain.cpp WTable.cpp ${sources_MOC}
 )
 
 target_link_libraries (
