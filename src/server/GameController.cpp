@@ -843,7 +843,7 @@ void GameController::stateAskShow(Table *t)
 	
 	if (p->next_action.valid)  // has player set an action?
 	{
-		if (p->next_action.action == Player::Fold)
+		if (p->next_action.action == Player::Muck)
 		{
 			// muck cards
 			chose_action = true;
