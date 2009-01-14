@@ -316,7 +316,7 @@ void WTable::updateView()
 					else
 						wseats[i]->setCards("back", "back");
 					
-					if (allcards.size() && (snap->state == Table::Showdown || snap->state == Table::EndRound))
+					if (allcards.size())
 					{
 						wseats[i]->card1->setVisible(true);
 						wseats[i]->card2->setVisible(true);
@@ -394,6 +394,7 @@ void WTable::updateView()
 		
 		// show correct actions
 		if (!snap->seats[snap->my_seat].in_round ||
+			snap->state == Table::AllFolded ||
 			snap->state == Table::Showdown ||
 			snap->state == Table::EndRound)
 		{
@@ -452,6 +453,9 @@ void WTable::actionBetRaise()
 		((PClient*)qApp)->doSetAction(gid, Player::Allin);
 	else
 		((PClient*)qApp)->doSetAction(gid, Player::Raise, amount);
+	
+	// reset the amount-slider
+	sliderAmount->setValue(0);
 }
 
 void WTable::actionShow()
@@ -621,11 +625,9 @@ void WSeat::setCards(const char *c1, const char *c2)
 	
 	snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", c1);
 	card1->loadImage(filename);
-	scard1->loadImage(filename);
 	
 	snprintf(filename, sizeof(filename), "gfx/deck/default/%s.png", c2);
 	card2->loadImage(filename);
-	scard2->loadImage(filename);
 }
 
 WPicture::WPicture(const char *filename, QWidget *parent) : QLabel(parent)
