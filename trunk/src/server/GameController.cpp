@@ -855,8 +855,9 @@ void GameController::stateAskShow(Table *t)
 			
 			chose_action = true;
 		}
-		else  // should never happen
-			p->next_action.valid = false;
+		
+		// reset scheduled action
+		p->next_action.valid = false;
 	}
 	else
 	{
