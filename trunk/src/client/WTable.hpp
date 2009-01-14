@@ -130,6 +130,7 @@ private slots:
 	void actionCheckCall();
 	void actionBetRaise();
 	void actionShow();
+	void actionMuck();
 	void slotBetValue(int value);
 	void slotShow();
 	void slotTest();

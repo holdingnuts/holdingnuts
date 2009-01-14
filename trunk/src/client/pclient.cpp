@@ -588,6 +588,9 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 	case Player::Show:
 		saction = "show";
 		break;
+	case Player::Muck:
+		saction = "muck";
+		break;
 	case Player::ResetAction:
 		saction = "reset";
 		break;

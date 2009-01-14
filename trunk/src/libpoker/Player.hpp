@@ -37,7 +37,8 @@ public:
 		Bet,
 		Raise,
 		Allin,
-		Show
+		Show,
+		Muck
 	} PlayerAction;
 	
 	typedef struct {

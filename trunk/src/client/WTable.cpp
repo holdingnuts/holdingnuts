@@ -59,7 +59,7 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QLabel(parent)
 	connect(btnShow, SIGNAL(clicked()), this, SLOT(actionShow()));
 	
 	QPushButton *btnMuck = new QPushButton(tr("Muck"), this);
-	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionFold()));
+	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
 	
 	QCheckBox *chkFold = new QCheckBox(tr("Fold"), this);
@@ -316,7 +316,7 @@ void WTable::updateView()
 					else
 						wseats[i]->setCards("back", "back");
 					
-					if (snap->state == Table::Showdown || snap->state == Table::EndRound)
+					if (allcards.size() && (snap->state == Table::Showdown || snap->state == Table::EndRound))
 					{
 						wseats[i]->card1->setVisible(true);
 						wseats[i]->card2->setVisible(true);
@@ -402,7 +402,12 @@ void WTable::updateView()
 		else
 		{
 			if (snap->state == Table::AskShow)
-				stlayActions->setCurrentIndex(2);
+			{
+				if ((int)snap->s_cur == snap->my_seat)
+					stlayActions->setCurrentIndex(2);
+				else
+					stlayActions->setCurrentIndex(3);
+			}
 			else
 			{
 				if ((int)snap->s_cur == snap->my_seat)
@@ -452,9 +457,11 @@ void WTable::actionBetRaise()
 void WTable::actionShow()
 {
 	((PClient*)qApp)->doSetAction(gid, Player::Show);
-	
-	// debug
-	//slotTest();
+}
+
+void WTable::actionMuck()
+{
+	((PClient*)qApp)->doSetAction(gid, Player::Muck);
 }
 
 void WTable::slotBetValue(int value)
