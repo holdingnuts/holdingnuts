@@ -114,22 +114,19 @@ bool GameController::getPlayerList(int tid, vector<int> &client_list)
 {
 	client_list.clear();
 	
-	for (unsigned int i=0; i < tables.size(); i++)
+	map<int,Table>::iterator it = tables.find(tid);
+	if (it == tables.end())
+		return false;
+	
+	Table *t = &(it->second);
+	
+	for (vector<Table::Seat>::iterator e = t->seats.begin(); e != t->seats.end(); e++)
 	{
-		Table *t = &(tables[i]);
-		
-		if (t->table_id == tid)
-		{
-			for (vector<Table::Seat>::iterator e = t->seats.begin(); e != t->seats.end(); e++)
-			{
-				Player *p = e->player;
-				client_list.push_back(p->client_id);
-			}
-			return true;
-		}
+		Player *p = e->player;
+		client_list.push_back(p->client_id);
 	}
 	
-	return false;
+	return true;
 }
 
 void GameController::chat(int tid, const char* msg)
@@ -957,7 +954,7 @@ void GameController::stateShowdown(Table *t)
 	// determine and send out hand-strength messages
 	for (unsigned int i=0; i < t->countActivePlayers(); i++)
 	{
-		if (t->seats[showdown_player].showcards)
+		if (t->seats[showdown_player].showcards || t->nomoreaction)
 		{
 			Player *p = t->seats[showdown_player].player;
 			
@@ -1146,7 +1143,7 @@ void GameController::tick()
 			table.dealer = 0;
 			table.blind = 10;
 			table.state = Table::GameStart;
-			tables.push_back(table);
+			tables[tid] = table;
 			
 			game_start = time(NULL);
 			
