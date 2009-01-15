@@ -38,17 +38,15 @@
 using namespace std;
 
 ////////////////////////
-vector<GameController*> games;
+map<int,GameController*> games;
 
 GameController* get_game_by_id(int gid)
 {
-	for (vector<GameController*>::iterator e = games.begin(); e != games.end(); e++)
-	{
-		GameController *g = *e;
-		if (g->getGameId() == gid)
-			return g;
-	}
-	return NULL;
+	map<int,GameController*>::const_iterator it = games.find(gid);
+	if (it != games.end())
+		return it->second;
+	else
+		return NULL;
 }
 
 
@@ -438,13 +436,14 @@ int client_execute(clientcon *client, const char *cmd)
 			else if (request == "gamelist")
 			{
 				string gameinfo;
-				for (vector<GameController*>::iterator e = games.begin(); e != games.end(); e++)
+				for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
 				{
-					GameController *g = *e;
+					int gid = e->first;
+					GameController *g = e->second;
 					char tmp[128];
 					
 					snprintf(tmp, sizeof(tmp), "%d:%d:moreinfo ",
-						g->getGameId(), (int)g->getGameType());
+						gid, (int)g->getGameType());
 					
 					gameinfo += tmp;
 				}
@@ -693,15 +692,16 @@ int gameloop()
 	if (!games.size())
 	{
 		GameController *g = new GameController();
-		g->setGameId(0);
+		const int gid = 0;
+		g->setGameId(gid);
 		g->setPlayerMax(3);
-		games.push_back(g);
+		games[gid] = g;
 	}
 	
 	// handle all games
-	for (vector<GameController*>::iterator e = games.begin(); e != games.end(); e++)
+	for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
 	{
-		GameController *g = *e;
+		GameController *g = e->second;
 		g->tick();
 	}
 	
