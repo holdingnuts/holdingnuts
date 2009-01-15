@@ -110,6 +110,28 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 	return true;
 }
 
+bool GameController::getPlayerList(int tid, vector<int> &client_list)
+{
+	client_list.clear();
+	
+	for (unsigned int i=0; i < tables.size(); i++)
+	{
+		Table *t = &(tables[i]);
+		
+		if (t->table_id == tid)
+		{
+			for (vector<Table::Seat>::iterator e = t->seats.begin(); e != t->seats.end(); e++)
+			{
+				Player *p = e->player;
+				client_list.push_back(p->client_id);
+			}
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 void GameController::chat(int tid, const char* msg)
 {
 	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)

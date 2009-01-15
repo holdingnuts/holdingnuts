@@ -162,6 +162,35 @@ bool client_chat(int from_gid, int from_tid, int to, const char *msg)
 	return true;
 }
 
+// from client to game/table
+bool table_chat(int from_cid, int to_gid, int to_tid, const char *msg)
+{
+	char data[1024];
+	
+	clientcon* fromclient = get_client_by_id(from_cid);
+	
+	GameController *g = get_game_by_id(to_gid);
+	if (!g)
+		return false;
+	
+	vector<int> client_list;
+	g->getPlayerList(to_tid, client_list);
+	
+	for (unsigned int i=0; i < client_list.size(); i++)
+	{
+		snprintf(data, sizeof(data), "MSG %d:%d:%d %s %s",
+			to_gid, to_tid, from_cid,
+			(fromclient) ? fromclient->name : "???",
+			msg);
+		
+		clientcon* toclient = get_client_by_id(client_list[i]);
+		if (toclient)
+			send_msg(toclient->sock, data);
+	}
+	
+	return true;
+}
+
 bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg)
 {
 	char data[1024];
@@ -353,11 +382,25 @@ int client_execute(clientcon *client, const char *cmd)
 			cmderr = true;
 		else
 		{
-			int dest = t.getNextInt();  // FIXME: chat to table
+			Tokenizer ct;
+			ct.parse(t.getNext());
 			string chatmsg = t.getTillEnd();
 			
-			if (!client_chat(client->id, dest, chatmsg.c_str()))
-				cmderr = true;
+			if (ct.getCount() == 1) // cid
+			{
+				int dest = ct.getNextInt();
+				
+				if (!client_chat(client->id, dest, chatmsg.c_str()))
+					cmderr = true;
+			}
+			else if (ct.getCount() == 2)  // gid:tid
+			{
+				int gid = ct.getNextInt();
+				int tid = ct.getNextInt();
+				
+				if (!table_chat(client->id, gid, tid, chatmsg.c_str()))
+					cmderr = true;
+			}
 		}
 		
 		if (!cmderr)
