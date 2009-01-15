@@ -438,7 +438,9 @@ void GameController::stateNewRound(Table *t)
 		return;
 #endif
 	
-	dbg_print("Table", "New Round");
+#ifdef DEBUG
+	dbg_print("Table", "New Round (gid=%d tid=%d)", game_id, t->table_id);
+#endif
 	
 	t->deck.fill();
 	t->deck.shuffle();
@@ -589,8 +591,6 @@ void GameController::stateBetting(Table *t)
 	else if (p->next_action.valid)  // has player set an action?
 	{
 		action = p->next_action.action;
-		
-		dbg_print("game", "player %d choose an action", p->client_id);
 		
 		if (action == Player::Fold)
 			allowed_action = true;
@@ -775,7 +775,6 @@ void GameController::stateBetting(Table *t)
 		// collect bets into pot
 		t->collectBets();
 		
-		dbg_print("table", "betting round ended");
 		
 		// all (or all except one) players are allin
 		if (t->isAllin())
@@ -1036,7 +1035,7 @@ void GameController::stateShowdown(Table *t)
 				// skip pot if player not involved in it
 				if (!t->isPlayerInvolvedInPot(pot, p))
 					continue;
-#ifdef DEBUG
+#if 0
 				dbg_print("winlist", "wl #%d: player #%d: pot #%d: involved-count=%d",
 					i+1, pi+1, poti+1, involved_count);
 #endif
