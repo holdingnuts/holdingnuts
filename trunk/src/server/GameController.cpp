@@ -790,8 +790,11 @@ void GameController::stateBetting(Table *t)
 			// collect bets into pot
 			t->collectBets();
 			
-			// end of hand, do showdown
-			t->state = Table::AskShow;
+			// end of hand, do showdown/ ask for show
+			if (t->nomoreaction)
+				t->state = Table::Showdown;
+			else
+				t->state = Table::AskShow;
 			
 			// last_bet_player MUST show his hand
 			t->seats[t->last_bet_player].showcards = true;
