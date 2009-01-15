@@ -31,14 +31,19 @@ public:
 	typedef enum {
 		None,
 		ResetAction,
+		
 		Check,
 		Fold,
 		Call,
 		Bet,
 		Raise,
 		Allin,
+		
 		Show,
-		Muck
+		Muck,
+		
+		Sitout,
+		Back
 	} PlayerAction;
 	
 	typedef struct {
@@ -60,6 +65,8 @@ private:
 	HoleCards holecards;
 	
 	SchedAction next_action;
+	
+	bool sitout;     // is player sitting out?
 };
 
 

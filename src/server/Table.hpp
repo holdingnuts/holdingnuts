@@ -54,8 +54,8 @@ public:
 		unsigned int seat_no;
 		Player *player;
 		float bet;
-		bool in_round;
-		bool showcards;
+		bool in_round;   // is player involved in current hand?
+		bool showcards;  // does the player want to show cards?
 	} Seat;
 	
 	typedef struct {
