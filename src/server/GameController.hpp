@@ -22,6 +22,7 @@
 #define _GAMECONTROLLER_H
 
 #include <vector>
+#include <map>
 #include <ctime>
 
 #include "Card.hpp"
@@ -104,7 +105,7 @@ private:
 	GameType type;
 	
 	std::vector<Player> players;
-	std::vector<Table> tables;
+	std::map<int,Table> tables;
 	
 	time_t game_start;
 	time_t round_start;
