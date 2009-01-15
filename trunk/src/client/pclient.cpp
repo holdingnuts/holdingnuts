@@ -271,8 +271,11 @@ int server_execute(const char *cmd)
 					if (si.client_id == srv.cid)
 						table.my_seat = seat_no;
 					
-					if (st.getNext() == "*")
+					int pstate = st.getNextInt();
+					if (pstate & PlayerInRound)
 						si.in_round = true;
+					// FIXME: player-sitout
+					
 					si.stake = st.getNextFloat();
 					si.bet = st.getNextFloat();
 					

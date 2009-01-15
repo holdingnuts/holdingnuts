@@ -552,6 +552,10 @@ int client_execute(clientcon *client, const char *cmd)
 					a = Player::Show;
 				else if (action == "muck")
 					a = Player::Muck;
+				else if (action == "sitout")
+					a = Player::Sitout;
+				else if (action == "back")
+					a = Player::Back;
 				else if (action == "reset")
 					a = Player::ResetAction;
 				else

@@ -57,6 +57,7 @@ bool GameController::addPlayer(int client_id)
 	p.client_id = client_id;
 	p.stake = 1500.0f;
 	p.next_action.valid = false;
+	p.sitout = false;
 	
 	players.push_back(p);
 	
@@ -158,10 +159,19 @@ bool GameController::setPlayerAction(int cid, Player::PlayerAction action, float
 	if (!p)
 		return false;
 	
-	// reset a previously set action
-	if (action == Player::ResetAction)
+	if (action == Player::ResetAction)   // reset a previously set action
 	{
 		p->next_action.valid = false;
+		return true;
+	}
+	else if (action == Player::Sitout)   // player wants to sit out
+	{
+		p->sitout = true;
+		return true;
+	}
+	else if (action == Player::Back)     // player says "I'm back", end sitout
+	{
+		p->sitout = false;
 		return true;
 	}
 	
@@ -231,12 +241,18 @@ void GameController::sendTableSnapshot(Table *t)
 		else
 			shole = "-";
 		
+		int pstate = 0;
+		if (s->in_round)
+			pstate |= PlayerInRound;
+		if (p->sitout)
+			pstate |= PlayerSitout;
+		
 		char tmp[1024];
 		snprintf(tmp, sizeof(tmp),
-			"s%d:%d:%c:%.2f:%.2f:%c:%s",
+			"s%d:%d:%d:%.2f:%.2f:%c:%s",
 			s->seat_no,
 			p->client_id,
-			s->in_round ? '*' : '-',
+			pstate,
 			p->stake,
 			s->bet,
 			'X' /* FIXME: action */,
@@ -660,8 +676,11 @@ void GameController::stateBetting(Table *t)
 		// handle player timeout
 #ifndef SERVER_TESTING
 		const int timeout = 60;   // FIXME: configurable
-		if ((int)difftime(time(NULL), timeout_start) > timeout)
+		if ((int)difftime(time(NULL), timeout_start) > timeout || p->sitout)
 		{
+			// let player sit out
+			p->sitout = true;
+			
 			// auto-action: fold, or check if possible
 			if (t->seats[t->cur_player].bet < t->bet_amount)
 				action = Player::Fold;
