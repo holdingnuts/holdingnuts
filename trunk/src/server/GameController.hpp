@@ -54,19 +54,27 @@ public:
 	unsigned int getPlayerMax() { return max_players; };
 	unsigned int getPlayerCount() { return players.size(); };
 	bool getPlayerList(std::vector<int> &client_list) const;
+	bool getPlayerList(int tid, std::vector<int> &client_list);
 	
 	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);
-	Player* findPlayer(int cid);
 	
 	void chat(int tid, const char* msg);
 	void chat(int cid, int tid, const char* msg);
-	void snap(int tid, int sid, const char* msg);
-	void snap(int cid, int tid, int sid, const char* msg);
 	
 	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
 	void tick();
+	
+#ifdef DEBUG
+	void setPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
+#endif
+	
+protected:
+	Player* findPlayer(int cid);
+		
+	void snap(int tid, int sid, const char* msg);
+	void snap(int cid, int tid, int sid, const char* msg);
 	
 	bool createWinlist(Table *t, std::vector< std::vector<HandStrength> > &winlist);
 	
@@ -86,10 +94,6 @@ public:
 	void dealRiver(Table *t);
 	
 	void sendTableSnapshot(Table *t);
-	
-#ifdef DEBUG
-	void setPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
-#endif
 	
 private:
 	int game_id;
