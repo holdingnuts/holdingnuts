@@ -80,8 +80,6 @@ public:
 	bool isPlayerInvolvedInPot(Pot *pot, Player *p);
 	unsigned int getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &wl);
 	
-	float determineMinimumBet() const;
-	
 	void tick();
 	
 private:
@@ -93,8 +91,6 @@ private:
 	State state;
 	bool nomoreaction;
 	BettingRound betround;
-	
-	unsigned int blind;
 	
 	Seat seats[10];
 	unsigned int dealer, sb, bb;
