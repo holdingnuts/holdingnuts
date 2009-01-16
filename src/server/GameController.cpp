@@ -45,6 +45,11 @@ GameController::GameController()
 	started = false;
 	max_players = 10;
 	
+	blindrule = BlindByTime;
+	blinds_time = 60 * 4;
+	blinds_factor = 2.0f;
+	blind = 10.0f;
+	
 	type = SNG;
 }
 
@@ -313,7 +318,7 @@ void GameController::sendTableSnapshot(Table *t)
 	
 	float minimum_bet;
 	if (t->state == Table::Betting)
-		minimum_bet = t->determineMinimumBet();
+		minimum_bet = determineMinimumBet(t);
 	else
 		minimum_bet = 0.0f;
 	
@@ -333,6 +338,14 @@ void GameController::sendTableSnapshot(Table *t)
 		minimum_bet);
 	
 	snap(t->table_id, SnapTable, msg);
+}
+
+float GameController::determineMinimumBet(Table *t) const
+{
+	if ((int) t->bet_amount == 0)
+		return blind;
+	else
+		return t->bet_amount + (t->bet_amount - t->last_bet_amount);
 }
 
 // FIXME: SB gets first (one) card; not very important because it doesn't really matter
@@ -487,9 +500,22 @@ void GameController::stateNewRound(Table *t)
 
 void GameController::stateBlinds(Table *t)
 {
+	// new blinds level?
+	switch ((int) blindrule)
+	{
+	case BlindByTime:
+		if (difftime(time(NULL), last_blinds_time) > blinds_time)
+		{
+			last_blinds_time = time(NULL);
+			blind *= blinds_factor;
+		}
+		break;
+	}
+	
+	
 	// FIXME: handle non-SNG correctly (ask each player for blinds ...)
 	
-	t->bet_amount = (float)t->blind;
+	t->bet_amount = (float)blind;
 	t->last_bet_amount = 0.0f;
 	
 	bool headsup_rule = (t->countPlayers() == 2);
@@ -518,7 +544,7 @@ void GameController::stateBlinds(Table *t)
 	
 	
 	// set the player's SB
-	float amount = t->blind / 2;
+	float amount = blind / 2;
 	
 	if (amount > pSmall->stake)
 		amount = pSmall->stake;
@@ -528,7 +554,7 @@ void GameController::stateBlinds(Table *t)
 	
 	
 	// set the player's BB
-	amount = t->blind;
+	amount = blind;
 	
 	if (amount > pBig->stake)
 		amount = pBig->stake;
@@ -541,8 +567,8 @@ void GameController::stateBlinds(Table *t)
 	
 	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
 		pDealer->client_id,
-		pSmall->client_id, (float)t->blind / 2,
-		pBig->client_id, (float)t->blind,
+		pSmall->client_id, (float)blind / 2,
+		pBig->client_id, (float)blind,
 		(headsup_rule) ? "HEADS-UP" : "");
 	chat(t->table_id, msg);
 #endif /* SERVER_TESTING */
@@ -585,7 +611,7 @@ void GameController::stateBetting(Table *t)
 	Player::PlayerAction action;
 	float amount;
 	
-	float minimum_bet = t->determineMinimumBet();
+	float minimum_bet = determineMinimumBet(t);
 	
 	if (t->nomoreaction)  // early showdown, no more action at table possible
 	{
@@ -912,7 +938,7 @@ void GameController::stateAskShow(Table *t)
 	{
 		// handle player timeout
 		const int timeout = 4;   // FIXME: configurable
-		if ((int)difftime(time(NULL), timeout_start) > timeout)
+		if ((int)difftime(time(NULL), timeout_start) > timeout || p->sitout)
 		{
 			// default on showdown is "to show"
 			// Note: client needs to determine if it's hand is
@@ -1166,11 +1192,11 @@ void GameController::tick()
 				table.seats[i] = seat;
 			}
 			table.dealer = 0;
-			table.blind = 10;
 			table.state = Table::GameStart;
 			tables[tid] = table;
 			
 			game_start = time(NULL);
+			last_blinds_time = time(NULL);
 			
 			snap(tid, SnapGameState, "start");
 			sendTableSnapshot(&(tables[tables.size()-1]));

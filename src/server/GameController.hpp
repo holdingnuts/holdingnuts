@@ -44,6 +44,14 @@ public:
 		SNG         // Sit'n'Go
 	} GameType;
 	
+	
+	typedef enum {
+		BlindByTime,
+		//BlindByRound,
+		BlindByKnockout
+	} BlindRule;
+	
+	
 	GameController();
 	
 	bool setGameId(int gid) { game_id = gid; return true; };
@@ -66,6 +74,8 @@ public:
 	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
 	void tick();
+	
+	float determineMinimumBet(Table *t) const;
 	
 #ifdef DEBUG
 	void setPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
@@ -111,7 +121,12 @@ private:
 	time_t round_start;
 	time_t betround_start;
 	time_t timeout_start;
+	
+	float blind;
+	BlindRule blindrule;
+	unsigned int blinds_time;  // seconds
+	time_t last_blinds_time;
+	float blinds_factor;
 };
-
 
 #endif /* _GAMECONTROLLER_H */
