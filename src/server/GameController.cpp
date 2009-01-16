@@ -351,7 +351,7 @@ float GameController::determineMinimumBet(Table *t) const
 // FIXME: SB gets first (one) card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
-	for (unsigned int i = t->cur_player, c=0; c < 10; i = t->getNextPlayer(i), c++)
+	for (unsigned int i = t->cur_player, c=0; c < t->countPlayers(); i = t->getNextPlayer(i), c++)
 	{
 		if (!t->seats[i].occupied)
 			continue;
@@ -1213,8 +1213,15 @@ void GameController::tick()
 		// table closed?
 		if (handleTable(t) < 0)
 		{
-			Player *p = t->seats[0].player;
-			chat(p->client_id, t->table_id, "You won!");
+			for (unsigned int i=0; i < 10; i++)
+			{
+				if (t->seats[i].occupied)
+				{
+					Player *p = t->seats[i].player;
+					chat(p->client_id, t->table_id, "You won!");
+					break;
+				}
+			}
 			
 			// FIXME: what to do here?
 			started = false;
