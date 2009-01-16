@@ -121,9 +121,12 @@ bool GameController::getPlayerList(int tid, vector<int> &client_list)
 	
 	Table *t = &(it->second);
 	
-	for (vector<Table::Seat>::iterator e = t->seats.begin(); e != t->seats.end(); e++)
+	for (unsigned int i=0; i < 10; i++)
 	{
-		Player *p = e->player;
+		if (!t->seats[i].occupied)
+			continue;
+		
+		Player *p = t->seats[i].player;
 		client_list.push_back(p->client_id);
 	}
 	
@@ -222,9 +225,13 @@ void GameController::sendTableSnapshot(Table *t)
 	
 	// assemble seats string
 	string sseats;
-	for (unsigned int i=0; i < t->seats.size(); i++)
+	for (unsigned int i=0; i < 10; i++)
 	{
 		Table::Seat *s = &(t->seats[i]);
+		
+		if (!s->occupied)
+			continue;
+		
 		Player *p = s->player;
 		
 		// assemble hole-cards string
@@ -260,8 +267,7 @@ void GameController::sendTableSnapshot(Table *t)
 		
 		sseats += tmp;
 		
-		if (i < t->seats.size() -1)
-			sseats += ' ';
+		sseats += ' ';
 	}
 	
 	
@@ -332,8 +338,11 @@ void GameController::sendTableSnapshot(Table *t)
 // FIXME: SB gets first (one) card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
-	for (unsigned int i = t->cur_player, c=0; c < t->seats.size(); i = t->getNextPlayer(i), c++)
+	for (unsigned int i = t->cur_player, c=0; c < 10; i = t->getNextPlayer(i), c++)
 	{
+		if (!t->seats[i].occupied)
+			continue;
+		
 		t->seats[i].in_round = true;
 		t->seats[i].showcards = false;
 		
@@ -483,7 +492,7 @@ void GameController::stateBlinds(Table *t)
 	t->bet_amount = (float)t->blind;
 	t->last_bet_amount = 0.0f;
 	
-	bool headsup_rule = (t->seats.size() == 2);
+	bool headsup_rule = (t->countPlayers() == 2);
 	
 	// determine who is SB and BB
 	if (headsup_rule)   // heads-up rule: only 2 players remain, so swap blinds
@@ -831,7 +840,7 @@ void GameController::stateBetting(Table *t)
 		t->last_bet_amount = 0.0f;
 		
 		// set current player to SB (or next active behind SB)
-		bool headsup_rule = (t->seats.size() == 2);
+		bool headsup_rule = (t->countPlayers() == 2);
 		if (headsup_rule)
 			t->cur_player = t->getNextActivePlayer(t->getNextActivePlayer(t->dealer));
 		else
@@ -1074,28 +1083,22 @@ void GameController::stateShowdown(Table *t)
 void GameController::stateEndRound(Table *t)
 {
 	// remove broken players from seats
-	bool removed_player;
-	do
+	for (unsigned int i=0; i < 10; i++)
 	{
-		removed_player = false;
+		if (!t->seats[i].occupied)
+			continue;
 		
-		for (vector<Table::Seat>::iterator e = t->seats.begin(); e != t->seats.end(); e++)
+		Player *p = t->seats[i].player;
+		
+		// player has no stake left
+		if ((int)p->stake == 0)
 		{
-			Player *p = e->player;
+			dbg_print("stateEndRound", "removed player %d", p->client_id);
+			chat(p->client_id, t->table_id, "You broke!");
 			
-			// player has no stake left
-			if ((int)p->stake == 0)
-			{
-				dbg_print("stateEndRound", "removed player %d", p->client_id);
-				chat(p->client_id, t->table_id, "You broke!");
-				
-				t->seats.erase(e);
-				
-				removed_player = true;
-				break;
-			}
+			t->seats[i].occupied = false;
 		}
-	} while (removed_player);
+	}
 	
 	t->dealer = t->getNextPlayer(t->dealer);
 	t->state = Table::NewRound;
@@ -1126,7 +1129,7 @@ int GameController::handleTable(Table *t)
 		stateEndRound(t);
 		
 		// only 1 player left? close table
-		if (t->seats.size() == 1)
+		if (t->countPlayers() == 1)
 			return -1;
 		
 		round_start = time(NULL);
@@ -1150,13 +1153,17 @@ void GameController::tick()
 			const int tid = 0;
 			Table table;
 			table.setTableId(tid);
-			for (unsigned int i=0; i < players.size(); i++)
+			
+			memset(table.seats, 0, sizeof(Table::Seat) * 10);
+			
+			for (unsigned int i=0; i < players.size() && i < 10; i++)
 			{
 				Table::Seat seat;
 				memset(&seat, 0, sizeof(Table::Seat));
+				seat.occupied = true;
 				seat.seat_no = i;
 				seat.player = &(players[i]);
-				table.seats.push_back(seat);
+				table.seats[i] = seat;
 			}
 			table.dealer = 0;
 			table.blind = 10;

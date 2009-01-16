@@ -31,10 +31,26 @@ Table::Table()
 
 int Table::getNextPlayer(unsigned int pos)
 {
-	if (pos + 1 == seats.size())
-		return 0;
-	else
-		return pos + 1;
+	unsigned int start = pos;
+	unsigned int cur = pos;
+	bool found = false;
+	
+	do
+	{
+		cur += 1;
+		if (cur >= 10)
+			cur = 0;
+		
+		// no active player left
+		if (start == cur)
+			return -1;
+		
+		if (seats[cur].occupied)
+			found = true;
+		
+	} while (!found);
+	
+	return cur;
 }
 
 int Table::getNextActivePlayer(unsigned int pos)
@@ -47,24 +63,37 @@ int Table::getNextActivePlayer(unsigned int pos)
 	{
 		cur = getNextPlayer(cur);
 		
-		if (seats[cur].in_round)
-			found = true;
-		
 		// no active player left
 		if (start == cur)
 			return -1;
+		
+		if (seats[cur].in_round)
+			found = true;
 	} while (!found);
 	
 	return cur;
+}
+
+unsigned int Table::countPlayers()
+{
+	unsigned int count = 0;
+	
+	for (unsigned int i=0; i < 10; i++)
+	{
+		if (seats[i].occupied)
+			count++;
+	}
+	
+	return count;
 }
 
 unsigned int Table::countActivePlayers()
 {
 	unsigned int count = 0;
 	
-	for (unsigned int i=0; i < seats.size(); i++)
+	for (unsigned int i=0; i < 10; i++)
 	{
-		if (seats[i].in_round)
+		if (seats[i].occupied && seats[i].in_round)
 			count++;
 	}
 	
@@ -77,9 +106,9 @@ bool Table::isAllin()
 	unsigned int count = 0;
 	unsigned int active_players = 0;
 	
-	for (unsigned int i=0; i < seats.size(); i++)
+	for (unsigned int i=0; i < 10; i++)
 	{
-		if (seats[i].in_round)
+		if (seats[i].occupied && seats[i].in_round)
 		{
 			active_players++;
 			
@@ -130,10 +159,10 @@ void Table::collectBets()
 		float smallest_bet = 0.0f;
 		bool need_sidepot = false;
 		
-		for (unsigned int i=0; i < seats.size(); i++)
+		for (unsigned int i=0; i < 10; i++)
 		{
 			// skip folded and already handled players
-			if (!seats[i].in_round || (int)seats[i].bet == 0)
+			if (!seats[i].occupied || !seats[i].in_round || (int)seats[i].bet == 0)
 				continue;
 			
 			if ((int)smallest_bet == 0)   // set an initial value
@@ -172,8 +201,12 @@ void Table::collectBets()
 		
 		
 		// collect the bet of each player
-		for (unsigned int i=0; i < seats.size(); i++)
+		for (unsigned int i=0; i < 10; i++)
 		{
+			// skip invalid seats
+			if (!seats[i].occupied)
+				continue;
+			
 			// skip already handled players
 			if ((int)seats[i].bet == 0)
 				continue;
