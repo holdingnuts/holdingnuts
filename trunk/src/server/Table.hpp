@@ -51,6 +51,7 @@ public:
 	} BettingRound;
 	
 	typedef struct {
+		bool occupied;
 		unsigned int seat_no;
 		Player *player;
 		float bet;
@@ -71,6 +72,7 @@ public:
 	
 	int getNextPlayer(unsigned int pos);
 	int getNextActivePlayer(unsigned int pos);
+	unsigned int countPlayers();
 	unsigned int countActivePlayers();
 	bool isAllin();
 	
@@ -94,7 +96,7 @@ private:
 	
 	unsigned int blind;
 	
-	std::vector<Seat> seats;
+	Seat seats[10];
 	unsigned int dealer, sb, bb;
 	unsigned int cur_player;
 	unsigned int last_bet_player;
