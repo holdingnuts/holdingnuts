@@ -381,7 +381,7 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 		{
 			Tokenizer ct;
-			ct.parse(t.getNext());
+			ct.parse(t.getNext(), ":");
 			string chatmsg = t.getTillEnd();
 			
 			if (ct.getCount() == 1) // cid
