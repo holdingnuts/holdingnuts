@@ -17,103 +17,22 @@
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <cstdio>
-
 #include "WMain.hpp"
+#include "ChatBox.hpp"
 #include "WTable.hpp"
-
 #include "Config.h"
 #include "Debug.h"
-
 #include "pclient.hpp"
 
-void WMain::actionConnect()
-{
-	if (!((PClient*)qApp)->doConnect(editSrvAddr->text(), DEFAULT_SERVER_PORT))
-		addLog(tr("Error connecting."));
-	else
-		btnConnect->setEnabled(false);
-}
-
-void WMain::actionClose()
-{
-	((PClient*)qApp)->doClose();
-}
-
-
-void WMain::actionTest()
-{
-	WTable *table = new WTable(0, 0);
-	table->show();
-}
-
-void WMain::actionRegister()
-{
-	((PClient*)qApp)->doRegister(0);
-}
-
-void WMain::slotSrvTextChanged()
-{
-	if (!editSrvAddr->text().length() || ((PClient*)qApp)->isConnected())
-		btnConnect->setEnabled(false);
-	else
-		btnConnect->setEnabled(true);
-}
-
-void WMain::actionChat()
-{
-	if (editChat->text().length())
-	{
-		((PClient*)qApp)->chatAll(editChat->text());
-		editChat->clear();
-		editChat->setFocus();
-	}
-}
-
-void WMain::updateConnectionStatus()
-{
-	if (((PClient*)qApp)->isConnected())
-	{
-		btnConnect->setEnabled(false);
-		btnClose->setEnabled(true);
-	}
-	else
-	{
-		if (editSrvAddr->text().length())
-			btnConnect->setEnabled(true);
-		else
-			btnConnect->setEnabled(false);
-		btnClose->setEnabled(false);
-	}
-}
-
-void WMain::addLog(QString line)
-{
-	editLog->append(line);
-}
-
-void WMain::addChat(QString from, QString text)
-{
-	//QString chatline = "[" + from + "]: " + text;
-	//editChatLog->append(chatline);
-	
-	editChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
-	editChatLog->setFontWeight(QFont::Bold);
-	editChatLog->insertPlainText("[" + from + "]");
-	editChatLog->setFontWeight(QFont::Normal);
-	editChatLog->insertPlainText(": " + text + "\r\n");
-}
-
-QString WMain::getUsername()
-{
-	return editUsername->text();
-}
+#include <cstdio>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QTextEdit>
 
 WMain::WMain(QWidget *parent) : QWidget(parent)
 {
 	//setFixedSize(200, 120);
-	setWindowTitle("HoldingNuts foyer");
+	setWindowTitle(tr("HoldingNuts Foyer"));
 	
 	QGroupBox *groupInfo = new QGroupBox(tr("User info"));
 	
@@ -160,42 +79,92 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	
 	groupSrv->setLayout(lsrv);
 	/////////////////////
-	
-	QGroupBox *groupChat = new QGroupBox(tr("Foyer chat"));
-	
-	editChat = new QLineEdit(this);
-	connect(editChat, SIGNAL(returnPressed()), this, SLOT(actionChat()));
-	
-	QPushButton *btnChat = new QPushButton(tr("Chat"), this);
-	connect(btnChat, SIGNAL(clicked()), this, SLOT(actionChat()));
-	
-	QHBoxLayout *lchatinp = new QHBoxLayout();
-	lchatinp->addWidget(editChat);
-	lchatinp->addWidget(btnChat);
-	
-	editChatLog = new QTextEdit(this);
-	editChatLog->setReadOnly(true);
-	
-	QVBoxLayout *lchat = new QVBoxLayout();
-	lchat->addLayout(lchatinp);
-	lchat->addWidget(editChatLog);
-	
-	groupChat->setLayout(lchat);
-	/////////////////////
-	
+
 	QPushButton *btnRegister = new QPushButton(tr("Register"), this);
 	connect(btnRegister, SIGNAL(clicked()), this, SLOT(actionRegister()));
 	
 	QPushButton *btnTest = new QPushButton(tr("Test"), this);
 	connect(btnTest, SIGNAL(clicked()), this, SLOT(actionTest()));
 	
-	/////////////////////
+	m_pChat = new ChatBox(tr("Foyer Chat"), ((PClient*)qApp)->getMyCId(), -1);
 	
+	// final layout
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->addWidget(groupInfo);
 	layout->addWidget(groupSrv);
-	layout->addWidget(groupChat);
+	layout->addWidget(m_pChat);
 	layout->addWidget(btnRegister);
 	layout->addWidget(btnTest);
+	
 	setLayout(layout);
+} // Wmain
+
+void WMain::addLog(const QString& line)
+{
+	editLog->append(line);
+}
+
+void WMain::addChat(const QString& from, const QString& text)
+{
+	m_pChat->addMessage(from, text);
+} // addChat
+
+void WMain::addServerMessage(const QString& text)
+{
+	m_pChat->addMessage(text, Qt::red);
+} // addServerMessage
+
+void WMain::updateConnectionStatus()
+{
+	if (((PClient*)qApp)->isConnected())
+	{
+		btnConnect->setEnabled(false);
+		btnClose->setEnabled(true);
+	}
+	else
+	{
+		if (editSrvAddr->text().length())
+			btnConnect->setEnabled(true);
+		else
+			btnConnect->setEnabled(false);
+		btnClose->setEnabled(false);
+	}
+}
+
+QString WMain::getUsername() const
+{
+	return editUsername->text();
+}
+
+void WMain::actionConnect()
+{
+	if (!((PClient*)qApp)->doConnect(editSrvAddr->text(), DEFAULT_SERVER_PORT))
+		addLog(tr("Error connecting."));
+	else
+		btnConnect->setEnabled(false);
+}
+
+void WMain::actionClose()
+{
+	((PClient*)qApp)->doClose();
+}
+
+
+void WMain::actionTest()
+{
+	WTable *table = new WTable(0, 0);
+	table->show();
+}
+
+void WMain::actionRegister()
+{
+	((PClient*)qApp)->doRegister(0);
+}
+
+void WMain::slotSrvTextChanged()
+{
+	if (!editSrvAddr->text().length() || ((PClient*)qApp)->isConnected())
+		btnConnect->setEnabled(false);
+	else
+		btnConnect->setEnabled(true);
 }

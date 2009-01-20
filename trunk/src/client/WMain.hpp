@@ -21,46 +21,46 @@
 #ifndef _WMAIN_H
 #define _WMAIN_H
 
-#include <QApplication>
 #include <QWidget>
-#include <QFont>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QLabel>
-#include <QTextEdit>
+
+class ChatBox;
+class QLineEdit;
+class QPushButton;
+class QTextEdit;
 
 class WMain : public QWidget
 {
-Q_OBJECT
+	Q_OBJECT
 
-public:
-	WMain(QWidget *parent = 0);
-	void addLog(QString line);
-	void addChat(QString from, QString text);
-	void updateConnectionStatus();
-	QString getUsername();
+	public:
+		WMain(QWidget *parent = 0);
 
-private slots:
-	void actionConnect();
-	void actionClose();
-	void actionChat();
-	void slotSrvTextChanged();
-	void actionRegister();
-	void actionTest();
+		void addLog(const QString& line);
+	
+		void addChat(const QString& from, const QString& text);
+		void addServerMessage(const QString& text);
+	
+		void updateConnectionStatus();
 
-private:
-	QLineEdit *editUsername;
+		QString getUsername() const;
+
+	private slots:
+		void actionConnect();
+		void actionClose();
+		void slotSrvTextChanged();
+		void actionRegister();
+		void actionTest();
+
+	private:
+		QLineEdit*		editUsername;
 	
-	QLineEdit *editSrvAddr;
-	QPushButton *btnConnect, *btnClose;
+		QLineEdit*		editSrvAddr;
+		QPushButton*	btnConnect;
+		QPushButton*	btnClose;
 	
-	QLineEdit *editChat;
-	QTextEdit *editChatLog;
+		QTextEdit*		editLog;
 	
-	QTextEdit *editLog;
+		ChatBox*	m_pChat;
 };
 
-#endif /* _WMAIN_H */
+#endif	// _WMAIN_H

@@ -109,16 +109,19 @@ private:
 	QLabel *lblAction;
 };
 
+class ChatBox;
 
 class WTable : public QLabel
 {
-Q_OBJECT
+	Q_OBJECT
 
-public:
-	WTable(int gid, int tid, QWidget *parent = 0);
-	void updateView();
-	
-	
+	public:
+		WTable(int gid, int tid, QWidget *parent = 0);
+		
+		void updateView();
+
+		void addChat(const QString& from, const QString& text);
+		void addServerMessage(const QString& text);
 
 protected:
 	void closeEvent(QCloseEvent *event);
@@ -135,9 +138,9 @@ private slots:
 	void slotShow();
 	void slotTest();
 
-private:
-	int gid;
-	int tid;
+	private:
+		int gid;
+		int tid;
 	
 	QStackedLayout *stlayActions;
 	QLineEdit *editAmount;
@@ -150,8 +153,11 @@ private:
 	QLabel *lblPots;
 	WPicture *cc[5];
 	QWidget *wCC;
+	
+		int			m_nGid;
+		int			m_nTid;
+
+		ChatBox*	m_pChat;
 };
-
-
 
 #endif /* _WTABLE_H */

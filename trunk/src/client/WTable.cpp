@@ -23,13 +23,13 @@
 
 #include "Config.h"
 #include "Debug.h"
-
 #include "pclient.hpp"
+#include "ChatBox.hpp"
 
 using namespace std;
 
 
-WTable::WTable(int gid, int tid, QWidget *parent) : QLabel(parent)
+WTable::WTable(int gid, int tid, QWidget *parent) : QLabel(parent), m_nGid(gid), m_nTid(tid)
 {
 	this->gid = gid;
 	this->tid = tid;
@@ -133,16 +133,24 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QLabel(parent)
 	wTable->setPixmap(QPixmap::fromImage(image));
 	/////
 	
+	
+	m_pChat	= new ChatBox(tr("Table Chat"), m_nGid, m_nTid);
+	
+	QHBoxLayout* actionHBox = new QHBoxLayout();
+
+	actionHBox->addWidget(m_pChat);
+	actionHBox->addWidget(wActions, 1, Qt::AlignCenter);
+	
 	QWidget *wSpacer = new QWidget(this);
 	wSpacer->setFixedHeight(50);
 	
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->addWidget(wSpacer);
 	layout->addWidget(wTable, 90);
-	layout->addWidget(wActions, 1, Qt::AlignCenter);
+	layout->addLayout(actionHBox);
+	
 	
 	setLayout(layout);
-	
 	
 	////////
 	
@@ -258,10 +266,11 @@ void WTable::updateView()
 	
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
 	
-	if (!tinfo)
-		return;
-	
+	Q_ASSERT_X(tinfo, "WTable::updateView", "getTableInfo failed");
+
 	table_snapshot *snap = &(tinfo->snap);
+	
+	Q_ASSERT_X(snap, "WTable::updateView", "invalid snapshot pointer");
 	
 	for (unsigned int i=0; i < 10; i++)
 	{
@@ -419,6 +428,16 @@ void WTable::updateView()
 		}
 	}
 }
+
+void WTable::addChat(const QString& from, const QString& text)
+{
+	m_pChat->addMessage(from, text);
+} // addChat
+
+void WTable::addServerMessage(const QString& text)
+{
+	m_pChat->addMessage(text, Qt::red);
+} // addServerMessage
 
 void WTable::closeEvent(QCloseEvent *event)
 {
