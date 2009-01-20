@@ -17,6 +17,12 @@
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Config.h"
+#include "Debug.h"
+#include "Protocol.h"
+#include "Tokenizer.hpp"
+#include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
+#include "pclient.hpp"
 
 #include <cstdlib>
 #include <cstdio>
@@ -26,30 +32,22 @@
 # include <signal.h>
 #endif
 
-#include "Config.h"
-#include "Debug.h"
-#include "Protocol.h"
-#include "Tokenizer.hpp"
-
-#include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
-
-#include "pclient.hpp"
-
-using namespace std;
-
-servercon srv;
-
-map<int,playerinfo> players;
-map<int,gameinfo> games;
 //////////////
+typedef std::map<int, playerinfo>		players_type;
+typedef std::map<int,gameinfo>			games_type;
 
+servercon			srv;
+players_type		players;
+games_type			games;
+
+//////////////
 
 int send_msg(const char *msg)
 {
 	const int bufsize = 1024;
 	char buf[bufsize];
-	int len = snprintf(buf, bufsize, "%s\n", msg);
-	int bytes = socket_write(srv.sock, buf, len);
+	const int len = snprintf(buf, sizeof(buf), "%s\n", msg);
+	const int bytes = socket_write(srv.sock, buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
 	
@@ -61,20 +59,20 @@ int send_msg(const char *msg)
 
 int server_execute(const char *cmd)
 {
+#ifdef DEBUG	
+//	dbg_print("server_execute", "cmd= %s", cmd);
+#endif
+
 	char msg[1024];
 	
 	Tokenizer t;
 	t.parse(cmd);  // parse the command line
 	
-	if (!t.getCount())
+	if(!t.getCount())
 		return 0;
 	
-	//dbg_print("server", "executing '%s'", cmd);
-	//QString log(cmd);
-	//((PClient*)qApp)->wMain->addLog(log);
-	
 	// get first arg
-	string command;
+	std::string command;
 	t.getNext(command);
 	
 	// FIXME: state; check if this is really a pserver
@@ -103,13 +101,18 @@ int server_execute(const char *cmd)
 	}
 	else if (command == "MSG")
 	{
-		string idfrom = t.getNext();
+		// MSG <from> <sender-name> <message>
+		// from := { -1 | <game-id>:<table-id> | <client-id> | <gid>:<tid>:<cid> }   # -1 server
+		std::string idfrom = t.getNext();
+
 		Tokenizer ft;
 		ft.parse(idfrom, ":");
 		
 		int from;
-		int gid, tid;
+		int gid = -1;
+		int tid = -1;
 		bool gmsg = false;
+
 		if (ft.getCount() >= 2)
 		{
 			gmsg = true;
@@ -119,31 +122,50 @@ int server_execute(const char *cmd)
 		else
 			from = ft.getNextInt();
 		
-		string sfrom = t.getNext();
+		// playername
+		QString qsfrom(QString::fromStdString(t.getNext()));
+		// chatmessage
+		QString qchatmsg(QString::fromStdString(t.getTillEnd()));
 		
-		string chatmsg = t.getTillEnd();
-		
-		QString qsfrom(QString::fromStdString(sfrom));
-		QString qchatmsg(QString::fromStdString(chatmsg));
+		// TODO: only parse playername if the msg ist not from server
 		
 		// replace all occurrences of "[cid]" in server-msg with player-name
 		if (gmsg || from == -1)
 		{
 			QRegExp rx("\\[(\\d+)\\]");
-			while (rx.indexIn(qchatmsg) != -1)
+			
+			while(rx.indexIn(qchatmsg) != -1)
 			{
-				QString scid = rx.cap(1);
-				QString name = players[scid.toInt()].name;  // FIXME: fill in '???' for unknown player
+				QString name = "???";
+				players_type::iterator it = players.find(rx.cap(1).toInt());
+
+				if(it != players.end())
+					name = it->second.name;
 				
 				qchatmsg.replace(rx, "'" + name + "'");
 			}
 		}
-		
-		((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
+
+		if(gid != -1 && tid != -1)
+		{
+			tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+
+			Q_ASSERT_X(tinfo, "server_execute", "getTableInfo failed");
+			
+			// TODO: player or server message
+			tinfo->window->addChat(qsfrom, qchatmsg);
+		}
+		else
+		{
+			if(from == -1) // message from server to foyer
+				((PClient*)qApp)->wMain->addServerMessage(qchatmsg);
+			else // message from user to foyer
+				((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
+		}
 	}
-	else if (command == "SNAP")
+	else if (command == "SNAP")		// TODO: snap only debug-code
 	{
-		string from = t.getNext();
+		std::string from = t.getNext();
 		Tokenizer ft;
 		ft.parse(from, ":");
 		int gid = ft.getNextInt();
@@ -155,7 +177,7 @@ int server_execute(const char *cmd)
 		{
 		case SnapGameState:
 			{
-				string sstate = t.getNext();
+				std::string sstate = t.getNext();
 				
 				if (sstate == "start")
 				{
@@ -196,7 +218,7 @@ int server_execute(const char *cmd)
 				Tokenizer st;
 				
 				// state:betting_round
-				string tmp = t.getNext();
+				std::string tmp = t.getNext();
 				st.parse(tmp, ":");
 				
 				table.state = st.getNextInt();
@@ -214,7 +236,7 @@ int server_execute(const char *cmd)
 				// community-cards
 				{
 					//table.communitycards = t.getNext().substr(3);
-					string board = t.getNext().substr(3);
+					std::string board = t.getNext().substr(3);
 					CommunityCards &cc = table.communitycards;
 					
 					Tokenizer ct;
@@ -280,7 +302,7 @@ int server_execute(const char *cmd)
 					si.bet = st.getNextFloat();
 					
 					/*si.action = */ st.getNext();
-					string shole = st.getNext();
+					std::string shole = st.getNext();
 					if (shole.length() == 4)
 					{
 						Card h1(shole.substr(0, 2).c_str());
@@ -335,7 +357,7 @@ int server_execute(const char *cmd)
 				
 				HoleCards &h = tinfo->holecards;
 				
-				string hole = t.getNext();
+				std::string hole = t.getNext();
 				
 				Tokenizer ct;
 				ct.parse(hole, ":");
@@ -356,7 +378,7 @@ int server_execute(const char *cmd)
 	{
 		/* from */ t.getNextInt();
 		
-		string sreq = t.getTillEnd();
+		std::string sreq = t.getTillEnd();
 		
 		snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq.c_str());
 		send_msg(msg);
@@ -368,14 +390,14 @@ int server_execute(const char *cmd)
 		playerinfo pi;
 		memset(&pi, 0, sizeof(pi));
 		
-		string sinfo;
+		std::string sinfo;
 		while (t.getNext(sinfo))
 		{
 			Tokenizer it;
 			it.parse(sinfo, ":");
 			
-			string itype = it.getNext();
-			string ivalue = it.getNext();
+			std::string itype = it.getNext();
+			std::string ivalue = it.getNext();
 			
 			if (itype == "name")
 			{
@@ -386,10 +408,8 @@ int server_execute(const char *cmd)
 		//update_player_info(&pi);
 		players[cid] = pi;
 	}
-	
 	return 0;
-}
-
+} // server_execute
 
 // returns zero if no cmd was found or no bytes remaining after exec
 int server_parsebuffer()
@@ -447,9 +467,8 @@ int server_handle()
 	if ((bytes = socket_read(sock, buf, sizeof(buf))) <= 0)
 		return bytes;
 	
-	
-	//dbg_print("connectsock", "(%d) DATA len=%d", sock, bytes);
-	
+//	dbg_print("connectsock", "(%d) DATA len=%d", sock, bytes);
+
 	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
 	{
 		dbg_print("clientsock", "(%d) error: buffer size exceeded", sock);
@@ -465,7 +484,7 @@ int server_handle()
 	}
 	
 	return bytes;
-}
+} // server_handle
 
 int connectsock_create(const char *server, unsigned int port)
 {
@@ -669,13 +688,23 @@ void PClient::slotReceived(int n)
 #endif
 }
 
-void PClient::chatAll(QString text)
+void PClient::chatAll(const QString& text)
 {
+	// foyer chat
 	if (!connected)
 		return;
 	
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "CHAT %d %s", -1, text.simplified().toStdString().c_str());
+	send_msg(msg);
+}
+
+void PClient::chat(const QString& text, int gid, int tid)
+{
+	if (!connected) return;
+
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "CHAT %d:%d %s", gid, tid, text.simplified().toStdString().c_str());
 	send_msg(msg);
 }
 

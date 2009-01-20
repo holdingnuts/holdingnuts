@@ -34,13 +34,11 @@
 #include <QRegExp>
 
 #include "Network.h"
-
 #include "Card.hpp"
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
 #include "GameLogic.hpp"
 #include "Player.hpp"
-
 #include "WMain.hpp"
 #include "WTable.hpp"
 
@@ -85,7 +83,9 @@ public:
 	void doClose();
 	
 	bool isConnected() const { return connected || connecting; };
-	void chatAll(QString text);
+	
+	void chatAll(const QString& text);
+	void chat(const QString& text, int gid, int tid);
 	
 	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
 	
