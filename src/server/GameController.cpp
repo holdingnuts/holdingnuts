@@ -261,13 +261,13 @@ void GameController::sendTableSnapshot(Table *t)
 		
 		char tmp[1024];
 		snprintf(tmp, sizeof(tmp),
-			"s%d:%d:%d:%.2f:%.2f:%c:%s",
+			"s%d:%d:%d:%.2f:%.2f:%d:%s",
 			s->seat_no,
 			p->client_id,
 			pstate,
 			p->stake,
 			s->bet,
-			'X' /* FIXME: action */,
+			p->last_action,
 			shole.c_str());
 		
 		sseats += tmp;
@@ -351,13 +351,13 @@ float GameController::determineMinimumBet(Table *t) const
 // FIXME: SB gets first (one) card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
-	for (unsigned int i = t->cur_player, c=0; c < t->countPlayers(); i = t->getNextPlayer(i), c++)
+	for (unsigned int i = t->cur_player, c=0; c < t->countPlayers(); i = t->getNextPlayer(i))
 	{
 		if (!t->seats[i].occupied)
 			continue;
 		
-		t->seats[i].in_round = true;
-		t->seats[i].showcards = false;
+		// increase found-player counter
+		c++;
 		
 		Player *p = t->seats[i].player;
 		
@@ -376,7 +376,7 @@ void GameController::dealHole(Table *t)
 		chat(p->client_id, t->table_id, msg);
 		
 		
-		// holecard snapshot
+		// holecard snapshot to each player
 		vector<Card> cards;
 		string scards;
 		
@@ -464,28 +464,17 @@ void GameController::stateNewRound(Table *t)
 	dbg_print("Table", "New Round (gid=%d tid=%d)", game_id, t->table_id);
 #endif
 	
+	// fill and shuffle card-deck
 	t->deck.fill();
 	t->deck.shuffle();
 	
+	
+	// reset round-related
 	t->communitycards.clear();
-
-#ifdef SERVER_TESTING
-	chat(t->table_id, "---------------------------------------------");
 	
-	string ststr = "Stacks: ";
-	for (unsigned int i=0; i < t->seats.size(); i++)
-	{
-		Player *p = t->seats[i].player;
-		
-		char tmp[128];
-		snprintf(tmp, sizeof(tmp), "[%d]=%0.2f ", p->client_id, p->stake);
-		ststr += tmp;
-	}
-	chat(t->table_id, ststr.c_str());
-	
-	chat(t->table_id, "New round started, deck shuffled");
-#endif
-	
+	t->bet_amount = 0.0f;
+	t->last_bet_amount = 0.0f;
+	t->nomoreaction = false;
 	
 	// clear old pots and create initial main pot
 	t->pots.clear();
@@ -494,7 +483,46 @@ void GameController::stateNewRound(Table *t)
 	pot.final = false;
 	t->pots.push_back(pot);
 	
-	t->nomoreaction = false;
+	
+	// reset player-related
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		if (!t->seats[i].occupied)
+			continue;
+		
+		t->seats[i].in_round = true;
+		t->seats[i].showcards = false;
+		t->seats[i].bet = 0.0f;
+		
+		
+		Player *p = t->seats[i].player;
+		
+		p->holecards.clear();
+		p->last_action = Player::None;
+	}
+	
+	
+	// determine who is SB and BB
+	bool headsup_rule = (t->countPlayers() == 2);
+	
+	if (headsup_rule)   // heads-up rule: only 2 players remain, so swap blinds
+	{
+		t->bb = t->getNextPlayer(t->dealer);
+		t->sb = t->getNextPlayer(t->bb);
+	}
+	else
+	{
+		t->sb = t->getNextPlayer(t->dealer);
+		t->bb = t->getNextPlayer(t->sb);
+	}
+	
+	// player under the gun
+	t->cur_player = t->getNextPlayer(t->bb);
+	t->last_bet_player = t->cur_player;
+	
+	
+	sendTableSnapshot(t);
+	
 	t->state = Table::Blinds;
 }
 
@@ -516,27 +544,6 @@ void GameController::stateBlinds(Table *t)
 	// FIXME: handle non-SNG correctly (ask each player for blinds ...)
 	
 	t->bet_amount = (float)blind;
-	t->last_bet_amount = 0.0f;
-	
-	bool headsup_rule = (t->countPlayers() == 2);
-	
-	// determine who is SB and BB
-	if (headsup_rule)   // heads-up rule: only 2 players remain, so swap blinds
-	{
-		t->bb = t->getNextPlayer(t->dealer);
-		t->sb = t->getNextPlayer(t->bb);
-	}
-	else
-	{
-		t->sb = t->getNextPlayer(t->dealer);
-		t->bb = t->getNextPlayer(t->sb);
-	}
-	
-	// player under the gun
-	t->cur_player = t->getNextPlayer(t->bb);
-	t->last_bet_player = t->cur_player;
-	
-	sendTableSnapshot(t);
 	
 	
 	Player *pSmall = t->seats[t->sb].player;
@@ -562,16 +569,9 @@ void GameController::stateBlinds(Table *t)
 	t->seats[t->bb].bet = amount;
 	pBig->stake -= amount;
 	
-#ifdef SERVER_TESTING
-	Player *pDealer = t->seats[t->dealer].player;
 	
-	snprintf(msg, sizeof(msg), "[%d] is Dealer, [%d] is SB (%.2f), [%d] is BB (%.2f) %s",
-		pDealer->client_id,
-		pSmall->client_id, (float)blind / 2,
-		pBig->client_id, (float)blind,
-		(headsup_rule) ? "HEADS-UP" : "");
-	chat(t->table_id, msg);
-#endif /* SERVER_TESTING */
+	sendTableSnapshot(t);
+	
 	
 	// initialize the player's timeout
 	timeout_start = time(NULL);
@@ -734,6 +734,10 @@ void GameController::stateBetting(Table *t)
 		return;
 	
 	
+	// remember action for snapshot
+	p->last_action = action;
+	
+	
 	// perform action
 	if (action == Player::None)
 	{
@@ -848,6 +852,7 @@ void GameController::stateBetting(Table *t)
 			
 			// last_bet_player MUST show his hand
 			t->seats[t->last_bet_player].showcards = true;
+			// FIXME: set last action ?
 			
 			// set the player behind last action as current player
 			t->cur_player = t->getNextActivePlayer(t->last_bet_player);
@@ -953,6 +958,14 @@ void GameController::stateAskShow(Table *t)
 	// return here if no action chosen till now
 	if (!chose_action)
 		return;
+	
+	
+	// remember action for snapshot
+	if (t->seats[t->cur_player].showcards)
+		p->last_action = Player::Show;
+	else
+		p->last_action = Player::Muck;
+	
 	
 	// all-players-(except-one)-folded or showdown?
 	if (t->countActivePlayers() == 1)
