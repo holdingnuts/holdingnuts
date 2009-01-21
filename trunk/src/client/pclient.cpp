@@ -302,8 +302,8 @@ int server_execute(const char *cmd)
 					
 					si.stake = st.getNextFloat();
 					si.bet = st.getNextFloat();
+					si.action = (Player::PlayerAction) st.getNextInt();
 					
-					/*si.action = */ st.getNext();
 					std::string shole = st.getNext();
 					if (shole.length() == 4)
 					{

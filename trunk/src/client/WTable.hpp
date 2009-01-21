@@ -52,6 +52,7 @@ typedef struct {
 	float bet;
 	float stake;
 	bool in_round;
+	Player::PlayerAction action;
 	HoleCards holecards;
 } seatinfo;
 

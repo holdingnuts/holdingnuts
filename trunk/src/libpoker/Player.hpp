@@ -65,6 +65,7 @@ private:
 	HoleCards holecards;
 	
 	SchedAction next_action;
+	PlayerAction last_action;
 	
 	bool sitout;     // is player sitting out?
 };
