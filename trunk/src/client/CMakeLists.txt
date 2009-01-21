@@ -71,7 +71,7 @@ target_link_libraries (
 #http://www.cmake.org/Wiki/CMake:How_To_Build_Qt4_Software
 #http://doc.trolltech.com/4.3/i18n.html
 
-file (GLOB TRANSLATIONS_FILES *.ts)
+file (GLOB TRANSLATIONS_FILES translations/*.ts)
 
 file (GLOB SRC_FILES *.cpp *.hpp)
 
