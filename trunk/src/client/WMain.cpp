@@ -20,8 +20,10 @@
 #include "WMain.hpp"
 #include "ChatBox.hpp"
 #include "WTable.hpp"
+
 #include "Config.h"
 #include "Debug.h"
+
 #include "pclient.hpp"
 
 #include <cstdio>
@@ -97,7 +99,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	layout->addWidget(btnTest);
 	
 	setLayout(layout);
-} // Wmain
+}
 
 void WMain::addLog(const QString& line)
 {
@@ -107,12 +109,12 @@ void WMain::addLog(const QString& line)
 void WMain::addChat(const QString& from, const QString& text)
 {
 	m_pChat->addMessage(from, text);
-} // addChat
+}
 
 void WMain::addServerMessage(const QString& text)
 {
 	m_pChat->addMessage(text, Qt::red);
-} // addServerMessage
+}
 
 void WMain::updateConnectionStatus()
 {

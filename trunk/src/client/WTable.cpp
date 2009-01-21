@@ -19,11 +19,13 @@
 
 
 #include <cstdio>
-#include "WTable.hpp"
 
 #include "Config.h"
 #include "Debug.h"
+
 #include "pclient.hpp"
+
+#include "WTable.hpp"
 #include "ChatBox.hpp"
 
 using namespace std;
@@ -432,12 +434,12 @@ void WTable::updateView()
 void WTable::addChat(const QString& from, const QString& text)
 {
 	m_pChat->addMessage(from, text);
-} // addChat
+}
 
 void WTable::addServerMessage(const QString& text)
 {
 	m_pChat->addMessage(text, Qt::red);
-} // addServerMessage
+}
 
 void WTable::closeEvent(QCloseEvent *event)
 {
