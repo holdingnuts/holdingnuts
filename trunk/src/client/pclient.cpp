@@ -472,7 +472,7 @@ int server_handle()
 
 	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
 	{
-		dbg_print("clientsock", "(%d) error: buffer size exceeded", sock);
+		dbg_print("connectsock", "(%d) error: buffer size exceeded", sock);
 		srv.buflen = 0;
 	}
 	else
@@ -633,7 +633,7 @@ void PClient::slotConnectTimeout()
 	wMain->addLog(tr("Connection timeout."));
 	
 	delete snw;
-	delete connect_timer;
+	delete connect_timer;      // FIXME: can't delete on event handler
 	
 	connected = false;
 	connecting = false;
@@ -643,9 +643,11 @@ void PClient::slotConnectTimeout()
 
 void PClient::slotConnected(int n)
 {
+	snw->setEnabled(false);
+	
 	wMain->addLog(tr("Connected."));
 	
-	delete snw;
+	delete snw;   // FIXME: can't delete on event handler
 	delete connect_timer;
 	
 	memset(&srv, 0, sizeof(srv));
@@ -672,19 +674,27 @@ void PClient::slotConnected(int n)
 }
 
 void PClient::slotReceived(int n)
-{	
-	if (server_handle() <= 0)
+{
+#ifdef PLATFORM_WINDOWS
+	// http://doc.trolltech.com/4.4/qsocketnotifier.html#notes-for-windows-users
+	snr->setEnabled(false);
+#endif
+	
+	const int status = server_handle();
+	
+	if (status <= 0)
 	{
-		delete snr;
+		wMain->addLog(tr("Connection closed."));
+		
+		delete snr;    // FIXME: can't delete on event handler
 		socket_close(srv.sock);
 		connected = false;
 		
-		wMain->addLog(tr("Connection closed."));
 		wMain->updateConnectionStatus();
 	}
 	
 #ifdef PLATFORM_WINDOWS
-	// http://doc.trolltech.com/4.3/qsocketnotifier.html#notes-for-windows-users
+	// http://doc.trolltech.com/4.4/qsocketnotifier.html#notes-for-windows-users
 	snr->setEnabled(true);
 #endif
 }
