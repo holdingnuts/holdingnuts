@@ -348,16 +348,12 @@ float GameController::determineMinimumBet(Table *t) const
 		return t->bet_amount + (t->bet_amount - t->last_bet_amount);
 }
 
-// FIXME: SB gets first (one) card; not very important because it doesn't really matter
 void GameController::dealHole(Table *t)
 {
-	for (unsigned int i = t->cur_player, c=0; c < t->countPlayers(); i = t->getNextPlayer(i))
+	for (unsigned int i = t->sb, c=0; c < t->countPlayers(); i = t->getNextPlayer(i))
 	{
 		if (!t->seats[i].occupied)
 			continue;
-		
-		// increase found-player counter
-		c++;
 		
 		Player *p = t->seats[i].player;
 		
@@ -376,7 +372,7 @@ void GameController::dealHole(Table *t)
 		chat(p->client_id, t->table_id, msg);
 		
 		
-		// holecard snapshot to each player
+		// assemble holecards snapshot
 		vector<Card> cards;
 		string scards;
 		
@@ -390,7 +386,12 @@ void GameController::dealHole(Table *t)
 				scards += ':';
 		}
 		
+		// send the holecards snapshot to player
 		snap(p->client_id, t->table_id, SnapHoleCards, scards.c_str());
+		
+		
+		// increase the found-player counter
+		c++;
 	}
 }
 
