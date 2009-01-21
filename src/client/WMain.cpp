@@ -113,7 +113,13 @@ void WMain::addChat(const QString& from, const QString& text)
 
 void WMain::addServerMessage(const QString& text)
 {
-	m_pChat->addMessage(text, Qt::red);
+	m_pChat->addMessage(text, Qt::blue);
+}
+
+void WMain::addServerErrorMessage(int code, const QString& text)
+{
+	QString qmsg = tr("Error") + ": " + text + " (Code: " + QString::number(code) + ")";
+	m_pChat->addMessage(qmsg, Qt::red);
 }
 
 void WMain::updateConnectionStatus()

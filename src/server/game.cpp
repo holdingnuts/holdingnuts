@@ -204,9 +204,16 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 
 bool client_add(socktype sock, sockaddr_in *saddr)
 {
-	clientcon client;
+	// drop client if maximum connection count is reached   // FIXME: configurable
+	if (clients.size() == SERVER_CLIENT_HARDLIMIT)
+	{
+		send_err(sock, -999 /* FIXME: error-code */, "server full");
+		socket_close(sock);
+		
+		return false;
+	}
 	
-	// FIXME: handle case when server is full
+	clientcon client;
 	
 	memset(&client, 0, sizeof(client));
 	client.sock = sock;

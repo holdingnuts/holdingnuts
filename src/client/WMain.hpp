@@ -39,6 +39,7 @@ public:
 
 	void addChat(const QString& from, const QString& text);
 	void addServerMessage(const QString& text);
+	void addServerErrorMessage(int code, const QString& text);
 
 	void updateConnectionStatus();
 

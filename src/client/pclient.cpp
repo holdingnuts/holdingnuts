@@ -99,6 +99,11 @@ int server_execute(const char *cmd)
 	else if (command == "ERR")
 	{
 		dbg_print("server", "last cmd error!");
+		
+		const int err_code = t.getNextInt();
+		QString qmsg(QString::fromStdString(t.getTillEnd()));
+		
+		((PClient*)qApp)->wMain->addServerErrorMessage(err_code, qmsg);
 	}
 	else if (command == "MSG")
 	{
