@@ -46,8 +46,7 @@ games_type		games;
 
 int send_msg(const char *msg)
 {
-	const int bufsize = 1024;
-	char buf[bufsize];
+	char buf[1024];
 	const int len = snprintf(buf, sizeof(buf), "%s\n", msg);
 	const int bytes = socket_write(srv.sock, buf, len);
 	

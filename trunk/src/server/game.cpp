@@ -82,10 +82,9 @@ clientcon* get_client_by_id(int cid)
 
 int send_msg(socktype sock, const char *msg)
 {
-	const int bufsize = 1024;
-	char buf[bufsize];
-	int len = snprintf(buf, bufsize, "%s\r\n", msg);
-	int bytes = socket_write(sock, buf, len);
+	char buf[1024];
+	const int len = snprintf(buf, sizeof(buf), "%s\r\n", msg);
+	const int bytes = socket_write(sock, buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
 	if (len != bytes)
