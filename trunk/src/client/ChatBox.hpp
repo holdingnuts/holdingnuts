@@ -15,6 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Authors:
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
 

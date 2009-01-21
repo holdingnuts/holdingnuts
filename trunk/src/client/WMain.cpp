@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, Dominik Geyer
+ * Copyright 2008, 2009, Dominik Geyer
  *
  * This file is part of HoldingNuts.
  *
@@ -15,6 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Authors:
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 #include "WMain.hpp"
