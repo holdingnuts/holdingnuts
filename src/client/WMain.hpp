@@ -30,37 +30,37 @@ class QTextEdit;
 
 class WMain : public QWidget
 {
-	Q_OBJECT
+Q_OBJECT
 
-	public:
-		WMain(QWidget *parent = 0);
+public:
+	WMain(QWidget *parent = 0);
 
-		void addLog(const QString& line);
-	
-		void addChat(const QString& from, const QString& text);
-		void addServerMessage(const QString& text);
-	
-		void updateConnectionStatus();
+	void addLog(const QString& line);
 
-		QString getUsername() const;
+	void addChat(const QString& from, const QString& text);
+	void addServerMessage(const QString& text);
 
-	private slots:
-		void actionConnect();
-		void actionClose();
-		void slotSrvTextChanged();
-		void actionRegister();
-		void actionTest();
+	void updateConnectionStatus();
 
-	private:
-		QLineEdit*		editUsername;
-	
-		QLineEdit*		editSrvAddr;
-		QPushButton*	btnConnect;
-		QPushButton*	btnClose;
-	
-		QTextEdit*		editLog;
-	
-		ChatBox*	m_pChat;
+	QString getUsername() const;
+
+private slots:
+	void actionConnect();
+	void actionClose();
+	void slotSrvTextChanged();
+	void actionRegister();
+	void actionTest();
+
+private:
+	QLineEdit*	editUsername;
+
+	QLineEdit*	editSrvAddr;
+	QPushButton*	btnConnect;
+	QPushButton*	btnClose;
+
+	QTextEdit*	editLog;
+
+	ChatBox*	m_pChat;
 };
 
-#endif	// _WMAIN_H
+#endif	/* _WMAIN_H */

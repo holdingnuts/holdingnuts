@@ -19,9 +19,11 @@
 
 #include "Config.h"
 #include "Debug.h"
-#include "Protocol.h"
 #include "Tokenizer.hpp"
+
+#include "Protocol.h"
 #include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
+
 #include "pclient.hpp"
 
 #include <cstdlib>
@@ -33,12 +35,12 @@
 #endif
 
 //////////////
-typedef std::map<int, playerinfo>		players_type;
-typedef std::map<int,gameinfo>			games_type;
+typedef std::map<int,playerinfo>	players_type;
+typedef std::map<int,gameinfo>		games_type;
 
-servercon			srv;
+servercon		srv;
 players_type		players;
-games_type			games;
+games_type		games;
 
 //////////////
 
@@ -68,7 +70,7 @@ int server_execute(const char *cmd)
 	Tokenizer t;
 	t.parse(cmd);  // parse the command line
 	
-	if(!t.getCount())
+	if (!t.getCount())
 		return 0;
 	
 	// get first arg
@@ -134,19 +136,19 @@ int server_execute(const char *cmd)
 		{
 			QRegExp rx("\\[(\\d+)\\]");
 			
-			while(rx.indexIn(qchatmsg) != -1)
+			while (rx.indexIn(qchatmsg) != -1)
 			{
 				QString name = "???";
 				players_type::iterator it = players.find(rx.cap(1).toInt());
 
-				if(it != players.end())
+				if (it != players.end())
 					name = it->second.name;
 				
 				qchatmsg.replace(rx, "'" + name + "'");
 			}
 		}
 
-		if(gid != -1 && tid != -1)
+		if (gid != -1 && tid != -1)
 		{
 			tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
 
@@ -157,7 +159,7 @@ int server_execute(const char *cmd)
 		}
 		else
 		{
-			if(from == -1) // message from server to foyer
+			if (from == -1) // message from server to foyer
 				((PClient*)qApp)->wMain->addServerMessage(qchatmsg);
 			else // message from user to foyer
 				((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
@@ -409,7 +411,7 @@ int server_execute(const char *cmd)
 		players[cid] = pi;
 	}
 	return 0;
-} // server_execute
+}
 
 // returns zero if no cmd was found or no bytes remaining after exec
 int server_parsebuffer()
@@ -484,7 +486,7 @@ int server_handle()
 	}
 	
 	return bytes;
-} // server_handle
+}
 
 int connectsock_create(const char *server, unsigned int port)
 {
@@ -701,7 +703,8 @@ void PClient::chatAll(const QString& text)
 
 void PClient::chat(const QString& text, int gid, int tid)
 {
-	if (!connected) return;
+	if (!connected)
+		return;
 
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "CHAT %d:%d %s", gid, tid, text.simplified().toStdString().c_str());

@@ -34,11 +34,13 @@
 #include <QRegExp>
 
 #include "Network.h"
+
 #include "Card.hpp"
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
 #include "GameLogic.hpp"
 #include "Player.hpp"
+
 #include "WMain.hpp"
 #include "WTable.hpp"
 
