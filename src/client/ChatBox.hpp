@@ -31,15 +31,23 @@ class QTextEdit;
 
 class ChatBox : public QGroupBox
 {
-Q_OBJECT
+	Q_OBJECT
 
 public:
+	enum InputLineAlignment
+	{
+		INPUTLINE_TOP,
+		INPUTLINE_BOTTOM
+	};
+
 	ChatBox(
 		const QString& title,
 		int gid = 0,
 		int tid = -1,
+		InputLineAlignment align = INPUTLINE_TOP,
+		int nTextLogHeight = 100,
 		QWidget *parent = 0);
-	
+
 	void addMessage(const QString& msg, const QColor& color);
 	void addMessage(const QString& from, const QString& msg);
 	void addMessage(
@@ -52,7 +60,7 @@ protected:
 
 private slots:
 	void actionChat();
-	
+
 protected:
 	int			m_nGameID;
 	int			m_nTableID;

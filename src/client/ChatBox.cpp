@@ -28,23 +28,36 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-ChatBox::ChatBox(const QString& title, int gid, int tid, QWidget *parent)
+ChatBox::ChatBox(
+	const QString& title,
+	int gid,
+	int tid,
+	InputLineAlignment align,
+	int nTextLogHeight,
+	QWidget *parent)
+
 :	QGroupBox(title, parent),
 	m_nGameID(gid),
 	m_nTableID(tid)
 {
 	m_pEditChat = new QLineEdit(this);
-	
+
 	connect(m_pEditChat, SIGNAL(returnPressed()), this, SLOT(actionChat()));
-	
+
 	m_pEditChatLog = new QTextEdit(this);
 	m_pEditChatLog->setReadOnly(true);
-	
+	m_pEditChatLog->setFixedHeight(nTextLogHeight);
+
 	QVBoxLayout *lchat = new QVBoxLayout();
 
-	lchat->addWidget(m_pEditChat);
+	if (align == INPUTLINE_TOP)
+		lchat->addWidget(m_pEditChat);
+
 	lchat->addWidget(m_pEditChatLog);
-	
+
+	if (align == INPUTLINE_BOTTOM)
+		lchat->addWidget(m_pEditChat);
+
 	this->setLayout(lchat);
 }
 
@@ -54,7 +67,7 @@ void ChatBox::addMessage(const QString& msg, const QColor& color)
 	m_pEditChatLog->setTextColor(color);
 	m_pEditChatLog->setFontWeight(QFont::Normal);
 	m_pEditChatLog->insertPlainText(msg + "\r\n");
-	m_pEditChatLog->setTextColor(QColor(0, 0, 0));	
+	m_pEditChatLog->setTextColor(QColor(0, 0, 0));
 }
 
 void ChatBox::addMessage(const QString& from, const QString& msg)
