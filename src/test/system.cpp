@@ -77,6 +77,12 @@ int test_sysaccess()
 	filetype *fp;
 	fp = file_open("testfile", mode_write | mode_read);
 	
+	if (!fp)
+	{
+		dbg_print("io", "Error opening file for read/write");
+		return -1;
+	}
+	
 	char buffer[1024];
 	strcpy(buffer, "Hallo\n");
 	
@@ -125,6 +131,9 @@ int main(void)
 	test_sysaccess();
 	
 	test_configparser();
+	
+	const char *config_path = sys_config_path();
+	dbg_print("sys", "config-path: _%s_", config_path);
 	
 	return 0;
 }

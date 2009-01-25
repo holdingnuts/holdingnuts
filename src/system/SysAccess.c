@@ -20,7 +20,7 @@
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
-
+#include "Config.h"
 #include "SysAccess.h"
 
 filetype* file_open(const char *filename, int mode)
@@ -28,12 +28,21 @@ filetype* file_open(const char *filename, int mode)
 	char mode_str[4];
 	int seq_pos = 0;
 	
-	if (mode & mode_read)
-		mode_str[seq_pos++] = 'r';
-	else if (mode & mode_write)
+	if (mode & mode_read && mode & mode_write)
+	{
 		mode_str[seq_pos++] = 'w';
+		mode_str[seq_pos++] = '+';
+	}
+	else
+	{
+		if (mode & mode_read)
+			mode_str[seq_pos++] = 'r';
+		
+		if (mode & mode_write)
+			mode_str[seq_pos++] = 'w';
+	}
 	
-#if defined(PLATFORM_WINDOWS)	
+#if defined(PLATFORM_WINDOWS)
 	mode_str[seq_pos++] = 'b';
 #endif
 	
@@ -100,7 +109,16 @@ char* file_readline(filetype *fp, char *buf, int max)
 	s = fgets(buf, max, fp);
 	
 	if (s)
-		buf[strlen(buf)-1] = '\0';  // remove newline
+	{
+		// remove newline
+		int length = strlen(buf);
+		
+		if (length >= 1 && (buf[length - 1] == '\n' || buf[length - 1] == '\r'))
+			buf[length - 1] = '\0';
+		if (length >= 2 && (buf[length - 2] == '\n' || buf[length - 2] == '\r'))
+			buf[length - 2] = '\0';
+		
+	}
 	
 	return s;
 }
@@ -114,3 +132,26 @@ int file_writeline(filetype *fp, char *buf)
 	return length + 1;
 }
 
+
+const char* sys_config_path()
+{
+	static char path[1024];
+	char *config;
+
+#if defined(PLATFORM_WINDOWS)
+	config = getenv("APPDATA");
+#else
+	config = getenv("HOME");
+#endif
+	
+	if (!config)
+		return 0;
+	
+#if defined(PLATFORM_WINDOWS)
+	snprintf(path, sizeof(path), "%s/%s", config, CONFIG_APPNAME);
+#else
+	snprintf(path, sizeof(path), "%s/.%s", config, CONFIG_APPNAME);
+#endif
+	
+	return path;
+}

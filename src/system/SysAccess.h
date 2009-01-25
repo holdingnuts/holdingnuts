@@ -27,6 +27,7 @@
 #include "Platform.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
@@ -59,6 +60,8 @@ long file_length(filetype *fp);
 
 char* file_readline(filetype *fp, char *buf, int max);
 int file_writeline(filetype *fp, char *buf);
+
+const char* sys_config_path();
 
 #if defined __cplusplus
     }

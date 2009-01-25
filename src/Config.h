@@ -49,4 +49,10 @@
 #define CLIENT_CONNECT_TIMEOUT  10
 
 
+#if defined(PLATFORM_WINDOWS)
+# define CONFIG_APPNAME "HoldingNuts"
+#else
+# define CONFIG_APPNAME "holdingnuts"
+#endif
+
 #endif /* _CONFIG_H */
