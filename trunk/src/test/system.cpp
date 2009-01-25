@@ -24,11 +24,14 @@
 #include <iostream>
 #include <string>
 
+#include "Debug.h"
 #include "Tokenizer.hpp"
+#include "ConfigParser.hpp"
+#include "SysAccess.h"
 
 using namespace std;
 
-int main(void)
+int test_tokenizer()
 {
 	string sa[] = {
 		"Hallo",
@@ -65,6 +68,63 @@ int main(void)
 		cout << "_" << str << "_";
 	
 	cout << endl << flush;
+	
+	return 0;
+}
+
+int test_sysaccess()
+{
+	filetype *fp;
+	fp = file_open("testfile", mode_write | mode_read);
+	
+	char buffer[1024];
+	strcpy(buffer, "Hallo\n");
+	
+	file_write(fp, buffer, strlen(buffer));
+	
+	//file_setpos(f1, 3, seek_set);
+	//file_write(f1, buffer, strlen(buffer));
+	
+	long length = file_length(fp);
+	
+	dbg_print("io", "length: %ld", length);
+	
+	file_writeline(fp, "a line");
+	
+	file_setpos(fp, 0, seek_set);
+	
+	while (file_readline(fp, buffer, sizeof(buffer)))
+		dbg_print("io", "line: _%s_", buffer);
+	
+	
+	file_close(fp);
+	
+	return 0;
+}
+
+int test_configparser()
+{
+	ConfigParser cp;
+	
+	cp.read("settings.conf");
+	
+	string value = cp.get("test");
+	int count = cp.getInt("count");
+	
+	dbg_print("config", "test=_%s_  count=%d", value.c_str(), count);
+	
+	cp.save("settings.new.conf");
+	
+	return 0;
+}
+
+int main(void)
+{
+	test_tokenizer();
+	
+	test_sysaccess();
+	
+	test_configparser();
 	
 	return 0;
 }
