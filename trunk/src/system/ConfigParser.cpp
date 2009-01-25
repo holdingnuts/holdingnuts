@@ -75,7 +75,7 @@ bool ConfigParser::save(const char *filename)
 	
 	for (map<string,string>::iterator e = vars.begin(); e != vars.end(); e++)
 	{
-		snprintf(buffer, sizeof(buffer), "%s   %s", e->first.c_str(), e->second.c_str());
+		snprintf(buffer, sizeof(buffer), "%s\t\t%s", e->first.c_str(), e->second.c_str());
 		file_writeline(fp, buffer);
 	}
 	
