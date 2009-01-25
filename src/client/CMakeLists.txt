@@ -1,13 +1,11 @@
 include_directories (
 	${HOLDINGNUTS_SOURCE_DIR}/src
-	${HOLDINGNUTS_SOURCE_DIR}/src/network
 	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
 	${HOLDINGNUTS_SOURCE_DIR}/src/server
 	${HOLDINGNUTS_SOURCE_DIR}/src/client
 )
 link_directories(
-	${HOLDINGNUTS_SOURCE_DIR}/src/network
 	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
 )

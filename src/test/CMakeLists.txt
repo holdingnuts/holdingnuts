@@ -1,6 +1,5 @@
 include_directories (
 	${HOLDINGNUTS_SOURCE_DIR}/src
-	${HOLDINGNUTS_SOURCE_DIR}/src/network
 	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
 	${HOLDINGNUTS_SOURCE_DIR}/src/server
@@ -8,7 +7,6 @@ include_directories (
 	
 )
 link_directories(
-	${HOLDINGNUTS_SOURCE_DIR}/src/network
 	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
 )
@@ -24,7 +22,7 @@ add_executable (simulator simulator.cpp)
 target_link_libraries(simulator Poker)
 
 add_executable (systest system.cpp)
-target_link_libraries(systest System)
+target_link_libraries(systest System SysAccess)
 
 
 IF (WIN32)
