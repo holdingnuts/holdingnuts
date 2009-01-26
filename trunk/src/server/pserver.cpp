@@ -104,7 +104,7 @@ int listensock_create(unsigned int port, int backlog)
 int mainloop()
 {
 	int listenfd;
-	if ((listenfd = listensock_create(DEFAULT_SERVER_PORT, SERVER_LISTEN_BACKLOG)) < 0)
+	if ((listenfd = listensock_create(config.getInt("port"), SERVER_LISTEN_BACKLOG)) < 0)
 	{
 		dbg_print("listensock", "(%d) error creating socket", listenfd);
 		return 1;
@@ -193,8 +193,12 @@ int mainloop()
 
 bool config_load()
 {
-	// defaults   // FIXME: move to separate file
-	config.set("max_clients", "200");
+	// include defaults
+	#include "server_variables.hpp"
+	
+	
+	// create config-dir if it doesn't yet exist
+	sys_mkdir(sys_config_path());
 	
 	
 	char cfgfile[1024];
@@ -219,9 +223,6 @@ int main(int argc, char **argv)
 	// init PRNG
 	srand((unsigned) time(NULL));
 	
-	
-	// create config-dir
-	sys_mkdir(sys_config_path());
 	
 	// load config
 	config_load();

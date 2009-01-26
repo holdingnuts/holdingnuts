@@ -21,29 +21,7 @@
  */
 
 
-#ifndef _CONFIGPARSER_H
-#define _CONFIGPARSER_H
+// Server defaults
 
-#include <string>
-#include <map>
-
-class ConfigParser
-{
-public:
-	bool load(const char *filename);
-	bool save(const char *filename);
-	
-	bool get(std::string name, std::string &value);
-	std::string get(std::string name);
-	
-	bool getInt(std::string name, int &value);
-	int getInt(std::string name);
-	
-	bool set(std::string name, std::string value);
-	bool set(std::string name, int value);
-	
-private:
-	std::map<std::string,std::string> vars;
-};
-
-#endif /* _CONFIGPARSER_H */
+config.set("port",		DEFAULT_SERVER_PORT);
+config.set("max_clients",	200);

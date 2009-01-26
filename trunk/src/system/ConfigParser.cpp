@@ -20,6 +20,7 @@
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
+#include <sstream>
 
 #include "SysAccess.h"
 #include "Tokenizer.hpp"
@@ -130,5 +131,13 @@ int ConfigParser::getInt(string name)
 bool ConfigParser::set(string name, string value)
 {
 	vars[name] = value;
+	return true;
+}
+
+bool ConfigParser::set(string name, int value)
+{
+	ostringstream oss;
+	oss << value;
+	vars[name] = oss.str();
 	return true;
 }
