@@ -34,6 +34,6 @@ add_executable (pserver
 )
 
 target_link_libraries(pserver
-	Poker Network System
+	Poker Network SysAccess System
 	${aux_lib}
 )

@@ -44,11 +44,13 @@ bool ConfigParser::read(const char *filename)
 		Tokenizer t;
 		t.parse(buffer);
 		
+		// skip blank lines
 		if (!t.getCount())
 			continue;
 		
 		string varname = t.getNext();
 		
+		// skip comments
 		if (varname[0] == '#')
 			continue;
 		
@@ -81,7 +83,7 @@ bool ConfigParser::save(const char *filename)
 	
 	file_close(fp);
 	
-	return false;
+	return true;
 }
 
 bool ConfigParser::get(string name, string &value)

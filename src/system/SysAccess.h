@@ -61,6 +61,7 @@ long file_length(filetype *fp);
 char* file_readline(filetype *fp, char *buf, int max);
 int file_writeline(filetype *fp, char *buf);
 
+int sys_mkdir(const char *path);
 const char* sys_config_path();
 
 #if defined __cplusplus
