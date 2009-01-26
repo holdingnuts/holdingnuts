@@ -21,6 +21,15 @@
  */
 
 #include "Config.h"
+
+#include <errno.h>
+
+#if defined(PLATFORM_WINDOWS)
+#else
+# include <sys/stat.h>
+# include <sys/types.h>
+#endif
+
 #include "SysAccess.h"
 
 filetype* file_open(const char *filename, int mode)
@@ -132,25 +141,41 @@ int file_writeline(filetype *fp, char *buf)
 	return length + 1;
 }
 
+int sys_mkdir(const char *path)
+{
+#if defined(PLATFORM_WINDOWS)
+	if (_mkdir(path) == 0)
+		return 0;
+#else
+	if (mkdir(path, 0755) == 0)
+		return 0;
+#endif
+	
+	// don't indicate error if directory already exists
+	if(errno == EEXIST)
+		return 0;
+	
+	return -1;
+}
 
 const char* sys_config_path()
 {
 	static char path[1024];
-	char *config;
+	const char *config_path;
 
 #if defined(PLATFORM_WINDOWS)
-	config = getenv("APPDATA");
+	config_path = getenv("APPDATA");
 #else
-	config = getenv("HOME");
+	config_path = getenv("HOME");
 #endif
 	
-	if (!config)
+	if (!config_path)
 		return 0;
 	
 #if defined(PLATFORM_WINDOWS)
-	snprintf(path, sizeof(path), "%s/%s", config, CONFIG_APPNAME);
+	snprintf(path, sizeof(path), "%s/%s", config_path, CONFIG_APPNAME);
 #else
-	snprintf(path, sizeof(path), "%s/.%s", config, CONFIG_APPNAME);
+	snprintf(path, sizeof(path), "%s/.%s", config_path, CONFIG_APPNAME);
 #endif
 	
 	return path;

@@ -37,6 +37,7 @@
 #include "Debug.h"
 
 #include "Network.h"
+#include "SysAccess.h"
 #include "game.hpp"
 
 using namespace std;
@@ -200,6 +201,10 @@ int main(int argc, char **argv)
 	
 	// init PRNG
 	srand((unsigned) time(NULL));
+	
+	// create config-dir
+	sys_mkdir(sys_config_path());
+	
 	
 	network_init();
 	
