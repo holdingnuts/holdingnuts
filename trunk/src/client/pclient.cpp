@@ -37,6 +37,10 @@
 # include <signal.h>
 #endif
 
+#ifdef DEBUG
+#	include	<QThread>
+#endif
+
 //////////////
 typedef std::map<int,playerinfo>	players_type;
 typedef std::map<int,gameinfo>		games_type;
@@ -61,6 +65,105 @@ int send_msg(const char *msg)
 	return bytes;
 }
 
+// server command PSERVER <version> <client-id>
+void server_cmd_pserver(Tokenizer& t)
+{
+	unsigned int version = t.getNextInt();
+	srv.cid = t.getNextInt();
+		
+	dbg_print("server", "Server running version %d.%d.%d. Your client ID is %d",
+			  VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
+							   srv.cid);
+
+	char msg[1024];
+	// send user info
+	snprintf(msg, sizeof(msg), "INFO name:%s",
+			 ((PClient*)qApp)->wMain->getUsername().toStdString().c_str());
+		
+	send_msg(msg);
+}
+
+// server command ERR [<code>] [<text>]
+void server_cmd_error(Tokenizer& t)
+{
+	dbg_print("server", "last cmd error!");
+
+	const int err_code = t.getNextInt();
+	const QString qmsg(QString::fromStdString(t.getTillEnd()));
+
+	((PClient*)qApp)->wMain->addServerErrorMessage(err_code, qmsg);
+}
+
+// server command MSG <from> <sender-name> <message>
+// from := { -1 | <game-id>:<table-id> | <client-id> | <gid>:<tid>:<cid> }   # -1 server
+void server_cmd_msg(Tokenizer& t)
+{
+	const std::string idfrom = t.getNext();
+
+	Tokenizer ft;
+	ft.parse(idfrom, ":");
+		
+	int from = -1;
+	int gid = -1;
+	int tid = -1;
+	int cid = -1;
+
+	if (ft.getCount() == 2)
+	{
+		gid = ft.getNextInt();
+		tid = ft.getNextInt();
+	}
+	else if (ft.getCount() == 3)
+	{
+		gid = ft.getNextInt();
+		tid = ft.getNextInt();
+		cid = ft.getNextInt();
+	}
+	else
+		from = ft.getNextInt();
+
+	// playername
+	const QString qsfrom(QString::fromStdString(t.getNext()));
+	// chatmessage
+	QString qchatmsg(QString::fromStdString(t.getTillEnd()));
+
+	// replace all occurrences of "[cid]" in server-msg with player-name
+	if (from == -1)
+	{
+		QRegExp rx("\\[(\\d+)\\]");
+			
+		while(rx.indexIn(qchatmsg) != -1)
+		{
+			QString name = "???";
+			players_type::iterator it = players.find(rx.cap(1).toInt());
+
+			if(it != players.end())
+				name = it->second.name;
+				
+			qchatmsg.replace(rx, "'" + name + "'");
+		}
+	}
+
+	if (gid != -1 && tid != -1)
+	{
+		tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+
+		Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
+			
+		if (cid == -1) // message from server to table
+			tinfo->window->addServerMessage(qchatmsg);
+		else // message from user to table
+			tinfo->window->addChat(qsfrom, qchatmsg);
+	}
+	else
+	{
+		if (from == -1) // message from server to foyer
+			((PClient*)qApp)->wMain->addServerMessage(qchatmsg);
+		else // message from user to foyer
+			((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
+	}
+} // server_cmd_msg
+
 int server_execute(const char *cmd)
 {
 #ifdef DEBUG	
@@ -81,97 +184,15 @@ int server_execute(const char *cmd)
 	
 	// FIXME: state; check if this is really a pserver
 	if (command == "PSERVER")
-	{
-		unsigned int version = t.getNextInt();
-		srv.cid = t.getNextInt();
-		
-		dbg_print("server", "Server running version %d.%d.%d. Your client ID is %d",
-			VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
-			srv.cid);
-		
-		// send user info
-		snprintf(msg, sizeof(msg), "INFO name:%s",
-			((PClient*)qApp)->wMain->getUsername().toStdString().c_str());
-		
-		send_msg(msg);
-	}
+		server_cmd_pserver(t);
 	else if (command == "OK")
 	{
 		
 	}
 	else if (command == "ERR")
-	{
-		dbg_print("server", "last cmd error!");
-		
-		const int err_code = t.getNextInt();
-		QString qmsg(QString::fromStdString(t.getTillEnd()));
-		
-		((PClient*)qApp)->wMain->addServerErrorMessage(err_code, qmsg);
-	}
+		server_cmd_error(t);
 	else if (command == "MSG")
-	{
-		// MSG <from> <sender-name> <message>
-		// from := { -1 | <game-id>:<table-id> | <client-id> | <gid>:<tid>:<cid> }   # -1 server
-		std::string idfrom = t.getNext();
-
-		Tokenizer ft;
-		ft.parse(idfrom, ":");
-		
-		int from;
-		int gid = -1;
-		int tid = -1;
-		bool gmsg = false;
-
-		if (ft.getCount() >= 2)
-		{
-			gmsg = true;
-			gid = ft.getNextInt();
-			tid = ft.getNextInt();
-		}
-		else
-			from = ft.getNextInt();
-		
-		// playername
-		QString qsfrom(QString::fromStdString(t.getNext()));
-		// chatmessage
-		QString qchatmsg(QString::fromStdString(t.getTillEnd()));
-		
-		// TODO: only parse playername if the msg ist not from server
-		
-		// replace all occurrences of "[cid]" in server-msg with player-name
-		if (gmsg || from == -1)
-		{
-			QRegExp rx("\\[(\\d+)\\]");
-			
-			while (rx.indexIn(qchatmsg) != -1)
-			{
-				QString name = "???";
-				players_type::iterator it = players.find(rx.cap(1).toInt());
-
-				if (it != players.end())
-					name = it->second.name;
-				
-				qchatmsg.replace(rx, "'" + name + "'");
-			}
-		}
-
-		if (gid != -1 && tid != -1)
-		{
-			tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
-
-			Q_ASSERT_X(tinfo, "server_execute", "getTableInfo failed");
-			
-			// TODO: player or server message
-			tinfo->window->addChat(qsfrom, qchatmsg);
-		}
-		else
-		{
-			if (from == -1) // message from server to foyer
-				((PClient*)qApp)->wMain->addServerMessage(qchatmsg);
-			else // message from user to foyer
-				((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
-		}
-	}
+		server_cmd_msg(t);
 	else if (command == "SNAP")		// TODO: snap only debug-code
 	{
 		std::string from = t.getNext();
@@ -190,7 +211,7 @@ int server_execute(const char *cmd)
 				
 				if (sstate == "start")
 				{
-					((PClient*)qApp)->wMain->addChat("foyer", "game has been started");
+					((PClient*)qApp)->wMain->addServerMessage("Game has been started");
 					
 					games[gid].registered = true;
 					games[gid].tables[tid].sitting = true;
@@ -751,6 +772,10 @@ int PClient::getMyCId()
 
 int main(int argc, char **argv)
 {
+#if defined(PLATFORM_WINDOWS)
+	FILE *ferr = freopen("err.log","w+",stderr);
+#endif	
+	
 	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	
@@ -774,10 +799,27 @@ int main(int argc, char **argv)
 	app.wMain = new WMain();
 	app.wMain->updateConnectionStatus();
 	app.wMain->show();
+
+#ifdef DEBUG	
+	// parse commandline arguments in debugmode
+	if (argc == 2)
+	{
+		if (strcmp(argv[1], "--dbg_register") == 0)
+		{
+			app.doConnect("localhost", DEFAULT_SERVER_PORT);
+			// TODO: wait for n secondes and then try to register a game
+			app.doRegister(0);
+		}
+	}
+#endif
 	
 	int retval = app.exec();
 	
 	network_shutdown();
+	
+#if defined(PLATFORM_WINDOWS)
+	fclose(ferr);
+#endif	
 	
 	return retval;
 }

@@ -67,12 +67,12 @@ void ChatBox::addMessage(const QString& msg, const QColor& color)
 	m_pEditChatLog->setTextColor(color);
 	m_pEditChatLog->setFontWeight(QFont::Normal);
 	m_pEditChatLog->insertPlainText(msg + "\r\n");
-	m_pEditChatLog->setTextColor(QColor(0, 0, 0));
 }
 
 void ChatBox::addMessage(const QString& from, const QString& msg)
 {
 	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
+	m_pEditChatLog->setTextColor(Qt::black);
 	m_pEditChatLog->setFontWeight(QFont::Bold);
 	m_pEditChatLog->insertPlainText("[" + from + "]");
 	m_pEditChatLog->setFontWeight(QFont::Normal);
@@ -87,7 +87,6 @@ void ChatBox::addMessage(const QString& from, const QString& msg, const QColor& 
 	m_pEditChatLog->insertPlainText("[" + from + "]");
 	m_pEditChatLog->setFontWeight(QFont::Normal);
 	m_pEditChatLog->insertPlainText(": " + msg + "\r\n");
-	m_pEditChatLog->setTextColor(QColor(0, 0, 0));
 }
 
 void ChatBox::actionChat()

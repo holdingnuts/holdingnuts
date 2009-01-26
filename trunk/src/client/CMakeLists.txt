@@ -46,12 +46,12 @@ include_directories (
 	#${QT_INCLUDES}    # done by QT_USE_FILE
 )
 
-QT4_WRAP_CPP(sources_MOC pclient.hpp WMain.hpp WTable.hpp ChatBox.hpp)
+QT4_WRAP_CPP(sources_MOC pclient.hpp WMain.hpp WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp SeatImages.hpp)
 
 add_executable (
 	pclient
 	WIN32    # when building for windows: do not show the console window
-	pclient.cpp ${aux_obj} WMain.cpp WTable.cpp ChatBox.cpp ${sources_MOC}
+	pclient.cpp ${aux_obj} WMain.cpp WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp ${sources_MOC}
 )
 
 target_link_libraries (
