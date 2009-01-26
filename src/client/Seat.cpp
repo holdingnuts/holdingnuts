@@ -115,7 +115,6 @@ void Seat::setValid(bool valid)
 
 void Seat::setName(const QString& name)
 {
-//	lblCaption->setText(name);
 	m_strName = name;
 }
 
@@ -133,6 +132,9 @@ void Seat::setAction(Player::PlayerAction action, float amount)
 
 	switch (action)
 	{
+		case Player::None:
+				m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
+			break;
 		case Player::Check:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActCheck;
 			break;
@@ -183,6 +185,11 @@ void Seat::setCards(const char *c1, const char *c2)
 	m_SecondCard.load(QString("gfx/deck/default/%1.png").arg(c2));
 }
 
+void Seat::setNewRound()
+{
+	m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
+}
+
 void Seat::move(int x, int y)
 {
 	this->setPos(x, y);
@@ -190,18 +197,22 @@ void Seat::move(int x, int y)
 
 int Seat::width() const
 {
-	return 100;
+	return SeatImages::Instance().imgBack.width();
 }
 
 int Seat::height() const
 {
-	return 70;
+	return SeatImages::Instance().imgBack.height();
 }
 
 QRectF Seat::boundingRect() const
 {
 	// TODO: right size
-	return QRectF(0, 0, width(), height());
+	return QRectF(
+		scenePos().x(),
+		scenePos().y(),
+		width(),
+		height());
 }
 
 void Seat::paint(
@@ -233,6 +244,7 @@ void Seat::paint(
 				SeatImages::Instance().imgBackCurrent.width(),
 				SeatImages::Instance().imgBackCurrent.height()),
 			SeatImages::Instance().imgBackCurrent);
+/*
 		painter->drawImage(
 			QRect(
 				wpos.x(),
@@ -240,6 +252,7 @@ void Seat::paint(
 				SeatImages::Instance().imgTimeout.width(),
 				SeatImages::Instance().imgTimeout.height()),
 			SeatImages::Instance().imgTimeout);
+*/			
 	}
 	else
 	{

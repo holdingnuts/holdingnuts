@@ -37,10 +37,6 @@
 # include <signal.h>
 #endif
 
-#ifdef DEBUG
-#	include	<QThread>
-#endif
-
 //////////////
 typedef std::map<int,playerinfo>	players_type;
 typedef std::map<int,gameinfo>		games_type;
@@ -776,8 +772,8 @@ int main(int argc, char **argv)
 	FILE *ferr = freopen("err.log","w+",stderr);
 #endif	
 	
-	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d)",
-		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d) Qt Version %s",
+		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, qVersion());
 	
 #if not defined(PLATFORM_WINDOWS)
 	// ignore broken-pipe signal eventually caused by sockets
