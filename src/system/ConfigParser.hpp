@@ -30,7 +30,7 @@
 class ConfigParser
 {
 public:
-	bool read(const char *filename);
+	bool load(const char *filename);
 	bool save(const char *filename);
 	
 	bool get(std::string name, std::string &value);
@@ -38,7 +38,9 @@ public:
 	
 	bool getInt(std::string name, int &value);
 	int getInt(std::string name);
-
+	
+	bool set(std::string name, std::string value);
+	
 private:
 	std::map<std::string,std::string> vars;
 };

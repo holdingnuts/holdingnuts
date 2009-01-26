@@ -38,10 +38,12 @@
 
 #include "Network.h"
 #include "SysAccess.h"
+#include "ConfigParser.hpp"
 #include "game.hpp"
 
 using namespace std;
 
+ConfigParser config;
 
 socktype fdset_get_descriptor(fd_set *fds)
 {
@@ -189,6 +191,21 @@ int mainloop()
 	return 0;
 }
 
+bool config_load()
+{
+	// defaults   // FIXME: move to separate file
+	config.set("max_clients", "200");
+	
+	
+	char cfgfile[1024];
+	snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
+	
+	if (!config.load(cfgfile))
+		config.save(cfgfile);
+	
+	return true;
+}
+
 int main(int argc, char **argv)
 {
 	dbg_print("main", "HoldingNuts pserver (version %d.%d.%d)",
@@ -202,8 +219,12 @@ int main(int argc, char **argv)
 	// init PRNG
 	srand((unsigned) time(NULL));
 	
+	
 	// create config-dir
 	sys_mkdir(sys_config_path());
+	
+	// load config
+	config_load();
 	
 	
 	network_init();

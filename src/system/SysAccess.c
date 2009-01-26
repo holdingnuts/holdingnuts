@@ -42,6 +42,11 @@ filetype* file_open(const char *filename, int mode)
 		mode_str[seq_pos++] = 'w';
 		mode_str[seq_pos++] = '+';
 	}
+	else if (mode & mode_read && mode & mode_append)
+	{
+		mode_str[seq_pos++] = 'a';
+		mode_str[seq_pos++] = '+';
+	}
 	else
 	{
 		if (mode & mode_read)
@@ -49,6 +54,9 @@ filetype* file_open(const char *filename, int mode)
 		
 		if (mode & mode_write)
 			mode_str[seq_pos++] = 'w';
+		
+		if (mode & mode_append)
+			mode_str[seq_pos++] = 'a';
 	}
 	
 #if defined(PLATFORM_WINDOWS)
