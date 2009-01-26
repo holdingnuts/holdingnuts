@@ -78,7 +78,7 @@ size_t file_read(filetype *fp, void *buf, unsigned int size)
 	return fread(buf, 1, size, fp);
 }
 
-size_t file_write(filetype *fp, void *buf, unsigned int size)
+size_t file_write(filetype *fp, const void *buf, unsigned int size)
 {
 	return fwrite(buf, 1, size, fp);
 }
@@ -140,7 +140,7 @@ char* file_readline(filetype *fp, char *buf, int max)
 	return s;
 }
 
-int file_writeline(filetype *fp, char *buf)
+int file_writeline(filetype *fp, const char *buf)
 {
 	int length = strlen(buf);
 	file_write(fp, buf, length);

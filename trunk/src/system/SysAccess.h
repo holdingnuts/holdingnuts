@@ -54,13 +54,13 @@ typedef enum {
 filetype* file_open(const char *filename, int mode);
 int file_close(filetype *fp);
 size_t file_read(filetype *fp, void *buf, unsigned int size);
-size_t file_write(filetype *fp, void *buf, unsigned int size);
+size_t file_write(filetype *fp, const void *buf, unsigned int size);
 int file_setpos(filetype *fp, long offset, int whence);
 long file_getpos(filetype *fp);
 long file_length(filetype *fp);
 
 char* file_readline(filetype *fp, char *buf, int max);
-int file_writeline(filetype *fp, char *buf);
+int file_writeline(filetype *fp, const char *buf);
 
 int sys_mkdir(const char *path);
 const char* sys_config_path();
