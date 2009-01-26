@@ -61,6 +61,7 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QGraphicsView(parent), m_nGi
 	QGraphicsScene* pScene = new QGraphicsScene(
 		0, 0, imgTable.width(), 700, this);
 
+	pScene->setBackgroundBrush(Qt::black);//QPixmap("gfx/table/background.png"));
 	pScene->addPixmap(QPixmap::fromImage(imgTable));
 
 	m_pDealerButton = new DealerButton;
@@ -80,20 +81,11 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QGraphicsView(parent), m_nGi
 	this->setMinimumSize(
 		static_cast<int>(pScene->width()),
 		static_cast<int>(pScene->height()));
-	this->setBackgroundBrush(Qt::black);//QPixmap("gfx/table/background.png"));
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	// ui - widgets
-
-	// set window-background
-//	QImage bgimage("gfx/table/background.png");
-//	setPixmap(QPixmap::fromImage(bgimage));
-//	setScaledContents(true);
-	
-	///////
-	
 	QPushButton *btnFold = new QPushButton(tr("Fold"), this);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
 	
@@ -222,8 +214,9 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QGraphicsView(parent), m_nGi
 	for (unsigned int i = 0; i < nMaxSeats; i++)
 	{
 		wseats[i] = new Seat(i, this);
+		wseats[i]->scale(0.5, 0.5);	// TODO: remove
 		
-		wseats[i]->scale(0.5, 0.5);
+		wseats[i]->setPos(calcSeatPos(i));
 
 		pScene->addItem(wseats[i]);
 	}
@@ -279,10 +272,11 @@ void WTable::arrangeItems()
 	
 	for (int i=0; i < seatcount; i++)
 	{
+/*		
 		wseats[i]->move(
 			offset_x + seats[i].col * cell_w + cell_w / 2 - wseats[i]->width() / 2,
 			offset_y + seats[i].row * cell_h + cell_h / 2 - wseats[i]->height() / 2);
-		/*
+
 		int cw = wseats[i]->scard1->width();
 		int ch = wseats[i]->scard1->height();
 		int cx, cy;
@@ -312,8 +306,10 @@ void WTable::arrangeItems()
 	
 	// community-cards
 	wCC->move(
-		offset_x + twidth/2 - wCC->width() /2,
-		offset_y + theight/2 - wCC->height() /2);
+		this->width() / 2 - wCC->width() / 2,
+		this->height() / 2 - wCC->height() / 2);
+//		/* offset_x + */ twidth/2 - wCC->width() /2,
+//		offset_y + theight/2 - wCC->height() /2);
 	
 	// pots
 	lblPots->move(offset_x + twidth/2 - lblPots->width() /2, wCC->y() + wCC->height() + 10);
@@ -324,11 +320,11 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID)
 {
 	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
 
-	//		9	  dealer	0
-	//	 8					  1
-	// 7						2
-	//   6					  3
-	//		5				4
+	//		8	9	0
+	//	 7			   1
+	// 						
+	//   6			   2
+	//		5	4	3
 
 	// TODO: note size from seat images
 	// TODO: calc seat position
@@ -339,25 +335,25 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID)
 	switch (nSeatID)
 	{
 		case 0:
-			return QPointF(width() - width_seat - 150, height_start);
+			return QPointF(400, height_start);
 		case 1:
-			return QPointF(width() - width_seat - 60, height_start + height_step - 10);
+			return QPointF(475, 125);
 		case 2:
-			return QPointF(width() - width_seat - 10, height_start + height_step * 2 + 5);
+			return QPointF(475, 210);
 		case 3:
-			return QPointF(width() - width_seat - 60, height_start + height_step * 3 + 20);
+			return QPointF(400, 300);
 		case 4:
-			return QPointF(width() - width_seat - 175, height_start + height_step * 4 - 20);
+			return QPointF(250, 300);
 		case 5:
-			return QPointF(175, height_start + height_step * 4 - 20);
+			return QPointF(100, 300);
 		case 6:
-			return QPointF(60, height_start + height_step * 3 + 20);
+			return QPointF(25, 125);
 		case 7:
-			return QPointF(10, height_start + height_step * 2 + 5);
+			return QPointF(25, 210);
 		case 8:
-			return QPointF(60, height_start + height_step - 10);
+			return QPointF(100, height_start);
 		case 9:
-			return QPointF(150, height_start);
+			return QPointF(250, height_start);
 	}
 
 	return QPointF(0, 0);
@@ -365,6 +361,8 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID)
 
 void WTable::updateView()
 {
+	// TODO: wait for server
+	
 	int my_cid = ((PClient*)qApp)->getMyCId();
 	
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
@@ -374,7 +372,7 @@ void WTable::updateView()
 	table_snapshot *snap = &(tinfo->snap);
 	
 	Q_ASSERT_X(snap, __func__, "invalid snapshot pointer");
-	
+
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
 		seatinfo *seat = &(snap->seats[i]);
@@ -395,7 +393,7 @@ void WTable::updateView()
 			
 			if (seat->in_round)
 			{
-				wseats[i]->setAction(Player::Check /* FIXME */, seat->bet);
+				wseats[i]->setAction(seat->action, seat->bet);
 				wseats[i]->setMySeat(my_cid == cid);
 /*
 				std::vector<Card> allcards;
@@ -422,7 +420,7 @@ void WTable::updateView()
 						char card1[3], card2[3];
 						strcpy(card1, allcards[0].getName());
 						strcpy(card2, allcards[1].getName());
-						wseats[i]->setCards(allcards[0].getName(), allcards[1].getName());
+						wseats[i]->setCards(card1, card2);
 					}
 					else
 						wseats[i]->setCards("blank", "blank");
@@ -459,6 +457,18 @@ void WTable::updateView()
 				wseats[i]->setAction(Player::Fold);
 				wseats[i]->setCards("blank", "blank");
 			}
+
+#ifdef DEBUG
+//			this->scene()->update(wseats[i]->boundingRect());
+			if(i == 0)
+				this->scene()->addRect(wseats[i]->boundingRect(), QPen(Qt::red));
+			else if(i == 1)	
+				this->scene()->addRect(wseats[i]->boundingRect(), QPen(Qt::green));
+			else if(i == 2)	
+				this->scene()->addRect(wseats[i]->boundingRect(), QPen(Qt::blue));
+			else if(i == 3)	
+				this->scene()->addRect(wseats[i]->boundingRect(), QPen(Qt::white));
+#endif				
 		}
 		else
 		{
@@ -470,6 +480,8 @@ void WTable::updateView()
 			wseats[i]->setValid(false);
 		}
 	}
+	
+	this->viewport()->update();	// TODO: remove
 	
 	// Pots
 	QString spots;

@@ -55,6 +55,10 @@ public:
 	void setAction(Player::PlayerAction action, float amount=0.0f);
 	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
+	
+	
+	void setNewRound();
+	
 	WPicture *card1, *card2;   // FIXME: :)
 	WPicture *scard1, *scard2;
 	
@@ -62,9 +66,9 @@ public:
 	int width() const;
 	int height() const;
 	
-protected:
 	virtual QRectF boundingRect() const;
 
+protected:
 	virtual void paint(
 		QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
