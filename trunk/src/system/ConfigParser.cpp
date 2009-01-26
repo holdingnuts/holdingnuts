@@ -28,7 +28,7 @@
 
 using namespace std;
 
-bool ConfigParser::read(const char *filename)
+bool ConfigParser::load(const char *filename)
 {
 	filetype *fp;
 	
@@ -125,4 +125,10 @@ int ConfigParser::getInt(string name)
 	getInt(name, value);
 	
 	return value;
+}
+
+bool ConfigParser::set(string name, string value)
+{
+	vars[name] = value;
+	return true;
 }

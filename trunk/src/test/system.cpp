@@ -112,7 +112,7 @@ int test_configparser()
 {
 	ConfigParser cp;
 	
-	cp.read("settings.conf");
+	cp.load("settings.conf");
 	
 	string value = cp.get("test");
 	int count = cp.getInt("count");

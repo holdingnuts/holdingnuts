@@ -33,12 +33,15 @@
 #include "Platform.h"
 #include "Network.h"
 #include "Tokenizer.hpp"
+#include "ConfigParser.hpp"
 
 #include "Debug.h"
 #include "GameController.hpp"
 #include "game.hpp"
 
 using namespace std;
+
+extern ConfigParser config;
 
 ////////////////////////
 map<int,GameController*> games;
@@ -207,8 +210,8 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 
 bool client_add(socktype sock, sockaddr_in *saddr)
 {
-	// drop client if maximum connection count is reached   // FIXME: configurable
-	if (clients.size() == SERVER_CLIENT_HARDLIMIT)
+	// drop client if maximum connection count is reached
+	if (clients.size() == SERVER_CLIENT_HARDLIMIT || (int)clients.size() == config.getInt("max_clients"))
 	{
 		send_err(sock, -999 /* FIXME: error-code */, "server full");
 		socket_close(sock);

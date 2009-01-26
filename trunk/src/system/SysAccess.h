@@ -40,7 +40,8 @@ typedef FILE filetype;
 
 typedef enum {
 	mode_read	= 0x01,
-	mode_write	= 0x02
+	mode_write	= 0x02,
+	mode_append	= 0x04
 } filemode;
 
 typedef enum {
