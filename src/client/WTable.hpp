@@ -26,20 +26,14 @@
 
 #include <vector>
 
-#include <QApplication>
-#include <QWidget>
-#include <QFont>
-#include <QPushButton>
 #include <QLineEdit>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QStackedLayout>
 #include <QLabel>
 #include <QTextEdit>
 #include <QButtonGroup>
 #include <QCheckBox>
-#include <QSlider>
 #include <QPalette>
+#include <QGridLayout>	// TODO: remove!!! only wmain needs this
+#include <QGraphicsView>
 
 #include "Card.hpp"
 #include "HoleCards.hpp"
@@ -47,7 +41,7 @@
 #include "GameLogic.hpp"
 #include "Table.hpp"
 #include "Player.hpp"
-
+#include "Seat.hpp"
 
 typedef struct {
 	bool valid;
@@ -75,47 +69,15 @@ typedef struct {
 } table_snapshot;
 
 
-class WPicture : public QLabel
-{
-Q_OBJECT
-
-public:
-	WPicture(const char *filename, QWidget *parent = 0);
-	void loadImage(const char *filename);
-private:
-	//int heightForWidth ( int w );
-
-};
-
-
-class WSeat : public QLabel
-{
-Q_OBJECT
-
-public:
-	WSeat(unsigned int id, QWidget *parent = 0);
-
-	void setName(QString name);
-	void setStake(float amount);
-	void setAction(Player::PlayerAction action, float amount=0.0f);
-	void setCurrent(bool cur);
-	void setCards(const char *c1, const char *c2);
-	void setValid(bool valid);
-	WPicture *card1, *card2;   // FIXME: :)
-	WPicture *scard1, *scard2;
-	
-private slots:
-	
-
-private:
-	QLabel *lblCaption;
-	QLabel *lblStake;
-	QLabel *lblAction;
-};
+// class Seat;
+class QStackedLayout;
+class QLabel;
+class QSlider;
 
 class ChatBox;
+class DealerButton;
 
-class WTable : public QLabel
+class WTable : public QGraphicsView
 {
 Q_OBJECT
 
@@ -126,11 +88,15 @@ public:
 
 	void addChat(const QString& from, const QString& text);
 	void addServerMessage(const QString& text);
+	
+public:
+	static const unsigned int	nMaxSeats;
 
 protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent * event);
 	void arrangeItems();
+	QPointF calcSeatPos(unsigned int nSeatID);
 
 private slots:
 	void actionFold();
@@ -143,25 +109,35 @@ private slots:
 	void slotTest();
 
 private:
-	int gid;
-	int tid;
-	
 	QStackedLayout *stlayActions;
 	QLineEdit *editAmount;
 	QSlider *sliderAmount;
 	
 	QLabel *wTable;
 	
-	WSeat *wseats[10];
+	Seat *wseats[10];
 	
 	QLabel *lblPots;
 	WPicture *cc[5];
 	QWidget *wCC;
 	
-	int		m_nGid;
-	int		m_nTid;
+
 	
-	ChatBox*	m_pChat;
+private:
+	//! \brief Game ID
+	const int	m_nGid;
+	//! \brief Table ID
+	const int	m_nTid;
+	//! \brief Tablechat
+	ChatBox			*m_pChat;
+	//! \brief Container for Table Actions
+//	QStackedLayout	*m_stLayActions;
+	//! \brief Layout for Table Actions
+	QLabel			*m_LayoutActions;
+	//! \brief Dealer Button
+	DealerButton	*m_pDealerButton;
+	//! \brief Seats
+//	std::vector<Seat*>	m_Seats;		// TODO: über scene ansprechen
 };
 
 #endif /* _WTABLE_H */
