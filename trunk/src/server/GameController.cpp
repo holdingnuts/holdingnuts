@@ -301,8 +301,7 @@ void GameController::sendTableSnapshot(Table *t)
 	// assemble 'whose-turn' string
 	string sturn;
 	if (t->state == Table::GameStart ||
-		t->state == Table::ElectDealer ||
-		t->state == Table::NewRound)
+		t->state == Table::ElectDealer)
 	{
 		sturn = "-1";
 	}
