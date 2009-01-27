@@ -49,44 +49,34 @@ public:
 	Seat(unsigned int id, QWidget *parent);
 
 	void setName(const QString& name);
-	void setStake(float amount);
+	void setStake(qreal amount);
 	void setCurrent(bool cur);
 	void setMySeat(bool bMyseat);
-	void setAction(Player::PlayerAction action, float amount=0.0f);
+	void setAction(Player::PlayerAction action, qreal amount = 0.0);
 	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
-	
-	
-	void setNewRound();
-	
-	WPicture *card1, *card2;   // FIXME: :)
-	WPicture *scard1, *scard2;
-	
-	void move(int x, int y);
-	int width() const;
-	int height() const;
-	
-	virtual QRectF boundingRect() const;
 
-protected:
+	virtual QRectF boundingRect() const;
 	virtual void paint(
 		QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 	
-private slots:
-	
-
-private:
-	QLabel *lblCaption;
-	QLabel *lblStake;
-	QLabel *lblAction;
+public:
+	// cards size
+	static const int sx_card;
+	static const int sy_card;
+	// mini cards size
+	static const int sx_mini_card;
+	static const int sy_mini_card;
 	
 private:
 	//! \brief Seat ID (clockwise)
 	const unsigned int		m_nID;
 	//! \brief Playername on the Seat
 	QString					m_strName;
+	//! \brief
+	QString					m_strStake;
 	//! \brief
 	QString					m_strAmount;
 	//! \brief 
