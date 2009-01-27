@@ -688,12 +688,10 @@ void PClient::slotConnected(int n)
 	
 	// send protocol introduction
 	char msg[1024];
-	// FIXME: load UUID from config
-	const char uuid[] = "12345678-abcd-90ef-1234-1234567890ab";
 	snprintf(msg, sizeof(msg), "PCLIENT %d %s",
 		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
-		uuid);
-		
+		config.get("uuid").c_str());
+	
 	send_msg(msg);
 }
 
