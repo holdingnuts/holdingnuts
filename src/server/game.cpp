@@ -710,7 +710,7 @@ int gameloop()
 		GameController *g = new GameController();
 		const int gid = 0;
 		g->setGameId(gid);
-		g->setPlayerMax(3);
+		g->setPlayerMax(config.getInt("dbg_testgame_players"));
 		games[gid] = g;
 	}
 	

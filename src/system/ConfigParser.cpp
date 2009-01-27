@@ -40,6 +40,7 @@ bool ConfigParser::load(const char *filename)
 	
 	char buffer[1024];
 	
+	// parse each line in config-file
 	while (file_readline(fp, buffer, sizeof(buffer)))
 	{
 		Tokenizer t;
@@ -74,11 +75,16 @@ bool ConfigParser::save(const char *filename)
 	if (!fp)
 		return false;
 	
+	// insert comment into file
+	file_writeline(fp, "# Auto-generated HoldingNuts configuration file");
+	file_writeline(fp, "");
+	
 	char buffer[1024];
 	
+	// write all config-vars
 	for (map<string,string>::iterator e = vars.begin(); e != vars.end(); e++)
 	{
-		snprintf(buffer, sizeof(buffer), "%s\t\t%s", e->first.c_str(), e->second.c_str());
+		snprintf(buffer, sizeof(buffer), "%s  %s", e->first.c_str(), e->second.c_str());
 		file_writeline(fp, buffer);
 	}
 	
