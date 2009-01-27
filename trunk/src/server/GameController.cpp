@@ -825,6 +825,18 @@ void GameController::stateBetting(Table *t)
 			t->nomoreaction = true;
 		}
 		
+		
+		// reset last-player action
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			if (!t->seats[i].occupied)
+				continue;
+			
+			Player *p = t->seats[i].player;
+			p->last_action = Player::None;
+		}
+		
+		
 		// which betting round is next?
 		switch ((int)t->betround)
 		{

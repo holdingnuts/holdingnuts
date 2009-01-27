@@ -86,9 +86,16 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	
 	groupSrv->setLayout(lsrv);
 	/////////////////////
-
+	
 	QPushButton *btnRegister = new QPushButton(tr("Register"), this);
 	connect(btnRegister, SIGNAL(clicked()), this, SLOT(actionRegister()));
+	
+	editRegister = new QLineEdit("0", this);
+	editRegister->setFixedWidth(30);
+	
+	QHBoxLayout *lRegister = new QHBoxLayout();
+	lRegister->addWidget(btnRegister);
+	lRegister->addWidget(editRegister);
 	
 	QPushButton *btnTest = new QPushButton(tr("Test"), this);
 	connect(btnTest, SIGNAL(clicked()), this, SLOT(actionTest()));
@@ -100,7 +107,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	layout->addWidget(groupInfo);
 	layout->addWidget(groupSrv);
 	layout->addWidget(m_pChat);
-	layout->addWidget(btnRegister);
+	layout->addLayout(lRegister);
 	layout->addWidget(btnTest);
 	
 	setLayout(layout);
@@ -171,7 +178,8 @@ void WMain::actionTest()
 
 void WMain::actionRegister()
 {
-	((PClient*)qApp)->doRegister(0);
+	const int gid = editRegister->text().toInt();
+	((PClient*)qApp)->doRegister(gid);
 }
 
 void WMain::slotSrvTextChanged()
