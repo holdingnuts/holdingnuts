@@ -707,11 +707,14 @@ int gameloop()
 	// initially add a game for debugging purpose
 	if (!games.size())
 	{
-		GameController *g = new GameController();
-		const int gid = 0;
-		g->setGameId(gid);
-		g->setPlayerMax(config.getInt("dbg_testgame_players"));
-		games[gid] = g;
+		for (int i=0; i < config.getInt("dbg_testgame_games"); i++)
+		{
+			GameController *g = new GameController();
+			const int gid = i;
+			g->setGameId(gid);
+			g->setPlayerMax(config.getInt("dbg_testgame_players"));
+			games[gid] = g;
+		}
 	}
 	
 	// handle all games
