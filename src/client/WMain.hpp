@@ -65,6 +65,8 @@ private:
 	QTextEdit*	editLog;
 
 	ChatBox*	m_pChat;
+	
+	QLineEdit	*editRegister;   // debug, remove later
 };
 
 #endif	/* _WMAIN_H */

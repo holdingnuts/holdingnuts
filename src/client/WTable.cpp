@@ -446,7 +446,7 @@ void WTable::updateView()
 			}
 			else
 			{
-				wseats[i]->setAction(Player::None);
+				wseats[i]->setAction(seat->action);
 				wseats[i]->setCards("blank", "blank");
 			}
 
