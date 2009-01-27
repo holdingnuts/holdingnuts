@@ -68,7 +68,6 @@ typedef struct {
 	int my_seat;
 } table_snapshot;
 
-
 // class Seat;
 class QStackedLayout;
 class QLabel;
@@ -95,8 +94,9 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent * event);
-	void arrangeItems();
+	
 	QPointF calcSeatPos(unsigned int nSeatID);
+	QPointF calcDealerBtnPos(unsigned int nSeatID);
 
 private slots:
 	void actionFold();

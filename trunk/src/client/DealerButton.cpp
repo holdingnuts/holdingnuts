@@ -28,13 +28,11 @@
 
 DealerButton::DealerButton()
 :	m_Image("gfx/table/dealer_button.png")
-{
-	startTimer(1000 / 33);
-}
+{ }
 
 QRectF DealerButton::boundingRect() const
 {
-	return QRectF(100, 100, m_Image.width(), m_Image.height());
+	return QRectF(0, 0, m_Image.width(), m_Image.height());
 }
 
 void DealerButton::paint(
@@ -46,8 +44,8 @@ void DealerButton::paint(
 
 	painter->drawImage(
 		QRect(
-			static_cast<int>(pos().x()),
-			static_cast<int>(pos().y()),
+			0,
+			0,
 			m_Image.width(),
 			m_Image.height()),
 		m_Image);
