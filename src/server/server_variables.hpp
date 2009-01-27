@@ -27,3 +27,4 @@ config.set("port",		DEFAULT_SERVER_PORT);
 config.set("max_clients",	200);
 
 config.set("dbg_testgame_players",	3);
+config.set("dbg_testgame_games",	2);
