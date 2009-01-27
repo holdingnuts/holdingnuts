@@ -22,6 +22,7 @@
 
 
 #include <cstdio>
+#include <cmath>
 
 #include <QGraphicsScene>
 #include <QPainter>
@@ -131,9 +132,28 @@ QDebug operator << (QDebug s, const table_snapshot& t)
 
 #endif /* DEBUG */
 
+qreal normalize(QPointF& vector)
+{
+	const qreal len = std::sqrt(
+		vector.x() * vector.x() +
+		vector.y() * vector.y());
+
+	if(len != 0)
+	{
+		const qreal InvLen = 1 / len;
+
+		vector *= InvLen;
+	}
+	return len;
+}
+
 const unsigned int WTable::nMaxSeats = 10;
 
-WTable::WTable(int gid, int tid, QWidget *parent) : QGraphicsView(parent), m_nGid(gid), m_nTid(tid)
+WTable::WTable(int gid, int tid, QWidget *parent)
+:	QGraphicsView(parent),
+	m_nGid(gid),
+	m_nTid(tid),
+	m_pImgTable(0)
 {
 	QDir::setCurrent("C:/Eigene Dateien/cpp/holdingnuts/trunk/data");
 	
@@ -146,17 +166,15 @@ WTable::WTable(int gid, int tid, QWidget *parent) : QGraphicsView(parent), m_nGi
 		0, 0, imgTable.width(), 700, this);
 
 	pScene->setBackgroundBrush(Qt::black);//QPixmap("gfx/table/background.png"));
-	pScene->addPixmap(QPixmap::fromImage(imgTable));
+	
+	m_pImgTable = pScene->addPixmap(QPixmap::fromImage(imgTable));
 
 	m_pDealerButton = new DealerButton;
 	m_pDealerButton->scale(0.5, 0.5);
-	m_pDealerButton->setPos(200, 300);
+	m_pDealerButton->setPos(
+		imgTable.width() / 5, imgTable.height() / 2);
 
 	pScene->addItem(m_pDealerButton);
-
-///////////////////////////////
-	
-	//setAttribute(Qt::WA_DeleteOnClose); // FIXME: implement correctly
 
 	// view
 	this->setScene(pScene);
@@ -328,41 +346,15 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID)
 QPointF WTable::calcDealerBtnPos(unsigned int nSeatID)
 {
 	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
+	
+	const QPointF& ptBase = wseats[nSeatID]->pos() + wseats[nSeatID]->boundingRect().center();
+	const QPointF& ptMid = m_pImgTable->sceneBoundingRect().center();
+	
+	QPointF vDir = ptBase - ptMid;
 
-	//		8	9	0
-	//	 7			   1
-	// 						
-	//   6			   2
-	//		5	4	3
+	normalize(vDir);
 
-	// TODO: note size from seat images
-	// TODO: calc seat position
-	const int height_start = 120;
-
-	switch (nSeatID)
-	{
-		case 0:
-			return QPointF(600, height_start);
-		case 1:
-			return QPointF(680, 220);
-		case 2:
-			return QPointF(680, 360);
-		case 3:
-			return QPointF(600, 410);
-		case 4:
-			return QPointF(400, 410);
-		case 5:
-			return QPointF(200, 410);
-		case 6:
-			return QPointF(100, 340);
-		case 7:
-			return QPointF(100, 190);
-		case 8:
-			return QPointF(200, height_start);
-		case 9:
-			return QPointF(400, height_start);
-	}
-	return QPointF(0, 0);
+	return ptBase - (vDir * 40);
 }
 
 void WTable::updateView()
@@ -565,7 +557,7 @@ void WTable::addChat(const QString& from, const QString& text)
 
 void WTable::addServerMessage(const QString& text)
 {
-	m_pChat->addMessage(text, Qt::red);
+	m_pChat->addMessage(text, Qt::blue);
 }
 
 void WTable::closeEvent(QCloseEvent *event)
@@ -672,7 +664,34 @@ void WTable::slotTest()
 
 void WTable::resizeEvent(QResizeEvent *event)
 {
-	const QSize size = event->size();
+	const QSize& size = event->size();
+
+	this->scene()->setSceneRect(
+		QRectF(0, 0, size.width(), size.height()));
+
+	if (event->oldSize().isValid())
+	{
+		const qreal ratio_x = 
+			static_cast<qreal>(event->size().width()) / 
+			static_cast<qreal>(event->oldSize().width());
+		const qreal ratio_y = 
+			static_cast<qreal>(event->size().height()) / 
+			static_cast<qreal>(event->oldSize().height());
+
+		m_pImgTable->scale(ratio_x, ratio_y);
+		
+		for (unsigned int i = 0; i < nMaxSeats; ++i)
+		{
+			wseats[i]->setPos(
+				wseats[i]->pos().x() * ratio_x,
+				wseats[i]->pos().y() * ratio_y);
+			wseats[i]->scale(ratio_x, ratio_y);
+		}
+		
+		m_pDealerButton->setPos(
+			m_pDealerButton->pos().x() * ratio_x,
+			m_pDealerButton->pos().y() * ratio_y);
+	}	
 
 	m_pChat->move(20, size.height() - m_pChat->height() - 10);
 
@@ -689,7 +708,5 @@ void WTable::resizeEvent(QResizeEvent *event)
 	
 	// pots
 //	lblPots->move(offset_x + twidth/2 - lblPots->width() /2, wCC->y() + wCC->height() + 10);
-
-	// TODO: seats
 }
 

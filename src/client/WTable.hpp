@@ -128,16 +128,18 @@ private:
 	const int	m_nGid;
 	//! \brief Table ID
 	const int	m_nTid;
+	//! \brief Tableimage
+	QGraphicsPixmapItem		*m_pImgTable;
 	//! \brief Tablechat
 	ChatBox			*m_pChat;
-	//! \brief Container for Table Actions
-//	QStackedLayout	*m_stLayActions;
 	//! \brief Layout for Table Actions
 	QLabel			*m_LayoutActions;
 	//! \brief Dealer Button
 	DealerButton	*m_pDealerButton;
 	//! \brief Seats
 //	std::vector<Seat*>	m_Seats;		// TODO: über scene ansprechen
+	//! \brief
+	std::vector<QGraphicsPixmapItem*>	m_CommunityCards;
 };
 
 #endif /* _WTABLE_H */
