@@ -56,7 +56,7 @@ add_executable (
 
 target_link_libraries (
    pclient
-   Poker Network System
+   Poker Network SysAccess System
    ${QT_LIBRARIES}
    ${aux_lib}
 ##   ${SDL_LIBRARY}

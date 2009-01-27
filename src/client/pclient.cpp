@@ -22,7 +22,9 @@
 
 #include "Config.h"
 #include "Debug.h"
+#include "SysAccess.h"
 #include "Tokenizer.hpp"
+#include "ConfigParser.hpp"
 
 #include "Protocol.h"
 #include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
@@ -38,6 +40,9 @@
 #endif
 
 //////////////
+
+ConfigParser config;
+
 typedef std::map<int,playerinfo>	players_type;
 typedef std::map<int,gameinfo>		games_type;
 
@@ -550,12 +555,6 @@ int connectsock_create(const char *server, unsigned int port)
 	return sock;
 }
 
-PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
-{
-	connected = false;
-	connecting = false;
-}
-
 bool PClient::doConnect(QString strServer, unsigned int port)
 {
 	wMain->addLog(tr("Connecting..."));
@@ -766,14 +765,66 @@ int PClient::getMyCId()
 	return srv.cid;
 }
 
+PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
+{
+	connected = false;
+	connecting = false;
+	
+	// include config defaults
+	#include "client_variables.hpp"
+	
+	// create config-dir if it doesn't yet exist
+	sys_mkdir(sys_config_path());
+	
+	char cfgfile[1024];
+	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
+	
+	if (!config.load(cfgfile))
+		config.save(cfgfile);
+	
+	
+	// change into data-dir
+	QDir::setCurrent("data");
+	
+	QString locale;
+	if (config.get("locale").length())
+		locale = QString::fromStdString(config.get("locale"));
+	else
+		locale = QLocale::system().name().left(2);
+	
+	QTranslator myappTranslator;
+	myappTranslator.load("i18n/hn_" + locale);
+	dbg_print("main", "Using locale: %s", locale.toStdString().c_str());
+	installTranslator(&myappTranslator);
+	
+	wMain = new WMain();
+	wMain->updateConnectionStatus();
+	wMain->show();
+
+#ifdef DEBUG	
+	// parse commandline arguments in debugmode
+	if (argc == 2)
+	{
+		if (strcmp(argv[1], "--dbg_register") == 0)
+		{
+			doConnect("localhost", DEFAULT_SERVER_PORT);
+			// TODO: wait for n seconds and then try to register a game
+			doRegister(0);
+		}
+	}
+#endif
+}
+
 int main(int argc, char **argv)
 {
+	// FIXME: add config-var if logging is needed; use SysAccess functions
 #if defined(PLATFORM_WINDOWS)
 	FILE *ferr = freopen("err.log","w+",stderr);
 #endif	
 	
-	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d) Qt Version %s",
-		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, qVersion());
+	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d; Qt version %s)",
+		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
+		qVersion());
 	
 #if not defined(PLATFORM_WINDOWS)
 	// ignore broken-pipe signal eventually caused by sockets
@@ -783,32 +834,6 @@ int main(int argc, char **argv)
 	network_init();
 	
 	PClient app(argc, argv);
-	
-	QDir::setCurrent("data");
-	
-	QTranslator myappTranslator;
-	QString locale = QLocale::system().name().left(2);
-	myappTranslator.load("i18n/hn_" + locale);
-	dbg_print("main", "Using locale: %s", locale.toStdString().c_str());
-	app.installTranslator(&myappTranslator);
-	
-	app.wMain = new WMain();
-	app.wMain->updateConnectionStatus();
-	app.wMain->show();
-
-#ifdef DEBUG	
-	// parse commandline arguments in debugmode
-	if (argc == 2)
-	{
-		if (strcmp(argv[1], "--dbg_register") == 0)
-		{
-			app.doConnect("localhost", DEFAULT_SERVER_PORT);
-			// TODO: wait for n secondes and then try to register a game
-			app.doRegister(0);
-		}
-	}
-#endif
-	
 	int retval = app.exec();
 	
 	network_shutdown();
