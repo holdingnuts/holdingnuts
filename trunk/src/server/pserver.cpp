@@ -204,8 +204,13 @@ bool config_load()
 	char cfgfile[1024];
 	snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
 	
-	if (!config.load(cfgfile))
-		config.save(cfgfile);
+	if (config.load(cfgfile))
+		dbg_print("config", "Loaded configuration from %s", cfgfile);
+	else
+	{
+		if (config.save(cfgfile))
+			dbg_print("config", "Saved initial configuration to %s", cfgfile);
+	}
 	
 	return true;
 }
