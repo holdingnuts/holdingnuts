@@ -26,6 +26,7 @@
 
 #include "Config.h"
 #include "Debug.h"
+#include "ConfigParser.hpp"
 
 #include "pclient.hpp"
 
@@ -33,6 +34,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
+
+extern ConfigParser config;
 
 WMain::WMain(QWidget *parent) : QWidget(parent)
 {
@@ -42,7 +45,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	QGroupBox *groupInfo = new QGroupBox(tr("User info"));
 	
 	QLabel *lblUsername = new QLabel(tr("Username:"), this);
-	editUsername = new QLineEdit(tr("JohnDoe"), this);
+	editUsername = new QLineEdit(QString::fromStdString(config.get("player_name")), this);
 	
 	QGridLayout *lInfo = new QGridLayout();
 	lInfo->addWidget(lblUsername, 0, 0);
@@ -56,8 +59,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	
 	QLabel *lblHost = new QLabel(tr("Host:"), this);
 	
-	editSrvAddr = new QLineEdit(this);
-	editSrvAddr->setText("localhost");
+	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host")), this);
 	connect(editSrvAddr, SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
 	
 	btnConnect = new QPushButton(tr("Connect"), this);
