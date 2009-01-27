@@ -151,7 +151,7 @@ QString WMain::getUsername() const
 
 void WMain::actionConnect()
 {
-	if (!((PClient*)qApp)->doConnect(editSrvAddr->text(), DEFAULT_SERVER_PORT))
+	if (!((PClient*)qApp)->doConnect(editSrvAddr->text(), config.getInt("default_port")))
 		addLog(tr("Error connecting."));
 	else
 		btnConnect->setEnabled(false);
