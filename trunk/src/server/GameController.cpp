@@ -54,6 +54,8 @@ GameController::GameController()
 	blinds_factor = 2.0f;
 	blind = 10.0f;
 	
+	hand_no = 0;
+	
 	type = SNG;
 }
 
@@ -464,8 +466,14 @@ void GameController::stateNewRound(Table *t)
 		return;
 #endif
 	
+	// count up current hand number
+	hand_no++;
+	
+	snprintf(msg, sizeof(msg), "New hand #%d begins.", hand_no);
+	chat(t->table_id, msg);
+	
 #ifdef DEBUG
-	dbg_print("Table", "New Round (gid=%d tid=%d)", game_id, t->table_id);
+	dbg_print("Table", "Hand #%d (gid=%d tid=%d)", hand_no, game_id, t->table_id);
 #endif
 	
 	// fill and shuffle card-deck

@@ -130,6 +130,8 @@ private:
 	unsigned int blinds_time;  // seconds
 	time_t last_blinds_time;
 	float blinds_factor;
+	
+	unsigned int hand_no;
 };
 
 #endif /* _GAMECONTROLLER_H */
