@@ -46,6 +46,19 @@ Result:
 
 
 
+Algorithm: Minimum bet
+======================
+
+1)   Minimum bet is current Big Blind (e.g. 10)
+
+2a)  A raise must be at least 2x bet (e.g. to 20)
+3a)  A re-raise must be at least difference between bet and raise (e.g. to 20+(20-10)=30)
+
+2b)  If raise was "to 50"
+3b)  A re-raise must be at least 50+(50-10)=90
+
+
+
 Algorithm: Client: Auto-Muck losing hands
 =========================================
 
