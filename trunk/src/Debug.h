@@ -24,6 +24,7 @@
 #ifndef _DEBUG_H
 #define _DEBUG_H
 
+#if 0
 #include <stdio.h>
 
 #ifndef _MSC_VER
@@ -34,6 +35,7 @@
 # define dbg_print(level, s, ...) \
 	do { fprintf(stderr, "[%s]: "s"\n", level, __VA_ARGS__) ; fflush(stderr); } while(0)
 #endif /* _MSC_VER */
+#endif
 
 #endif /* _DEBUG_H */
 

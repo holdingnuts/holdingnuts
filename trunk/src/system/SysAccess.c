@@ -32,10 +32,11 @@
 
 #include "SysAccess.h"
 
-filetype* file_open(const char *filename, int mode)
+
+const char* build_mode_string(int mode)
 {
-	char mode_str[4];
-	int seq_pos = 0;
+	static char mode_str[4];
+	unsigned int seq_pos = 0;
 	
 	if (mode & mode_read && mode & mode_write)
 	{
@@ -65,7 +66,17 @@ filetype* file_open(const char *filename, int mode)
 	
 	mode_str[seq_pos++] = '\0';
 	
-	return fopen(filename, mode_str);
+	return mode_str;
+}
+
+filetype* file_open(const char *filename, int mode)
+{
+	return fopen(filename, build_mode_string(mode));
+}
+
+filetype* file_reopen(const char *filename, int mode, filetype *stream)
+{
+	return freopen(filename, build_mode_string(mode), stream);
 }
 
 int file_close(filetype *fp)

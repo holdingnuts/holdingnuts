@@ -21,6 +21,8 @@
  */
 
 
+#warning pclient_t is not compatible with protocol anymore; consider removing
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -36,6 +38,7 @@
 
 #include "Config.h"
 #include "Platform.h"
+#include "Logger.h"
 #include "Debug.h"
 #include "Network.h"
 #include "Protocol.h"
@@ -117,7 +120,7 @@ bool get_hand_strength(string hole, string board, string *sstring)
 	CommunityCards cc;
 	ct.parse(board, ":");
 	
-	if (ct.getCount() >= 3)
+	if (ct.count() >= 3)
 	{
 		Card cf1(ct.getNext().c_str());
 		Card cf2(ct.getNext().c_str());
@@ -126,14 +129,14 @@ bool get_hand_strength(string hole, string board, string *sstring)
 		cc.setFlop(cf1, cf2, cf3);
 	}
 	
-	if (ct.getCount() >= 4)
+	if (ct.count() >= 4)
 	{
 		Card ct1(ct.getNext().c_str());
 		
 		cc.setTurn(ct1);
 	}
 	
-	if (ct.getCount() == 5)
+	if (ct.count() == 5)
 	{
 		Card cr1(ct.getNext().c_str());
 		
@@ -269,7 +272,7 @@ int server_execute(const char *cmd)
 	Tokenizer t;
 	t.parse(cmd);  // parse the command line
 	
-	if (!t.getCount())
+	if (!t.count())
 		return 0;
 	
 	//dbg_print("server", "executing '%s'", cmd);
@@ -600,7 +603,7 @@ int client_execute(const char *cmd)
 	Tokenizer t;
 	t.parse(cmd);  // parse the command line
 	
-	if (!t.getCount())
+	if (!t.count())
 		return 0;
 	
 	//dbg_print("input", "executing '%s'", cmd);

@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 
+#include "Logger.h"
 #include "Debug.h"
 #include "Tokenizer.hpp"
 #include "ConfigParser.hpp"
@@ -54,7 +55,7 @@ int test_tokenizer()
 		cout << "Test " << i + 1 << ":" << flush;
 		t.parse(sa[i]);
 		
-		for (unsigned int j=0; j < t.getCount(); j++)
+		for (unsigned int j=0; j < t.count(); j++)
 			cout << "_" << t[j] << "_";
 		
 		cout << endl << flush;

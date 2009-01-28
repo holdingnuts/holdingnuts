@@ -27,6 +27,7 @@
 #include <algorithm>
 
 #include "Config.h"
+#include "Logger.h"
 #include "Debug.h"
 #include "GameController.hpp"
 #include "GameLogic.hpp"
@@ -38,7 +39,7 @@
 using namespace std;
 
 // temporary buffer for chat/snap data
-char msg[1024];
+static char msg[1024];
 
 
 GameController::GameController()

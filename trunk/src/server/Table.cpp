@@ -21,6 +21,7 @@
  */
 
 
+#include "Logger.h"
 #include "Debug.h"
 #include "Table.hpp"
 

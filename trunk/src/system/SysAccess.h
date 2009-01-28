@@ -52,6 +52,7 @@ typedef enum {
 
 
 filetype* file_open(const char *filename, int mode);
+filetype* file_reopen(const char *filename, int mode, filetype *stream);
 int file_close(filetype *fp);
 size_t file_read(filetype *fp, void *buf, unsigned int size);
 size_t file_write(filetype *fp, const void *buf, unsigned int size);

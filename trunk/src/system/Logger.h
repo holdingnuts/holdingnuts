@@ -21,34 +21,24 @@
  */
 
 
-#ifndef _TOKENIZER_H
-#define _TOKENIZER_H
+#ifndef _LOGGER_H
+#define _LOGGER_H
 
-#include <string>
-#include <vector>
 
-class Tokenizer
-{
-public:
-	bool parse(std::string str, std::string sep = " \t\n");
-	bool getNext(std::string &str);
-	std::string getNext();
-	std::string getTillEnd(char sep=' ');
-	int getNextInt();
-	float getNextFloat();
-	
-	bool popFirst();
-	
-	unsigned int count() const { return tokens.size(); };
-	std::string operator[](const unsigned int i) const;
-	
-	static bool isSep(char ch, std::string sep);
-	static int string2int(std::string s, unsigned int base = 0);
-	static float string2float(std::string s);
+#include "Platform.h"
+#include "SysAccess.h"
 
-private:
-	std::vector<std::string> tokens;
-	unsigned int index;
-};
 
-#endif /* _TOKENIZER_H */
+#if defined __cplusplus
+        extern "C" {
+#endif
+
+
+void dbg_print(const char *level, const char *format, ...);
+void dbg_setlog(filetype *stream1, filetype *stream2);
+
+#if defined __cplusplus
+    }
+#endif
+
+#endif /* _LOGGER_H */

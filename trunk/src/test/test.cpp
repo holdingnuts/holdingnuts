@@ -30,6 +30,7 @@
 #include <functional>
 
 #include "Platform.h"
+#include "Logger.h"
 #include "Debug.h"
 
 #include "Card.hpp"

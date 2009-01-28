@@ -35,6 +35,7 @@
 #include "Config.h"
 #include "Platform.h"
 #include "Debug.h"
+#include "Logger.h"
 
 #include "Network.h"
 #include "SysAccess.h"
@@ -217,6 +218,8 @@ bool config_load()
 
 int main(int argc, char **argv)
 {
+	dbg_setlog(stderr, 0);
+	
 	dbg_print("main", "HoldingNuts pserver (version %d.%d.%d)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	
@@ -232,12 +235,26 @@ int main(int argc, char **argv)
 	// load config
 	config_load();
 	
+	// start logging
+	filetype *fplog = NULL;
+	if (config.getBool("log"))
+	{
+		char logfile[1024];
+		snprintf(logfile, sizeof(logfile), "%s/server.log", sys_config_path());
+		fplog = file_open(logfile, mode_write);
+		
+		dbg_setlog(stderr, fplog);
+	}
 	
 	network_init();
 	
 	mainloop();
 	
 	network_shutdown();
+	
+	// close log-file
+	if (fplog)
+		file_close(fplog);
 	
 	return 0;
 }
