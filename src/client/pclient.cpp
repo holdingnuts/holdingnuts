@@ -181,8 +181,8 @@ int server_execute(const char *cmd)
 		return 0;
 	
 	// get first arg
-	std::string command;
-	t.getNext(command);
+	std::string command = t.getNext();
+	t.popFirst();   // remove the command token
 	
 	// FIXME: state; check if this is really a pserver
 	if (command == "PSERVER")
