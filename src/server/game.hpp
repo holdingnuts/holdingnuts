@@ -70,8 +70,8 @@ bool client_remove(socktype sock);
 int client_handle(socktype sock);
 
 // used by GameController.cpp
-bool client_chat(int from_gid, int from_tid, int to, const char *msg);
-bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg);
+bool client_chat(int from_gid, int from_tid, int to, const char *message);
+bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *message);
 
 
 #endif /* _GAME_H */

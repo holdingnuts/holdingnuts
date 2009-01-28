@@ -32,10 +32,12 @@
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
+#include "Debug.h"
+#include "Logger.h"
 #include "Tokenizer.hpp"
 #include "ConfigParser.hpp"
 
-#include "Debug.h"
+
 #include "GameController.hpp"
 #include "game.hpp"
 
@@ -43,8 +45,16 @@ using namespace std;
 
 extern ConfigParser config;
 
-////////////////////////
-map<int,GameController*> games;
+// temporary buffer for sending messages
+static char msg[1024];
+
+static map<int,GameController*> games;
+
+static vector<clientcon> clients;
+static unsigned int cid_counter = 0;
+
+static map<string,clientcon_archive> con_archive;
+
 
 GameController* get_game_by_id(int gid)
 {
@@ -54,13 +64,6 @@ GameController* get_game_by_id(int gid)
 	else
 		return NULL;
 }
-
-
-////////////////////////
-vector<clientcon> clients;
-unsigned int cid_counter = 0;
-
-map<string,clientcon_archive> con_archive;
 
 // for pserver.cpp filling FD_SET
 vector<clientcon>& get_client_vector()
@@ -86,10 +89,10 @@ clientcon* get_client_by_id(int cid)
 	return NULL;
 }
 
-int send_msg(socktype sock, const char *msg)
+int send_msg(socktype sock, const char *message)
 {
 	char buf[1024];
-	const int len = snprintf(buf, sizeof(buf), "%s\r\n", msg);
+	const int len = snprintf(buf, sizeof(buf), "%s\r\n", message);
 	const int bytes = socket_write(sock, buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
@@ -101,48 +104,48 @@ int send_msg(socktype sock, const char *msg)
 
 bool send_ok(socktype sock, int code=0, const char *str="")
 {
-	char msg[128];
-	snprintf(msg, sizeof(msg), "OK %d %s", code, str);
-	return send_msg(sock, msg);
+	char buf[128];
+	snprintf(buf, sizeof(buf), "OK %d %s", code, str);
+	return send_msg(sock, buf);
 }
 
 bool send_err(socktype sock, int code=0, const char *str="")
 {
-	char msg[128];
-	snprintf(msg, sizeof(msg), "ERR %d %s", code, str);
-	return send_msg(sock, msg);
+	char buf[128];
+	snprintf(buf, sizeof(buf), "ERR %d %s", code, str);
+	return send_msg(sock, buf);
 }
 
 // from client/foyer to client/foyer
-bool client_chat(int from, int to, const char *msg)
+bool client_chat(int from, int to, const char *message)
 {
-	char data[1024];
+	char msg[1024];
 	
 	if (from == -1)
 	{
-		snprintf(data, sizeof(data), "MSG %d %s %s",
-			from, "foyer", msg);
+		snprintf(msg, sizeof(msg), "MSG %d %s %s",
+			from, "foyer", message);
 	}
 	else
 	{
 		clientcon* fromclient = get_client_by_id(from);
 		
-		snprintf(data, sizeof(data), "MSG %d %s %s",
+		snprintf(msg, sizeof(msg), "MSG %d %s %s",
 			from,
 			(fromclient) ? fromclient->name : "???",
-			msg);
+			message);
 	}
 	
 	if (to == -1)
 	{
 		for (vector<clientcon>::iterator e = clients.begin(); e != clients.end(); e++)
-			send_msg(e->sock, data);
+			send_msg(e->sock, msg);
 	}
 	else
 	{
 		clientcon* toclient = get_client_by_id(to);
 		if (toclient)
-			send_msg(toclient->sock, data);
+			send_msg(toclient->sock, msg);
 		else
 			return false;
 	}
@@ -151,24 +154,24 @@ bool client_chat(int from, int to, const char *msg)
 }
 
 // from game/table to client
-bool client_chat(int from_gid, int from_tid, int to, const char *msg)
+bool client_chat(int from_gid, int from_tid, int to, const char *message)
 {
-	char data[1024];
+	char msg[1024];
 	
-	snprintf(data, sizeof(data), "MSG %d:%d %s %s",
-		from_gid, from_tid, (from_tid == -1) ? "game" : "table", msg);
+	snprintf(msg, sizeof(msg), "MSG %d:%d %s %s",
+		from_gid, from_tid, (from_tid == -1) ? "game" : "table", message);
 	
 	clientcon* toclient = get_client_by_id(to);
 	if (toclient)
-		send_msg(toclient->sock, data);
+		send_msg(toclient->sock, msg);
 	
 	return true;
 }
 
 // from client to game/table
-bool table_chat(int from_cid, int to_gid, int to_tid, const char *msg)
+bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 {
-	char data[1024];
+	char msg[1024];
 	
 	clientcon* fromclient = get_client_by_id(from_cid);
 	
@@ -181,29 +184,27 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *msg)
 	
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
-		snprintf(data, sizeof(data), "MSG %d:%d:%d %s %s",
+		snprintf(msg, sizeof(msg), "MSG %d:%d:%d %s %s",
 			to_gid, to_tid, from_cid,
 			(fromclient) ? fromclient->name : "???",
-			msg);
+			message);
 		
 		clientcon* toclient = get_client_by_id(client_list[i]);
 		if (toclient)
-			send_msg(toclient->sock, data);
+			send_msg(toclient->sock, msg);
 	}
 	
 	return true;
 }
 
-bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg)
+bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *message)
 {
-	char data[1024];
-	
-	snprintf(data, sizeof(data), "SNAP %d:%d %d %s",
-		from_gid, from_tid, sid, msg);
+	snprintf(msg, sizeof(msg), "SNAP %d:%d %d %s",
+		from_gid, from_tid, sid, message);
 	
 	clientcon* toclient = get_client_by_id(to);
 	if (toclient)
-		send_msg(toclient->sock, data);
+		send_msg(toclient->sock, msg);
 	
 	return true;
 }
@@ -236,8 +237,6 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 
 bool client_remove(socktype sock)
 {
-	char msg[1024];
-	
 	for (vector<clientcon>::iterator client = clients.begin(); client != clients.end(); client++)
 	{
 		if (client->sock == sock)
@@ -282,340 +281,373 @@ bool client_remove(socktype sock)
 	return true;
 }
 
-int client_execute(clientcon *client, const char *cmd)
+int client_cmd_pclient(clientcon *client, Tokenizer &t)
 {
-	socktype s = client->sock;
-	char msg[1024];
+	unsigned int version = t.getNextInt();
+	string uuid = t.getNext();
 	
-	Tokenizer t;
-	t.parse(cmd);  // parse the command line
+	if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
+		VERSION_GETMINOR(version) != VERSION_MINOR)
+	{
+		dbg_print("client", "client %d version (%d) doesn't match", client->sock, version);
+		send_err(client->sock);
+	}
+	else
+	{
+		client->version = version;
+		client->state |= Introduced;
+		
+		snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
+		
+		// re-assign cid if this client was previously connected (and cid isn't already connected)
+		if (uuid.length() && con_archive.find(uuid) != con_archive.end() && !get_client_by_id(con_archive[uuid].id))
+			client->id = con_archive[uuid].id;
+		else
+			client->id = cid_counter++;
+		
+		// set temporary client name
+		snprintf(client->name, sizeof(client->name), "client_%d", client->id);
+		
+		
+		// send 'introduced response'
+		snprintf(msg, sizeof(msg), "PSERVER %d %d",
+			VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
+			client->id);
+			
+		send_msg(client->sock, msg);
+	}
 	
-	if (!t.getCount())
-		return 0;
+	return 0;
+}
+
+int client_cmd_info(clientcon *client, Tokenizer &t)
+{
+	string infostr;
+	Tokenizer it;
 	
-	//dbg_print("clientsock", "(%d) executing '%s'", s, cmd);
+	while (t.getNext(infostr))
+	{
+		it.parse(infostr, ":");
+		
+		string infotype, infoarg;
+		it.getNext(infotype);
+		
+		bool havearg = it.getNext(infoarg);
+		
+		if (infotype == "name" && havearg)
+		{
+			snprintf(client->name, sizeof(client->name), "%s", infoarg.c_str());
+		}
+	}
 	
-	unsigned int argcount = t.getCount() - 1;
+	send_ok(client->sock);
 	
-	// get first arg
-	string command;
-	t.getNext(command);
+	if (!(client->state & SentInfo))
+	{
+		snprintf(msg, sizeof(msg),
+			"'%s' (%d) joined foyer",
+			client->name, client->id);
+		
+		client_chat(-1, -1, msg);
+	}
 	
+	client->state |= SentInfo;
+	
+	return 0;
+}
+
+int client_cmd_chat(clientcon *client, Tokenizer &t)
+{
 	bool cmderr = false;
 	
-	if (!(client->state & Introduced))  // state: not introduced
+	if (t.count() < 2)
+		cmderr = true;
+	else
 	{
-		if (command == "PCLIENT")
+		Tokenizer ct;
+		ct.parse(t.getNext(), ":");
+		string chatmsg = t.getTillEnd();
+		
+		if (ct.count() == 1) // cid
 		{
-			unsigned int version = t.getNextInt();
-			string uuid = t.getNext();
+			int dest = ct.getNextInt();
 			
-			if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
-				VERSION_GETMINOR(version) != VERSION_MINOR)
+			if (!client_chat(client->id, dest, chatmsg.c_str()))
+				cmderr = true;
+		}
+		else if (ct.count() == 2)  // gid:tid
+		{
+			int gid = ct.getNextInt();
+			int tid = ct.getNextInt();
+			
+			if (!table_chat(client->id, gid, tid, chatmsg.c_str()))
+				cmderr = true;
+		}
+	}
+	
+	if (!cmderr)
+		send_ok(client->sock);
+	else
+		send_err(client->sock);
+	
+	return 0;
+}
+
+int client_cmd_request(clientcon *client, Tokenizer &t)
+{
+	bool cmderr = false;
+	
+	if (!t.count())
+		cmderr = true;
+	else
+	{
+		string request = t.getNext();
+		
+		if (request == "clientinfo")
+		{
+			string scid;
+			while (t.getNext(scid))   // FIXME: have maximum for count of requests
 			{
-				dbg_print("client", "client %d version (%d) doesn't match", s, version);
-				send_err(s);
-			}
-			else
-			{
-				client->version = version;
-				client->state |= Introduced;
-				
-				snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
-				
-				// re-assign cid if this client was previously connected (and cid isn't already connected)
-				if (uuid.length() && con_archive.find(uuid) != con_archive.end() && !get_client_by_id(con_archive[uuid].id))
-					client->id = con_archive[uuid].id;
-				else
-					client->id = cid_counter++;
-				
-				// set temporary client name
-				snprintf(client->name, sizeof(client->name), "client_%d", client->id);
-				
-				
-				// send 'introduced response'
-				snprintf(msg, sizeof(msg), "PSERVER %d %d",
-					VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
-					client->id);
+				socktype cid = Tokenizer::string2int(scid);
+				clientcon *c;
+				if ((c = get_client_by_id(cid)))
+				{
+					snprintf(msg, sizeof(msg),
+						"CLIENTINFO %d name:%s",
+						cid,
+						c->name);
 					
+					send_msg(client->sock, msg);
+				}
+			}
+		}
+		else if (request == "gamelist")
+		{
+			string gameinfo;
+			for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
+			{
+				int gid = e->first;
+				GameController *g = e->second;
+				char tmp[128];
+				
+				snprintf(tmp, sizeof(tmp), "%d:%d:moreinfo ",
+					gid, (int)g->getGameType());
+				
+				gameinfo += tmp;
+			}
+			
+			snprintf(msg, sizeof(msg),
+				"GAMELIST %s", gameinfo.c_str());
+			
+			send_msg(client->sock, msg);
+		}
+		else if (request == "playerlist")
+		{
+			int gid = t.getNextInt();
+			
+			GameController *g;
+			if ((g = get_game_by_id(gid)))
+			{
+				vector<int> client_list;
+				g->getPlayerList(client_list);
+				
+				string slist;
+				for (unsigned int i=0; i < client_list.size(); i++)
+				{
+					char tmp[10];
+					snprintf(tmp, sizeof(tmp), "%d ", client_list[i]);
+					slist += tmp;
+				}
+				
+				snprintf(msg, sizeof(msg), "PLAYERLIST %d %s", gid, slist.c_str());
 				send_msg(client->sock, msg);
 			}
 		}
 		else
+			cmderr = true;
+	}
+	
+	if (!cmderr)
+		send_ok(client->sock);
+	else
+		send_err(client->sock);
+	
+	return 0;
+}
+
+int client_cmd_register(clientcon *client, Tokenizer &t)
+{
+	bool cmderr = false;
+	
+	if (!t.count())
+		cmderr = true;
+	else
+	{
+		int gid = t.getNextInt();
+		GameController *g;
+		if ((g = get_game_by_id(gid)))
 		{
-			send_err(s, 1, "protocol error");
-			client_remove(s);
+			g->removePlayer(client->id);
+			
+			if (g->addPlayer(client->id))
+			{
+				snprintf(msg, sizeof(msg),
+					"'%s' (%d) joined game %d (%d/%d)",
+					client->name, client->id, gid,
+					g->getPlayerCount(), g->getPlayerMax());
+				
+				dbg_print("game", "%s", msg);
+				client_chat(-1, -1, msg);
+			}
+			else
+				cmderr = true;
+		}
+		else
+			cmderr = true;
+	}
+	
+	if (!cmderr)
+		send_ok(client->sock);
+	else
+		send_err(client->sock);
+	
+	return 0;
+}
+
+int client_cmd_action(clientcon *client, Tokenizer &t)
+{
+	bool cmderr = false;
+	
+	if (t.count() < 2)
+		cmderr = true;
+	else
+	{
+		int gid = t.getNextInt();
+		GameController *g;
+		if ((g = get_game_by_id(gid)))
+		{
+			string action;
+			t.getNext(action);
+			
+			string samount;
+			float amount = t.getNextFloat();
+			
+			Player::PlayerAction a;
+			
+			if (action == "check")
+				a = Player::Check;
+			else if (action == "fold")
+				a = Player::Fold;
+			else if (action == "call")
+				a = Player::Call;
+			else if (action == "bet")
+				a = Player::Bet;
+			else if (action == "raise")
+				a = Player::Raise;
+			else if (action == "allin")
+				a = Player::Allin;
+			else if (action == "show")
+				a = Player::Show;
+			else if (action == "muck")
+				a = Player::Muck;
+			else if (action == "sitout")
+				a = Player::Sitout;
+			else if (action == "back")
+				a = Player::Back;
+			else if (action == "reset")
+				a = Player::ResetAction;
+			else
+				cmderr = true;
+			
+			if (!cmderr)
+				g->setPlayerAction(client->id, a, amount);
+		}
+		else
+			cmderr = true;
+	}
+	
+	if (!cmderr)
+		send_ok(client->sock, 0);
+	else
+		send_err(client->sock, 0, "what?");
+	
+	return 0;
+}
+
+int client_cmd_auth(clientcon *client, Tokenizer &t)
+{
+	bool cmderr = false;
+
+	if (t.count() < 2)
+		cmderr = true;
+	else
+	{
+		int type = t.getNextInt();  // FIXME: -1=server | other=game_id
+		
+		snprintf(msg, sizeof(msg), "auth on %d", type);
+		
+		if (t[2] == "secret")  // FIXME: no default pw, only testing here
+			client->state |= Authed;
+		else
+			cmderr = true;
+	}
+	
+	if (!cmderr)
+		send_ok(client->sock, 0, msg);
+	else
+		send_err(client->sock, 0, "auth failed");
+	
+	return 0;
+}
+
+int client_execute(clientcon *client, const char *cmd)
+{
+	Tokenizer t;
+	t.parse(cmd);  // parse the command line
+	
+	// ignore blank command
+	if (!t.count())
+		return 0;
+	
+	//dbg_print("clientsock", "(%d) executing '%s'", s, cmd);
+	
+	// get first arg
+	string command = t.getNext();
+	t.popFirst();   // remove the command token
+	
+	
+	if (!(client->state & Introduced))  // state: not introduced
+	{
+		if (command == "PCLIENT")
+			client_cmd_pclient(client, t);
+		else
+		{
+			// seems not to be a pclient
+			send_err(client->sock, 1, "protocol error");
+			client_remove(client->sock);
 			return -1;
 		}
 	}
 	else if (command == "INFO")
-	{
-		string infostr;
-		Tokenizer it;
-		
-		while (t.getNext(infostr))
-		{
-			it.parse(infostr, ":");
-			
-			string infotype, infoarg;
-			it.getNext(infotype);
-			
-			bool havearg = it.getNext(infoarg);
-			
-			if (infotype == "name" && havearg)
-			{
-				snprintf(client->name, sizeof(client->name), "%s", infoarg.c_str());
-			}
-		}
-		
-		if (!cmderr)
-		{
-			send_ok(s);
-			
-			if (!(client->state & SentInfo))
-			{
-				snprintf(msg, sizeof(msg),
-					"'%s' (%d) joined foyer",
-					client->name, client->id);
-				
-				client_chat(-1, -1, msg);
-			}
-			
-			client->state |= SentInfo;
-		}
-		else
-			send_err(s);
-	}
+		client_cmd_info(client, t);
 	else if (command == "CHAT")
-	{
-		if (argcount < 2)
-			cmderr = true;
-		else
-		{
-			Tokenizer ct;
-			ct.parse(t.getNext(), ":");
-			string chatmsg = t.getTillEnd();
-			
-			if (ct.getCount() == 1) // cid
-			{
-				int dest = ct.getNextInt();
-				
-				if (!client_chat(client->id, dest, chatmsg.c_str()))
-					cmderr = true;
-			}
-			else if (ct.getCount() == 2)  // gid:tid
-			{
-				int gid = ct.getNextInt();
-				int tid = ct.getNextInt();
-				
-				if (!table_chat(client->id, gid, tid, chatmsg.c_str()))
-					cmderr = true;
-			}
-		}
-		
-		if (!cmderr)
-			send_ok(s);
-		else
-			send_err(s);
-	}
+		client_cmd_chat(client, t);
 	else if (command == "REQUEST")
-	{
-		if (!argcount)
-			cmderr = true;
-		else
-		{
-			string request;
-			t.getNext(request);
-			
-			if (request == "clientinfo")
-			{
-				string scid;
-				while (t.getNext(scid))   // FIXME: have maximum for count of requests
-				{
-					socktype cid = Tokenizer::string2int(scid);
-					clientcon *client;
-					if ((client = get_client_by_id(cid)))
-					{
-						snprintf(msg, sizeof(msg),
-							"CLIENTINFO %d name:%s",
-							cid,
-							client->name);
-						
-						send_msg(s, msg);
-					}
-				}
-			}
-			else if (request == "gamelist")
-			{
-				string gameinfo;
-				for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
-				{
-					int gid = e->first;
-					GameController *g = e->second;
-					char tmp[128];
-					
-					snprintf(tmp, sizeof(tmp), "%d:%d:moreinfo ",
-						gid, (int)g->getGameType());
-					
-					gameinfo += tmp;
-				}
-				
-				snprintf(msg, sizeof(msg),
-					"GAMELIST %s", gameinfo.c_str());
-				
-				send_msg(s, msg);
-			}
-			else if (request == "playerlist")
-			{
-				int gid = t.getNextInt();
-				
-				GameController *g;
-				if ((g = get_game_by_id(gid)))
-				{
-					vector<int> client_list;
-					g->getPlayerList(client_list);
-					
-					string slist;
-					for (unsigned int i=0; i < client_list.size(); i++)
-					{
-						char tmp[10];
-						snprintf(tmp, sizeof(tmp), "%d ", client_list[i]);
-						slist += tmp;
-					}
-					
-					snprintf(msg, sizeof(msg), "PLAYERLIST %d %s", gid, slist.c_str());
-					send_msg(s, msg);
-				}
-			}
-			else
-				cmderr = true;
-		}
-		
-		if (!cmderr)
-			send_ok(s);
-		else
-			send_err(s);
-	}
+		client_cmd_request(client, t);
 	else if (command == "REGISTER")
-	{
-		if (!argcount)
-			cmderr = true;
-		else
-		{
-			int gid = t.getNextInt();
-			GameController *g;
-			if ((g = get_game_by_id(gid)))
-			{
-				g->removePlayer(client->id);
-				
-				if (g->addPlayer(client->id))
-				{
-					snprintf(msg, sizeof(msg),
-						"'%s' (%d) joined game %d (%d/%d)",
-						client->name, client->id, gid,
-						g->getPlayerCount(), g->getPlayerMax());
-					
-					dbg_print("game", "%s", msg);
-					client_chat(-1, -1, msg);
-				}
-				else
-					cmderr = true;
-			}
-			else
-				cmderr = true;
-		}
-		
-		if (!cmderr)
-			send_ok(s);
-		else
-			send_err(s);
-	}
+		client_cmd_register(client, t);
 	else if (command == "ACTION")
-	{
-		if (argcount < 2)
-			cmderr = true;
-		else
-		{
-			int gid = t.getNextInt();
-			GameController *g;
-			if ((g = get_game_by_id(gid)))
-			{
-				string action;
-				t.getNext(action);
-				
-				string samount;
-				float amount = t.getNextFloat();
-				
-				Player::PlayerAction a;
-				
-				if (action == "check")
-					a = Player::Check;
-				else if (action == "fold")
-					a = Player::Fold;
-				else if (action == "call")
-					a = Player::Call;
-				else if (action == "bet")
-					a = Player::Bet;
-				else if (action == "raise")
-					a = Player::Raise;
-				else if (action == "allin")
-					a = Player::Allin;
-				else if (action == "show")
-					a = Player::Show;
-				else if (action == "muck")
-					a = Player::Muck;
-				else if (action == "sitout")
-					a = Player::Sitout;
-				else if (action == "back")
-					a = Player::Back;
-				else if (action == "reset")
-					a = Player::ResetAction;
-				else
-					cmderr = true;
-				
-				if (!cmderr)
-					g->setPlayerAction(client->id, a, amount);
-			}
-			else
-				cmderr = true;
-		}
-		
-		if (!cmderr)
-			send_ok(s, 0);
-		else
-			send_err(s, 0, "what?");
-	}
+		client_cmd_action(client, t);
 	else if (command == "AUTH")
-	{
-		if (argcount < 2)
-			cmderr = true;
-		else
-		{
-			int type = t.getNextInt();  // FIXME: -1=server | other=game_id
-			
-			snprintf(msg, sizeof(msg), "auth on %d", type);
-			
-			if (t[2] == "secret")  // FIXME: no default pw, only testing here
-				client->state |= Authed;
-			else
-				cmderr = true;
-		}
-		
-		if (!cmderr)
-			send_ok(s, 0, msg);
-		else
-			send_err(s, 0, "auth failed");
-	}
+		client_cmd_auth(client, t);
 	else if (command == "QUIT")
 	{
-		send_ok(s);
-		client_remove(s);
+		send_ok(client->sock);
+		client_remove(client->sock);
 		return -1;
 	}
 	else
-	{
-		send_err(s, 10, "not implemented");
-	}
+		send_err(client->sock, 10, "not implemented");
 	
 	return 0;
 }
@@ -704,6 +736,7 @@ int client_handle(socktype sock)
 
 int gameloop()
 {
+#ifdef DEBUG
 	// initially add a game for debugging purpose
 	if (!games.size())
 	{
@@ -716,6 +749,7 @@ int gameloop()
 			games[gid] = g;
 		}
 	}
+#endif
 	
 	// handle all games
 	for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
@@ -728,4 +762,3 @@ int gameloop()
 	
 	return 0;
 }
-

@@ -16,7 +16,7 @@ add_executable (test
 	../server/GameController.cpp
 	../server/Table.cpp
 )
-target_link_libraries(test Poker)
+target_link_libraries(test Poker System)
 
 add_executable (simulator simulator.cpp)
 target_link_libraries(simulator Poker)

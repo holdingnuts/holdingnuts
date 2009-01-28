@@ -28,3 +28,4 @@ config.set("default_port",	DEFAULT_SERVER_PORT);
 config.set("player_name",	"Unnamed");
 config.set("uuid",		"");
 config.set("locale",		"");
+config.set("log",		true);

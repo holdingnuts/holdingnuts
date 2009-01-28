@@ -47,7 +47,7 @@ bool ConfigParser::load(const char *filename)
 		t.parse(buffer);
 		
 		// skip blank lines
-		if (!t.getCount())
+		if (!t.count())
 			continue;
 		
 		string varname = t.getNext();
@@ -134,6 +134,29 @@ int ConfigParser::getInt(string name)
 	return value;
 }
 
+bool ConfigParser::getBool(string name, bool &value)
+{
+	string svalue;
+	if (!get(name, svalue))
+		return false;
+	
+	if (svalue == "true" || svalue == "yes" || svalue == "1")
+		value = true;
+	else
+		value = false;
+	
+	return true;
+}
+
+bool ConfigParser::getBool(string name)
+{
+	bool value = false;
+	
+	getBool(name, value);
+	
+	return value;
+}
+
 bool ConfigParser::set(string name, string value)
 {
 	vars[name] = value;
@@ -145,5 +168,11 @@ bool ConfigParser::set(string name, int value)
 	ostringstream oss;
 	oss << value;
 	vars[name] = oss.str();
+	return true;
+}
+
+bool ConfigParser::set(string name, bool value)
+{
+	vars[name] = (value) ? "true" : "false";
 	return true;
 }

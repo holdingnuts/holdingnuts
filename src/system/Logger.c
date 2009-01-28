@@ -21,34 +21,50 @@
  */
 
 
-#ifndef _TOKENIZER_H
-#define _TOKENIZER_H
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
-#include <string>
-#include <vector>
+#include "Logger.h"
 
-class Tokenizer
+
+#if defined __cplusplus
+        extern "C" {
+#endif
+
+static filetype *logger[2] = { 0, 0 };
+
+
+void dbg_print(const char *level, const char *format, ...)
 {
-public:
-	bool parse(std::string str, std::string sep = " \t\n");
-	bool getNext(std::string &str);
-	std::string getNext();
-	std::string getTillEnd(char sep=' ');
-	int getNextInt();
-	float getNextFloat();
+	va_list args;
+	char msg[1024];
+	unsigned int i;
 	
-	bool popFirst();
+	va_start(args, format);
+	vsnprintf(msg, sizeof(msg), format, args);
+	va_end(args);
 	
-	unsigned int count() const { return tokens.size(); };
-	std::string operator[](const unsigned int i) const;
+	// if there was no log target specified with dbg_setlog()
+	if (!logger[0])
+		logger[0] = stderr;
 	
-	static bool isSep(char ch, std::string sep);
-	static int string2int(std::string s, unsigned int base = 0);
-	static float string2float(std::string s);
+	for (i=0; i < 2; i++)
+	{
+		if (!logger[i])
+			continue;
+		
+		fprintf(logger[i], "[%s]: %s\n", level, msg);
+		fflush(logger[i]);
+	}
+}
 
-private:
-	std::vector<std::string> tokens;
-	unsigned int index;
-};
+void dbg_setlog(filetype *stream1, filetype *stream2)
+{
+	logger[0] = stream1;
+	logger[1] = stream2;
+}
 
-#endif /* _TOKENIZER_H */
+#if defined __cplusplus
+    }
+#endif

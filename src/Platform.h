@@ -25,7 +25,9 @@
 #define _PLATFORM_H
 
 #if defined(_MSC_VER)
-# define snprintf _snprintf
+# define snprintf	_snprintf
+# define vsnprintf	_vsnprintf
+# define vfprintf	_vfprintf
 #endif
 
 #endif /* _PLATFORM_H */

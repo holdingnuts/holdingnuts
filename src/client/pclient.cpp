@@ -21,6 +21,7 @@
  */
 
 #include "Config.h"
+#include "Logger.h"
 #include "Debug.h"
 #include "SysAccess.h"
 #include "Tokenizer.hpp"
@@ -109,12 +110,12 @@ void server_cmd_msg(Tokenizer& t)
 	int tid = -1;
 	int cid = -1;
 
-	if (ft.getCount() == 2)
+	if (ft.count() == 2)
 	{
 		gid = ft.getNextInt();
 		tid = ft.getNextInt();
 	}
-	else if (ft.getCount() == 3)
+	else if (ft.count() == 3)
 	{
 		gid = ft.getNextInt();
 		tid = ft.getNextInt();
@@ -176,7 +177,7 @@ int server_execute(const char *cmd)
 	Tokenizer t;
 	t.parse(cmd);  // parse the command line
 	
-	if (!t.getCount())
+	if (!t.count())
 		return 0;
 	
 	// get first arg
@@ -273,10 +274,10 @@ int server_execute(const char *cmd)
 					Tokenizer ct;
 					ct.parse(board, ":");
 					
-					if (ct.getCount() == 0)
+					if (ct.count() == 0)
 						cc.clear();
 					
-					if (ct.getCount() >= 3)
+					if (ct.count() >= 3)
 					{
 						Card cf1(ct.getNext().c_str());
 						Card cf2(ct.getNext().c_str());
@@ -285,14 +286,14 @@ int server_execute(const char *cmd)
 						cc.setFlop(cf1, cf2, cf3);
 					}
 					
-					if (ct.getCount() >= 4)
+					if (ct.count() >= 4)
 					{
 						Card ct1(ct.getNext().c_str());
 						
 						cc.setTurn(ct1);
 					}
 					
-					if (ct.getCount() == 5)
+					if (ct.count() == 5)
 					{
 						Card cr1(ct.getNext().c_str());
 						
@@ -768,23 +769,6 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connected = false;
 	connecting = false;
 	
-	// include config defaults
-	#include "client_variables.hpp"
-	
-	// create config-dir if it doesn't yet exist
-	sys_mkdir(sys_config_path());
-	
-	char cfgfile[1024];
-	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
-	
-	if (config.load(cfgfile))
-		dbg_print("config", "Loaded configuration from %s", cfgfile);
-	else
-	{
-		if (config.save(cfgfile))
-			dbg_print("config", "Saved initial configuration to %s", cfgfile);
-	}
-	
 	// change into data-dir
 	QDir::setCurrent("data");
 	
@@ -817,12 +801,31 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 #endif
 }
 
+bool config_load()
+{
+	// include config defaults
+	#include "client_variables.hpp"
+	
+	// create config-dir if it doesn't yet exist
+	sys_mkdir(sys_config_path());
+	
+	char cfgfile[1024];
+	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
+	
+	if (config.load(cfgfile))
+		dbg_print("config", "Loaded configuration from %s", cfgfile);
+	else
+	{
+		if (config.save(cfgfile))
+			dbg_print("config", "Saved initial configuration to %s", cfgfile);
+	}
+	
+	return true;
+}
+
 int main(int argc, char **argv)
 {
-	// FIXME: add config-var if logging is needed; use SysAccess functions
-#if defined(PLATFORM_WINDOWS)
-	FILE *ferr = freopen("err.log","w+",stderr);
-#endif	
+	dbg_setlog(stderr, 0);
 	
 	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d; Qt version %s)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
@@ -833,6 +836,20 @@ int main(int argc, char **argv)
 	signal(SIGPIPE, SIG_IGN);
 #endif
 	
+	// load config
+	config_load();
+	
+	// start logging
+	filetype *fplog = NULL;
+	if (config.getBool("log"))
+	{
+		char logfile[1024];
+		snprintf(logfile, sizeof(logfile), "%s/client.log", sys_config_path());
+		fplog = file_open(logfile, mode_write);
+		
+		dbg_setlog(stderr, fplog);
+	}
+	
 	network_init();
 	
 	PClient app(argc, argv);
@@ -840,9 +857,9 @@ int main(int argc, char **argv)
 	
 	network_shutdown();
 	
-#if defined(PLATFORM_WINDOWS)
-	fclose(ferr);
-#endif	
+	// close log-file
+	if (fplog)
+		file_close(fplog);
 	
 	return retval;
 }

@@ -115,7 +115,7 @@ bool Tokenizer::parse(string str, string sep)
 
 bool Tokenizer::getNext(string &str)
 {
-	if (index == tokens.size())
+	if (index == count())
 	{
 		str = "";
 		return false;
@@ -127,7 +127,7 @@ bool Tokenizer::getNext(string &str)
 
 string Tokenizer::getNext()
 {
-	if (index == tokens.size())
+	if (index == count())
 		return "";
 	
 	return tokens[index++];
@@ -135,18 +135,18 @@ string Tokenizer::getNext()
 
 string Tokenizer::getTillEnd(char sep)
 {
-	if (index == tokens.size())
+	if (index == count())
 		return "";
 	
 	string scompl;
-	for (unsigned int i=index; i < tokens.size(); i++)
+	for (unsigned int i=index; i < count(); i++)
 	{
 		scompl += tokens[i];
-		if (i < tokens.size() - 1)
+		if (i < count() - 1)
 			scompl += sep;
 	}
 	
-	index = tokens.size();
+	index = count();
 	
 	return scompl;
 }
@@ -161,9 +161,24 @@ float Tokenizer::getNextFloat()
 	return string2float(getNext());
 }
 
+bool Tokenizer::popFirst()
+{
+	if (!count())
+		return false;
+	
+	// move current position
+	if (index)
+		index--;
+	
+	// remove the first element
+	tokens.erase(tokens.begin());
+	
+	return true;
+}
+
 string Tokenizer::operator[](const unsigned int i) const
 {
-	if (i < tokens.size())
+	if (i < count())
 		return tokens[i];
 	else
 		return "";
