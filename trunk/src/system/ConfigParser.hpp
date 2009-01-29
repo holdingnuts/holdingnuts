@@ -42,7 +42,8 @@ public:
 	bool getBool(std::string name, bool &value);
 	bool getBool(std::string name);
 	
-	bool set(std::string name, std::string value);
+	bool set(std::string name, const std::string value);
+	bool set(std::string name, const char *value);
 	bool set(std::string name, int value);
 	bool set(std::string name, bool value);
 	
