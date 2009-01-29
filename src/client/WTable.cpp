@@ -155,9 +155,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_nTid(tid),
 	m_pImgTable(0)
 {
-	QDir::setCurrent("C:/Eigene Dateien/cpp/holdingnuts/trunk/data");
-	
-	// TODO: andere lösung muss her !!!!
 	QImage imgTable("gfx/table/default.png");
 	imgTable = imgTable.scaled(imgTable.width() / 2, imgTable.height() / 2);
 
@@ -634,7 +631,7 @@ void WTable::slotBetValue(int value)
 		amount = max_bet;
 	else
 	{
-		if (value <= 50)  // wieder range for small bets (half slider = 25% of stake)
+		if (value <= 50)  // wider range for small bets (half slider = 25% of stake)
 			amount = (int)((max_bet * 25 / 100) * value * 2 / 100);
 		else
 			amount = (int)(max_bet * value / 100);
