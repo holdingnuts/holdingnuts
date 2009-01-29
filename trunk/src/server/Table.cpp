@@ -182,7 +182,7 @@ void Table::collectBets()
 		
 		
 #if 0
-		dbg_print("collectBets", "smallest_bet: %s = %.2f", need_sidepot ? "true" : "false", smallest_bet);
+		log_msg("collectBets", "smallest_bet: %s = %.2f", need_sidepot ? "true" : "false", smallest_bet);
 #endif
 		// there are no bets, do nothing
 		if ((int)smallest_bet == 0)
@@ -254,19 +254,19 @@ void Table::collectBets()
 #if 0
 	for (unsigned int i=0; i < pots.size(); i++)
 	{
-		dbg_print("pot", "#%d: amount=%0.2f players=%d",
+		log_msg("pot", "#%d: amount=%0.2f players=%d",
 			i+1, pots[i].amount, (int)pots[i].players.size());
 		
 		for (unsigned int j=0; j < pots[i].players.size(); j++)
 		{
 			Player *p = pots[i].players[j];
-			dbg_print("pot", "    player %d", p->getClientId());
+			log_msg("pot", "    player %d", p->getClientId());
 		}
 	}
 	
 	for (unsigned int i=0; i < seats.size(); i++)
 	{
-		dbg_print("seat-bets", "seat-%d: %.2f", i, seats[i].bet);
+		log_msg("seat-bets", "seat-%d: %.2f", i, seats[i].bet);
 	}
 #endif
 }

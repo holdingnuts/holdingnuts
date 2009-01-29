@@ -62,7 +62,7 @@ int send_msg(const char *msg)
 	// FIXME: send remaining bytes if not all have been sent
 	
 	if (len != bytes)
-		dbg_print("connectsock", "(%d) warning: not all bytes written (%d != %d)", srv.sock, len, bytes);
+		log_msg("connectsock", "(%d) warning: not all bytes written (%d != %d)", srv.sock, len, bytes);
 	
 	return bytes;
 }
@@ -73,7 +73,7 @@ void server_cmd_pserver(Tokenizer& t)
 	unsigned int version = t.getNextInt();
 	srv.cid = t.getNextInt();
 		
-	dbg_print("server", "Server running version %d.%d.%d. Your client ID is %d",
+	log_msg("server", "Server running version %d.%d.%d. Your client ID is %d",
 			  VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
 							   srv.cid);
 
@@ -88,7 +88,7 @@ void server_cmd_pserver(Tokenizer& t)
 // server command ERR [<code>] [<text>]
 void server_cmd_error(Tokenizer& t)
 {
-	dbg_print("server", "last cmd error!");
+	log_msg("server", "last cmd error!");
 
 	const int err_code = t.getNextInt();
 	const QString qmsg(QString::fromStdString(t.getTillEnd()));
@@ -169,7 +169,7 @@ void server_cmd_msg(Tokenizer& t)
 int server_execute(const char *cmd)
 {
 #ifdef DEBUG	
-//	dbg_print("server_execute", "cmd= %s", cmd);
+//	log_msg("server_execute", "cmd= %s", cmd);
 #endif
 
 	char msg[1024];
@@ -230,13 +230,13 @@ int server_execute(const char *cmd)
 					send_msg(msg);
 				}
 				else if (sstate == "end")
-					dbg_print("game", "game ended");
+					log_msg("game", "game ended");
 			}
 			break;
 		case SnapTable:
 			{
 				#ifdef DEBUG
-				dbg_print("snap", "%s", cmd);
+				log_msg("snap", "%s", cmd);
 				#endif
 				
 				tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
@@ -309,7 +309,7 @@ int server_execute(const char *cmd)
 				
 				tmp = t.getNext();
 				do {
-					//dbg_print("seat", "%s", tmp.c_str());
+					//log_msg("seat", "%s", tmp.c_str());
 					
 					Tokenizer st;
 					st.parse(tmp, ":");
@@ -355,7 +355,7 @@ int server_execute(const char *cmd)
 				
 				// pots
 				do {
-					//dbg_print("pot", "%s", tmp.c_str());
+					//log_msg("pot", "%s", tmp.c_str());
 					Tokenizer pt;
 					pt.parse(tmp, ":");
 					
@@ -446,7 +446,7 @@ int server_execute(const char *cmd)
 // returns zero if no cmd was found or no bytes remaining after exec
 int server_parsebuffer()
 {
-	//dbg_print("clientsock", "(%d) parse (bufferlen=%d)", srv.sock, srv.buflen);
+	//log_msg("clientsock", "(%d) parse (bufferlen=%d)", srv.sock, srv.buflen);
 	
 	int found_nl = -1;
 	for (int i=0; i < srv.buflen; i++)
@@ -470,13 +470,13 @@ int server_parsebuffer()
 		memcpy(cmd, srv.msgbuf, found_nl);
 		cmd[found_nl] = '\0';
 		
-		//dbg_print("clientsock", "(%d) command: '%s' (len=%d)", srv.sock, cmd, found_nl);
+		//log_msg("clientsock", "(%d) command: '%s' (len=%d)", srv.sock, cmd, found_nl);
 		if (server_execute(cmd) != -1)
 		{
 			// move the rest to front
 			memmove(srv.msgbuf, srv.msgbuf + found_nl + 1, srv.buflen - (found_nl + 1));
 			srv.buflen -= found_nl + 1;
-			//dbg_print("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", srv.sock, srv.buflen);
+			//log_msg("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", srv.sock, srv.buflen);
 			
 			retval = srv.buflen;
 		}
@@ -499,11 +499,11 @@ int server_handle()
 	if ((bytes = socket_read(sock, buf, sizeof(buf))) <= 0)
 		return bytes;
 	
-//	dbg_print("connectsock", "(%d) DATA len=%d", sock, bytes);
+//	log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
 
 	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
 	{
-		dbg_print("connectsock", "(%d) error: buffer size exceeded", sock);
+		log_msg("connectsock", "(%d) error: buffer size exceeded", sock);
 		srv.buflen = 0;
 	}
 	else
@@ -526,7 +526,7 @@ int connectsock_create(const char *server, unsigned int port)
 
 	if ((connectfd = socket_create(PF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		dbg_print("connectsock", "socket() failed (%d: %s)", errno, strerror(errno));
+		log_msg("connectsock", "socket() failed (%d: %s)", errno, strerror(errno));
 		return -2;
 	}
 	
@@ -537,7 +537,7 @@ int connectsock_create(const char *server, unsigned int port)
 	
 	if(!host_entry)
 	{
-		dbg_print("connectsock", "gethostbyname() for %s failed (%d: %s)", server, errno, strerror(errno));
+		log_msg("connectsock", "gethostbyname() for %s failed (%d: %s)", server, errno, strerror(errno));
 		return -3;
 	}
 	
@@ -780,7 +780,7 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	
 	QTranslator myappTranslator;
 	myappTranslator.load("i18n/hn_" + locale);
-	dbg_print("main", "Using locale: %s", locale.toStdString().c_str());
+	log_msg("main", "Using locale: %s", locale.toStdString().c_str());
 	installTranslator(&myappTranslator);
 	
 	wMain = new WMain();
@@ -813,11 +813,11 @@ bool config_load()
 	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
 	
 	if (config.load(cfgfile))
-		dbg_print("config", "Loaded configuration from %s", cfgfile);
+		log_msg("config", "Loaded configuration from %s", cfgfile);
 	else
 	{
 		if (config.save(cfgfile))
-			dbg_print("config", "Saved initial configuration to %s", cfgfile);
+			log_msg("config", "Saved initial configuration to %s", cfgfile);
 	}
 	
 	return true;
@@ -825,9 +825,9 @@ bool config_load()
 
 int main(int argc, char **argv)
 {
-	dbg_setlog(stderr, 0);
+	log_set(stdout, 0);
 	
-	dbg_print("main", "HoldingNuts pclient (version %d.%d.%d; Qt version %s)",
+	log_msg("main", "HoldingNuts pclient (version %d.%d.%d; Qt version %s)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
 		qVersion());
 	
@@ -847,8 +847,14 @@ int main(int argc, char **argv)
 		snprintf(logfile, sizeof(logfile), "%s/client.log", sys_config_path());
 		fplog = file_open(logfile, mode_write);
 		
-		dbg_setlog(stderr, fplog);
+		log_set(stdout, fplog);
 	}
+	
+#if defined(DEBUG) && defined(PLATFORM_WINDOWS)
+	char dbgfile[1024];
+	snprintf(dbgfile, sizeof(dbgfile), "%s/client.debug", sys_config_path());
+	/*filetype *dbglog = */ file_reopen(dbgfile, mode_write, stderr);  // omit closing
+#endif
 	
 	network_init();
 	

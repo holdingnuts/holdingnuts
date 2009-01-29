@@ -80,7 +80,7 @@ int test_sysaccess()
 	
 	if (!fp)
 	{
-		dbg_print("io", "Error opening file for read/write");
+		log_msg("io", "Error opening file for read/write");
 		return -1;
 	}
 	
@@ -94,14 +94,14 @@ int test_sysaccess()
 	
 	long length = file_length(fp);
 	
-	dbg_print("io", "length: %ld", length);
+	log_msg("io", "length: %ld", length);
 	
 	file_writeline(fp, "a line");
 	
 	file_setpos(fp, 0, seek_set);
 	
 	while (file_readline(fp, buffer, sizeof(buffer)))
-		dbg_print("io", "line: _%s_", buffer);
+		log_msg("io", "line: _%s_", buffer);
 	
 	
 	file_close(fp);
@@ -118,7 +118,7 @@ int test_configparser()
 	string value = cp.get("test");
 	int count = cp.getInt("count");
 	
-	dbg_print("config", "test=_%s_  count=%d", value.c_str(), count);
+	log_msg("config", "test=_%s_  count=%d", value.c_str(), count);
 	
 	cp.save("settings.new.conf");
 	
@@ -134,7 +134,7 @@ int main(void)
 	test_configparser();
 	
 	const char *config_path = sys_config_path();
-	dbg_print("sys", "config-path: _%s_", config_path);
+	log_msg("sys", "config-path: _%s_", config_path);
 	
 	return 0;
 }

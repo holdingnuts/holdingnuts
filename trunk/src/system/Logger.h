@@ -34,8 +34,8 @@
 #endif
 
 
-void dbg_print(const char *level, const char *format, ...);
-void dbg_setlog(filetype *stream1, filetype *stream2);
+void log_msg(const char *level, const char *format, ...);
+void log_set(filetype *stream1, filetype *stream2);
 
 #if defined __cplusplus
     }

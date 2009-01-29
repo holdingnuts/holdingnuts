@@ -64,7 +64,7 @@ int listensock_create(unsigned int port, int backlog)
 
 	if ((listenfd = socket_create(PF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		dbg_print("listensock", "socket() failed (%d: %s)", errno, strerror(errno));
+		log_msg("listensock", "socket() failed (%d: %s)", errno, strerror(errno));
 		return -1;
 	}
 	
@@ -78,7 +78,7 @@ int listensock_create(unsigned int port, int backlog)
 	int reuse = 1;
 	if (socket_setopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0)
 	{
-		dbg_print("listensock", "setsockopt:SO_REUSEADDR failed");
+		log_msg("listensock", "setsockopt:SO_REUSEADDR failed");
 		return -4;
 	}
 	
@@ -86,18 +86,18 @@ int listensock_create(unsigned int port, int backlog)
 	
 	if (socket_bind(sock, (struct sockaddr*)&addr, sizeof(addr)) == -1)
 	{
-		dbg_print("listensock", "bind() failed: (%d: %s)", errno, strerror(errno));
+		log_msg("listensock", "bind() failed: (%d: %s)", errno, strerror(errno));
 		return -2;
 	}
 	
 	if (socket_listen(sock, backlog) == -1)
 	{
-		dbg_print("listensock", "listen() failed: (%d: %s)", errno, strerror(errno));
+		log_msg("listensock", "listen() failed: (%d: %s)", errno, strerror(errno));
 		return -3;
 	}
 	
 	
-	dbg_print("listensock", "listening (port: %d)", port);
+	log_msg("listensock", "listening (port: %d)", port);
 	
 	return sock;
 }
@@ -107,7 +107,7 @@ int mainloop()
 	int listenfd;
 	if ((listenfd = listensock_create(config.getInt("port"), SERVER_LISTEN_BACKLOG)) < 0)
 	{
-		dbg_print("listensock", "(%d) error creating socket", listenfd);
+		log_msg("listensock", "(%d) error creating socket", listenfd);
 		return 1;
 	}
 	
@@ -155,7 +155,7 @@ int mainloop()
 				memset(&saddr, 0, sizeof(sockaddr_in));
 				
 				socktype client_sock = socket_accept(sock, (struct sockaddr*) &saddr, &saddrlen);
-				dbg_print("listensock", "(%d) accepted connection (%s)",
+				log_msg("listensock", "(%d) accepted connection (%s)",
 					client_sock, inet_ntoa((struct in_addr) saddr.sin_addr));
 				
 				socket_setnonblocking(client_sock);
@@ -174,7 +174,7 @@ int mainloop()
 				{
 					if (!status)
 						errno = 0;
-					dbg_print("clientsock", "(%d) socket closed (%d: %s)", sender, errno, strerror(errno));
+					log_msg("clientsock", "(%d) socket closed (%d: %s)", sender, errno, strerror(errno));
 
 					client_remove(sender);
 					
@@ -206,11 +206,11 @@ bool config_load()
 	snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
 	
 	if (config.load(cfgfile))
-		dbg_print("config", "Loaded configuration from %s", cfgfile);
+		log_msg("config", "Loaded configuration from %s", cfgfile);
 	else
 	{
 		if (config.save(cfgfile))
-			dbg_print("config", "Saved initial configuration to %s", cfgfile);
+			log_msg("config", "Saved initial configuration to %s", cfgfile);
 	}
 	
 	return true;
@@ -218,9 +218,9 @@ bool config_load()
 
 int main(int argc, char **argv)
 {
-	dbg_setlog(stderr, 0);
+	log_set(stdout, 0);
 	
-	dbg_print("main", "HoldingNuts pserver (version %d.%d.%d)",
+	log_msg("main", "HoldingNuts pserver (version %d.%d.%d)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	
 #if not defined(PLATFORM_WINDOWS)
@@ -243,7 +243,7 @@ int main(int argc, char **argv)
 		snprintf(logfile, sizeof(logfile), "%s/server.log", sys_config_path());
 		fplog = file_open(logfile, mode_write);
 		
-		dbg_setlog(stderr, fplog);
+		log_set(stdout, fplog);
 	}
 	
 	network_init();

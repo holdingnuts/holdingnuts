@@ -24,18 +24,20 @@
 #ifndef _DEBUG_H
 #define _DEBUG_H
 
-#if 0
+#if DEBUG
 #include <stdio.h>
 
 #ifndef _MSC_VER
 
-# define dbg_print(level, s, args...) \
+# define dbg_msg(level, s, args...) \
 	do { fprintf(stderr, "[%s]: "s"\n", level, ##args) ; fflush(stderr); } while(0)
+
 #else /* _MSC_VER */
-# define dbg_print(level, s, ...) \
+
+# define dbg_msg(level, s, ...) \
 	do { fprintf(stderr, "[%s]: "s"\n", level, __VA_ARGS__) ; fflush(stderr); } while(0)
+
 #endif /* _MSC_VER */
-#endif
+#endif /* DEBUG */
 
 #endif /* _DEBUG_H */
-

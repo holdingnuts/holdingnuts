@@ -97,7 +97,7 @@ int send_msg(socktype sock, const char *message)
 	
 	// FIXME: send remaining bytes if not all have been sent
 	if (len != bytes)
-		dbg_print("clientsock", "(%d) warning: not all bytes written (%d != %d)", sock, len, bytes);
+		log_msg("clientsock", "(%d) warning: not all bytes written (%d != %d)", sock, len, bytes);
 	
 	return bytes;
 }
@@ -266,7 +266,7 @@ bool client_remove(socktype sock)
 				}
 			}
 			
-			dbg_print("clientsock", "(%d) connection closed", client->sock);
+			log_msg("clientsock", "(%d) connection closed", client->sock);
 			
 			clients.erase(client);
 			
@@ -289,7 +289,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 	if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
 		VERSION_GETMINOR(version) != VERSION_MINOR)
 	{
-		dbg_print("client", "client %d version (%d) doesn't match", client->sock, version);
+		log_msg("client", "client %d version (%d) doesn't match", client->sock, version);
 		send_err(client->sock);
 	}
 	else
@@ -496,7 +496,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 					client->name, client->id, gid,
 					g->getPlayerCount(), g->getPlayerMax());
 				
-				dbg_print("game", "%s", msg);
+				log_msg("game", "%s", msg);
 				client_chat(-1, -1, msg);
 			}
 			else
@@ -609,7 +609,7 @@ int client_execute(clientcon *client, const char *cmd)
 	if (!t.count())
 		return 0;
 	
-	//dbg_print("clientsock", "(%d) executing '%s'", s, cmd);
+	//log_msg("clientsock", "(%d) executing '%s'", s, cmd);
 	
 	// get first arg
 	string command = t.getNext();
@@ -655,7 +655,7 @@ int client_execute(clientcon *client, const char *cmd)
 // returns zero if no cmd was found or no bytes remaining after exec
 int client_parsebuffer(clientcon *client)
 {
-	//dbg_print("clientsock", "(%d) parse (bufferlen=%d)", client->sock, client->buflen);
+	//log_msg("clientsock", "(%d) parse (bufferlen=%d)", client->sock, client->buflen);
 	
 	int found_nl = -1;
 	for (int i=0; i < client->buflen; i++)
@@ -679,13 +679,13 @@ int client_parsebuffer(clientcon *client)
 		memcpy(cmd, client->msgbuf, found_nl);
 		cmd[found_nl] = '\0';
 		
-		//dbg_print("clientsock", "(%d) command: '%s' (len=%d)", client->sock, cmd, found_nl);
+		//log_msg("clientsock", "(%d) command: '%s' (len=%d)", client->sock, cmd, found_nl);
 		if (client_execute(client, cmd) != -1)  // client quitted ?
 		{
 			// move the rest to front
 			memmove(client->msgbuf, client->msgbuf + found_nl + 1, client->buflen - (found_nl + 1));
 			client->buflen -= found_nl + 1;
-			//dbg_print("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", client->sock, client->buflen);
+			//log_msg("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", client->sock, client->buflen);
 			
 			retval = client->buflen;
 		}
@@ -708,18 +708,18 @@ int client_handle(socktype sock)
 		return bytes;
 	
 	
-	//dbg_print("clientsock", "(%d) DATA len=%d", sock, bytes);
+	//log_msg("clientsock", "(%d) DATA len=%d", sock, bytes);
 	
 	clientcon *client = get_client_by_sock(sock);
 	if (!client)
 	{
-		dbg_print("clientsock", "(%d) error: no client associated", sock);
+		log_msg("clientsock", "(%d) error: no client associated", sock);
 		return -1;
 	}
 	
 	if (client->buflen + bytes > (int)sizeof(client->msgbuf))
 	{
-		dbg_print("clientsock", "(%d) error: buffer size exceeded", sock);
+		log_msg("clientsock", "(%d) error: buffer size exceeded", sock);
 		client->buflen = 0;
 	}
 	else

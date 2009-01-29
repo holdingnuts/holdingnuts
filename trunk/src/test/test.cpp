@@ -255,7 +255,7 @@ int test_winlist1()
 // ****** test: gamecontroller *********
 bool client_chat(int from, int to, const char *msg)
 {
-	dbg_print("msg", "%d: %s", to, msg);
+	log_msg("msg", "%d: %s", to, msg);
 	return true;
 }
 
@@ -266,7 +266,7 @@ bool client_chat(int from_gid, int from_tid, int to, const char *msg)
 
 bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg)
 {
-	dbg_print("snap", "%d: [%d] %s", to, sid, msg);
+	log_msg("snap", "%d: [%d] %s", to, sid, msg);
 	return true;
 }
 

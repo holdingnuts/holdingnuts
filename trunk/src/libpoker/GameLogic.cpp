@@ -97,7 +97,7 @@ bool GameLogic::getStrength(HoleCards *hole, CommunityCards *community, HandStre
 	}
 	
 #if 0
-	dbg_print("getStrength", "Strength: %s", HandStrength::getRankingName(*r));
+	log_msg("getStrength", "Strength: %s", HandStrength::getRankingName(*r));
 	print_cards("Rank", rank);
 	print_cards("Kicker", kicker);
 #endif
