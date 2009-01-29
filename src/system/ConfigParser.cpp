@@ -157,7 +157,13 @@ bool ConfigParser::getBool(string name)
 	return value;
 }
 
-bool ConfigParser::set(string name, string value)
+bool ConfigParser::set(string name, const string value)
+{
+	vars[name] = value;
+	return true;
+}
+
+bool ConfigParser::set(string name, const char *value)
 {
 	vars[name] = value;
 	return true;
