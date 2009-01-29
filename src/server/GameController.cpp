@@ -473,7 +473,7 @@ void GameController::stateNewRound(Table *t)
 	chat(t->table_id, msg);
 	
 #ifdef DEBUG
-	dbg_print("Table", "Hand #%d (gid=%d tid=%d)", hand_no, game_id, t->table_id);
+	log_msg("Table", "Hand #%d (gid=%d tid=%d)", hand_no, game_id, t->table_id);
 #endif
 	
 	// fill and shuffle card-deck
@@ -1108,7 +1108,7 @@ void GameController::stateShowdown(Table *t)
 				if (!t->isPlayerInvolvedInPot(pot, p))
 					continue;
 #if 0
-				dbg_print("winlist", "wl #%d: player #%d: pot #%d: involved-count=%d",
+				log_msg("winlist", "wl #%d: player #%d: pot #%d: involved-count=%d",
 					i+1, pi+1, poti+1, involved_count);
 #endif
 				// pot is divided by number of players involved in
@@ -1156,7 +1156,7 @@ void GameController::stateEndRound(Table *t)
 		// player has no stake left
 		if ((int)p->stake == 0)
 		{
-			dbg_print("stateEndRound", "removed player %d", p->client_id);
+			log_msg("stateEndRound", "removed player %d", p->client_id);
 			chat(p->client_id, t->table_id, "You broke!");
 			
 			t->seats[i].occupied = false;
@@ -1208,7 +1208,7 @@ void GameController::tick()
 		// start a game
 		if (getPlayerCount() == max_players)
 		{
-			dbg_print("game", "game %d has been started", game_id);
+			log_msg("game", "game %d has been started", game_id);
 			
 			started = true;
 			

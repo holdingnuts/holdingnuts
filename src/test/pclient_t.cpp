@@ -260,7 +260,7 @@ int send_msg(const char *msg)
 	// FIXME: send remaining bytes if not all have been sent
 	
 	if (len != bytes)
-		dbg_print("connectsock", "(%d) warning: not all bytes written (%d != %d)", srv.sock, len, bytes);
+		log_msg("connectsock", "(%d) warning: not all bytes written (%d != %d)", srv.sock, len, bytes);
 	
 	return bytes;
 }
@@ -275,7 +275,7 @@ int server_execute(const char *cmd)
 	if (!t.count())
 		return 0;
 	
-	//dbg_print("server", "executing '%s'", cmd);
+	//log_msg("server", "executing '%s'", cmd);
 	
 	// get first arg
 	string command;
@@ -287,7 +287,7 @@ int server_execute(const char *cmd)
 		unsigned int version = t.getNextInt();
 		my_cid = t.getNextInt();
 		
-		dbg_print("server", "Server running version %d.%d.%d. Your client ID is %d",
+		log_msg("server", "Server running version %d.%d.%d. Your client ID is %d",
 			VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
 			my_cid);
 		
@@ -304,11 +304,11 @@ int server_execute(const char *cmd)
 	}
 	else if (command == "ERR")
 	{
-		dbg_print("server", "last cmd error!");
+		log_msg("server", "last cmd error!");
 	}
 	else if (command == "GAMELIST")
 	{
-		dbg_print("server", "list of games: %s", cmd);
+		log_msg("server", "list of games: %s", cmd);
 	}
 	else if (command == "PLAYERLIST")
 	{
@@ -353,7 +353,7 @@ int server_execute(const char *cmd)
 		
 		string chatmsg = t.getTillEnd();
 		
-		dbg_print("chat", "[%s]: %s", sfrom.c_str(), chatmsg.c_str());
+		log_msg("chat", "[%s]: %s", sfrom.c_str(), chatmsg.c_str());
 	}
 	else if (command == "SNAP")
 	{
@@ -373,20 +373,20 @@ int server_execute(const char *cmd)
 				
 				if (sstate == "start")
 				{
-					dbg_print("game", "game has been started");
+					log_msg("game", "game has been started");
 					char msg[1024];
 					snprintf(msg, sizeof(msg), "REQUEST playerlist %d",
 						gid);
 					send_msg(msg);
 				}
 				else if (sstate == "end")
-					dbg_print("game", "game ended");
+					log_msg("game", "game ended");
 			}
 			break;
 		
 		case SnapTable:
 			{
-				//dbg_print("snap", "%s", cmd);
+				//log_msg("snap", "%s", cmd);
 				
 				Tokenizer st;
 				
@@ -413,7 +413,7 @@ int server_execute(const char *cmd)
 				
 				tmp = t.getNext();
 				do {
-					//dbg_print("seat", "%s", tmp.c_str());
+					//log_msg("seat", "%s", tmp.c_str());
 					
 					Tokenizer st;
 					st.parse(tmp, ":");
@@ -441,7 +441,7 @@ int server_execute(const char *cmd)
 				
 				// pots
 				do {
-					//dbg_print("pot", "%s", tmp.c_str());
+					//log_msg("pot", "%s", tmp.c_str());
 					Tokenizer pt;
 					pt.parse(tmp, ":");
 					
@@ -471,12 +471,12 @@ int server_execute(const char *cmd)
 			break;
 		
 		default:
-			dbg_print("server", "unknown snaptype: %s", cmd);
+			log_msg("server", "unknown snaptype: %s", cmd);
 		}
 	}
 	else
 	{
-		dbg_print("server", "unknown cmd: %s", cmd);
+		log_msg("server", "unknown cmd: %s", cmd);
 	}
 	
 	
@@ -486,7 +486,7 @@ int server_execute(const char *cmd)
 // returns zero if no cmd was found or no bytes remaining after exec
 int server_parsebuffer()
 {
-	//dbg_print("clientsock", "(%d) parse (bufferlen=%d)", srv.sock, srv.buflen);
+	//log_msg("clientsock", "(%d) parse (bufferlen=%d)", srv.sock, srv.buflen);
 	
 	int found_nl = -1;
 	for (int i=0; i < srv.buflen; i++)
@@ -510,13 +510,13 @@ int server_parsebuffer()
 		memcpy(cmd, srv.msgbuf, found_nl);
 		cmd[found_nl] = '\0';
 		
-		//dbg_print("clientsock", "(%d) command: '%s' (len=%d)", srv.sock, cmd, found_nl);
+		//log_msg("clientsock", "(%d) command: '%s' (len=%d)", srv.sock, cmd, found_nl);
 		if (server_execute(cmd) != -1)
 		{
 			// move the rest to front
 			memmove(srv.msgbuf, srv.msgbuf + found_nl + 1, srv.buflen - (found_nl + 1));
 			srv.buflen -= found_nl + 1;
-			//dbg_print("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", srv.sock, srv.buflen);
+			//log_msg("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", srv.sock, srv.buflen);
 			
 			retval = srv.buflen;
 		}
@@ -540,11 +540,11 @@ int server_handle()
 		return bytes;
 	
 	
-	//dbg_print("connectsock", "(%d) DATA len=%d", sock, bytes);
+	//log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
 	
 	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
 	{
-		dbg_print("clientsock", "(%d) error: buffer size exceeded", sock);
+		log_msg("clientsock", "(%d) error: buffer size exceeded", sock);
 		srv.buflen = 0;
 	}
 	else
@@ -567,7 +567,7 @@ int connectsock_create(const char *server, unsigned int port)
 
 	if ((connectfd = socket_create(PF_INET, SOCK_STREAM, 0)) == -1)
 	{
-		dbg_print("connectsock", "socket() failed (%d: %s)", errno, strerror(errno));
+		log_msg("connectsock", "socket() failed (%d: %s)", errno, strerror(errno));
 		return -1;
 	}
 	
@@ -578,7 +578,7 @@ int connectsock_create(const char *server, unsigned int port)
 	
 	if(!host_entry)
 	{
-		dbg_print("connectsock", "gethostbyname() failed (%d: %s)", errno, strerror(errno));
+		log_msg("connectsock", "gethostbyname() failed (%d: %s)", errno, strerror(errno));
 		return -2;
 	}
 	
@@ -606,7 +606,7 @@ int client_execute(const char *cmd)
 	if (!t.count())
 		return 0;
 	
-	//dbg_print("input", "executing '%s'", cmd);
+	//log_msg("input", "executing '%s'", cmd);
 	
 	// get first arg
 	string command;
@@ -651,7 +651,7 @@ int client_execute(const char *cmd)
 		send_msg(msg);
 	}
 	else
-		dbg_print("input", "unknown cmd: %s", cmd);
+		log_msg("input", "unknown cmd: %s", cmd);
 	
 	return 0;
 }
@@ -679,7 +679,7 @@ int input_handle()
 		if (inr.EventType == KEY_EVENT && inr.Event.KeyEvent.bKeyDown)
 		{
 			buf = inr.Event.KeyEvent.uChar.AsciiChar;
-			//dbg_print("windows", "got input: %c 0x%x", buf, buf);
+			//log_msg("windows", "got input: %c 0x%x", buf, buf);
 			
 			if (buf == '\r')
 			{
@@ -727,7 +727,7 @@ int input_handle()
 	fgets(input, max_input, stdin);
 	input[strlen(input)-1] = '\0';
 	
-	//dbg_print("input", "len=%d text=%s", (int)strlen(input), input);
+	//log_msg("input", "len=%d text=%s", (int)strlen(input), input);
 	client_execute(input);
 	
 	return 0;
@@ -771,13 +771,13 @@ int mainloop()
 		{
 			if (FD_ISSET(sock, &fds_err))
 			{
-				dbg_print("connectsock", "error connecting socket");
+				log_msg("connectsock", "error connecting socket");
 				return -1;
 			}
 			
 			if (FD_ISSET(sock, &fds_write))
 			{
-				dbg_print("connectsock", "connected");
+				log_msg("connectsock", "connected");
 			}
 		}
 	}
@@ -823,7 +823,7 @@ int mainloop()
 					if (!status)
 						errno = 0;
 					
-					dbg_print("connectsock", "(%d) closed connection (%d: %s)", sock, errno, strerror(errno));
+					log_msg("connectsock", "(%d) closed connection (%d: %s)", sock, errno, strerror(errno));
 					socket_close(sock);
 					
 					return -1;
@@ -842,7 +842,7 @@ int mainloop()
 
 int main(int argc, char **argv)
 {
-	dbg_print("main", "HoldingNuts pclient_t version %d.%d.%d",
+	log_msg("main", "HoldingNuts pclient_t version %d.%d.%d",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	
 #if not defined(PLATFORM_WINDOWS)

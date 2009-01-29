@@ -35,7 +35,7 @@
 static filetype *logger[2] = { 0, 0 };
 
 
-void dbg_print(const char *level, const char *format, ...)
+void log_msg(const char *level, const char *format, ...)
 {
 	va_list args;
 	char msg[1024];
@@ -59,7 +59,7 @@ void dbg_print(const char *level, const char *format, ...)
 	}
 }
 
-void dbg_setlog(filetype *stream1, filetype *stream2)
+void log_set(filetype *stream1, filetype *stream2)
 {
 	logger[0] = stream1;
 	logger[1] = stream2;
