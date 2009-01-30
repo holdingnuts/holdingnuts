@@ -27,28 +27,32 @@
 #include <string>
 #include <map>
 
+
+typedef std::map<std::string,std::string>	cfgvars_type;
+
+
 class ConfigParser
 {
 public:
 	bool load(const char *filename);
 	bool save(const char *filename);
 	
-	bool get(std::string name, std::string &value);
-	std::string get(std::string name);
+	bool get(const std::string &name, std::string &value);
+	std::string get(const std::string &name);
 	
-	bool getInt(std::string name, int &value);
-	int getInt(std::string name);
+	bool getInt(const std::string &name, int &value);
+	int getInt(const std::string &name);
 	
-	bool getBool(std::string name, bool &value);
-	bool getBool(std::string name);
+	bool getBool(const std::string &name, bool &value);
+	bool getBool(const std::string &name);
 	
-	bool set(std::string name, const std::string value);
-	bool set(std::string name, const char *value);
-	bool set(std::string name, int value);
-	bool set(std::string name, bool value);
+	bool set(const std::string &name, const std::string &value);
+	bool set(const std::string &name, const char *value);
+	bool set(const std::string &name, int value);
+	bool set(const std::string &name, bool value);
 	
 private:
-	std::map<std::string,std::string> vars;
+	cfgvars_type vars;
 };
 
 #endif /* _CONFIGPARSER_H */
