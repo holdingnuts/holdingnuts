@@ -30,17 +30,6 @@
 
 #include "Player.hpp"
 
-class WPicture : public QLabel
-{
-Q_OBJECT
-
-public:
-	WPicture(const char *filename, QWidget *parent = 0);
-	void loadImage(const char *filename);
-private:
-	//int heightForWidth ( int w );
-};
-
 class Seat : public QObject, public QGraphicsItem
 {
 Q_OBJECT
@@ -57,18 +46,23 @@ public:
 	void setValid(bool valid);
 
 	virtual QRectF boundingRect() const;
+	virtual QRectF boundingRectSeat() const;
+	
 	virtual void paint(
 		QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
+
+private:
+	void calcSCardPos(qreal& x, qreal& y) const;
 	
 public:
 	// cards size
-	static const int sx_card;
-	static const int sy_card;
+	static const qreal sx_card;
+	static const qreal sy_card;
 	// mini cards size
-	static const int sx_mini_card;
-	static const int sy_mini_card;
+	static const qreal sx_mini_card;
+	static const qreal sy_mini_card;
 	
 private:
 	//! \brief Seat ID (clockwise)

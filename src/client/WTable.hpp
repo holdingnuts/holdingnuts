@@ -75,6 +75,7 @@ class QSlider;
 
 class ChatBox;
 class DealerButton;
+class EditableSlider;
 
 class WTable : public QGraphicsView
 {
@@ -95,8 +96,11 @@ protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent * event);
 	
-	QPointF calcSeatPos(unsigned int nSeatID);
-	QPointF calcDealerBtnPos(unsigned int nSeatID);
+	QPointF calcSeatPos(unsigned int nSeatID) const;
+	QPointF calcDealerBtnPos(
+		unsigned int nSeatID,
+		int distance = 100) const;
+	QPointF calcCCardsPos(unsigned int nCard) const;
 
 private slots:
 	void actionFold();
@@ -104,42 +108,31 @@ private slots:
 	void actionBetRaise();
 	void actionShow();
 	void actionMuck();
-	void slotBetValue(int value);
+
 	void slotShow();
-	void slotTest();
-
-private:
-	QStackedLayout *stlayActions;
-	QLineEdit *editAmount;
-	QSlider *sliderAmount;
-	
-	QLabel *wTable;
-	
-	Seat *wseats[10];
-	
-	QLabel *lblPots;
-	WPicture *cc[5];
-	QWidget *wCC;
-	
-
 	
 private:
 	//! \brief Game ID
 	const int	m_nGid;
 	//! \brief Table ID
 	const int	m_nTid;
+
 	//! \brief Tableimage
 	QGraphicsPixmapItem		*m_pImgTable;
-	//! \brief Tablechat
-	ChatBox			*m_pChat;
-	//! \brief Layout for Table Actions
-	QLabel			*m_LayoutActions;
 	//! \brief Dealer Button
-	DealerButton	*m_pDealerButton;
+	DealerButton			*m_pDealerButton;
 	//! \brief Seats
+	Seat					*wseats[10];
 //	std::vector<Seat*>	m_Seats;		// TODO: über scene ansprechen
 	//! \brief
 	std::vector<QGraphicsPixmapItem*>	m_CommunityCards;
+
+	// ui
+	ChatBox			*m_pChat;
+	QLabel			*m_LayoutActions;
+	QStackedLayout	*stlayActions;
+	QLabel			*lblPots;
+	EditableSlider	*m_pSliderAmount;
 };
 
 #endif /* _WTABLE_H */

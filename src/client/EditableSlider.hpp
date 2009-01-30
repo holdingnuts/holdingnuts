@@ -21,44 +21,36 @@
  */
 
 
-#include "DealerButton.hpp"
+#ifndef _HOLDING_NUTS_EDITABLE_SLIDER_H
+#define _HOLDING_NUTS_EDITABLE_SLIDER_H
 
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
+#include <QWidget>
+#include <QSize>
 
-DealerButton::DealerButton()
-:	m_Image("gfx/table/dealer_button.png")
-{ }
+class QSlider;
+class QLineEdit;
 
-QRectF DealerButton::boundingRect() const
+class EditableSlider : public QWidget
 {
-	QRectF rc(0, 0, m_Image.width(), m_Image.height());
-	QTransform m = this->transform();
-	
-	return m.mapRect(rc);
-}
+	Q_OBJECT
 
-void DealerButton::paint(
-	QPainter* painter,
-	const QStyleOptionGraphicsItem* option,
-	QWidget* widget)
-{
-	this->setZValue(10);
+public:
+	EditableSlider(QWidget *parent = 0);
 
-	painter->setRenderHint(QPainter::SmoothPixmapTransform);
+	virtual ~EditableSlider();
+		
+	void setMinimum(int value);
+	void setMaximum(int value);
 
-	painter->drawImage(
-		QRectF(
-			0,
-			0,
-			m_Image.width(),
-			m_Image.height()),
-		m_Image);
-}
+	int value() const;
 
-// void DealerButton::startAnimationTo() { }
+public slots:
+	void setValue(int value);
 
-void DealerButton::timerEvent(QTimerEvent* event)
-{
+protected:
+	QSlider		*m_pSlider;
+	QLineEdit	*m_pEdit;
+};
 
-}
+#endif /* _HOLDING_NUTS_EDITABLE_SLIDER_H */
+
