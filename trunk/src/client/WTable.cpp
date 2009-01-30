@@ -223,7 +223,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	// don't use bsptree
 	pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
-	QImage imgTable("gfx/table/default.png");
+	QImage imgTable("gfx/table/table.png");
 	
 	m_pImgTable = pScene->addPixmap(QPixmap::fromImage(imgTable));
 	m_pImgTable->scale(
