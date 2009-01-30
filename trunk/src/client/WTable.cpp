@@ -42,6 +42,7 @@
 #include "Config.h"
 #include "Debug.h"
 #include "Logger.h"
+#include "ConfigParser.hpp"
 #include "GameLogic.hpp"
 
 #include "pclient.hpp"
@@ -53,6 +54,8 @@
 #include "EditableSlider.hpp"
 
 using namespace std;
+
+extern ConfigParser config;
 
 #ifdef DEBUG
 #	include <QDebug>
@@ -733,4 +736,7 @@ void WTable::resizeEvent(QResizeEvent *event)
 	lblHandStrength->move(
 		(size.width() - lblHandStrength->width()) / 2,
 		220);
+	
+	if (!config.getBool("ui_show_handstrength"))
+		lblHandStrength->setVisible(false);
 }
