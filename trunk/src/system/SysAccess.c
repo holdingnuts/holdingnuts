@@ -25,6 +25,7 @@
 #include <errno.h>
 
 #if defined(PLATFORM_WINDOWS)
+# include <dirent.h>
 #else
 # include <sys/stat.h>
 # include <sys/types.h>
