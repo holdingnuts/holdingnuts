@@ -20,6 +20,7 @@
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
+
 #include <sstream>
 
 #include "SysAccess.h"
@@ -82,7 +83,7 @@ bool ConfigParser::save(const char *filename)
 	char buffer[1024];
 	
 	// write all config-vars
-	for (map<string,string>::iterator e = vars.begin(); e != vars.end(); e++)
+	for (cfgvars_type::iterator e = vars.begin(); e != vars.end(); e++)
 	{
 		snprintf(buffer, sizeof(buffer), "%s  %s", e->first.c_str(), e->second.c_str());
 		file_writeline(fp, buffer);
@@ -93,9 +94,9 @@ bool ConfigParser::save(const char *filename)
 	return true;
 }
 
-bool ConfigParser::get(string name, string &value)
+bool ConfigParser::get(const string &name, string &value)
 {
-	map<string,string>::const_iterator it = vars.find(name);
+	cfgvars_type::const_iterator it = vars.find(name);
 	
 	if (it == vars.end())
 		return false;
@@ -105,7 +106,7 @@ bool ConfigParser::get(string name, string &value)
 	return true;
 }
 
-string ConfigParser::get(string name)
+string ConfigParser::get(const string &name)
 {
 	string value = "";
 	
@@ -114,7 +115,7 @@ string ConfigParser::get(string name)
 	return value;
 }
 
-bool ConfigParser::getInt(string name, int &value)
+bool ConfigParser::getInt(const string &name, int &value)
 {
 	string svalue;
 	if (!get(name, svalue))
@@ -125,7 +126,7 @@ bool ConfigParser::getInt(string name, int &value)
 	return true;
 }
 
-int ConfigParser::getInt(string name)
+int ConfigParser::getInt(const string &name)
 {
 	int value = 0;
 	
@@ -134,7 +135,7 @@ int ConfigParser::getInt(string name)
 	return value;
 }
 
-bool ConfigParser::getBool(string name, bool &value)
+bool ConfigParser::getBool(const string &name, bool &value)
 {
 	string svalue;
 	if (!get(name, svalue))
@@ -148,7 +149,7 @@ bool ConfigParser::getBool(string name, bool &value)
 	return true;
 }
 
-bool ConfigParser::getBool(string name)
+bool ConfigParser::getBool(const string &name)
 {
 	bool value = false;
 	
@@ -157,19 +158,19 @@ bool ConfigParser::getBool(string name)
 	return value;
 }
 
-bool ConfigParser::set(string name, const string value)
+bool ConfigParser::set(const string &name, const string &value)
 {
 	vars[name] = value;
 	return true;
 }
 
-bool ConfigParser::set(string name, const char *value)
+bool ConfigParser::set(const string &name, const char *value)
 {
 	vars[name] = value;
 	return true;
 }
 
-bool ConfigParser::set(string name, int value)
+bool ConfigParser::set(const string &name, int value)
 {
 	ostringstream oss;
 	oss << value;
@@ -177,7 +178,7 @@ bool ConfigParser::set(string name, int value)
 	return true;
 }
 
-bool ConfigParser::set(string name, bool value)
+bool ConfigParser::set(const string &name, bool value)
 {
 	vars[name] = (value) ? "true" : "false";
 	return true;
