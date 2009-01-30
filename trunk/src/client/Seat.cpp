@@ -28,37 +28,12 @@
 #include "SeatImages.hpp"
 #include "Debug.h"
 
-WPicture::WPicture(const char *filename, QWidget *parent) : QLabel(parent)
-{
-	//setBackgroundRole(QPalette::Base);
-	//setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-	//sizePolicy().hasHeightForWidth();
-//	setScaledContents(true);
-	
-	loadImage(filename);
-}
-
-void WPicture::loadImage(const char *filename)
-{
-	QImage image(filename);
-	setPixmap(QPixmap::fromImage(image));
-}
-
-/*
-int WPicture::heightForWidth ( int w )
-{
-	return -1;
-}
-*/
-
-////////////////////////
-
 // cards size
-const int Seat::sx_card = 110;
-const int Seat::sy_card = 143;
+const qreal Seat::sx_card = 107;
+const qreal Seat::sy_card = 140;
 // mini cards size
-const int Seat::sx_mini_card = 45;
-const int Seat::sy_mini_card = 60;
+const qreal Seat::sx_mini_card = 45;
+const qreal Seat::sy_mini_card = 60;
 
 Seat::Seat(unsigned int id, QWidget *parent)
 :	m_nID(id),
@@ -142,18 +117,52 @@ void Seat::setCards(const char *c1, const char *c2)
 
 QRectF Seat::boundingRect() const
 {
-	qreal cards;
-	
+	qreal x = 0;
+	qreal y = 0;
+	qreal width = SeatImages::Instance().imgBack.width() + m_pCurrentActionImg->width();
+	qreal height = SeatImages::Instance().imgBack.height();
+
 	if (m_bMySeat)
-		cards = -sx_card * 1.5;
-	else
-		cards = -sx_mini_card * 1.5;
+		height += sy_card;
+
+	//		8	9	0
+	//	 7			   1
+	// 						
+	//   6			   2
+	//		5	4	3
+	switch (m_nID)
+	{
+		case 1: case 2:
+				x = -sx_mini_card;
+			break;
+		case 3: case 4: case 5:
+				y = -sy_mini_card;
+			break;
+		case 8: case 9: case 0:
+				height += sy_mini_card;
+			break;
+		case 6: case 7:
+				width += sx_mini_card;
+			break;
+	}
+
+	QRectF rc(x, y, width, height);
+	QTransform m = this->transform();
 	
-	return QRectF(
-		cards,
+	return m.mapRect(rc);
+}
+
+QRectF Seat::boundingRectSeat() const
+{
+	QRectF rc(
+		0,
 		0,
 		SeatImages::Instance().imgBack.width() + m_pCurrentActionImg->width(),
 		SeatImages::Instance().imgBack.height());
+
+	QTransform m = this->transform();
+	
+	return m.mapRect(rc);
 }
 
 void Seat::paint(
@@ -166,20 +175,22 @@ void Seat::paint(
 	
 	this->setZValue(8);
 		
-	const int seat_width = SeatImages::Instance().imgBack.width();
-	const int seat_height = SeatImages::Instance().imgBack.height();
+	const qreal seat_width = SeatImages::Instance().imgBack.width();
+	const qreal seat_height = SeatImages::Instance().imgBack.height();
+
+	painter->setRenderHint(QPainter::SmoothPixmapTransform);
 
 	if (m_bCurrent)
 	{
 		painter->drawImage(
-			QRect(
+			QRectF(
 				0,
 				0,
-				seat_width,
+				seat_width + m_pCurrentActionImg->width(),
 				seat_height),
 			SeatImages::Instance().imgBackCurrent);
 //		painter->drawImage(
-//			QRect(
+//			QRectF(
 //				wpos.x(),
 //				wpos.y() + SeatImages::Instance().imgBackCurrent.height(),
 //				SeatImages::Instance().imgTimeout.width(),
@@ -189,10 +200,10 @@ void Seat::paint(
 	else
 	{
 		painter->drawImage(
-			QRect(
+			QRectF(
 				0,
 				0,
-				seat_width,
+				seat_width + m_pCurrentActionImg->width(),
 				seat_height),
 			SeatImages::Instance().imgBack);
 	}
@@ -201,7 +212,7 @@ void Seat::paint(
 	if (m_pCurrentActionImg)
 	{
 		painter->drawImage(
-			QRect(
+			QRectF(
 				seat_width,
 				0,
 				m_pCurrentActionImg->width(),
@@ -209,18 +220,10 @@ void Seat::paint(
 			*m_pCurrentActionImg);
 	}
 
-	// TODO: differ right and left seats
-	
-	//		8	9	0
-	//	 7			   1
-	// 						
-	//   6			   2
-	//		5	4	3
-	
 	// TODO: font
 	painter->setFont(QFont("Arial", 18,  QFont::Bold));
 	painter->drawText(
-		QRect(
+		QRectF(
 			10,
 			0,
 			seat_width - 10,
@@ -230,9 +233,9 @@ void Seat::paint(
 
 	if (!m_bValid)
 		return;
-		
+
 	painter->drawText(
-		QRect(
+		QRectF(
 			-30,
 			seat_height,
 			50,
@@ -244,14 +247,14 @@ void Seat::paint(
 	if (m_bMySeat)
 	{
 		painter->drawImage(
-			QRect(
-				seat_width + m_pCurrentActionImg->width() - static_cast<int>(sx_card * 1.5),
+			QRectF(
+				seat_width + m_pCurrentActionImg->width() - (sx_card * 1.5),
 				-sy_card,
 				sx_card,
 				sy_card),
 			m_FirstCard);
 		painter->drawImage(
-			QRect(
+			QRectF(
 				seat_width + m_pCurrentActionImg->width() - sx_card,
 				-sy_card,
 				sx_card,
@@ -260,19 +263,53 @@ void Seat::paint(
 	}
 	else // draw small cards
 	{
+		qreal sx_pos = 0;
+		qreal sy_pos = 0;
+		
+		calcSCardPos(sx_pos, sy_pos);
+		
 		painter->drawImage(
-			QRect(
-				static_cast<int>(-sx_mini_card * 1.5),
-				0,
+			QRectF(
+				sx_pos * 1.5,
+				sy_pos,
 				sx_mini_card,
 				sy_mini_card),
 			imgCardBackside);
 		painter->drawImage(
-			QRect(
-				-sx_mini_card,
-				0,
+			QRectF(
+				sx_pos,
+				sy_pos,
 				sx_mini_card,
 				sy_mini_card),
 			imgCardBackside);
+	}
+}
+
+void Seat::calcSCardPos(qreal& x, qreal& y) const
+{
+	//		8	9	0
+	//	 7			   1
+	// 						
+	//   6			   2
+	//		5	4	3
+
+	switch (m_nID)
+	{
+		case 1: case 2:
+				x = -sx_mini_card;
+				y = 0;
+			break;
+		case 3: case 4: case 5:
+				x = 0;
+				y = -(SeatImages::Instance().imgBack.height() + 5);
+			break;
+		case 8: case 9: case 0:
+				x = 0;
+				y = SeatImages::Instance().imgBack.height() + 5;
+			break;
+		case 6: case 7:
+				x = SeatImages::Instance().imgBack.width();
+				y = 0;
+			break;
 	}
 }
