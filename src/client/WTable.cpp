@@ -41,6 +41,8 @@
 
 #include "Config.h"
 #include "Debug.h"
+#include "Logger.h"
+#include "GameLogic.hpp"
 
 #include "pclient.hpp"
 
@@ -327,6 +329,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblPots = new QLabel("Pot 0: 0.00", this);
 	lblPots->setFixedWidth(static_cast<int>(pScene->width()));
 	lblPots->setAlignment(Qt::AlignCenter);
+	
+	lblHandStrength = new QLabel("HandStrength", this);
+	lblHandStrength->setFixedWidth(static_cast<int>(pScene->width()));
+	lblHandStrength->setAlignment(Qt::AlignCenter);
 }
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
@@ -552,20 +558,19 @@ void WTable::updateView()
 	
 	if (snap->my_seat != -1)
 	{
+		seatinfo *s = &(snap->seats[snap->my_seat]);
+		
 		// minimum bet
-		if (snap->minimum_bet > snap->seats[snap->my_seat].stake)
-			m_pSliderAmount->setMinimum(
-				static_cast<int>(snap->seats[snap->my_seat].stake));
+		if (snap->minimum_bet > s->stake)
+			m_pSliderAmount->setMinimum((int) s->stake);
 		else
-			m_pSliderAmount->setMinimum(
-				static_cast<int>(snap->minimum_bet));
-
+			m_pSliderAmount->setMinimum((int) snap->minimum_bet);
+		
 		// maximum bet is stake size
-		m_pSliderAmount->setMaximum(
-			static_cast<int>(snap->seats[snap->my_seat].stake));
+		m_pSliderAmount->setMaximum((int) s->stake);
 		
 		// show correct actions
-		if (!snap->seats[snap->my_seat].in_round ||
+		if (!s->in_round ||
 			snap->state == Table::AllFolded ||
 			snap->state == Table::Showdown ||
 			snap->state == Table::EndRound)
@@ -589,6 +594,27 @@ void WTable::updateView()
 					stlayActions->setCurrentIndex(1);
 			}
 		}
+		
+		
+		// determine hand-strength
+		if (s->in_round)
+		{
+			vector<Card> allcards;
+			tinfo->holecards.copyCards(&allcards);
+			
+			if (allcards.size())
+			{
+				HandStrength strength;
+				GameLogic::getStrength(&(tinfo->holecards), &(snap->communitycards), &strength);
+				const char *sstrength = HandStrength::getRankingName(strength.getRanking());
+				
+				lblHandStrength->setText(sstrength);
+			}
+			else
+				lblHandStrength->clear();
+		}
+		else
+			lblHandStrength->clear();
 	}
 }
 
@@ -703,4 +729,8 @@ void WTable::resizeEvent(QResizeEvent *event)
 	lblPots->move(
 		(size.width() - lblPots->width()) / 2,
 		200);
+	
+	lblHandStrength->move(
+		(size.width() - lblHandStrength->width()) / 2,
+		220);
 }

@@ -130,9 +130,10 @@ private:
 	// ui
 	ChatBox			*m_pChat;
 	QLabel			*m_LayoutActions;
-	QStackedLayout	*stlayActions;
+	QStackedLayout		*stlayActions;
 	QLabel			*lblPots;
-	EditableSlider	*m_pSliderAmount;
+	QLabel			*lblHandStrength;
+	EditableSlider		*m_pSliderAmount;
 };
 
 #endif /* _WTABLE_H */
