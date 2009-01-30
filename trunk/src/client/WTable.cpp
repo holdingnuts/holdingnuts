@@ -219,7 +219,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	// scene
 	QGraphicsScene* pScene = new QGraphicsScene(0, 0, 900, 700, this);
 
-	pScene->setBackgroundBrush(Qt::black);
+//	pScene->setBackgroundBrush(Qt::black);
 	// don't use bsptree
 	pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -228,7 +228,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pImgTable = pScene->addPixmap(QPixmap::fromImage(imgTable));
 	m_pImgTable->scale(
 		pScene->width() / imgTable.width(),
-		(pScene->height() - 150 ) / imgTable.height()); // 150 == height chatbox
+		(pScene->height() - 150) / imgTable.height()); // 150 == height chatbox
 
 	m_pDealerButton = new DealerButton;
 	m_pDealerButton->scale(0.5, 0.5);
@@ -241,7 +241,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setScene(pScene);
 //	this->setRenderHint(QPainter::HighQualityAntialiasing);
 	this->setRenderHint(QPainter::SmoothPixmapTransform);
-//	this->setCacheMode(QGraphicsView::CacheBackground);
+	this->setCacheMode(QGraphicsView::CacheBackground);
 	this->setMinimumSize(
 		static_cast<int>(pScene->width()),
 		static_cast<int>(pScene->height()));
@@ -304,7 +304,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_LayoutActions = new QLabel(this);
 	m_LayoutActions->setPixmap(QPixmap("gfx/table/actions.png"));
 	m_LayoutActions->setScaledContents(true);
-	m_LayoutActions->setFixedSize(400, 60);
+	m_LayoutActions->setFixedSize(400, 70);
 	m_LayoutActions->setLayout(stlayActions);
 	
 	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 120, this);
@@ -341,7 +341,7 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 
 	// TODO: note size from seat images
 	// TODO: calc seat position
-	static const qreal height_start = 73;
+	static const qreal height_start = 72;
 
 	switch (nSeatID)
 	{
@@ -352,11 +352,11 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 		case 2:
 			return QPointF(750, 340);
 		case 3:
-			return QPointF(600, 450);
+			return QPointF(600, 449);
 		case 4:
-			return QPointF(400, 450);
+			return QPointF(400, 449);
 		case 5:
-			return QPointF(200, 450);
+			return QPointF(200, 449);
 		case 6:
 			return QPointF(50, 340);
 		case 7:
