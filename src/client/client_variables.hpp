@@ -29,3 +29,4 @@ config.set("player_name",	"Unnamed");
 config.set("uuid",		"");
 config.set("locale",		"");
 config.set("log",		true);
+config.set("ui_show_handstrength", 	true);
