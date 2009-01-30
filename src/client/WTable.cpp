@@ -336,6 +336,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblHandStrength = new QLabel("HandStrength", this);
 	lblHandStrength->setFixedWidth(static_cast<int>(pScene->width()));
 	lblHandStrength->setAlignment(Qt::AlignCenter);
+	
+	if (!config.getBool("ui_show_handstrength"))
+		lblHandStrength->setVisible(false);
 }
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
@@ -438,7 +441,7 @@ void WTable::updateView()
 			{
 				wseats[i]->setAction(seat->action, seat->bet);
 				wseats[i]->setMySeat(my_cid == cid);
-/*
+				
 				std::vector<Card> allcards;
 				
 				if (my_cid == cid)
@@ -446,48 +449,20 @@ void WTable::updateView()
 				else
 					seat->holecards.copyCards(&allcards);
 
-				if (allcards.size() == 2)
+				if (allcards.size())
 					wseats[i]->setCards(
 						allcards[0].getName(),
 						allcards[1].getName());
 				else
-					wseats[i]->setCards("blank", "blank");
-*/					
-				if (my_cid == cid)
 				{
-					std::vector<Card> allcards;
-					tinfo->holecards.copyCards(&allcards);
-					
-					if (allcards.size() == 2)
-					{
-						char card1[3], card2[3];
-						strcpy(card1, allcards[0].getName());
-						strcpy(card2, allcards[1].getName());
-						wseats[i]->setCards(card1, card2);
-					}
-					else
+					if (my_cid == cid)
 						wseats[i]->setCards("blank", "blank");
-				}
-				else
-				{
-					vector<Card> allcards;
-					seat->holecards.copyCards(&allcards);
-					
-					if (allcards.size())
-					{
-						char card1[3], card2[3];
-						strcpy(card1, allcards[0].getName());
-						strcpy(card2, allcards[1].getName());
-						wseats[i]->setCards(card1, card2);
-					}
 					else
 						wseats[i]->setCards("back", "back");
-					
 				}
 			}
-			else
+			else   // player isn't anymore involved in current hand
 			{
-				// TODO: fold ?!?!?
 				wseats[i]->setAction(seat->action);
 				wseats[i]->setCards("blank", "blank");
 			}
@@ -736,7 +711,4 @@ void WTable::resizeEvent(QResizeEvent *event)
 	lblHandStrength->move(
 		(size.width() - lblHandStrength->width()) / 2,
 		220);
-	
-	if (!config.getBool("ui_show_handstrength"))
-		lblHandStrength->setVisible(false);
 }
