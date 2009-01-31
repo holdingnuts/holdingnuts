@@ -102,18 +102,25 @@ int send_msg(socktype sock, const char *message)
 	return bytes;
 }
 
-bool send_ok(socktype sock, int code=0, const char *str="")
+bool send_response(socktype sock, bool is_success, int last_msgid, int code=0, const char *str="")
 {
 	char buf[128];
-	snprintf(buf, sizeof(buf), "OK %d %s", code, str);
+	if (last_msgid == -1)
+		snprintf(buf, sizeof(buf), "%s %d %s", is_success ? "OK" : "ERR", code, str);
+	else
+		snprintf(buf, sizeof(buf), "%d %s %d %s", last_msgid, is_success ? "OK" : "ERR", code, str);
+	
 	return send_msg(sock, buf);
 }
 
-bool send_err(socktype sock, int code=0, const char *str="")
+bool send_ok(clientcon *client, int code=0, const char *str="")
 {
-	char buf[128];
-	snprintf(buf, sizeof(buf), "ERR %d %s", code, str);
-	return send_msg(sock, buf);
+	return send_response(client->sock, true, client->last_msgid, code, str);
+}
+
+bool send_err(clientcon *client, int code=0, const char *str="")
+{
+	return send_response(client->sock, false, client->last_msgid, code, str);
 }
 
 // from client/foyer to client/foyer
@@ -214,7 +221,7 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	// drop client if maximum connection count is reached
 	if (clients.size() == SERVER_CLIENT_HARDLIMIT || (int)clients.size() == config.getInt("max_clients"))
 	{
-		send_err(sock, -999 /* FIXME: error-code */, "server full");
+		send_response(sock, false, -1, -999 /* FIXME: error-code */, "server full");
 		socket_close(sock);
 		
 		return false;
@@ -290,7 +297,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		VERSION_GETMINOR(version) != VERSION_MINOR)
 	{
 		log_msg("client", "client %d version (%d) doesn't match", client->sock, version);
-		send_err(client->sock);
+		send_err(client);
 	}
 	else
 	{
@@ -340,7 +347,7 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 		}
 	}
 	
-	send_ok(client->sock);
+	send_ok(client);
 	
 	if (!(client->state & SentInfo))
 	{
@@ -386,9 +393,9 @@ int client_cmd_chat(clientcon *client, Tokenizer &t)
 	}
 	
 	if (!cmderr)
-		send_ok(client->sock);
+		send_ok(client);
 	else
-		send_err(client->sock);
+		send_err(client);
 	
 	return 0;
 }
@@ -468,9 +475,9 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 	}
 	
 	if (!cmderr)
-		send_ok(client->sock);
+		send_ok(client);
 	else
-		send_err(client->sock);
+		send_err(client);
 	
 	return 0;
 }
@@ -507,9 +514,9 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	}
 	
 	if (!cmderr)
-		send_ok(client->sock);
+		send_ok(client);
 	else
-		send_err(client->sock);
+		send_err(client);
 	
 	return 0;
 }
@@ -567,9 +574,9 @@ int client_cmd_action(clientcon *client, Tokenizer &t)
 	}
 	
 	if (!cmderr)
-		send_ok(client->sock, 0);
+		send_ok(client);
 	else
-		send_err(client->sock, 0, "what?");
+		send_err(client, 0, "what?");
 	
 	return 0;
 }
@@ -583,6 +590,7 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 		int type = t.getNextInt();
 		string passwd = t.getNext();
 		
+		// -1 is server-auth, anything other is game-auth
 		if (type == -1)
 		{
 			if (passwd == config.get("auth_password"))
@@ -599,9 +607,9 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 	}
 	
 	if (!cmderr)
-		send_ok(client->sock, 0);
+		send_ok(client, 0);
 	else
-		send_err(client->sock, 0, "auth failed");
+		send_err(client, 0, "auth failed");
 	
 	return 0;
 }
@@ -615,9 +623,22 @@ int client_execute(clientcon *client, const char *cmd)
 	if (!t.count())
 		return 0;
 	
-	//log_msg("clientsock", "(%d) executing '%s'", s, cmd);
+#ifdef DEBUG
+	//dbg_msg("clientsock", "(%d) executing '%s'", s, cmd);
+#endif
 	
-	// get first arg
+	// extract message-id if present
+	const char firstchar = t[0][0];
+	if (firstchar >= '0' && firstchar <= '9')
+	{
+		client->last_msgid = t.getNextInt();
+		t.popFirst();
+	}
+	else
+		client->last_msgid = -1;
+	
+	
+	// get command argument
 	string command = t.getNext();
 	t.popFirst();   // remove the command token
 	
@@ -629,7 +650,7 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 		{
 			// seems not to be a pclient
-			send_err(client->sock, 1, "protocol error");
+			send_err(client, 1, "protocol error");
 			client_remove(client->sock);
 			return -1;
 		}
@@ -648,12 +669,12 @@ int client_execute(clientcon *client, const char *cmd)
 		client_cmd_auth(client, t);
 	else if (command == "QUIT")
 	{
-		send_ok(client->sock);
+		send_ok(client);
 		client_remove(client->sock);
 		return -1;
 	}
 	else
-		send_err(client->sock, 10, "not implemented");
+		send_err(client, 10, "not implemented");
 	
 	return 0;
 }
