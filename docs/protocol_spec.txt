@@ -8,8 +8,8 @@ Protocol specification (client<->server)
 PSERVER <version> <client-id>
 
 * client-command responses:
-OK [<code>] [<text>]
-ERR [<code>] [<text>]
+[<id>] OK [<code>] [<text>]
+[<id>] ERR [<code>] [<text>]
 
 * server messages:
 MSG <from> <sender-name> <message>        # from := { -1 | <client-id> | <game-id>:<table-id> | <gid>:<tid>:<cid> }    # -1 is server
@@ -50,6 +50,18 @@ SnapHoleCards data:
 ################################################################################
 [[CLIENT]]
 ################################################################################
+
+General syntax:
+
+[<id>] <command> <arguments>
+
+Note:
+	Each command (except PCLIENT) can optionally be prefixed with an <id>.
+	e.g. "12345 AUTH -1 secret"
+	If a command was sent with an <id>, the server sends the same <id> with
+	its response.
+	e.g. "12345 ERR 987 Wrong password"
+
 
 * protocol-init message:
 PCLIENT <version> [<uuid>]

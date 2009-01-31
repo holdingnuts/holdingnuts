@@ -48,6 +48,7 @@ typedef struct {
 	
 	char msgbuf[1024];
 	int buflen;
+	int last_msgid;
 	
 	unsigned int state;
 	unsigned int version;
