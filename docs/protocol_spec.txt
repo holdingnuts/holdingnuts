@@ -4,7 +4,7 @@ Protocol specification (client<->server)
 [[SERVER]]
 ################################################################################
 
-* protocol-init message:
+* protocol-init response:
 PSERVER <version> <client-id>
 
 * client-command responses:
@@ -23,6 +23,12 @@ PONG
 [Snapshots]
 ================================================================================
 
+SnapGameState data:
+	<state> <type>:<value> [...]
+	
+	state := { start }
+
+
 SnapTable data:
 	<state>:<betting-round> \
 	<dealer>:<SB>:<BB>:<current>:<last-bet-player> \
@@ -34,16 +40,23 @@ SnapTable data:
 	flags := { in-round || sitout }
 
 
+SnapHoleCards data:
+	<card1>:<card2>
+	
+	card1 | card2 := { "As" ... "2c" }
+
+
+
 ################################################################################
 [[CLIENT]]
 ################################################################################
 
-* protocol-init response:
+* protocol-init message:
 PCLIENT <version> [<uuid>]
 
 * client commands:
 INFO <type>:<value> [...]      # type := { name | location }
-CHAT <to> <str>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 is foyer
+CHAT <to> <msg>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 is foyer
 REQUEST gamelist
 REQUEST gameinfo <game-id>
 REQUEST clientinfo <client-id> [...]

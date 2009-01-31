@@ -15,18 +15,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Authors:
- *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
 // Client defaults
 
-config.set("default_host",	"localhost");
-config.set("default_port",	DEFAULT_SERVER_PORT);
-config.set("player_name",	"Unnamed");
-config.set("uuid",		"");
-config.set("locale",		"");
-config.set("log",		true);
-config.set("ui_show_handstrength", 	true);
+config.set("default_host",	"localhost");		// default host to connect to
+config.set("default_port",	DEFAULT_SERVER_PORT);	// default port to connect to
+config.set("player_name",	"Unnamed");		// the player name
+config.set("uuid",		"");			// unique ID for re-connect
+config.set("locale",		"");			// language/locale to use
+config.set("log",		true);			// log to file
+config.set("ui_show_handstrength", 	true);		// display hand strength on table
