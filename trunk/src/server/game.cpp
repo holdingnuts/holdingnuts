@@ -576,24 +576,30 @@ int client_cmd_action(clientcon *client, Tokenizer &t)
 
 int client_cmd_auth(clientcon *client, Tokenizer &t)
 {
-	bool cmderr = false;
-
-	if (t.count() < 2)
-		cmderr = true;
-	else
+	bool cmderr = true;
+	
+	if (t.count() >= 2 && config.get("auth_password").length())
 	{
-		int type = t.getNextInt();  // FIXME: -1=server | other=game_id
+		int type = t.getNextInt();
+		string passwd = t.getNext();
 		
-		snprintf(msg, sizeof(msg), "auth on %d", type);
-		
-		if (t[2] == "secret")  // FIXME: no default pw, only testing here
-			client->state |= Authed;
+		if (type == -1)
+		{
+			if (passwd == config.get("auth_password"))
+			{
+				client->state |= Authed;
+				
+				cmderr = false;
+			}
+		}
 		else
-			cmderr = true;
+		{
+			// TODO: game-auth
+		}
 	}
 	
 	if (!cmderr)
-		send_ok(client->sock, 0, msg);
+		send_ok(client->sock, 0);
 	else
 		send_err(client->sock, 0, "auth failed");
 	

@@ -15,17 +15,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Authors:
- *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
 // Server defaults
 
-config.set("port",		DEFAULT_SERVER_PORT);
-config.set("max_clients",	200);
-config.set("log",		true);
+config.set("port",		DEFAULT_SERVER_PORT);	// port the server is listening on
+config.set("max_clients",	200);			// limit for client connections
+config.set("log",		true);			// log into file
+config.set("auth_password",	"");			// server authentication password
 
 #ifdef DEBUG
 config.set("dbg_testgame_players",	3);
