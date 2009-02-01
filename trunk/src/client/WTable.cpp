@@ -224,16 +224,19 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	// scene
 	QGraphicsScene* pScene = new QGraphicsScene(0, 0, 900, 700, this);
 
-//	pScene->setBackgroundBrush(Qt::black);
+	pScene->setBackgroundBrush(QPixmap("gfx/table/background.png"));
+	
 	// don't use bsptree
 	pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
-	QImage imgTable("gfx/table/table.png");
+	m_pImgTable = new QGraphicsPixmapItem(QPixmap("gfx/table/table.png"));
+	m_pImgTable->setTransformationMode(Qt::SmoothTransformation);
 	
-	m_pImgTable = pScene->addPixmap(QPixmap::fromImage(imgTable));
+	pScene->addItem(m_pImgTable);
+	//m_pImgTable = pScene->addPixmap(QPixmap::fromImage(imgTable));
 	m_pImgTable->scale(
-		pScene->width() / imgTable.width(),
-		(pScene->height() - 150) / imgTable.height()); // 150 == height chatbox
+		pScene->width() / m_pImgTable->pixmap().width(),
+		(pScene->height() - 150) / m_pImgTable->pixmap().height()); // 150 == height chatbox
 
 	m_pDealerButton = new DealerButton;
 	m_pDealerButton->scale(0.5, 0.5);
