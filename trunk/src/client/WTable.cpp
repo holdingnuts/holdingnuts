@@ -448,11 +448,14 @@ void WTable::updateView()
 					tinfo->holecards.copyCards(&allcards);
 				else
 					seat->holecards.copyCards(&allcards);
-
+				
 				if (allcards.size())
-					wseats[i]->setCards(
-						allcards[0].getName(),
-						allcards[1].getName());
+				{
+					char card1[3], card2[3];
+					strcpy(card1, allcards[0].getName());
+					strcpy(card2, allcards[1].getName());
+					wseats[i]->setCards(card1, card2);
+				}
 				else
 				{
 					if (my_cid == cid)
