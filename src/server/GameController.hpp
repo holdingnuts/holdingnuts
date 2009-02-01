@@ -54,6 +54,12 @@ public:
 		BlindByKnockout
 	} BlindRule;
 	
+	typedef enum {
+		NoLimit,
+		PotLimit,
+		SplitLimit,
+		FixedLimit
+	} LimitRule;
 	
 	GameController();
 	
@@ -86,7 +92,7 @@ public:
 	
 protected:
 	Player* findPlayer(int cid);
-		
+	
 	void snap(int tid, int sid, const char* msg);
 	void snap(int cid, int tid, int sid, const char* msg);
 	
@@ -116,6 +122,7 @@ private:
 	unsigned int max_players;
 	
 	GameType type;
+	LimitRule limit;
 	
 	std::vector<Player> players;
 	std::map<int,Table> tables;
@@ -125,11 +132,13 @@ private:
 	time_t betround_start;
 	time_t timeout_start;
 	
-	float blind;
-	BlindRule blindrule;
-	unsigned int blinds_time;  // seconds
-	time_t last_blinds_time;
-	float blinds_factor;
+	struct {
+		float amount;
+		BlindRule blindrule;
+		unsigned int blinds_time;  // seconds
+		time_t last_blinds_time;
+		float blinds_factor;
+	} blind;
 	
 	unsigned int hand_no;
 };

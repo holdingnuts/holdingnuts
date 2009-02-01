@@ -49,10 +49,10 @@ GameController::GameController()
 	started = false;
 	max_players = 10;
 	
-	blindrule = BlindByTime;
-	blinds_time = 60 * 4;
-	blinds_factor = 2.0f;
-	blind = 10.0f;
+	blind.blindrule = BlindByTime;
+	blind.blinds_time = 60 * 4;
+	blind.blinds_factor = 2.0f;
+	blind.amount = 10.0f;
 	
 	hand_no = 0;
 	
@@ -348,7 +348,7 @@ void GameController::sendTableSnapshot(Table *t)
 float GameController::determineMinimumBet(Table *t) const
 {
 	if ((int) t->bet_amount == 0)
-		return blind;
+		return blind.amount;
 	else
 		return t->bet_amount + (t->bet_amount - t->last_bet_amount);
 }
@@ -541,13 +541,13 @@ void GameController::stateNewRound(Table *t)
 void GameController::stateBlinds(Table *t)
 {
 	// new blinds level?
-	switch ((int) blindrule)
+	switch ((int) blind.blindrule)
 	{
 	case BlindByTime:
-		if (difftime(time(NULL), last_blinds_time) > blinds_time)
+		if (difftime(time(NULL), blind.last_blinds_time) > blind.blinds_time)
 		{
-			last_blinds_time = time(NULL);
-			blind *= blinds_factor;
+			blind.last_blinds_time = time(NULL);
+			blind.amount *= blind.blinds_factor;
 		}
 		break;
 	}
@@ -555,7 +555,7 @@ void GameController::stateBlinds(Table *t)
 	
 	// FIXME: handle non-SNG correctly (ask each player for blinds ...)
 	
-	t->bet_amount = (float)blind;
+	t->bet_amount = (float)blind.amount;
 	
 	
 	Player *pSmall = t->seats[t->sb].player;
@@ -563,7 +563,7 @@ void GameController::stateBlinds(Table *t)
 	
 	
 	// set the player's SB
-	float amount = blind / 2;
+	float amount = blind.amount / 2;
 	
 	if (amount > pSmall->stake)
 		amount = pSmall->stake;
@@ -573,7 +573,7 @@ void GameController::stateBlinds(Table *t)
 	
 	
 	// set the player's BB
-	amount = blind;
+	amount = blind.amount;
 	
 	if (amount > pBig->stake)
 		amount = pBig->stake;
@@ -1233,7 +1233,7 @@ void GameController::tick()
 			tables[tid] = table;
 			
 			game_start = time(NULL);
-			last_blinds_time = time(NULL);
+			blind.last_blinds_time = time(NULL);
 			
 			snap(tid, SnapGameState, "start");
 			sendTableSnapshot(&(tables[tables.size()-1]));
