@@ -3,6 +3,6 @@
 #define IDC_STATIC (-1)
 #endif
 
-#define IDI_APPICON   102
+#define IDI_APPICON   100
 
-IDI_APPICON   ICON    "pclient.ico"
+IDI_APPICON   ICON    "res/pclient.ico"
