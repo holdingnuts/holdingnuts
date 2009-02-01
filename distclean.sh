@@ -5,4 +5,4 @@
 #     $ mkdir build ; cd build ; cmake ../trunk
 
 make clean   2>/dev/null
-rm -r {.,src}/{,network,libpoker,server,client,test,system}/{Makefile,CMakeCache.txt,CMakeFiles,cmake_install.cmake}   2>/dev/null
+rm -r {.,src}/{,libpoker,server,client,test,system}/{Makefile,CMakeCache.txt,CMakeFiles,cmake_install.cmake}   2>/dev/null
