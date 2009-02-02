@@ -148,7 +148,12 @@ bool client_chat(int from, int to, const char *message)
 	if (to == -1)
 	{
 		for (vector<clientcon>::iterator e = clients.begin(); e != clients.end(); e++)
+		{
+			if (!(e->state & Introduced))  // do not send broadcast to non-introduced clients
+				continue;
+			
 			send_msg(e->sock, msg);
+		}
 	}
 	else
 	{
