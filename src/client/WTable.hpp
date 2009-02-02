@@ -134,6 +134,7 @@ private:
 	QLabel			*lblPots;
 	QLabel			*lblHandStrength;
 	EditableSlider		*m_pSliderAmount;
+	QCheckBox 		*chkFold;
 };
 
 #endif /* _WTABLE_H */

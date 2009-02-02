@@ -274,7 +274,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnMuck = new QPushButton(tr("Muck"), this);
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
-	QCheckBox *chkFold = new QCheckBox(tr("Fold"), this);
+	chkFold = new QCheckBox(tr("Fold"), this);
 
 
 	m_pSliderAmount = new EditableSlider;
@@ -502,11 +502,16 @@ void WTable::updateView()
 		timer->start();
 	}
 	
+	dbg_msg(__func__, "snap->pots.size() %d", snap->pots.size());
+	
 	// Pots
-	lblPots->setText(
-		QString("Pot %1: %2").arg(
-			snap->pots.size()).arg(
-				std::accumulate(snap->pots.begin(), snap->pots.end(), 0.0), 0, 'f', 2));
+	QString strPots;
+	for (unsigned int t = 0; t < snap->pots.size(); ++t)
+	{
+		strPots.append(
+			QString("Pot %1: %2 ").arg(t+1).arg(snap->pots.at(t), 0, 'f', 2));
+	}
+	lblPots->setText(strPots);
 	
 	// CommunityCards
 	if (snap->state == Table::NewRound)
@@ -528,17 +533,21 @@ void WTable::updateView()
 	{
 		for (unsigned int i = m_CommunityCards.size(); i < allcards.size(); i++)
 		{
-			QGraphicsPixmapItem *p = this->scene()->addPixmap(
+			QGraphicsPixmapItem *p = new QGraphicsPixmapItem(
 				QPixmap(
 					QString("gfx/deck/default/%1.png").arg(allcards[i].getName())));
 
+			p->setTransformationMode(Qt::SmoothTransformation);
 			p->setPos(calcCCardsPos(i));
+			p->scale(0.3, 0.3);
+
+			this->scene()->addItem(p);
 
 			m_CommunityCards.push_back(p);
 		}
 	}
 
-//	this->viewport()->update();	// TODO: remove
+	this->viewport()->update();	// TODO: remove
 	
 	if (snap->my_seat != -1)
 	{
@@ -573,7 +582,15 @@ void WTable::updateView()
 			else
 			{
 				if ((int)snap->s_cur == snap->my_seat)
-					stlayActions->setCurrentIndex(0);
+				{
+					if (chkFold->checkState() == Qt::Checked)
+					{
+						actionFold();
+						chkFold->setCheckState(Qt::Unchecked);
+					}
+					else
+						stlayActions->setCurrentIndex(0);
+				}
 				else
 					stlayActions->setCurrentIndex(1);
 			}
