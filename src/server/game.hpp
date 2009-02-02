@@ -62,6 +62,7 @@ typedef struct {
 	time_t logout_time;
 } clientcon_archive;
 
+typedef std::map<std::string,clientcon_archive>	clientconar_type;
 
 // used by pserver.cpp
 int gameloop();
