@@ -186,7 +186,8 @@ void server_cmd_snap(Tokenizer& t)
 			
 			if (sstate == "start")
 			{
-				((PClient*)qApp)->wMain->addServerMessage("Game has been started");
+				((PClient*)qApp)->wMain->addServerMessage(
+					QString("Game (%1) has been started.").arg(gid));
 				
 				games[gid].registered = true;
 				games[gid].tables[tid].sitting = true;
@@ -458,7 +459,11 @@ int server_execute(const char *cmd)
 		else
 		{
 			// protocol error: maybe this isn't a pserver
-			log_msg("connect", "protocol error");
+			log_msg("introduce", "protocol error");
+			((PClient*)qApp)->wMain->addServerErrorMessage(
+				ErrProtocol, "Protocol error. The remote station doesn't seem to be a pserver.");
+			
+			// FIXME: don't do a regular/clean close (no QUIT sequence)
 			((PClient*)qApp)->doClose();
 		}
 	}
