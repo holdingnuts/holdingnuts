@@ -106,9 +106,11 @@ bool send_response(socktype sock, bool is_success, int last_msgid, int code=0, c
 {
 	char buf[128];
 	if (last_msgid == -1)
-		snprintf(buf, sizeof(buf), "%s %d %s", is_success ? "OK" : "ERR", code, str);
+		snprintf(buf, sizeof(buf), "%s %d %s",
+			is_success ? "OK" : "ERR", code, str);
 	else
-		snprintf(buf, sizeof(buf), "%d %s %d %s", last_msgid, is_success ? "OK" : "ERR", code, str);
+		snprintf(buf, sizeof(buf), "%d %s %d %s",
+			  last_msgid, is_success ? "OK" : "ERR", code, str);
 	
 	return send_msg(sock, buf);
 }
@@ -221,7 +223,7 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	// drop client if maximum connection count is reached
 	if (clients.size() == SERVER_CLIENT_HARDLIMIT || (int)clients.size() == config.getInt("max_clients"))
 	{
-		send_response(sock, false, -1, -999 /* FIXME: error-code */, "server full");
+		send_response(sock, false, -1, ErrServerFull, "server full");
 		socket_close(sock);
 		
 		return false;
@@ -297,10 +299,15 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		VERSION_GETMINOR(version) != VERSION_MINOR)
 	{
 		log_msg("client", "client %d version (%d) doesn't match", client->sock, version);
-		send_err(client);
+		send_err(client, ErrWrongVersion, "wrong version");
+		client_remove(client->sock);
 	}
 	else
 	{
+		// ack the command
+		send_ok(client);
+		
+		
 		client->version = version;
 		client->state |= Introduced;
 		
@@ -576,7 +583,20 @@ int client_cmd_action(clientcon *client, Tokenizer &t)
 	if (!cmderr)
 		send_ok(client);
 	else
-		send_err(client, 0, "what?");
+		send_err(client);
+	
+	return 0;
+}
+
+int client_cmd_create(clientcon *client, Tokenizer &t)
+{
+	if (!config.getBool("perm_create_user") && !(client->state & Authed))
+	{
+		send_err(client, ErrNoPermission, "no permission");
+		return -1;
+	}
+	
+	//  TODO:
 	
 	return 0;
 }
@@ -607,7 +627,7 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 	}
 	
 	if (!cmderr)
-		send_ok(client, 0);
+		send_ok(client);
 	else
 		send_err(client, 0, "auth failed");
 	
@@ -639,7 +659,7 @@ int client_execute(clientcon *client, const char *cmd)
 	
 	
 	// get command argument
-	string command = t.getNext();
+	const string command = t.getNext();
 	t.popFirst();   // remove the command token
 	
 	
@@ -650,7 +670,7 @@ int client_execute(clientcon *client, const char *cmd)
 		else
 		{
 			// seems not to be a pclient
-			send_err(client, 1, "protocol error");
+			send_err(client, ErrProtocol, "protocol error");
 			client_remove(client->sock);
 			return -1;
 		}
@@ -665,6 +685,8 @@ int client_execute(clientcon *client, const char *cmd)
 		client_cmd_register(client, t);
 	else if (command == "ACTION")
 		client_cmd_action(client, t);
+	else if (command == "CREATE")
+		client_cmd_create(client, t);
 	else if (command == "AUTH")
 		client_cmd_auth(client, t);
 	else if (command == "QUIT")
@@ -674,7 +696,7 @@ int client_execute(clientcon *client, const char *cmd)
 		return -1;
 	}
 	else
-		send_err(client, 10, "not implemented");
+		send_err(client, ErrNotImplemented, "not implemented");
 	
 	return 0;
 }

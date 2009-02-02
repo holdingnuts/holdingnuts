@@ -24,6 +24,8 @@ config.set("port",		DEFAULT_SERVER_PORT);	// port the server is listening on
 config.set("max_clients",	200);			// limit for client connections
 config.set("log",		true);			// log into file
 config.set("auth_password",	"");			// server authentication password
+config.set("perm_create_user",	true);			// allow regular user to create games
+
 
 #ifdef DEBUG
 config.set("dbg_testgame_players",	3);
