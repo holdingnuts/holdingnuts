@@ -820,10 +820,11 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	else
 		locale = QLocale::system().name().left(2);
 	
-	QTranslator myappTranslator;
-	myappTranslator.load("i18n/hn_" + locale);
 	log_msg("main", "Using locale: %s", locale.toStdString().c_str());
-	installTranslator(&myappTranslator);
+	
+	QTranslator *translator = new QTranslator();
+	translator->load("i18n/hn_" + locale);
+	installTranslator(translator);
 	
 	wMain = new WMain();
 	wMain->updateConnectionStatus();
