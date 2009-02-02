@@ -53,7 +53,8 @@ static map<int,GameController*> games;
 static vector<clientcon> clients;
 static unsigned int cid_counter = 0;
 
-static map<string,clientcon_archive> con_archive;
+
+static clientconar_type con_archive;
 
 
 GameController* get_game_by_id(int gid)
@@ -319,10 +320,34 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
 		
 		// re-assign cid if this client was previously connected (and cid isn't already connected)
-		if (uuid.length() && con_archive.find(uuid) != con_archive.end() && !get_client_by_id(con_archive[uuid].id))
-			client->id = con_archive[uuid].id;
-		else
+		bool use_uuid_cid = false;
+		
+		if (uuid.length())
+		{
+			clientconar_type::iterator it = con_archive.find(uuid);
+			
+			if (it != con_archive.end())
+			{
+				if (!get_client_by_id(it->second.id))
+				{
+					client->id = it->second.id;
+					use_uuid_cid = true;
+					
+					dbg_msg("uuid", "using previous cid (%d) for uuid '%s' (%d)", client->id, client->uuid, client->sock);
+				}
+				else
+				{
+					dbg_msg("uuid", "uuid '%s' already connected (%d)", client->uuid, client->sock);
+					client->uuid[0] = '\0';    // client is not allowed to use this uuid
+				}
+			}
+			else
+				dbg_msg("uuid", "uuid '%s' not found (%d)", client->uuid, client->sock);
+		}
+		
+		if (!use_uuid_cid)
 			client->id = cid_counter++;
+		
 		
 		// set temporary client name
 		snprintf(client->name, sizeof(client->name), "client_%d", client->id);
@@ -649,7 +674,7 @@ int client_execute(clientcon *client, const char *cmd)
 		return 0;
 	
 #ifdef DEBUG
-	//dbg_msg("clientsock", "(%d) executing '%s'", s, cmd);
+	//dbg_msg("clientsock", "(%d) executing '%s'", client->sock, cmd);
 #endif
 	
 	// extract message-id if present
