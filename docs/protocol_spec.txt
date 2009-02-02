@@ -29,6 +29,12 @@ SnapGameState data:
 	state := { start }
 
 
+SnapGameInfo data:
+	<type>:<value> [...]
+	
+	type := { timeout_bet | timeout_show }
+
+
 SnapTable data:
 	<state>:<betting-round> \
 	<dealer>:<SB>:<BB>:<current>:<last-bet-player> \
@@ -56,7 +62,7 @@ General syntax:
 [<id>] <command> <arguments>
 
 Note:
-	Each command (except PCLIENT) can optionally be prefixed with an <id>.
+	Each command can optionally be prefixed by an <id>.
 	e.g. "12345 AUTH -1 secret"
 	If a command was sent with an <id>, the server sends the same <id> with
 	its response.

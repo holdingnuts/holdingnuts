@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "SysAccess.h"
+#include "Logger.h"
 #include "Tokenizer.hpp"
 
 #include "ConfigParser.hpp"
@@ -182,4 +183,10 @@ bool ConfigParser::set(const string &name, bool value)
 {
 	vars[name] = (value) ? "true" : "false";
 	return true;
+}
+
+void ConfigParser::print()
+{
+	for (cfgvars_type::iterator e = vars.begin(); e != vars.end(); e++)
+		log_msg("config", "* %s  %s", e->first.c_str(), e->second.c_str());
 }

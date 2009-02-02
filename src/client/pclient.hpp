@@ -53,8 +53,11 @@ typedef struct {
 	
 	char msgbuf[1024];
 	int buflen;
+	int last_msgid;
 	
 	int cid;   // our client-id assigned by server
+	
+	bool introduced;   // PCLIENT->PSERVER sequence success
 } servercon;
 
 typedef struct {

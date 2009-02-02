@@ -45,7 +45,7 @@ void log_msg(const char *level, const char *format, ...)
 	vsnprintf(msg, sizeof(msg), format, args);
 	va_end(args);
 	
-	// if there was no log target specified with dbg_setlog()
+	// if there was no log target specified with log_set()
 	if (!logger[0])
 		logger[0] = stderr;
 	
@@ -54,7 +54,7 @@ void log_msg(const char *level, const char *format, ...)
 		if (!logger[i])
 			continue;
 		
-		fprintf(logger[i], "[%s]: %s\n", level, msg);
+		fprintf(logger[i], "[%10s]  %s\n", level, msg);
 		fflush(logger[i]);
 	}
 }

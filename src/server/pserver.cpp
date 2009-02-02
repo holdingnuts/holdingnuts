@@ -234,6 +234,7 @@ int main(int argc, char **argv)
 	
 	// load config
 	config_load();
+	config.print();
 	
 	// start logging
 	filetype *fplog = NULL;

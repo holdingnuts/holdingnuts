@@ -51,6 +51,8 @@ public:
 	bool set(const std::string &name, int value);
 	bool set(const std::string &name, bool value);
 	
+	void print();
+	
 private:
 	cfgvars_type vars;
 };
