@@ -275,9 +275,7 @@ bool client_remove(socktype sock)
 				if (uuid.length())
 				{
 					// FIXME: only add max. 3 entries for each IP
-					con_archive[uuid].id = client->id;
 					con_archive[uuid].logout_time = time(NULL);
-					//con_archive[uuid].saddr = client->saddr;
 				}
 			}
 			
@@ -328,21 +326,22 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 			
 			if (it != con_archive.end())
 			{
-				if (!get_client_by_id(it->second.id))
+				clientcon *conc = get_client_by_id(it->second.id);
+				if (!conc)
 				{
 					client->id = it->second.id;
 					use_uuid_cid = true;
 					
-					dbg_msg("uuid", "using previous cid (%d) for uuid '%s' (%d)", client->id, client->uuid, client->sock);
+					dbg_msg("uuid", "(%d) using previous cid (%d) for uuid '%s'", client->sock, client->id, client->uuid);
 				}
 				else
 				{
-					dbg_msg("uuid", "uuid '%s' already connected (%d)", client->uuid, client->sock);
+					dbg_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
 					client->uuid[0] = '\0';    // client is not allowed to use this uuid
 				}
 			}
 			else
-				dbg_msg("uuid", "uuid '%s' not found (%d)", client->uuid, client->sock);
+				dbg_msg("uuid", "(%d) uuid '%s' not found", client->sock, client->uuid);
 		}
 		
 		if (!use_uuid_cid)
@@ -388,6 +387,13 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 	
 	if (!(client->state & SentInfo))
 	{
+		// store UUID in connection-archive
+		clientcon_archive ar;
+		memset(&ar, 0, sizeof(ar));
+		ar.id = client->id;
+		con_archive[client->uuid] = ar;
+		
+		// send broadcast message to foyer
 		snprintf(msg, sizeof(msg),
 			"'%s' (%d) joined foyer",
 			client->name, client->id);
