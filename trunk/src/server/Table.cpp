@@ -271,4 +271,22 @@ void Table::collectBets()
 #endif
 }
 
+void Table::resetLastPlayerActions()
+{
+	// reset last-player action
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		if (!seats[i].occupied)
+			continue;
+		
+		seats[i].player->resetLastAction();
+	}
+}
 
+void Table::scheduleState(State sched_state, unsigned int delay_sec)
+{
+	state = Table::Delay;
+	scheduled_state = sched_state;
+	delay = delay_sec;
+	delay_start = time(NULL);
+}

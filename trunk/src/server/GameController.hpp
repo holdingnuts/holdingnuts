@@ -99,7 +99,6 @@ protected:
 	bool createWinlist(Table *t, std::vector< std::vector<HandStrength> > &winlist);
 	
 	int handleTable(Table *t);
-	void stateGameStart(Table *t);
 	void stateNewRound(Table *t);
 	void stateBlinds(Table *t);
 	void stateBetting(Table *t);
@@ -107,6 +106,9 @@ protected:
 	void stateAllFolded(Table *t);
 	void stateShowdown(Table *t);
 	void stateEndRound(Table *t);
+	
+	// pseudo-state for delays
+	void stateDelay(Table *t);
 	
 	void dealHole(Table *t);
 	void dealFlop(Table *t);
@@ -127,9 +129,6 @@ private:
 	std::vector<Player> players;
 	std::map<int,Table> tables;
 	
-	time_t game_start;
-	time_t round_start;
-	time_t betround_start;
 	time_t timeout_start;
 	
 	struct {

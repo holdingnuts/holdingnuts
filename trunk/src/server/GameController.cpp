@@ -446,26 +446,8 @@ void GameController::dealRiver(Table *t)
 	chat(t->table_id, msg);
 }
 
-void GameController::stateGameStart(Table *t)
-{
-#ifndef SERVER_TESTING
-	const int timeout = 5;   // FIXME: configurable
-	if ((int)difftime(time(NULL), game_start) > timeout)
-		t->state = Table::NewRound;
-#else
-	t->state = Table::NewRound;
-#endif
-	round_start = time(NULL);
-}
-
 void GameController::stateNewRound(Table *t)
 {
-#ifndef SERVER_TESTING
-	const int timeout = 4;   // FIXME: configurable
-	if ((int)difftime(time(NULL), round_start) < timeout)
-		return;
-#endif
-	
 	// count up current hand number
 	hand_no++;
 	
@@ -510,7 +492,7 @@ void GameController::stateNewRound(Table *t)
 		Player *p = t->seats[i].player;
 		
 		p->holecards.clear();
-		p->last_action = Player::None;
+		p->resetLastAction();
 	}
 	
 	
@@ -588,8 +570,6 @@ void GameController::stateBlinds(Table *t)
 	// initialize the player's timeout
 	timeout_start = time(NULL);
 	
-	// initialize bet-round delay
-	betround_start = time(NULL);
 	
 	// give out hole-cards
 	dealHole(t);
@@ -601,21 +581,12 @@ void GameController::stateBlinds(Table *t)
 	chat(p->client_id, t->table_id, msg);
 	
 	
-	t->state = Table::Betting;
 	t->betround = Table::Preflop;
-	
-	sendTableSnapshot(t);
+	t->scheduleState(Table::Betting, 3);
 }
 
 void GameController::stateBetting(Table *t)
 {
-	// have delay before each action
-#ifndef SERVER_TESTING
-	const int timeout = 1;
-	if ((int)difftime(time(NULL), betround_start) < timeout)
-		return;
-#endif
-	
 	Player *p = t->seats[t->cur_player].player;
 	bool allowed_action = false;  // is action allowed?
 	bool auto_action = false;
@@ -816,6 +787,7 @@ void GameController::stateBetting(Table *t)
 		timeout_start = time(NULL);
 		
 		sendTableSnapshot(t);
+		t->resetLastPlayerActions();
 		return;
 	}
 	
@@ -832,17 +804,6 @@ void GameController::stateBetting(Table *t)
 		{
 			// no further action at table possible
 			t->nomoreaction = true;
-		}
-		
-		
-		// reset last-player action
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			if (!t->seats[i].occupied)
-				continue;
-			
-			Player *p = t->seats[i].player;
-			p->last_action = Player::None;
 		}
 		
 		
@@ -865,15 +826,6 @@ void GameController::stateBetting(Table *t)
 			break;
 		
 		case Table::River:
-			// collect bets into pot
-			t->collectBets();
-			
-			// end of hand, do showdown/ ask for show
-			if (t->nomoreaction)
-				t->state = Table::Showdown;
-			else
-				t->state = Table::AskShow;
-			
 			// last_bet_player MUST show his hand
 			t->seats[t->last_bet_player].showcards = true;
 			// FIXME: set last action ?
@@ -884,8 +836,16 @@ void GameController::stateBetting(Table *t)
 			// initialize the player's timeout
 			timeout_start = time(NULL);
 			
+			
+			// end of hand, do showdown/ ask for show
+			if (t->nomoreaction)
+				t->state = Table::Showdown;
+			else
+				t->state = Table::AskShow;
+			
 			sendTableSnapshot(t);
 			
+			t->resetLastPlayerActions();
 			return;
 		}
 		
@@ -904,13 +864,14 @@ void GameController::stateBetting(Table *t)
 		// re-initialize the player's timeout
 		timeout_start = time(NULL);
 		
-		// re-initialize bet-round delay
-		betround_start = time(NULL);
 		
 		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
 		
+		t->resetLastPlayerActions();
+		
 		sendTableSnapshot(t);
+		t->scheduleState(Table::Betting, 2);
 	}
 	else
 	{
@@ -923,10 +884,8 @@ void GameController::stateBetting(Table *t)
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		timeout_start = time(NULL);
 		
-		// re-initialize bet-round delay
-		betround_start = time(NULL);
-		
 		sendTableSnapshot(t);
+		t->scheduleState(Table::Betting, 1);
 	}
 	
 	
@@ -965,6 +924,7 @@ void GameController::stateAskShow(Table *t)
 	}
 	else
 	{
+#ifndef SERVER_TESTING
 		// handle player timeout
 		const int timeout = 4;   // FIXME: configurable
 		if ((int)difftime(time(NULL), timeout_start) > timeout || p->sitout)
@@ -977,6 +937,7 @@ void GameController::stateAskShow(Table *t)
 			
 			chose_action = true;
 		}
+#endif /* SERVER_TESTING */
 	}
 	
 	// return here if no action chosen till now
@@ -1164,17 +1125,24 @@ void GameController::stateEndRound(Table *t)
 	}
 	
 	t->dealer = t->getNextPlayer(t->dealer);
-	t->state = Table::NewRound;
+	
+	t->scheduleState(Table::NewRound, 4);
+}
+
+void GameController::stateDelay(Table *t)
+{
+#ifndef SERVER_TESTING
+	if ((unsigned int) difftime(time(NULL), t->delay_start) >= t->delay)
+		t->state = t->scheduled_state;
+#else
+	t->state = t->scheduled_state;
+#endif
 }
 
 int GameController::handleTable(Table *t)
 {
-	if (t->state == Table::GameStart)
-		stateGameStart(t);
-	else if (t->state == Table::ElectDealer)
-	{
-		// TODO: implement me
-	}
+	if (t->state == Table::Delay)
+		stateDelay(t);
 	else if (t->state == Table::NewRound)
 		stateNewRound(t);
 	else if (t->state == Table::Blinds)
@@ -1188,15 +1156,12 @@ int GameController::handleTable(Table *t)
 	else if (t->state == Table::Showdown)
 		stateShowdown(t);
 	else if (t->state == Table::EndRound)
-	{
 		stateEndRound(t);
-		
-		// only 1 player left? close table
-		if (t->countPlayers() == 1)
-			return -1;
-		
-		round_start = time(NULL);
-	}
+	
+	
+	// only 1 player left? close table
+	if (t->countPlayers() == 1)
+		return -1;
 	
 	return 0;
 }
@@ -1232,11 +1197,14 @@ void GameController::tick()
 			table.state = Table::GameStart;
 			tables[tid] = table;
 			
-			game_start = time(NULL);
 			blind.last_blinds_time = time(NULL);
 			
 			snap(tid, SnapGameState, "start");
+			
 			sendTableSnapshot(&(tables[tables.size()-1]));
+			
+			// FIXME: just fix me :)
+			tables[tid].scheduleState(Table::NewRound, 5);
 		}
 		else
 			return;
