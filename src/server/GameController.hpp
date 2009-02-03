@@ -36,7 +36,9 @@
 #include "Player.hpp"
 #include "GameLogic.hpp"
 
-// only variant "Texas Hold'em" supported yet
+
+typedef std::map<int,Table*>	tables_type;
+
 
 class GameController
 {
@@ -127,7 +129,7 @@ private:
 	LimitRule limit;
 	
 	std::vector<Player> players;
-	std::map<int,Table> tables;
+	tables_type tables;
 	
 	time_t timeout_start;
 	
