@@ -60,6 +60,8 @@ public:
 	float getStake() const { return stake; };
 	int getClientId() const { return client_id; };
 	
+	void resetLastAction() { last_action = Player::None; }
+	
 private:
 	int client_id;
 	

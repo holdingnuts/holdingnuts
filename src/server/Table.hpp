@@ -43,7 +43,8 @@ public:
 		AskShow,
 		AllFolded,
 		Showdown,
-		EndRound
+		EndRound,
+		Delay
 	} State;
 	
 	typedef enum {
@@ -78,10 +79,13 @@ public:
 	unsigned int countPlayers();
 	unsigned int countActivePlayers();
 	bool isAllin();
+	void resetLastPlayerActions();
 	
 	void collectBets();
 	bool isPlayerInvolvedInPot(Pot *pot, Player *p);
 	unsigned int getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &wl);
+	
+	void scheduleState(State sched_state, unsigned int delay_sec);
 	
 	void tick();
 	
@@ -92,6 +96,12 @@ private:
 	CommunityCards communitycards;
 	
 	State state;
+	
+	// Delay state
+	State scheduled_state;
+	time_t delay_start;
+	unsigned int delay;
+	
 	bool nomoreaction;
 	BettingRound betround;
 	
