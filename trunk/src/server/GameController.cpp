@@ -23,7 +23,7 @@
 
 #include <cstdio>
 #include <string>
-#include <cstring>   // FIXME: try to remove this one
+#include <cstring>
 #include <algorithm>
 
 #include "Config.h"
@@ -126,11 +126,11 @@ bool GameController::getPlayerList(int tid, vector<int> &client_list)
 {
 	client_list.clear();
 	
-	map<int,Table>::iterator it = tables.find(tid);
+	tables_type::iterator it = tables.find(tid);
 	if (it == tables.end())
 		return false;
 	
-	Table *t = &(it->second);
+	Table *t = it->second;
 	
 	for (unsigned int i=0; i < 10; i++)
 	{
@@ -1179,32 +1179,32 @@ void GameController::tick()
 			
 			// TODO: support more than 1 table
 			const int tid = 0;
-			Table table;
-			table.setTableId(tid);
+			Table *t = new Table();
+			t->setTableId(tid);
 			
-			memset(table.seats, 0, sizeof(Table::Seat) * 10);
+			memset(t->seats, 0, sizeof(Table::Seat) * 10);
 			
 			for (unsigned int i=0; i < players.size() && i < 10; i++)
 			{
 				Table::Seat seat;
+				
 				memset(&seat, 0, sizeof(Table::Seat));
 				seat.occupied = true;
 				seat.seat_no = i;
 				seat.player = &(players[i]);
-				table.seats[i] = seat;
+				t->seats[i] = seat;
 			}
-			table.dealer = 0;
-			table.state = Table::GameStart;
-			tables[tid] = table;
+			t->dealer = 0;
+			t->state = Table::GameStart;
+			tables[tid] = t;
 			
 			blind.last_blinds_time = time(NULL);
 			
 			snap(tid, SnapGameState, "start");
 			
-			sendTableSnapshot(&(tables[tables.size()-1]));
+			sendTableSnapshot(t);
 			
-			// FIXME: just fix me :)
-			tables[tid].scheduleState(Table::NewRound, 5);
+			t->scheduleState(Table::NewRound, 5);
 		}
 		else
 			return;
@@ -1213,7 +1213,7 @@ void GameController::tick()
 	// handle all tables
 	for (unsigned int i=0; i < tables.size(); i++)
 	{
-		Table *t = &(tables[i]);
+		Table *t = tables[i];
 		
 		// table closed?
 		if (handleTable(t) < 0)
@@ -1228,12 +1228,14 @@ void GameController::tick()
 				}
 			}
 			
-			// FIXME: what to do here?
+			// FIXME: remove table ...
 			started = false;
 			players.clear();
+			delete t;
 			tables.clear();
 			
 			snap(-1, SnapGameState, "end");
+			break;
 		}
 	}
 }
