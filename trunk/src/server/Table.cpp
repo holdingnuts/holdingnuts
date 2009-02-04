@@ -25,6 +25,8 @@
 #include "Debug.h"
 #include "Table.hpp"
 
+#include <ctime>
+
 using namespace std;
 
 
