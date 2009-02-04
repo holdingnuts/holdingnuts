@@ -422,9 +422,7 @@ int server_execute(const char *cmd)
 	if (!t.count())
 		return 0;
 	
-#ifdef DEBUG
-//	log_msg("server_execute", "cmd= %s", cmd);
-#endif
+	//dbg_msg("server_execute", "cmd= %s", cmd);
 	
 	// extract message-id if present
 	const char firstchar = t[0][0];
