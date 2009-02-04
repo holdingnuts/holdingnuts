@@ -502,7 +502,7 @@ void WTable::updateView()
 		timer->start();
 	}
 	
-	dbg_msg(__func__, "snap->pots.size() %d", snap->pots.size());
+	//dbg_msg(__func__, "snap->pots.size() %d", snap->pots.size());
 	
 	// Pots
 	QString strPots;

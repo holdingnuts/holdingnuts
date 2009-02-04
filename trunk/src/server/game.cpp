@@ -679,9 +679,7 @@ int client_execute(clientcon *client, const char *cmd)
 	if (!t.count())
 		return 0;
 	
-#ifdef DEBUG
 	//dbg_msg("clientsock", "(%d) executing '%s'", client->sock, cmd);
-#endif
 	
 	// extract message-id if present
 	const char firstchar = t[0][0];

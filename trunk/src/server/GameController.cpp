@@ -588,6 +588,7 @@ void GameController::stateBlinds(Table *t)
 void GameController::stateBetting(Table *t)
 {
 	Player *p = t->seats[t->cur_player].player;
+	
 	bool allowed_action = false;  // is action allowed?
 	bool auto_action = false;
 	
@@ -596,12 +597,8 @@ void GameController::stateBetting(Table *t)
 	
 	float minimum_bet = determineMinimumBet(t);
 	
-	if (t->nomoreaction)  // early showdown, no more action at table possible
-	{
-		action = Player::None;
-		allowed_action = true;
-	}
-	else if ((int)p->stake == 0)  // player is allin and has no more options
+	if (t->nomoreaction ||		// early showdown, no more action at table possible, or
+		(int)p->stake == 0)	// player is allin and has no more options
 	{
 		action = Player::None;
 		allowed_action = true;
@@ -879,7 +876,7 @@ void GameController::stateBetting(Table *t)
 		// assign 'last action' to next active player
 		if (action == Player::Fold && t->cur_player == t->last_bet_player)
 			t->last_bet_player = t->getNextActivePlayer(t->last_bet_player);
-
+		
 		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		timeout_start = time(NULL);
