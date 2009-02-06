@@ -564,9 +564,6 @@ void GameController::stateBlinds(Table *t)
 	pBig->stake -= amount;
 	
 	
-	sendTableSnapshot(t);
-	
-	
 	// initialize the player's timeout
 	timeout_start = time(NULL);
 	
@@ -583,6 +580,8 @@ void GameController::stateBlinds(Table *t)
 	
 	t->betround = Table::Preflop;
 	t->scheduleState(Table::Betting, 3);
+	
+	sendTableSnapshot(t);
 }
 
 void GameController::stateBetting(Table *t)
@@ -867,8 +866,8 @@ void GameController::stateBetting(Table *t)
 		
 		t->resetLastPlayerActions();
 		
-		sendTableSnapshot(t);
 		t->scheduleState(Table::Betting, 2);
+		sendTableSnapshot(t);
 	}
 	else
 	{
@@ -881,8 +880,8 @@ void GameController::stateBetting(Table *t)
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		timeout_start = time(NULL);
 		
-		sendTableSnapshot(t);
 		t->scheduleState(Table::Betting, 1);
+		sendTableSnapshot(t);
 	}
 	
 	
@@ -1130,7 +1129,7 @@ void GameController::stateDelay(Table *t)
 {
 #ifndef SERVER_TESTING
 	if ((unsigned int) difftime(time(NULL), t->delay_start) >= t->delay)
-		t->state = t->scheduled_state;
+		t->delay = 0;
 #else
 	t->state = t->scheduled_state;
 #endif
@@ -1138,9 +1137,13 @@ void GameController::stateDelay(Table *t)
 
 int GameController::handleTable(Table *t)
 {
-	if (t->state == Table::Delay)
+	if (t->delay)
+	{
 		stateDelay(t);
-	else if (t->state == Table::NewRound)
+		return 0;
+	}
+	
+	if (t->state == Table::NewRound)
 		stateNewRound(t);
 	else if (t->state == Table::Blinds)
 		stateBlinds(t);
