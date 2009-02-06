@@ -28,14 +28,18 @@
 #include <QVBoxLayout>
 
 EditableSlider::EditableSlider(QWidget *parent)
-:	QWidget(parent)
+:	QWidget(parent),
+	m_nMin(0),
+	m_nMax(0)
 {
 	m_pEdit = new QLineEdit("0");
 	m_pEdit->setAlignment(Qt::AlignRight);
 	m_pEdit->setValidator(new QIntValidator(m_pEdit));
 		
 	m_pSlider = new QSlider(Qt::Horizontal);
-	m_pSlider->setRange(0, 99);
+	m_pSlider->setTickInterval(10);
+	m_pSlider->setSingleStep(1);
+	m_pSlider->setRange(0, 100);
 	m_pSlider->setValue(0);
 	
 	connect(m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
@@ -54,12 +58,14 @@ void EditableSlider::setMinimum(int value)
 	QString str;
 
 	m_pEdit->setText(str.setNum(value));
-	m_pSlider->setMinimum(value);
+	m_pSlider->setSliderPosition(0);
+	
+	m_nMin = value;
 }
 
 void EditableSlider::setMaximum(int value)
 {
-	m_pSlider->setMaximum(value);
+	m_nMax = value;
 }
 
 int EditableSlider::value() const
@@ -69,7 +75,31 @@ int EditableSlider::value() const
 
 void EditableSlider::setValue(int value)
 {
+	int amount = 0;
+	
+	if (!value)
+		amount = 0;
+	else if (value == 100)	// 100% == allin
+		amount = m_nMax;
+	else
+	{
+		if (value <= 40)
+			amount = (int)((m_nMax * 0.25) * value * 0.02);
+		else if (value > 40 && value <= 50)
+			amount = (int)((m_nMax * 0.35) * value * 0.02);
+		else if (value > 50 && value <= 60)
+			amount = (int)((m_nMax * 0.45) * value * 0.02);
+		else
+			amount = (int)(m_nMax * value / 100);
+		
+	}
+
+	amount += m_nMin;
+	
+	if (amount > m_nMax)
+		amount = m_nMax;
+
 	QString str;
 
-	m_pEdit->setText(str.setNum(value));
+	m_pEdit->setText(str.setNum(amount));
 }
