@@ -221,6 +221,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_nTid(tid),
 	m_pImgTable(0)
 {
+	//setAttribute(Qt::WA_DeleteOnClose); // FIXME: implement correctly
+
 	// scene
 	QGraphicsScene* pScene = new QGraphicsScene(0, 0, 900, 700, this);
 
@@ -438,7 +440,9 @@ void WTable::updateView()
 			
 			wseats[i]->setStake(seat->stake);
 			wseats[i]->setValid(seat->in_round);
-			wseats[i]->setCurrent(snap->s_cur == i);
+			
+			if (snap->state > Table::ElectDealer)
+				wseats[i]->setCurrent(snap->s_cur == i);
 			
 			if (seat->in_round)
 			{
@@ -502,8 +506,6 @@ void WTable::updateView()
 		timer->start();
 	}
 	
-	//dbg_msg(__func__, "snap->pots.size() %d", snap->pots.size());
-	
 	// Pots
 	QString strPots;
 	for (unsigned int t = 0; t < snap->pots.size(); ++t)
@@ -551,7 +553,7 @@ void WTable::updateView()
 	
 	if (snap->my_seat != -1)
 	{
-		seatinfo *s = &(snap->seats[snap->my_seat]);
+		const seatinfo *s = &(snap->seats[snap->my_seat]);
 		
 		// minimum bet
 		if (snap->minimum_bet > s->stake)

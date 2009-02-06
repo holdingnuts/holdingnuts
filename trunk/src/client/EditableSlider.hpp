@@ -50,6 +50,9 @@ public slots:
 protected:
 	QSlider		*m_pSlider;
 	QLineEdit	*m_pEdit;
+	
+	int			m_nMin;
+	int			m_nMax;
 };
 
 #endif /* _HOLDING_NUTS_EDITABLE_SLIDER_H */
