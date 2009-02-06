@@ -43,8 +43,7 @@ public:
 		AskShow,
 		AllFolded,
 		Showdown,
-		EndRound,
-		Delay
+		EndRound
 	} State;
 	
 	typedef enum {
@@ -98,7 +97,6 @@ private:
 	State state;
 	
 	// Delay state
-	State scheduled_state;
 	time_t delay_start;
 	unsigned int delay;
 	

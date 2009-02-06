@@ -287,8 +287,7 @@ void Table::resetLastPlayerActions()
 
 void Table::scheduleState(State sched_state, unsigned int delay_sec)
 {
-	state = Table::Delay;
-	scheduled_state = sched_state;
+	state = sched_state;
 	delay = delay_sec;
 	delay_start = time(NULL);
 }
