@@ -836,7 +836,7 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 		{
 			doConnect("localhost", DEFAULT_SERVER_PORT);
 			// TODO: wait for n seconds and then try to register a game
-			doRegister(0);
+			//doRegister(0);
 		}
 	}
 #endif
