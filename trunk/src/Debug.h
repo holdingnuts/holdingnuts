@@ -30,12 +30,12 @@
 #ifndef _MSC_VER
 
 # define dbg_msg(level, s, args...) \
-	do { fprintf(stderr, "[%s]: "s"\n", level, ##args) ; fflush(stderr); } while(0)
+	do { fprintf(stderr, "[%10s]  "s"\n", level, ##args) ; fflush(stderr); } while(0)
 
 #else /* _MSC_VER */
 
 # define dbg_msg(level, s, ...) \
-	do { fprintf(stderr, "[%s]: "s"\n", level, __VA_ARGS__) ; fflush(stderr); } while(0)
+	do { fprintf(stderr, "[%10s]  "s"\n", level, __VA_ARGS__) ; fflush(stderr); } while(0)
 
 #endif /* _MSC_VER */
 #endif /* DEBUG */

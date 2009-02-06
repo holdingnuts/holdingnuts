@@ -84,11 +84,11 @@ void EditableSlider::setValue(int value)
 	else
 	{
 		if (value <= 40)
-			amount = (int)((m_nMax * 0.25) * value * 0.02);
+			amount = (int)((m_nMax * .25f) * value * .02f);
 		else if (value > 40 && value <= 50)
-			amount = (int)((m_nMax * 0.35) * value * 0.02);
+			amount = (int)((m_nMax * .35f) * value * .02f);
 		else if (value > 50 && value <= 60)
-			amount = (int)((m_nMax * 0.45) * value * 0.02);
+			amount = (int)((m_nMax * .45f) * value * .02f);
 		else
 			amount = (int)(m_nMax * value / 100);
 		
