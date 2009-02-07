@@ -276,6 +276,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnMuck = new QPushButton(tr("Muck"), this);
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
+	QPushButton *btnBack = new QPushButton(tr("I'm back"), this);
+	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
+	
 	chkFold = new QCheckBox(tr("Fold"), this);
 	chkCheck = new QCheckBox(tr("Check"), this);
 	chkCall = new QCheckBox(tr("Call"), this);
@@ -299,21 +302,27 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lPostActions->addWidget(btnMuck);
 	lPostActions->addWidget(btnShow);
 	
-
+	QHBoxLayout *lSitoutActions = new QHBoxLayout();
+	lSitoutActions->addWidget(btnBack);
+	
+	
 	stlayActions = new QStackedLayout();
 	QWidget *pageActions = new QWidget(this);
 	QWidget *pagePreActions = new QWidget(this);
 	QWidget *pagePostActions = new QWidget(this);
 	QWidget *pageNoActions = new QWidget(this);
+	QWidget *pageSitoutActions = new QWidget(this);
 	
 	pageActions->setLayout(lActions);
 	pagePreActions->setLayout(lPreActions);
 	pagePostActions->setLayout(lPostActions);
+	pageSitoutActions->setLayout(lSitoutActions);
 	
 	m_nActions = stlayActions->addWidget(pageActions);
 	m_nPreActions = stlayActions->addWidget(pagePreActions);
 	m_nPostActions = stlayActions->addWidget(pagePostActions);
 	m_nNoAction = stlayActions->addWidget(pageNoActions);
+	m_nSitoutActions = stlayActions->addWidget(pageSitoutActions);
 
 	m_LayoutActions = new QLabel(this);
 	m_LayoutActions->setPixmap(QPixmap("gfx/table/actions.png"));
@@ -444,6 +453,7 @@ void WTable::updateView()
 			
 			wseats[i]->setStake(seat->stake);
 			wseats[i]->setValid(seat->in_round);
+			wseats[i]->setSitout(seat->sitout);
 			
 			if (snap->state > Table::ElectDealer)
 				wseats[i]->setCurrent(snap->s_cur == i);
@@ -576,7 +586,11 @@ void WTable::updateView()
 		m_pSliderCallAmount->setMaximum((int) s->stake);
 		
 		// show correct actions
-		if (!s->in_round ||
+		if (s->sitout)
+		{
+			stlayActions->setCurrentIndex(m_nSitoutActions);
+		}
+		else if (!s->in_round ||
 			snap->state == Table::AllFolded ||
 			snap->state == Table::Showdown ||
 			snap->state == Table::EndRound)
@@ -725,6 +739,13 @@ void WTable::actionShow()
 void WTable::actionMuck()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Muck);
+}
+
+void WTable::actionBack()
+{
+	((PClient*)qApp)->doSetAction(m_nGid, Player::Back);
+	
+	// FIXME: show available actions again
 }
 
 void WTable::slotShow()

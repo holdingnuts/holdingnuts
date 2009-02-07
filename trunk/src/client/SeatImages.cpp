@@ -33,6 +33,7 @@ const SeatImages& SeatImages::Instance()
 SeatImages::SeatImages()
 :	imgBack("gfx/table/seat.png"),
 	imgBackCurrent("gfx/table/seat_current.png"),
+	imgBackSitout("gfx/table/seat_sitout.png"),
 	imgActNone("gfx/table/action_none.png"),
 	imgActBet("gfx/table/action_bet.png"),
 	imgActCall("gfx/table/action_call.png"),

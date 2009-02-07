@@ -40,6 +40,7 @@ public:
 	void setName(const QString& name);
 	void setStake(qreal amount);
 	void setCurrent(bool cur);
+	void setSitout(bool sitout);
 	void setMySeat(bool bMyseat);
 	void setAction(Player::PlayerAction action, qreal amount = 0.0);
 	void setCards(const char *c1, const char *c2);
@@ -79,6 +80,8 @@ private:
 	bool					m_bMySeat;
 	//! \brief
 	bool					m_bCurrent;
+	//! \brief
+	bool					m_bSitout;
 	//! \brief Pointer to current Action Image
 	const QImage			*m_pCurrentActionImg;
 	//! \brief first Card

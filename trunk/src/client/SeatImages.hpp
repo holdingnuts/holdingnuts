@@ -33,13 +33,15 @@ public:
 
 	//! \brief Background Image
 	const QImage 		imgBack;
-	//! \brief Background Image
+	//! \brief Background Image for current player
 	const QImage 		imgBackCurrent;
+	//! \brief Background Image for sitout player
+	const QImage 		imgBackSitout;
 	//! \brief Action Image None
 	const QImage		imgActNone;
 	//! \brief Action Image Bet
 	const QImage		imgActBet;
-	//! \brief Action Image Call11
+	//! \brief Action Image Call
 	const QImage		imgActCall;
 	//! \brief Action Image Check
 	const QImage		imgActCheck;
