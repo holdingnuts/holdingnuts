@@ -94,6 +94,10 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 				m_pCurrentActionImg = &SeatImages::Instance().imgActMuck;
 				m_strAmount.setNum(amount, 'f', 2);
 			break;
+		case Player::Allin:
+				m_pCurrentActionImg = &SeatImages::Instance().imgActAllin;
+				m_strAmount.setNum(amount, 'f', 2);
+			break;
 		default:
 			break;
 	}
