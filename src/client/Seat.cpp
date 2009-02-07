@@ -108,6 +108,11 @@ void Seat::setCurrent(bool cur)
 	m_bCurrent = cur;
 }
 
+void Seat::setSitout(bool sitout)
+{
+	m_bSitout = sitout;
+}
+
 void Seat::setMySeat(bool bMyseat)
 {
 	m_bMySeat = bMyseat;
@@ -184,33 +189,21 @@ void Seat::paint(
 
 	painter->setRenderHint(QPainter::SmoothPixmapTransform);
 
-	if (m_bCurrent)
-	{
-		painter->drawImage(
-			QRectF(
-				0,
-				0,
-				seat_width + m_pCurrentActionImg->width(),
-				seat_height),
-			SeatImages::Instance().imgBackCurrent);
-//		painter->drawImage(
-//			QRectF(
-//				wpos.x(),
-//				wpos.y() + SeatImages::Instance().imgBackCurrent.height(),
-//				SeatImages::Instance().imgTimeout.width(),
-//				SeatImages::Instance().imgTimeout.height()),
-//			SeatImages::Instance().imgTimeout);
-	}
+	const QImage *imgBack;
+	if (m_bSitout)
+		imgBack = &(SeatImages::Instance().imgBackSitout);
+	else if (m_bCurrent)
+		imgBack = &(SeatImages::Instance().imgBackCurrent);
 	else
-	{
-		painter->drawImage(
-			QRectF(
-				0,
-				0,
-				seat_width + m_pCurrentActionImg->width(),
-				seat_height),
-			SeatImages::Instance().imgBack);
-	}
+		imgBack = &(SeatImages::Instance().imgBack);
+	
+	painter->drawImage(
+		QRectF(
+			0,
+			0,
+			seat_width + m_pCurrentActionImg->width(),
+			seat_height),
+		*imgBack);
 
 	// action
 	if (m_pCurrentActionImg)

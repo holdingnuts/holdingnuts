@@ -49,6 +49,7 @@ typedef struct {
 	float bet;
 	float stake;
 	bool in_round;
+	bool sitout;
 	Player::PlayerAction action;
 	HoleCards holecards;
 } seatinfo;
@@ -108,8 +109,10 @@ private slots:
 	void actionBetRaise();
 	void actionShow();
 	void actionMuck();
+	void actionBack();
 
 	void slotShow();
+	
 	
 private:
 	//! \brief Game ID
@@ -142,7 +145,8 @@ private:
 	int				m_nActions;
 	int				m_nPreActions;
 	int				m_nPostActions;
-	int 			m_nNoAction;
+	int				m_nNoAction;
+	int				m_nSitoutActions;
 };
 
 #endif /* _WTABLE_H */

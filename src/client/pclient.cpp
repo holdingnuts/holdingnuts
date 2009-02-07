@@ -299,7 +299,8 @@ void server_cmd_snap(Tokenizer& t)
 				int pstate = st.getNextInt();
 				if (pstate & PlayerInRound)
 					si.in_round = true;
-				// FIXME: player-sitout
+				if (pstate & PlayerSitout)
+					si.sitout = true;
 				
 				si.stake = st.getNextFloat();
 				si.bet = st.getNextFloat();
@@ -660,6 +661,8 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 		return false;
 	
 	const char *saction = "";
+	bool bAmount = false;
+	
 	switch ((int) action)
 	{
 	case Player::Fold:
@@ -667,9 +670,11 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 		break;
 	case Player::Call:
 		saction = "call";
+		bAmount = true;
 		break;
 	case Player::Raise:
 		saction = "raise";
+		bAmount = true;
 		break;
 	case Player::Allin:
 		saction = "allin";
@@ -683,11 +688,21 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 	case Player::ResetAction:
 		saction = "reset";
 		break;
+	case Player::Back:
+		saction = "back";
+		break;
+	case Player::Sitout:
+		saction = "sitout";
+		break;
 	}
 	
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "ACTION %d %s %0.2f",
-		gid, saction, amount);
+	if (bAmount)
+		snprintf(msg, sizeof(msg), "ACTION %d %s %0.2f",
+			gid, saction, amount);
+	else
+		snprintf(msg, sizeof(msg), "ACTION %d %s",
+			gid, saction);
 	
 	send_msg(msg);
 	
@@ -899,7 +914,7 @@ int main(int argc, char **argv)
 	
 	
 	// change into data-dir
-	const char* datadir = sys_data_path();
+	const char *datadir = sys_data_path();
 	if (datadir)
 	{
 		log_msg("main", "Using data-directory: %s", datadir);
