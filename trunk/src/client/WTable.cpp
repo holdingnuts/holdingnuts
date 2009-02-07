@@ -277,10 +277,12 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
 	chkFold = new QCheckBox(tr("Fold"), this);
-
-
-	m_pSliderAmount = new EditableSlider;
+	chkCheck = new QCheckBox(tr("Check"), this);
+	chkCall = new QCheckBox(tr("Call"), this);
 	
+	m_pSliderAmount = new EditableSlider;
+	m_pSliderCallAmount = new EditableSlider;
+
 	QHBoxLayout *lActions = new QHBoxLayout();
 	lActions->addWidget(btnFold);
 	lActions->addWidget(btnCheckCall);
@@ -289,7 +291,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	QHBoxLayout *lPreActions = new QHBoxLayout();
 	lPreActions->addWidget(chkFold);
-	
+	lPreActions->addWidget(chkCheck);
+//	lPreActions->addWidget(chkCall);
+	lPreActions->addWidget(m_pSliderCallAmount);
+
 	QHBoxLayout *lPostActions = new QHBoxLayout();
 	lPostActions->addWidget(btnMuck);
 	lPostActions->addWidget(btnShow);
@@ -305,11 +310,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	pagePreActions->setLayout(lPreActions);
 	pagePostActions->setLayout(lPostActions);
 	
-	stlayActions->addWidget(pageActions);
-	stlayActions->addWidget(pagePreActions);
-	stlayActions->addWidget(pagePostActions);
-	stlayActions->addWidget(pageNoActions);
-	
+	m_nActions = stlayActions->addWidget(pageActions);
+	m_nPreActions = stlayActions->addWidget(pagePreActions);
+	m_nPostActions = stlayActions->addWidget(pagePostActions);
+	m_nNoAction = stlayActions->addWidget(pageNoActions);
 
 	m_LayoutActions = new QLabel(this);
 	m_LayoutActions->setPixmap(QPixmap("gfx/table/actions.png"));
@@ -446,6 +450,7 @@ void WTable::updateView()
 			
 			if (seat->in_round)
 			{
+				// TODO: allin action gfx
 				wseats[i]->setAction(seat->action, seat->bet);
 				wseats[i]->setMySeat(my_cid == cid);
 				
@@ -557,12 +562,19 @@ void WTable::updateView()
 		
 		// minimum bet
 		if (snap->minimum_bet > s->stake)
+		{
 			m_pSliderAmount->setMinimum((int) s->stake);
+			m_pSliderCallAmount->setMinimum((int) s->stake);
+		}
 		else
+		{
 			m_pSliderAmount->setMinimum((int) snap->minimum_bet);
+			m_pSliderCallAmount->setMinimum((int) snap->minimum_bet);
+		}
 		
 		// maximum bet is stake size
 		m_pSliderAmount->setMaximum((int) s->stake);
+		m_pSliderCallAmount->setMaximum((int) s->stake);
 		
 		// show correct actions
 		if (!s->in_round ||
@@ -570,16 +582,16 @@ void WTable::updateView()
 			snap->state == Table::Showdown ||
 			snap->state == Table::EndRound)
 		{
-			stlayActions->setCurrentIndex(3);
+			stlayActions->setCurrentIndex(m_nNoAction);
 		}
 		else
 		{
 			if (snap->state == Table::AskShow)
 			{
 				if ((int)snap->s_cur == snap->my_seat)
-					stlayActions->setCurrentIndex(2);
+					stlayActions->setCurrentIndex(m_nPostActions);
 				else
-					stlayActions->setCurrentIndex(3);
+					stlayActions->setCurrentIndex(m_nNoAction);
 			}
 			else
 			{
@@ -590,11 +602,33 @@ void WTable::updateView()
 						actionFold();
 						chkFold->setCheckState(Qt::Unchecked);
 					}
+/*					
+// TODO: only check if no one raised
+					else if (chkCheck->checkState() == Qt::Checked)
+					{
+						actionCheckCall();
+						chkCheck->setCheckState(Qt::Unchecked);
+					}
+*/					
+					else if (chkCall->checkState() == Qt::Checked)
+					{
+						if (m_pSliderCallAmount->value() >= snap->minimum_bet)
+							actionCheckCall();
+						else
+							stlayActions->setCurrentIndex(m_nActions);
+
+						chkCall->setCheckState(Qt::Unchecked);
+					}
 					else
-						stlayActions->setCurrentIndex(0);
+					{
+ 						if (s->stake == 0)
+							stlayActions->setCurrentIndex(m_nNoAction);
+						else
+							stlayActions->setCurrentIndex(m_nActions);
+					}
 				}
 				else
-					stlayActions->setCurrentIndex(1);
+					stlayActions->setCurrentIndex(m_nPreActions);
 			}
 		}
 		

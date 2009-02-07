@@ -123,7 +123,6 @@ private:
 	DealerButton			*m_pDealerButton;
 	//! \brief Seats
 	Seat					*wseats[10];
-//	std::vector<Seat*>	m_Seats;		// TODO: über scene ansprechen
 	//! \brief
 	std::vector<QGraphicsPixmapItem*>	m_CommunityCards;
 
@@ -134,7 +133,16 @@ private:
 	QLabel			*lblPots;
 	QLabel			*lblHandStrength;
 	EditableSlider		*m_pSliderAmount;
+	EditableSlider		*m_pSliderCallAmount;
 	QCheckBox 		*chkFold;
+	QCheckBox		*chkCheck;
+	QCheckBox		*chkCall;
+	
+	// stackedlayout widgets id
+	int				m_nActions;
+	int				m_nPreActions;
+	int				m_nPostActions;
+	int 			m_nNoAction;
 };
 
 #endif /* _WTABLE_H */
