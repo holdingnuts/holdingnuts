@@ -20,6 +20,7 @@
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
+
 #include "Config.h"
 #include "Logger.h"
 #include "Debug.h"
@@ -36,7 +37,7 @@
 #include <cstdio>
 #include <string>
 
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 # include <signal.h>
 #endif
 
@@ -809,8 +810,6 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connected = false;
 	connecting = false;
 	
-	// change into data-dir
-	QDir::setCurrent("data");
 	
 	QString locale;
 	if (config.get("locale").length())
@@ -872,7 +871,7 @@ int main(int argc, char **argv)
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
 		qVersion());
 	
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 	// ignore broken-pipe signal eventually caused by sockets
 	signal(SIGPIPE, SIG_IGN);
 #endif
@@ -897,6 +896,21 @@ int main(int argc, char **argv)
 	snprintf(dbgfile, sizeof(dbgfile), "%s/client.debug", sys_config_path());
 	/*filetype *dbglog = */ file_reopen(dbgfile, mode_write, stderr);  // omit closing
 #endif
+	
+	
+	// change into data-dir
+	const char* datadir = sys_data_path();
+	if (datadir)
+	{
+		log_msg("main", "Using data-directory: %s", datadir);
+		sys_chdir(datadir);
+	}
+	else
+	{
+		log_msg("main", "Error: data-directory was not found");
+		return 1;
+	}
+	
 	
 	network_init();
 	

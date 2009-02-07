@@ -28,7 +28,7 @@
 #include <cstring>
 #include <ctime>
 
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 # include <signal.h>
 #endif
 
@@ -799,7 +799,7 @@ int mainloop()
 		FD_ZERO(&fds);
 		
 		/* add stdin and connected-socket to the fd-set */
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 		FD_SET(STDIN_FILENO, &fds);
 #else
 		input_handle();
@@ -810,7 +810,7 @@ int mainloop()
 		// are there any modified descriptors?
 		if (select(max + 1, &fds, NULL, NULL, &timeout))
 		{
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 			if (FD_ISSET(STDIN_FILENO, &fds))
 				input_handle();
 #endif
@@ -845,7 +845,7 @@ int main(int argc, char **argv)
 	log_msg("main", "HoldingNuts pclient_t version %d.%d.%d",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 	// ignore broken-pipe signal eventually caused by sockets
 	signal(SIGPIPE, SIG_IGN);
 #endif

@@ -26,46 +26,50 @@
 
 #if defined(PLATFORM_WINDOWS)
 # include <dirent.h>
+# include <io.h>
 #else
-# include <sys/stat.h>
-# include <sys/types.h>
+# include <unistd.h>
 #endif
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "SysAccess.h"
+#include "Debug.h"
 
 
 const char* build_mode_string(int mode)
 {
 	static char mode_str[4];
-	unsigned int seq_pos = 0;
+	char *ms = mode_str;
 	
 	if (mode & mode_read && mode & mode_write)
 	{
-		mode_str[seq_pos++] = 'w';
-		mode_str[seq_pos++] = '+';
+		*ms++ = 'w';
+		*ms++ = '+';
 	}
 	else if (mode & mode_read && mode & mode_append)
 	{
-		mode_str[seq_pos++] = 'a';
-		mode_str[seq_pos++] = '+';
+		*ms++ = 'a';
+		*ms++ = '+';
 	}
 	else
 	{
 		if (mode & mode_read)
-			mode_str[seq_pos++] = 'r';
+			*ms++ = 'r';
 		
 		if (mode & mode_write)
-			mode_str[seq_pos++] = 'w';
+			*ms++ = 'w';
 		
 		if (mode & mode_append)
-			mode_str[seq_pos++] = 'a';
+			*ms++ = 'a';
 	}
 	
 #if defined(PLATFORM_WINDOWS)
-	mode_str[seq_pos++] = 'b';
+	*ms++ = 'b';
 #endif
 	
-	mode_str[seq_pos++] = '\0';
+	*ms = '\0';
 	
 	return mode_str;
 }
@@ -178,6 +182,26 @@ int sys_mkdir(const char *path)
 	return -1;
 }
 
+int sys_isdir(const char *path)
+{
+	struct stat sb;
+	if (stat(path, &sb) == -1)
+		return 0;
+
+	if (S_ISDIR(sb.st_mode))
+		return 1;
+	
+	return 0;
+}
+
+int sys_chdir(const char *path)
+{
+	if (chdir(path) == -1)
+		return -1;
+	
+	return 0;
+}
+
 const char* sys_config_path()
 {
 	static char path[1024];
@@ -199,4 +223,29 @@ const char* sys_config_path()
 #endif
 	
 	return path;
+}
+
+const char* sys_data_path()
+{
+	unsigned int i;
+	static char *search_dirs[] = {
+		"data",
+#if !defined(PLATFORM_WINDOWS)
+		"/usr/share/" CONFIG_APPNAME "/data",
+		"/usr/share/games/" CONFIG_APPNAME "/data",
+		"/usr/local/share/" CONFIG_APPNAME "/data",
+		"/usr/local/games/" CONFIG_APPNAME "/data",
+		"/opt/" CONFIG_APPNAME "/data",
+#endif
+	};
+	
+	const unsigned int count = sizeof(search_dirs) / sizeof(search_dirs[0]);
+	
+	for (i=0; i < count; i++)
+	{
+		if (sys_isdir(search_dirs[i]))
+			return search_dirs[i];
+	}
+	
+	return 0;
 }
