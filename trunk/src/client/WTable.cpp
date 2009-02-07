@@ -292,7 +292,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QHBoxLayout *lPreActions = new QHBoxLayout();
 	lPreActions->addWidget(chkFold);
 	lPreActions->addWidget(chkCheck);
-//	lPreActions->addWidget(chkCall);
+	lPreActions->addWidget(chkCall);
 	lPreActions->addWidget(m_pSliderCallAmount);
 
 	QHBoxLayout *lPostActions = new QHBoxLayout();
@@ -450,7 +450,6 @@ void WTable::updateView()
 			
 			if (seat->in_round)
 			{
-				// TODO: allin action gfx
 				wseats[i]->setAction(seat->action, seat->bet);
 				wseats[i]->setMySeat(my_cid == cid);
 				
@@ -602,14 +601,31 @@ void WTable::updateView()
 						actionFold();
 						chkFold->setCheckState(Qt::Unchecked);
 					}
-/*					
-// TODO: only check if no one raised
 					else if (chkCheck->checkState() == Qt::Checked)
 					{
-						actionCheckCall();
+						bool bGreaterBet = false;
+
+						for (unsigned int i=0; i < nMaxSeats; i++)
+						{
+							seatinfo *seat = &(snap->seats[i]);
+	
+							if (seat->valid)
+							{
+								if (seat->bet > s->bet)
+								{
+									bGreaterBet = true;
+										break;
+								}
+							}
+						}
+						
+						if (bGreaterBet == false)
+							actionCheckCall();
+						else
+							stlayActions->setCurrentIndex(m_nActions);
+					
 						chkCheck->setCheckState(Qt::Unchecked);
 					}
-*/					
 					else if (chkCall->checkState() == Qt::Checked)
 					{
 						if (m_pSliderCallAmount->value() >= snap->minimum_bet)
@@ -621,7 +637,7 @@ void WTable::updateView()
 					}
 					else
 					{
- 						if (s->stake == 0)
+ 						if ((int)s->stake == 0)
 							stlayActions->setCurrentIndex(m_nNoAction);
 						else
 							stlayActions->setCurrentIndex(m_nActions);
