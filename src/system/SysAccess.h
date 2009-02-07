@@ -64,7 +64,11 @@ char* file_readline(filetype *fp, char *buf, int max);
 int file_writeline(filetype *fp, const char *buf);
 
 int sys_mkdir(const char *path);
+int sys_isdir(const char *path);
+int sys_chdir(const char *path);
+
 const char* sys_config_path();
+const char* sys_data_path();
 
 #if defined __cplusplus
     }

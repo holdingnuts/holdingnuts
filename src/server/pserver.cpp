@@ -26,7 +26,7 @@
 #include <cstring>
 #include <ctime>
 
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 # include <signal.h>
 #endif
 
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 	log_msg("main", "HoldingNuts pserver (version %d.%d.%d)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	
-#if not defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS)
 	// ignore broken-pipe signal eventually caused by sockets
 	signal(SIGPIPE, SIG_IGN);
 #endif
