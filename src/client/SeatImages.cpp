@@ -41,5 +41,6 @@ SeatImages::SeatImages()
 	imgActMuck("gfx/table/action_muck.png"),
 	imgActRaise("gfx/table/action_raise.png"),
 	imgActShow("gfx/table/action_show.png"),
+	imgActAllin("gfx/table/action_allin.png"),
 	imgTimeout("gfx/table/timeout.png")
 { }

@@ -51,6 +51,8 @@ public:
 	const QImage		imgActRaise;
 	//! \brief Action Image Show
 	const QImage		imgActShow;
+	//! \brief Action Image Allin
+	const QImage		imgActAllin;
 	//! \brief Timeout Image
 	const QImage		imgTimeout;
 
