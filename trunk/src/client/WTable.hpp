@@ -102,6 +102,8 @@ protected:
 		unsigned int nSeatID,
 		int distance = 100) const;
 	QPointF calcCCardsPos(unsigned int nCard) const;
+	
+	void doSitout(bool bSitout);
 
 private slots:
 	void actionFold();
@@ -110,6 +112,7 @@ private slots:
 	void actionShow();
 	void actionMuck();
 	void actionBack();
+	void actionSitout();
 
 	void slotShow();
 	

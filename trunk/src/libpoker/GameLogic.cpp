@@ -44,7 +44,7 @@ using namespace std;
 	StraightFlush    Top card               -
 */
 
-bool GameLogic::getStrength(HoleCards *hole, CommunityCards *community, HandStrength *strength)
+bool GameLogic::getStrength(const HoleCards *hole, const CommunityCards *community, HandStrength *strength)
 {
 	HandStrength::Ranking *r = &(strength->ranking);
 	vector<Card> *rank = &(strength->rank);

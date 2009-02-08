@@ -279,6 +279,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnBack = new QPushButton(tr("I'm back"), this);
 	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
 	
+	QPushButton *btnSitout = new QPushButton(tr("Sitout"), this);
+	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
+	
 	chkFold = new QCheckBox(tr("Fold"), this);
 	chkCheck = new QCheckBox(tr("Check"), this);
 	chkCall = new QCheckBox(tr("Call"), this);
@@ -296,7 +299,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lPreActions->addWidget(chkFold);
 	lPreActions->addWidget(chkCheck);
 	lPreActions->addWidget(chkCall);
-	lPreActions->addWidget(m_pSliderCallAmount);
+	lPreActions->addWidget(m_pSliderCallAmount);   // FIXME: remove this one
+	lPreActions->addWidget(btnSitout);   // FIXME: display outside StackedLayout
 	
 	QHBoxLayout *lPostActions = new QHBoxLayout();
 	lPostActions->addWidget(btnMuck);
@@ -429,17 +433,17 @@ void WTable::updateView()
 {
 	int my_cid = ((PClient*)qApp)->getMyCId();
 	
-	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
 	Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
 
-	table_snapshot *snap = &(tinfo->snap);
+	const table_snapshot *snap = &(tinfo->snap);
 	
 	Q_ASSERT_X(snap, __func__, "invalid snapshot pointer");
 
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
-		seatinfo *seat = &(snap->seats[i]);
+		const seatinfo *seat = &(snap->seats[i]);
 	
 		if (seat->valid)
 		{
@@ -619,15 +623,12 @@ void WTable::updateView()
 
 						for (unsigned int i=0; i < nMaxSeats; i++)
 						{
-							seatinfo *seat = &(snap->seats[i]);
+							const seatinfo *seat = &(snap->seats[i]);
 	
-							if (seat->valid)
+							if (seat->valid && seat->bet > s->bet)
 							{
-								if (seat->bet > s->bet)
-								{
-									bGreaterBet = true;
-										break;
-								}
+								bGreaterBet = true;
+									break;
 							}
 						}
 						
@@ -739,11 +740,38 @@ void WTable::actionMuck()
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Muck);
 }
 
+void WTable::doSitout(bool bSitout)
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+	
+	const table_snapshot *snap = &(tinfo->snap);
+	if (!snap)
+		return;
+	
+	if (snap->my_seat == -1)
+		return;
+	
+	seatinfo *seat = (seatinfo*) &(snap->seats[snap->my_seat]);
+	
+	// set sitout and show available actions again
+	seat->sitout = bSitout;
+	updateView();
+}
+
+void WTable::actionSitout()
+{
+	((PClient*)qApp)->doSetAction(m_nGid, Player::Sitout);
+	
+	doSitout(true);
+}
+
 void WTable::actionBack()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Back);
 	
-	// FIXME: show available actions again
+	doSitout(false);
 }
 
 void WTable::slotShow()
