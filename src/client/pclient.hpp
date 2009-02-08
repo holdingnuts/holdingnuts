@@ -118,6 +118,10 @@ private slots:
 	void slotConnected(int n);
 	void slotReceived(int n);
 	void slotConnectTimeout();
+	
+#ifdef DEBUG
+	void slotDbgRegister();
+#endif
 };
 
 #endif /* _PCLIENT_H */

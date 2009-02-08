@@ -820,6 +820,14 @@ int PClient::getMyCId()
 	return srv.cid;
 }
 
+#ifdef DEBUG
+void PClient::slotDbgRegister()
+{
+	const int gid = config.getInt("dbg_register");
+	doRegister(gid);
+}
+#endif
+
 PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 {
 	connected = false;
@@ -842,16 +850,12 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	wMain->updateConnectionStatus();
 	wMain->show();
 
-#ifdef DEBUG	
-	// parse commandline arguments in debugmode
-	if (argc == 2)
+#ifdef DEBUG
+	if (config.getInt("dbg_register") != -1)
 	{
-		if (strcmp(argv[1], "--dbg_register") == 0)
-		{
-			doConnect("localhost", DEFAULT_SERVER_PORT);
-			// TODO: wait for n seconds and then try to register a game
-			//doRegister(0);
-		}
+		doConnect(config.get("default_host").c_str(),
+			config.getInt("default_port"));
+		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 	}
 #endif
 }
