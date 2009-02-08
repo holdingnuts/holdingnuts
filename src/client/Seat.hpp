@@ -45,6 +45,8 @@ public:
 	void setAction(Player::PlayerAction action, qreal amount = 0.0);
 	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
+	void showBigCards(bool bShow) { m_bBigCards = bShow; };
+	void showSmallCards(bool bShow) { m_bSmallCards = bShow; };
 
 	virtual QRectF boundingRect() const;
 	virtual QRectF boundingRectSeat() const;
@@ -88,6 +90,10 @@ private:
 	QImage					m_FirstCard;
 	//! \brief second Card
 	QImage					m_SecondCard;
+	//! \brief display big-cards
+	bool					m_bSmallCards;
+	//! \brief display small-cards
+	bool					m_bBigCards;
 };
 
 #endif /* _HOLDING_NUTS_SEAT_H */
