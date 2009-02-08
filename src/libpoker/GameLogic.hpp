@@ -50,8 +50,8 @@ public:
 	Ranking getRanking() const { return ranking; };
 	static const char* getRankingName(Ranking r);
 	
-	void copyRankCards(std::vector<Card> *v) { v->insert(v->end(), rank.begin(), rank.end()); };
-	void copyKickerCards(std::vector<Card> *v) { v->insert(v->end(), kicker.begin(), kicker.end()); };
+	void copyRankCards(std::vector<Card> *v) const { v->insert(v->end(), rank.begin(), rank.end()); };
+	void copyKickerCards(std::vector<Card> *v) const { v->insert(v->end(), kicker.begin(), kicker.end()); };
 	
 	void setId(int rid) { id = rid; };
 	int getId() const { return id; };
@@ -73,7 +73,7 @@ class GameLogic
 public:
 	GameLogic();
 	
-	static bool getStrength(HoleCards *hole, CommunityCards *community, HandStrength *strength);
+	static bool getStrength(const HoleCards *hole, const CommunityCards *community, HandStrength *strength);
 	
 	static bool isTwoPair(std::vector<Card> *allcards, std::vector<Card> *rank, std::vector<Card> *kicker);
 	static bool isStraight(std::vector<Card> *allcards, const int suit, std::vector<Card> *rank);
