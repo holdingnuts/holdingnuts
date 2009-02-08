@@ -61,7 +61,7 @@ void Seat::setStake(qreal amount)
 
 void Seat::setAction(Player::PlayerAction action, qreal amount)
 {
-	switch (action)
+	switch ((int)action)
 	{
 		case Player::None:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
@@ -97,8 +97,6 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 		case Player::Allin:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActAllin;
 				m_strAmount.setNum(amount, 'f', 2);
-			break;
-		default:
 			break;
 	}
 }
@@ -179,6 +177,11 @@ void Seat::paint(
 	const QStyleOptionGraphicsItem *option,
 	QWidget *widget)
 {
+	// seat is not occupied, don't paint anything
+	if (!m_bValid)
+		return;
+	
+	
 	// image card backside
 	static QImage imgCardBackside("gfx/deck/default/back.png");
 	
@@ -188,9 +191,6 @@ void Seat::paint(
 	const qreal seat_height = SeatImages::Instance().imgBack.height();
 
 	painter->setRenderHint(QPainter::SmoothPixmapTransform);
-
-	if (!m_bValid)
-		return;
 	
 	const QImage *imgBack;
 	if (m_bSitout)
@@ -251,8 +251,8 @@ void Seat::paint(
 		Qt::AlignRight,
 		m_strAmount);
 
-	// cards
-	if (m_bMySeat)
+	// big-cards
+	if (m_bBigCards)
 	{
 		painter->drawImage(
 			QRectF(
@@ -269,7 +269,9 @@ void Seat::paint(
 				sy_card),
 			m_SecondCard);
 	}
-	else // draw small cards
+	
+	// small cards
+	if (m_bSmallCards)
 	{
 		qreal sx_pos = 0;
 		qreal sy_pos = 0;

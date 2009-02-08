@@ -456,7 +456,7 @@ void WTable::updateView()
 				wseats[i]->setName("???");
 			
 			wseats[i]->setStake(seat->stake);
-			wseats[i]->setValid(seat->in_round);
+			wseats[i]->setValid(true);
 			wseats[i]->setSitout(seat->sitout);
 			
 			if (snap->state > Table::ElectDealer)
@@ -484,6 +484,8 @@ void WTable::updateView()
 					strcpy(card1, allcards[0].getName());
 					strcpy(card2, allcards[1].getName());
 					wseats[i]->setCards(card1, card2);
+					
+					wseats[i]->showBigCards(true);
 				}
 				else
 				{
@@ -491,12 +493,18 @@ void WTable::updateView()
 						wseats[i]->setCards("blank", "blank");
 					else
 						wseats[i]->setCards("back", "back");
+					
+					wseats[i]->showBigCards(false);
 				}
+				
+				wseats[i]->showSmallCards(true);
 			}
 			else   // player isn't anymore involved in current hand
 			{
 				wseats[i]->setAction(seat->action);
 				wseats[i]->setCards("blank", "blank");
+				wseats[i]->showBigCards(false);
+				wseats[i]->showSmallCards(false);
 			}
 
 //			this->scene()->update(wseats[i]->boundingRect());
@@ -810,12 +818,12 @@ void WTable::resizeEvent(QResizeEvent *event)
 			m_pDealerButton->pos().x() * ratio_x,
 			m_pDealerButton->pos().y() * ratio_y);
 
-		for(unsigned int i = 0; i < m_CommunityCards.size(); ++i)
+		for (unsigned int i = 0; i < m_CommunityCards.size(); ++i)
 		{
 			m_CommunityCards[i]->setPos(
 				m_CommunityCards[i]->pos().x() * ratio_x,
 				m_CommunityCards[i]->pos().y() * ratio_y);
-				
+			
 			m_CommunityCards[i]->scale(ratio_x, ratio_y);				
 		}
 	}	
