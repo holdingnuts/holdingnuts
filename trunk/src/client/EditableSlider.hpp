@@ -29,6 +29,7 @@
 
 class QSlider;
 class QLineEdit;
+class QIntValidator;
 
 class EditableSlider : public QWidget
 {
@@ -50,7 +51,8 @@ public slots:
 protected:
 	QSlider		*m_pSlider;
 	QLineEdit	*m_pEdit;
-	
+	QIntValidator	*m_pValidator;
+			
 	int			m_nMin;
 	int			m_nMax;
 };

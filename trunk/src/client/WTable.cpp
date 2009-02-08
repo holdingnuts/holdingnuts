@@ -297,7 +297,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lPreActions->addWidget(chkCheck);
 	lPreActions->addWidget(chkCall);
 	lPreActions->addWidget(m_pSliderCallAmount);
-
+	
 	QHBoxLayout *lPostActions = new QHBoxLayout();
 	lPostActions->addWidget(btnMuck);
 	lPostActions->addWidget(btnShow);
@@ -460,7 +460,11 @@ void WTable::updateView()
 			
 			if (seat->in_round)
 			{
-				wseats[i]->setAction(seat->action, seat->bet);
+				if (seat->stake == 0)
+					wseats[i]->setAction(Player::Allin, seat->bet);
+				else
+					wseats[i]->setAction(seat->action, seat->bet);
+				
 				wseats[i]->setMySeat(my_cid == cid);
 				
 				std::vector<Card> allcards;
@@ -571,15 +575,9 @@ void WTable::updateView()
 		
 		// minimum bet
 		if (snap->minimum_bet > s->stake)
-		{
 			m_pSliderAmount->setMinimum((int) s->stake);
-			m_pSliderCallAmount->setMinimum((int) s->stake);
-		}
 		else
-		{
 			m_pSliderAmount->setMinimum((int) snap->minimum_bet);
-			m_pSliderCallAmount->setMinimum((int) snap->minimum_bet);
-		}
 		
 		// maximum bet is stake size
 		m_pSliderAmount->setMaximum((int) s->stake);
@@ -642,7 +640,7 @@ void WTable::updateView()
 					}
 					else if (chkCall->checkState() == Qt::Checked)
 					{
-						if (m_pSliderCallAmount->value() >= snap->minimum_bet)
+						if (m_pSliderCallAmount->value() >= (int)snap->minimum_bet)
 							actionCheckCall();
 						else
 							stlayActions->setCurrentIndex(m_nActions);
@@ -728,7 +726,7 @@ void WTable::actionBetRaise()
 	if (amount == snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Allin);
 	else
-		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, amount);
+		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, amount + snap->seats[snap->my_seat].bet);
 }
 
 void WTable::actionShow()

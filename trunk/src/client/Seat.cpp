@@ -189,6 +189,9 @@ void Seat::paint(
 
 	painter->setRenderHint(QPainter::SmoothPixmapTransform);
 
+	if (!m_bValid)
+		return;
+	
 	const QImage *imgBack;
 	if (m_bSitout)
 		imgBack = &(SeatImages::Instance().imgBackSitout);
@@ -198,13 +201,24 @@ void Seat::paint(
 		imgBack = &(SeatImages::Instance().imgBack);
 	
 	painter->drawImage(
-		QRectF(
+			QRectF(
 			0,
 			0,
 			seat_width + m_pCurrentActionImg->width(),
 			seat_height),
 		*imgBack);
-
+	
+// 	if (m_bCurrent)
+// 	{
+//		painter->drawImage(
+//			QRectF(
+//				wpos.x(),
+//				wpos.y() + SeatImages::Instance().imgBackCurrent.height(),
+//				SeatImages::Instance().imgTimeout.width(),
+//				SeatImages::Instance().imgTimeout.height()),
+//			SeatImages::Instance().imgTimeout);
+// 	}
+	
 	// action
 	if (m_pCurrentActionImg)
 	{
@@ -227,9 +241,6 @@ void Seat::paint(
 			seat_height),
 		Qt::AlignVCenter | Qt::AlignCenter,
 		m_strName + "\n" + m_strStake);
-
-	if (!m_bValid)
-		return;
 
 	painter->drawText(
 		QRectF(

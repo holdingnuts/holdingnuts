@@ -34,8 +34,11 @@ EditableSlider::EditableSlider(QWidget *parent)
 {
 	m_pEdit = new QLineEdit("0");
 	m_pEdit->setAlignment(Qt::AlignRight);
-	m_pEdit->setValidator(new QIntValidator(m_pEdit));
 		
+	m_pValidator = new QIntValidator(m_pEdit);
+	
+	m_pEdit->setValidator(m_pValidator);
+			
 	m_pSlider = new QSlider(Qt::Horizontal);
 	m_pSlider->setTickInterval(10);
 	m_pSlider->setSingleStep(1);
@@ -44,7 +47,7 @@ EditableSlider::EditableSlider(QWidget *parent)
 	
 	connect(m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
 	
-	QVBoxLayout *layout = new QVBoxLayout;
+	QVBoxLayout *layout = new QVBoxLayout(parent);
 		layout->setSizeConstraint(QLayout::SetMinimumSize); 
 		layout->addWidget(m_pEdit);
 		layout->addWidget(m_pSlider);
@@ -59,6 +62,7 @@ void EditableSlider::setMinimum(int value)
 
 	m_pEdit->setText(str.setNum(value));
 	m_pSlider->setSliderPosition(0);
+	m_pValidator->setBottom(value);
 	
 	m_nMin = value;
 }
@@ -70,7 +74,12 @@ void EditableSlider::setMaximum(int value)
 
 int EditableSlider::value() const
 {
-	return m_pEdit->text().toInt();
+	int value = m_pEdit->text().toInt();
+	
+	if (value > m_nMax)
+		value = m_nMax;
+	
+	return value;
 }
 
 void EditableSlider::setValue(int value)
