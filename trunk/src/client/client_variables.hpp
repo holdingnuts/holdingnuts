@@ -27,3 +27,7 @@ config.set("uuid",		"");			// unique ID for re-connect
 config.set("locale",		"");			// language/locale to use
 config.set("log",		true);			// log to file
 config.set("ui_show_handstrength", 	true);		// display hand strength on table
+
+#ifdef DEBUG
+config.set("dbg_register",	-1);			// automatically connect and register to a game (value is gid)
+#endif
