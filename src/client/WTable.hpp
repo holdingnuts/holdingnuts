@@ -34,6 +34,7 @@
 #include <QPalette>
 #include <QGridLayout>	// TODO: remove!!! only wmain needs this
 #include <QGraphicsView>
+#include <QGraphicsItemAnimation>
 
 #include "Card.hpp"
 #include "HoleCards.hpp"
@@ -131,7 +132,13 @@ private:
 	Seat					*wseats[10];
 	//! \brief
 	std::vector<QGraphicsPixmapItem*>	m_CommunityCards;
-
+	//! \brief Timeout
+	QTimeLine				m_timeLine;
+	//! \brief Image Timeout
+	QGraphicsPixmapItem		*m_pImgTimeout;
+	//! \brief shear Animation from Timeout
+	QGraphicsItemAnimation	m_animTimeout;
+	
 	// ui
 	ChatBox			*m_pChat;
 	QLabel			*m_LayoutActions;

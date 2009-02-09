@@ -27,6 +27,7 @@
 #include <QGraphicsItem>
 #include <QObject>
 #include <QLabel>
+#include <QTimeLine>
 
 #include "Player.hpp"
 
@@ -39,7 +40,7 @@ public:
 
 	void setName(const QString& name);
 	void setStake(qreal amount);
-	void setCurrent(bool cur);
+	void setCurrent(bool cur, int sec_timeout);
 	void setSitout(bool sitout);
 	void setMySeat(bool bMyseat);
 	void setAction(Player::PlayerAction action, qreal amount = 0.0);
@@ -90,6 +91,8 @@ private:
 	QImage					m_FirstCard;
 	//! \brief second Card
 	QImage					m_SecondCard;
+	//! \brief
+	QTimeLine				m_timeLine;
 	//! \brief display big-cards
 	bool					m_bSmallCards;
 	//! \brief display small-cards

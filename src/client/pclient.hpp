@@ -92,6 +92,8 @@ Q_OBJECT
 public:
 	PClient(int &argc, char **argv);
 	
+	~PClient();
+	
 	bool doConnect(QString strServer, unsigned int port);
 	void doClose();
 	

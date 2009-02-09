@@ -101,9 +101,19 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 	}
 }
 
-void Seat::setCurrent(bool cur)
+void Seat::setCurrent(bool cur, int sec_timeout)
 {
 	m_bCurrent = cur;
+/*	
+	if (m_bCurrent && sec_timeout)
+	{
+		m_timeLine.setDuration(sec_timeout * 1000);
+		m_timeLine.setFrameRange(0, SeatImages::Instance().imgTimeout.width());
+		m_timeLine.start();
+	}
+	else
+		m_timeLine.stop();
+*/		
 }
 
 void Seat::setSitout(bool sitout)
@@ -207,18 +217,25 @@ void Seat::paint(
 			seat_width + m_pCurrentActionImg->width(),
 			seat_height),
 		*imgBack);
-	
-// 	if (m_bCurrent)
-// 	{
-//		painter->drawImage(
-//			QRectF(
-//				wpos.x(),
-//				wpos.y() + SeatImages::Instance().imgBackCurrent.height(),
-//				SeatImages::Instance().imgTimeout.width(),
-//				SeatImages::Instance().imgTimeout.height()),
-//			SeatImages::Instance().imgTimeout);
-// 	}
-	
+/*	
+	if (m_bCurrent)
+	{
+		painter->drawImage(
+			QRectF(
+				0,
+				SeatImages::Instance().imgBackCurrent.height(),
+				SeatImages::Instance().imgTimeout.width(),
+				SeatImages::Instance().imgTimeout.height()),
+			SeatImages::Instance().imgTimeout);
+		painter->fillRect(
+			QRectF(
+				0,
+				SeatImages::Instance().imgBackCurrent.height(),
+				m_timeLine.currentFrame(),
+				SeatImages::Instance().imgTimeout.height()),
+			QBrush(Qt::black));
+	}
+*/	
 	// action
 	if (m_pCurrentActionImg)
 	{
@@ -311,11 +328,11 @@ void Seat::calcSCardPos(qreal& x, qreal& y) const
 			break;
 		case 3: case 4: case 5:
 				x = 0;
-				y = -(SeatImages::Instance().imgBack.height() + 5);
+				y = -(SeatImages::Instance().imgBack.height() + 10);
 			break;
 		case 8: case 9: case 0:
 				x = 0;
-				y = SeatImages::Instance().imgBack.height() + 5;
+				y = SeatImages::Instance().imgBack.height() + 10;
 			break;
 		case 6: case 7:
 				x = SeatImages::Instance().imgBack.width();

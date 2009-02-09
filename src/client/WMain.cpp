@@ -41,6 +41,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 {
 	//setFixedSize(200, 120);
 	setWindowTitle(tr("HoldingNuts Foyer"));
+	setWindowIcon(QIcon(":/res/pclient.ico"));
 	
 	QGroupBox *groupInfo = new QGroupBox(tr("User info"));
 	
