@@ -13,8 +13,10 @@ PSERVER <version> <client-id>
 
 * server messages:
 MSG <from> <sender-name> <message>        # from := { -1 | <client-id> | <game-id>:<table-id> | <gid>:<tid>:<cid> }    # -1 is server
+PLAYERLIST <gid> <client-id> [...]
 CLIENTINFO <client-id> <type>:<value> [...]
-GAMELIST <game-info>
+GAMELIST <gid> [...]
+GAMEINFO <gid> <type>:<value> [...]
 SNAP <game-id>:<table-id> <snap-type> [<snap-data> ...]   # snap-type := { SnapGameState | SnapTable | SnapHoleCards }
 NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
 PONG
@@ -27,12 +29,6 @@ SnapGameState data:
 	<state> <type>:<value> [...]
 	
 	state := { start }
-
-
-SnapGameInfo data:
-	<type>:<value> [...]
-	
-	type := { timeout_bet | timeout_show }
 
 
 SnapTable data:
@@ -78,7 +74,7 @@ CHAT <to> <msg>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 i
 REQUEST gamelist
 REQUEST gameinfo <game-id>
 REQUEST clientinfo <client-id> [...]
-REGISTER <game-id>    # register to a game
+REGISTER <game-id> [<password>]   # register to a game
 UNREGISTER <game-id>
 ACTION <game-id> <action> [<amount>]      # action := { check | fold | call | bet | raise | allin | reset | sitout | back }
 SUBSCRIBE <game-id>:<table-id>   # retrieve instant data from table

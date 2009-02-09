@@ -458,8 +458,8 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 			string scid;
 			while (t.getNext(scid))   // FIXME: have maximum for count of requests
 			{
-				socktype cid = Tokenizer::string2int(scid);
-				clientcon *c;
+				const socktype cid = Tokenizer::string2int(scid);
+				const clientcon *c;
 				if ((c = get_client_by_id(cid)))
 				{
 					snprintf(msg, sizeof(msg),
@@ -471,23 +471,40 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 				}
 			}
 		}
+		else if (request == "gameinfo")
+		{
+			string sgid;
+			while (t.getNext(sgid))   // FIXME: have maximum for count of requests
+			{
+				const int gid = Tokenizer::string2int(sgid);
+				const GameController *g;
+				if ((g = get_game_by_id(gid)))
+				{
+					snprintf(msg, sizeof(msg),
+						"GAMEINFO %d type:%d player:%d:%d timeout:%d",
+						gid,
+						(int)g->getGameType(),
+						g->getPlayerMax(),
+						g->getPlayerCount(),
+						g->getPlayerTimeout());
+					
+					send_msg(client->sock, msg);
+				}
+			}
+		}
 		else if (request == "gamelist")
 		{
-			string gameinfo;
+			string gamelist;
 			for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
 			{
-				int gid = e->first;
-				GameController *g = e->second;
-				char tmp[128];
+				const int gid = e->first;
 				
-				snprintf(tmp, sizeof(tmp), "%d:%d:moreinfo ",
-					gid, (int)g->getGameType());
-				
-				gameinfo += tmp;
+				snprintf(msg, sizeof(msg), "%d ", gid);
+				gamelist += msg;
 			}
 			
 			snprintf(msg, sizeof(msg),
-				"GAMELIST %s", gameinfo.c_str());
+				"GAMELIST %s", gamelist.c_str());
 			
 			send_msg(client->sock, msg);
 		}
@@ -504,9 +521,8 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 				string slist;
 				for (unsigned int i=0; i < client_list.size(); i++)
 				{
-					char tmp[10];
-					snprintf(tmp, sizeof(tmp), "%d ", client_list[i]);
-					slist += tmp;
+					snprintf(msg, sizeof(msg), "%d ", client_list[i]);
+					slist += msg;
 				}
 				
 				snprintf(msg, sizeof(msg), "PLAYERLIST %d %s", gid, slist.c_str());
@@ -829,6 +845,7 @@ int gameloop()
 			const int gid = i;
 			g->setGameId(gid);
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));
+			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
 			games[gid] = g;
 		}
 	}

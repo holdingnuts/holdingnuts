@@ -75,8 +75,13 @@ typedef struct {
 
 typedef struct {
 	bool registered;
+	unsigned int player_timeout;
 	std::map<int,tableinfo> tables;
 } gameinfo;
+
+
+typedef std::map<int,playerinfo>	players_type;
+typedef std::map<int,gameinfo>		games_type;
 
 
 
@@ -99,6 +104,7 @@ public:
 	
 	void doRegister(int gid);
 	
+	gameinfo* getGameInfo(int gid);
 	tableinfo* getTableInfo(int gid, int tid);
 	playerinfo* getPlayerInfo(int cid);
 	int getMyCId();

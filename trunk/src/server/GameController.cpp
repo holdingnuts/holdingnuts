@@ -122,22 +122,22 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 	return true;
 }
 
-bool GameController::getPlayerList(int tid, vector<int> &client_list)
+bool GameController::getPlayerList(int tid, vector<int> &client_list) const
 {
 	client_list.clear();
 	
-	tables_type::iterator it = tables.find(tid);
+	tables_type::const_iterator it = tables.find(tid);
 	if (it == tables.end())
 		return false;
 	
-	Table *t = it->second;
+	const Table *t = it->second;
 	
 	for (unsigned int i=0; i < 10; i++)
 	{
 		if (!t->seats[i].occupied)
 			continue;
 		
-		Player *p = t->seats[i].player;
+		const Player *p = t->seats[i].player;
 		client_list.push_back(p->client_id);
 	}
 	
@@ -689,10 +689,9 @@ void GameController::stateBetting(Table *t)
 	{
 		// handle player timeout
 #ifndef SERVER_TESTING
-		const int timeout = 60;   // FIXME: configurable
-		if ((int)difftime(time(NULL), timeout_start) > timeout || p->sitout)
+		if (p->sitout || (unsigned int)difftime(time(NULL), timeout_start) > timeout)
 		{
-			// let player sit out
+			// let player sit out (if not already sitting out)
 			p->sitout = true;
 			
 			// auto-action: fold, or check if possible

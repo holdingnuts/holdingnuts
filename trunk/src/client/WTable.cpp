@@ -433,18 +433,20 @@ void WTable::updateView()
 {
 	int my_cid = ((PClient*)qApp)->getMyCId();
 	
-	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
+	Q_ASSERT_X(ginfo, __func__, "getGameInfo failed");
 	
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
 
 	const table_snapshot *snap = &(tinfo->snap);
-	
 	Q_ASSERT_X(snap, __func__, "invalid snapshot pointer");
-
+	
+	
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
 		const seatinfo *seat = &(snap->seats[i]);
-	
+		
 		if (seat->valid)
 		{
 			int cid = seat->client_id;
