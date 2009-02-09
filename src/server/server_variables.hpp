@@ -28,6 +28,7 @@ config.set("perm_create_user",	true);			// allow regular user to create games
 
 
 #ifdef DEBUG
-config.set("dbg_testgame_players",	3);
-config.set("dbg_testgame_games",	2);
+config.set("dbg_testgame_players",	3);		// testgames with X players
+config.set("dbg_testgame_games",	2);		// start X testgames
+config.set("dbg_testgame_timeout",	30);		// player timeout in seconds
 #endif

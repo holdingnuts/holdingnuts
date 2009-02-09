@@ -45,9 +45,6 @@
 
 ConfigParser config;
 
-typedef std::map<int,playerinfo>	players_type;
-typedef std::map<int,gameinfo>		games_type;
-
 static servercon		srv;
 static players_type		players;
 static games_type		games;
@@ -198,10 +195,15 @@ void server_cmd_snap(Tokenizer& t)
 				// show table after some delay (give time to retrieve player-info)
 				QTimer::singleShot(2000, games[gid].tables[tid].window, SLOT(slotShow()));
 				
-				// request the player-list of the game
+				
 				char msg[1024];
-				snprintf(msg, sizeof(msg), "REQUEST playerlist %d",
-					gid);
+				
+				// request the game-info
+				snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", gid);
+				send_msg(msg);
+				
+				// request the player-list of the game
+				snprintf(msg, sizeof(msg), "REQUEST playerlist %d", gid);
 				send_msg(msg);
 			}
 			else if (sstate == "end")
@@ -416,6 +418,35 @@ void server_cmd_clientinfo(Tokenizer& t)
 	players[cid] = pi;
 }
 
+void server_cmd_gameinfo(Tokenizer& t)
+{
+	int gid = t.getNextInt();
+	
+	games_type::iterator git = games.find(gid);
+	
+	if (git == games.end())
+	{
+		// FIXME: butt ugly... find smarter way of adding "empty" element
+		games[gid];
+		git = games.find(gid);
+	}
+	
+	std::string sinfo;
+	while (t.getNext(sinfo))
+	{
+		Tokenizer it;
+		it.parse(sinfo, ":");
+		
+		std::string itype = it.getNext();
+		std::string ivalue = it.getNext();
+		
+		if (itype == "timeout")
+		{
+			git->second.player_timeout = Tokenizer::string2int(ivalue);
+		}
+	}
+}
+
 int server_execute(const char *cmd)
 {
 	Tokenizer t;
@@ -481,6 +512,8 @@ int server_execute(const char *cmd)
 		server_cmd_playerlist(t);
 	else if (command == "CLIENTINFO")
 		server_cmd_clientinfo(t);
+	else if (command == "GAMEINFO")
+		server_cmd_gameinfo(t);
 	
 	return 0;
 }
@@ -797,6 +830,14 @@ void PClient::chat(const QString& text, int gid, int tid)
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "CHAT %d:%d %s", gid, tid, text.simplified().toStdString().c_str());
 	send_msg(msg);
+}
+
+gameinfo* PClient::getGameInfo(int gid)
+{
+	if (games.find(gid) != games.end())
+		return &(games[gid]);
+	else
+		return 0;
 }
 
 tableinfo* PClient::getTableInfo(int gid, int tid)

@@ -66,15 +66,18 @@ public:
 	GameController();
 	
 	bool setGameId(int gid) { game_id = gid; return true; };
-	int getGameId() { return game_id; };
+	int getGameId() const { return game_id; };
 	
-	GameType getGameType() { return type; };
+	GameType getGameType() const { return type; };
+	
+	void setPlayerTimeout(unsigned int respite) { timeout = respite; };
+	unsigned int getPlayerTimeout() const { return timeout; };
 	
 	bool setPlayerMax(unsigned int max);
-	unsigned int getPlayerMax() { return max_players; };
-	unsigned int getPlayerCount() { return players.size(); };
+	unsigned int getPlayerMax() const { return max_players; };
+	unsigned int getPlayerCount() const { return players.size(); };
 	bool getPlayerList(std::vector<int> &client_list) const;
-	bool getPlayerList(int tid, std::vector<int> &client_list);
+	bool getPlayerList(int tid, std::vector<int> &client_list) const;
 	
 	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);
@@ -132,6 +135,7 @@ private:
 	tables_type tables;
 	
 	time_t timeout_start;
+	unsigned int timeout;
 	
 	struct {
 		float amount;
