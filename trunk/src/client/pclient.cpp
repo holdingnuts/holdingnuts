@@ -874,6 +874,7 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connected = false;
 	connecting = false;
 	
+	Q_INIT_RESOURCE(pclient);
 	
 	QString locale;
 	if (config.get("locale").length())
@@ -899,6 +900,11 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 	}
 #endif
+}
+
+PClient::~PClient()
+{
+	Q_CLEANUP_RESOURCE(pclient);
 }
 
 bool config_load()

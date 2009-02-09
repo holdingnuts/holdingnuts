@@ -233,12 +233,11 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	m_pImgTable = new QGraphicsPixmapItem(QPixmap("gfx/table/table.png"));
 	m_pImgTable->setTransformationMode(Qt::SmoothTransformation);
-	
-	pScene->addItem(m_pImgTable);
-	//m_pImgTable = pScene->addPixmap(QPixmap::fromImage(imgTable));
 	m_pImgTable->scale(
 		pScene->width() / m_pImgTable->pixmap().width(),
 		(pScene->height() - 150) / m_pImgTable->pixmap().height()); // 150 == height chatbox
+
+	pScene->addItem(m_pImgTable);
 
 	m_pDealerButton = new DealerButton;
 	m_pDealerButton->scale(0.5, 0.5);
@@ -246,16 +245,39 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		pScene->width() / 5, pScene->height() / 2);
 
 	pScene->addItem(m_pDealerButton);
+/* TODO: fix
+	m_pImgTimeout = new QGraphicsPixmapItem(QPixmap("gfx/table/timeout.png"));
+	m_pImgTimeout->setTransformationMode(Qt::SmoothTransformation);
+	m_pImgTimeout->scale(0.5, 0.5);
+	m_pImgTimeout->setPos(50, 50);
 
+	pScene->addItem(m_pImgTimeout);
+	
+	m_timeLine.setDuration(5000);
+	m_timeLine.setFrameRange(0, m_pImgTimeout->pixmap().width());
+	
+	m_animTimeout.setItem(m_pImgTimeout);
+	m_animTimeout.setTimeLine(&m_timeLine);
+
+	for (int i = 0; i < 5000; ++i)
+		m_animTimeout.setShearAt(
+			i / 5000,
+			m_timeLine.frameForTime(5000 - i),
+			0);
+*/
 	// view
 	this->setScene(pScene);
 //	this->setRenderHint(QPainter::HighQualityAntialiasing);
 	this->setRenderHint(QPainter::SmoothPixmapTransform);
 	this->setCacheMode(QGraphicsView::CacheBackground);
+	
+	// TODO: kannst du die min-window size noch runtersetzen? kann so auf meinem EeePC in der 
+	// schule nicht das ganze fenster sehen :)
 	this->setMinimumSize(
 		static_cast<int>(pScene->width()),
 		static_cast<int>(pScene->height()));
 	this->setWindowTitle(tr("HoldingNuts table"));
+	this->setWindowIcon(QIcon(":/res/pclient.ico"));
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -462,7 +484,10 @@ void WTable::updateView()
 			wseats[i]->setSitout(seat->sitout);
 			
 			if (snap->state > Table::ElectDealer)
-				wseats[i]->setCurrent(snap->s_cur == i);
+			{
+				wseats[i]->setCurrent(snap->s_cur == i, ginfo->player_timeout);
+				m_timeLine.start();
+			}
 			
 			if (seat->in_round)
 			{
@@ -574,6 +599,8 @@ void WTable::updateView()
 			p->setTransformationMode(Qt::SmoothTransformation);
 			p->setPos(calcCCardsPos(i));
 			p->scale(0.3, 0.3);
+			p->show();
+			p->setZValue(5.0);
 
 			this->scene()->addItem(p);
 
@@ -667,7 +694,10 @@ void WTable::updateView()
 					}
 				}
 				else
-					stlayActions->setCurrentIndex(m_nPreActions);
+				{
+					if (s->stake > 0)
+						stlayActions->setCurrentIndex(m_nPreActions);
+				}
 			}
 		}
 		
