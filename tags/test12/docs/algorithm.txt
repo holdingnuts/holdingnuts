@@ -1,0 +1,93 @@
+Algorithm: Example for Side-Pots
+================================
+
+		A = 100
+	D = 30		B = 20
+		C = 50
+
+Player C is Allin, all other players call.
+
+player		-20	-10
+-------------------------------------
+A	50	30	20
+B	20	0	-
+C	50	30	20
+D	30	10	0
+-------------------------------------
+bets	150	70	40
+-------------------------------------
+pots		80	30	40
+		Main	Side 1	Side 2
+		ABCD	ACD	AC
+
+
+
+Algorithm: Example for Winning-List
+===================================
+
+Hands := { 3, 5, 4, 5 }
+
+sort Hands ->
+	W1 := { 5, 5, 4, 3 }
+
+compare each hand with first hand, begin with last hand -> 3 with 5, 4 with 5, 5 with 5
+move all hands smaller than first hand to next winning-list
+	W2 := { 3, 4 }
+sort again ->
+	W2 := {4, 3 }
+
+compare again -> 3 < 4
+	W3 := { 3 }
+
+Result:
+	W1 := { 5, 5 }
+	W2 := { 4 }
+	W3 := { 3 }
+
+
+
+Algorithm: Minimum bet
+======================
+
+1)   Minimum bet is current Big Blind (e.g. 10)
+
+2a)  A raise must be at least 2x bet (e.g. to 20)
+3a)  A re-raise must be at least difference between bet and raise (e.g. to 20+(20-10)=30)
+
+2b)  If raise was "to 50"
+3b)  A re-raise must be at least 50+(50-10)=90
+
+
+
+Algorithm: Client: Auto-Muck losing hands
+=========================================
+
+		(A bet 100)
+	(C call 100)	(B call 20 allin)
+
+player A (has worst hand) bet 100, last_bet_action
+	-> is first to show
+player B (has best hand) calls 20, is allin
+	-> shows his cards because he has the better hand
+player C (has second best hand) calls 100
+	-> shows his cards because he will win 160 (if muck, player A wins)
+--------------------------------------------------------------------------------
+
+  count up all bets made by a player and save this value
+
+  for each player who shows his hand
+        determine hand-strength of all shown players
+        create a winning-list
+
+        for each item [i] in winning-list
+            if it's "me" in the winning-list
+                break
+            end if
+
+            # player(s) has/have the better hand than "me"
+            if [i]-bets >= "me"-bets
+                muck my cards
+                break
+            end if
+        end for each
+  end for each
