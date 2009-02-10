@@ -30,6 +30,7 @@
 #include <QLabel>
 #include <QTextEdit>
 #include <QButtonGroup>
+#include <QPushButton>
 #include <QCheckBox>
 #include <QPalette>
 #include <QGridLayout>	// TODO: remove!!! only wmain needs this
@@ -105,9 +106,11 @@ protected:
 		int table_width) const;
 	
 	void doSitout(bool bSitout);
+
+	void evaluateActions(const table_snapshot *snap);
 	
 	bool greaterBet(
-		const table_snapshot& snap,
+		const table_snapshot *snap,
 		const qreal& bet,
 		qreal *pbet = 0) const;
 
@@ -119,6 +122,8 @@ private slots:
 	void actionMuck();
 	void actionBack();
 	void actionSitout();
+	
+	void actionAutoCheckCall(int state);
 
 	void slotShow();
 	
@@ -151,6 +156,8 @@ private:
 	QLabel			*lblPots;
 	QLabel			*lblHandStrength;
 	EditableSlider		*m_pSliderAmount;
+	QPushButton		*btnCheckCall;
+	QPushButton		*btnBetRaise;
 	QCheckBox 		*chkAutoFoldCheck;
 	QCheckBox		*chkAutoCheckCall;
 	
@@ -160,6 +167,8 @@ private:
 	int				m_nPostActions;
 	int				m_nNoAction;
 	int				m_nSitoutActions;
+	
+	qreal				m_autocall_amount;
 };
 
 #endif /* _WTABLE_H */

@@ -35,7 +35,6 @@
 #include <QSlider>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QPushButton>
 #include <QTimeLine>
 #include <QGraphicsItemAnimation>
 
@@ -295,10 +294,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnFold = new QPushButton(tr("Fold"), this);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
 	
-	QPushButton *btnCheckCall = new QPushButton(tr("Check/Call"), this);
+	btnCheckCall = new QPushButton("Check/Call", this);
 	connect(btnCheckCall, SIGNAL(clicked()), this, SLOT(actionCheckCall()));
 	
-	QPushButton *btnBetRaise = new QPushButton(tr("Bet/Raise"), this);
+	btnBetRaise = new QPushButton("Bet/Raise", this);
 	connect(btnBetRaise, SIGNAL(clicked()), this, SLOT(actionBetRaise()));
 	
 	QPushButton *btnShow = new QPushButton(tr("Show"), this);
@@ -313,8 +312,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnSitout = new QPushButton(tr("Sitout"), this);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
 	
-	chkAutoFoldCheck = new QCheckBox(tr("Fold/Check"), this);
-	chkAutoCheckCall = new QCheckBox(tr("Check/Call"), this);
+	chkAutoFoldCheck = new QCheckBox("Fold/Check", this);
+	chkAutoCheckCall = new QCheckBox("Check/Call", this);
+	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
 	
 	m_pSliderAmount = new EditableSlider;
 
@@ -425,6 +425,100 @@ QPointF WTable::calcCCardsPos(unsigned int nCard, int table_width) const
 	return QPointF(
 		((table_width - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
 		275);
+}
+
+void WTable::evaluateActions(const table_snapshot *snap)
+{
+	// player does not sit at table
+	if (snap->my_seat == -1)
+	{
+		stlayActions->setCurrentIndex(m_nNoAction);
+		return;
+	}
+	
+	
+	const seatinfo *s = &(snap->seats[snap->my_seat]);
+	
+	// minimum bet
+	if (snap->minimum_bet > s->stake)
+		m_pSliderAmount->setMinimum((int) s->stake);
+	else
+		m_pSliderAmount->setMinimum((int) snap->minimum_bet);
+	
+	// maximum bet is stake size
+	m_pSliderAmount->setMaximum((int) s->stake);
+	
+	
+	// evaluate available actions
+	if (s->sitout)
+	{
+		stlayActions->setCurrentIndex(m_nSitoutActions);
+	}
+	else if (!s->in_round ||
+		!(snap->state == Table::Blinds ||
+			snap->state == Table::Betting ||
+			snap->state == Table::AskShow) 
+		/* || isNoMoreAction(snap) */)
+	{
+		stlayActions->setCurrentIndex(m_nNoAction);
+	}
+	else if (snap->state == Table::AskShow)
+	{
+		if (snap->s_cur == (unsigned int)snap->my_seat)
+			stlayActions->setCurrentIndex(m_nPostActions);
+		else
+			stlayActions->setCurrentIndex(m_nNoAction);
+	}
+	else
+	{
+		qreal greater_bet;
+		bool bGreaterBet = greaterBet(snap, s->bet, &greater_bet);
+		
+		if (snap->s_cur == (unsigned int)snap->my_seat)
+		{
+			if ((int)s->stake == 0)
+				stlayActions->setCurrentIndex(m_nNoAction);
+			else
+			{
+				if (bGreaterBet)
+				{
+					btnCheckCall->setText(tr("Call"));
+					btnBetRaise->setText(tr("Raise"));
+				}
+				else
+				{
+					btnCheckCall->setText(tr("Check"));
+					
+					if (greaterBet(snap, 0))
+						btnBetRaise->setText(tr("Raise"));
+					else
+						btnBetRaise->setText(tr("Bet"));
+				}
+				
+				stlayActions->setCurrentIndex(m_nActions);
+			}
+		}
+		else
+		{
+			if ((int)s->stake == 0 /*|| !bGreaterBet*/)
+				stlayActions->setCurrentIndex(m_nNoAction);
+			else
+			{
+				if (bGreaterBet)
+				{
+					chkAutoFoldCheck->setText(tr("Fold"));
+					chkAutoCheckCall->setText(QString("Call %1").arg(greater_bet - s->bet));
+				}
+				else
+				{
+					chkAutoFoldCheck->setText(tr("Check/Fold"));
+					chkAutoCheckCall->setText(tr("Check"));
+				}
+				
+				stlayActions->setCurrentIndex(m_nPreActions);
+			}
+		}
+	}
 }
 
 void WTable::updateView()
@@ -549,85 +643,57 @@ void WTable::updateView()
 				QString("gfx/deck/default/%1.png").arg(allcards[i].getName())));
 		m_CommunityCards[i]->show();
 	}
-
+	
+	
 	this->viewport()->update();	// TODO: remove
+	
+	
+	evaluateActions(snap);
+	
 	
 	if (snap->my_seat != -1)
 	{
 		const seatinfo *s = &(snap->seats[snap->my_seat]);
 		
-		// minimum bet
-		if (snap->minimum_bet > s->stake)
-			m_pSliderAmount->setMinimum((int) s->stake);
-		else
-			m_pSliderAmount->setMinimum((int) snap->minimum_bet);
 		
-		// maximum bet is stake size
-		m_pSliderAmount->setMaximum((int) s->stake);
-		
-		// show correct actions
-		if (s->sitout)
+		// handle auto-actions
+		if (snap->state == Table::Betting)
 		{
-			stlayActions->setCurrentIndex(m_nSitoutActions);
-		}
-		else if (!s->in_round ||
-			snap->state == Table::AllFolded ||
-			snap->state == Table::Showdown ||
-			snap->state == Table::EndRound)
-		{
-			stlayActions->setCurrentIndex(m_nNoAction);
-		}
-		else
-		{
-			if (snap->state == Table::AskShow)
+			if ((int)snap->s_cur == snap->my_seat)
 			{
-				if ((int)snap->s_cur == snap->my_seat)
-					stlayActions->setCurrentIndex(m_nPostActions);
-				else
+				if (chkAutoFoldCheck->checkState() == Qt::Checked)
+				{
+					if (greaterBet(snap, s->bet))
+						actionFold();
+					else
+						actionCheckCall();
+					
+					chkAutoFoldCheck->setCheckState(Qt::Unchecked);
 					stlayActions->setCurrentIndex(m_nNoAction);
+				}
+				else if (chkAutoCheckCall->checkState() == Qt::Checked)
+				{
+					qreal greatest_bet;
+					greaterBet(snap, 0, &greatest_bet);
+					
+					if (m_autocall_amount >= greatest_bet)
+					{
+						actionCheckCall();
+						stlayActions->setCurrentIndex(m_nNoAction);
+					}
+					
+					chkAutoCheckCall->setCheckState(Qt::Unchecked);
+				}
 			}
 			else
 			{
-				if ((int)snap->s_cur == snap->my_seat)
+				if (chkAutoCheckCall->checkState() == Qt::Checked)
 				{
-					if (chkAutoFoldCheck->checkState() == Qt::Checked)
-					{
-						if (greaterBet(*snap, s->bet))
-							actionFold();
-						else
-							actionCheckCall();
-						
-						chkAutoFoldCheck->setCheckState(Qt::Unchecked);
-					}
-					else if (chkAutoCheckCall->checkState() == Qt::Checked)
-					{
-						actionCheckCall();
-						
+					qreal greatest_bet;
+					greaterBet(snap, 0, &greatest_bet);
+					
+					if (m_autocall_amount < greatest_bet)
 						chkAutoCheckCall->setCheckState(Qt::Unchecked);
-					}
-					else
-					{
- 						if ((int)s->stake == 0) // TODO: snap->state == Table::Showdown???? see line 584
-							stlayActions->setCurrentIndex(m_nNoAction);
-						else
-							stlayActions->setCurrentIndex(m_nActions);
-					}
-				}
-				else
-				{
-					if (s->stake > 0)
-					{
-						stlayActions->setCurrentIndex(m_nPreActions);
-						
-						qreal greater_bet = 0;
-// qDebug() << "id= " << snap->s_cur << " round= " << Table::BettingRound(snap->betting_round)<< " s->bet= " << s->bet;
-						// validate auto-call
-						if (greaterBet(*snap, s->bet, &greater_bet))
-						{
-							chkAutoCheckCall->setText(QString("Call %1").arg(greater_bet - s->bet));
-							chkAutoCheckCall->setCheckState(Qt::Unchecked);
-						}
-					}
 				}
 			}
 		}
@@ -653,6 +719,8 @@ void WTable::updateView()
 		else
 			lblHandStrength->clear();
 	}
+	else
+		lblHandStrength->clear();
 }
 
 void WTable::addChat(const QString& from, const QString& text)
@@ -728,7 +796,7 @@ void WTable::doSitout(bool bSitout)
 	
 	// set sitout and show available actions again
 	seat->sitout = bSitout;
-	updateView();
+	evaluateActions(snap);
 }
 
 void WTable::actionSitout()
@@ -743,6 +811,25 @@ void WTable::actionBack()
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Back);
 	
 	doSitout(false);
+}
+
+void WTable::actionAutoCheckCall(int state)
+{
+	if (state != Qt::Checked)
+		return;
+	
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+	
+	const table_snapshot *snap = &(tinfo->snap);
+	if (!snap)
+		return;
+	
+	qreal greatest_bet;
+	greaterBet(snap, 0, &greatest_bet);
+	
+	m_autocall_amount = greatest_bet;
 }
 
 void WTable::slotShow()
@@ -806,20 +893,20 @@ void WTable::resizeEvent(QResizeEvent *event)
 		220);
 }
 
-bool WTable::greaterBet(const table_snapshot& snap, const qreal& bet, qreal *pbet) const
+bool WTable::greaterBet(const table_snapshot *snap, const qreal& bet, qreal *pbet) const
 {
+	qreal cur_bet = bet;
+	
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
-		const seatinfo *seat = &(snap.seats[i]);
+		const seatinfo *seat = &(snap->seats[i]);
 
-		if (seat->valid && seat->bet > bet)
-		{
-			if (pbet)
-				*pbet = seat->bet;
-
-			return true;
-		}
+		if (seat->valid && seat->bet > cur_bet)
+			cur_bet = seat->bet;
 	}
-
-	return false;
+	
+	if (pbet)
+		*pbet = cur_bet;
+	
+	return (cur_bet > bet);
 }
