@@ -59,6 +59,7 @@ public:
 
 private:
 	void calcSCardPos(qreal& x, qreal& y) const;
+	void calcBetTextPos(qreal& x, qreal& y, int txt_width) const;
 	
 public:
 	// cards size
@@ -91,8 +92,6 @@ private:
 	QImage					m_FirstCard;
 	//! \brief second Card
 	QImage					m_SecondCard;
-	//! \brief
-	QTimeLine				m_timeLine;
 	//! \brief display big-cards
 	bool					m_bSmallCards;
 	//! \brief display small-cards

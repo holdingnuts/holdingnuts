@@ -69,7 +69,11 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 			break;
 		case Player::Check:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActCheck;
-				m_strAmount.setNum(amount, 'f', 2);
+				
+				if (amount > 0.0)
+					m_strAmount.setNum(amount, 'f', 2);
+				else
+					m_strAmount.clear();
 			break;
 		case Player::Fold:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActFold;
@@ -88,11 +92,11 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 			break;
 		case Player::Show:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActShow;
-				m_strAmount.setNum(amount, 'f', 2);
+				m_strAmount.clear();
 			break;
 		case Player::Muck:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActMuck;
-				m_strAmount.setNum(amount, 'f', 2);
+				m_strAmount.clear();
 			break;
 		case Player::Allin:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActAllin;
@@ -249,23 +253,44 @@ void Seat::paint(
 	}
 
 	// TODO: font
-	painter->setFont(QFont("Arial", 18,  QFont::Bold));
+	static const QFont normal_font("Arial", 18,  QFont::Normal);
+	static const QFont bold_font("Arial", 18,  QFont::Bold);
+	
+	static const QFontMetrics fm_bold(bold_font);
+	
+	painter->setFont(bold_font);
 	painter->drawText(
 		QRectF(
 			10,
-			0,
+			15,
 			seat_width - 10,
-			seat_height),
-		Qt::AlignVCenter | Qt::AlignCenter,
-		m_strName + "\n" + m_strStake);
-
+			fm_bold.height()),
+		Qt::AlignLeft,
+		m_strName);
+	painter->setFont(normal_font);
 	painter->drawText(
 		QRectF(
-			-30,
-			seat_height,
-			50,
-			100),
-		Qt::AlignRight,
+			10,
+			seat_height * 0.5,
+			seat_width - 10,
+			seat_height - 30),
+		Qt::AlignLeft,
+		"$" + m_strStake);
+	
+	// TODO: find right textposition
+	qreal tx_pos = 0;
+	qreal ty_pos = 0;
+			
+	calcBetTextPos(tx_pos, ty_pos, fm_bold.width(m_strAmount));
+	
+	painter->setFont(bold_font);
+	painter->drawText(
+		QRectF(
+			tx_pos,
+			ty_pos,
+			fm_bold.width(m_strAmount),
+			fm_bold.height()),
+		Qt::AlignLeft,
 		m_strAmount);
 
 	// big-cards
@@ -297,14 +322,14 @@ void Seat::paint(
 		
 		painter->drawImage(
 			QRectF(
-				sx_pos * 1.5,
+				sx_pos,
 				sy_pos,
 				sx_mini_card,
 				sy_mini_card),
 			imgCardBackside);
 		painter->drawImage(
 			QRectF(
-				sx_pos,
+				sx_pos + sx_mini_card * 0.4,
 				sy_pos,
 				sx_mini_card,
 				sy_mini_card),
@@ -323,15 +348,44 @@ void Seat::calcSCardPos(qreal& x, qreal& y) const
 	switch (m_nID)
 	{
 		case 1: case 2:
-				x = -sx_mini_card;
+				x = -sx_mini_card * 1.5;
 				y = 0;
 			break;
 		case 3: case 4: case 5:
 				x = 0;
-				y = -(SeatImages::Instance().imgBack.height() + 10);
+				y = -(SeatImages::Instance().imgBack.height() + 5);
 			break;
 		case 8: case 9: case 0:
 				x = 0;
+				y = SeatImages::Instance().imgBack.height() + 5;
+			break;
+		case 6: case 7:
+				x = SeatImages::Instance().imgBack.width();
+				y = 0;
+			break;
+	}
+}
+
+void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
+{
+	//		8	9	0
+	//	 7			   1
+	// 						
+	//   6			   2
+	//		5	4	3
+
+	switch (m_nID)
+	{
+		case 1: case 2:
+				x = -(txt_width + 10);
+				y = SeatImages::Instance().imgBack.height() - 30;
+			break;
+		case 3: case 4: case 5:
+				x = sx_mini_card * 1.7;
+				y = -(SeatImages::Instance().imgBack.height() + 10);
+			break;
+		case 8: case 9: case 0:
+				x = sx_mini_card * 1.7;
 				y = SeatImages::Instance().imgBack.height() + 10;
 			break;
 		case 6: case 7:
