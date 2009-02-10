@@ -109,6 +109,10 @@ protected:
 
 	void evaluateActions(const table_snapshot *snap);
 	
+#if 0
+	bool isNoMoreActionPossible(const table_snapshot *snap);
+#endif
+	
 	bool greaterBet(
 		const table_snapshot *snap,
 		const qreal& bet,
