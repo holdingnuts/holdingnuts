@@ -458,7 +458,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		!(snap->state == Table::Blinds ||
 			snap->state == Table::Betting ||
 			snap->state == Table::AskShow) 
-		/* || isNoMoreAction(snap) */)
+		/* || isNoMoreAction(snap) */)  // FIXME: implement this one
 	{
 		stlayActions->setCurrentIndex(m_nNoAction);
 	}
@@ -508,7 +508,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		}
 		else
 		{
-			if ((int)s->stake == 0 /*|| !bGreaterBet*/)
+			if ((int)s->stake == 0 /*|| !bGreaterBet*/)  // FIXME: do not show actions if there is no more action if nothing changes the betting round
 				stlayActions->setCurrentIndex(m_nNoAction);
 			else
 			{
@@ -519,7 +519,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					if (greatest_bet >= s->stake + s->bet)
 						chkAutoCheckCall->setText(tr("Allin"));
 					else
-						chkAutoCheckCall->setText(QString("Call %1").arg(greatest_bet - s->bet));
+						chkAutoCheckCall->setText(tr("Call") + QString(" %1").arg(greatest_bet - s->bet));
 				}
 				else
 				{
