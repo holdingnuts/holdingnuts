@@ -25,6 +25,8 @@
 #define _HOLDING_NUTS_DEALER_BUTTON_H
 
 #include <QGraphicsItem>
+#include <QTimeLine>
+#include <QGraphicsItemAnimation>
 
 class DealerButton : public QObject, public QGraphicsItem
 {
@@ -40,15 +42,14 @@ public:
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 
-	enum { Type = UserType + 1 };
-
-	int type() const { return Type; }
-
-protected:
-	void timerEvent(QTimerEvent* event);
+	void startAnimation(const QPointF& ptCenterSeat, int distance = 100);
 
 private:
 	const QImage	m_Image;
+	//! \brief Timeline Dealerbutton Animation
+	QTimeLine				m_tlDealerBtn;
+	//! \brief Animation Dealerbutton
+	QGraphicsItemAnimation	m_animDealerBtn;
 };
 
 #endif /* _HOLDING_NUTS_DEALER_BUTTON_H */

@@ -198,21 +198,6 @@ QDebug operator << (QDebug s, const table_snapshot& t)
 
 #endif /* DEBUG */
 
-qreal normalize(QPointF& vector)
-{
-	const qreal len = std::sqrt(
-		vector.x() * vector.x() +
-		vector.y() * vector.y());
-
-	if(len != 0)
-	{
-		const qreal InvLen = 1 / len;
-
-		vector *= InvLen;
-	}
-	return len;
-}
-
 const unsigned int WTable::nMaxSeats = 10;
 
 WTable::WTable(int gid, int tid, QWidget *parent)
@@ -240,6 +225,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	pScene->addItem(m_pImgTable);
 
 	m_pDealerButton = new DealerButton;
+	// QGraphicsPixmapItem(QPixmap("gfx/table/dealer_button.png"));
 	m_pDealerButton->scale(0.5, 0.5);
 	m_pDealerButton->setPos(
 		pScene->width() / 5, pScene->height() / 2);
@@ -265,6 +251,29 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 			m_timeLine.frameForTime(5000 - i),
 			0);
 */
+	for (unsigned int j = 0; j < 5; j++)
+	{
+		m_CommunityCards[j] = new QGraphicsPixmapItem(
+			QPixmap(QString("gfx/deck/default/back.png")));
+
+		m_CommunityCards[j]->setPos(
+			calcCCardsPos(j, static_cast<int>(pScene->width())));
+		m_CommunityCards[j]->setTransformationMode(Qt::SmoothTransformation);
+		m_CommunityCards[j]->scale(0.3, 0.3);
+		m_CommunityCards[j]->setZValue(5.0);
+
+		pScene->addItem(m_CommunityCards[j]);
+	}
+
+	for (unsigned int i = 0; i < nMaxSeats; i++)
+	{
+		wseats[i] = new Seat(i, this);
+		wseats[i]->scale(0.5, 0.5);
+		wseats[i]->setPos(calcSeatPos(i));
+
+		pScene->addItem(wseats[i]);
+	}
+
 	// view
 	this->setScene(pScene);
 //	this->setRenderHint(QPainter::HighQualityAntialiasing);
@@ -304,12 +313,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnSitout = new QPushButton(tr("Sitout"), this);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
 	
-	chkFold = new QCheckBox(tr("Fold"), this);
-	chkCheck = new QCheckBox(tr("Check"), this);
-	chkCall = new QCheckBox(tr("Call"), this);
+	chkAutoFoldCheck = new QCheckBox(tr("Fold/Check"), this);
+	chkAutoCheckCall = new QCheckBox(tr("Check/Call"), this);
 	
 	m_pSliderAmount = new EditableSlider;
-	m_pSliderCallAmount = new EditableSlider;
 
 	QHBoxLayout *lActions = new QHBoxLayout();
 	lActions->addWidget(btnFold);
@@ -318,10 +325,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lActions->addWidget(m_pSliderAmount);
 	
 	QHBoxLayout *lPreActions = new QHBoxLayout();
-	lPreActions->addWidget(chkFold);
-	lPreActions->addWidget(chkCheck);
-	lPreActions->addWidget(chkCall);
-	lPreActions->addWidget(m_pSliderCallAmount);   // FIXME: remove this one
+	lPreActions->addWidget(chkAutoFoldCheck);
+	lPreActions->addWidget(chkAutoCheckCall);
 	lPreActions->addWidget(btnSitout);   // FIXME: display outside StackedLayout
 	
 	QHBoxLayout *lPostActions = new QHBoxLayout();
@@ -330,7 +335,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	QHBoxLayout *lSitoutActions = new QHBoxLayout();
 	lSitoutActions->addWidget(btnBack);
-	
 	
 	stlayActions = new QStackedLayout();
 	QWidget *pageActions = new QWidget(this);
@@ -358,20 +362,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 120, this);
 	m_pChat->show();
-	
-	////////
-	
-	for (unsigned int i = 0; i < nMaxSeats; i++)
-	{
-		wseats[i] = new Seat(i, this);
-		wseats[i]->scale(0.5, 0.5);	// TODO: remove
-		
-		wseats[i]->setPos(calcSeatPos(i));
-
-		pScene->addItem(wseats[i]);
-	}
-	
-	////////
 	
 	lblPots = new QLabel("Pot 0: 0.00", this);
 	lblPots->setFixedWidth(static_cast<int>(pScene->width()));
@@ -425,21 +415,7 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 	return QPointF(0, 0);
 }
 
-QPointF WTable::calcDealerBtnPos(unsigned int nSeatID, int distance) const
-{
-	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
-
-	const QPointF& ptBase = wseats[nSeatID]->pos() + wseats[nSeatID]->boundingRectSeat().center();
-	const QPointF& ptMid = m_pImgTable->sceneBoundingRect().center();
-	
-	QPointF vDir = ptBase - ptMid;
-
-	normalize(vDir);
-
-	return ptBase - (vDir * distance);
-}
-
-QPointF WTable::calcCCardsPos(unsigned int nCard) const
+QPointF WTable::calcCCardsPos(unsigned int nCard, int table_width) const
 {
 	Q_ASSERT_X(nCard < 5, __func__, "invalided Card Number");
 
@@ -447,7 +423,7 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 	static const qreal card_width = 80;	// card_width = 72 + spacing
 
 	return QPointF(
-		((this->scene()->width() - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
+		((table_width - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
 		275);
 }
 
@@ -486,7 +462,7 @@ void WTable::updateView()
 			if (snap->state > Table::ElectDealer)
 			{
 				wseats[i]->setCurrent(snap->s_cur == i, ginfo->player_timeout);
-				m_timeLine.start();
+				// m_timeLine.start();
 			}
 			
 			if (seat->in_round)
@@ -544,23 +520,8 @@ void WTable::updateView()
 	// dealerbutton
 	if (snap->state == Table::NewRound)
 	{
-		QTimeLine *timer = new QTimeLine(2000);
-		timer->setFrameRange(0, 100);
-
-		QGraphicsItemAnimation *anim = new QGraphicsItemAnimation;
-
-		anim->setItem(m_pDealerButton);
-		anim->setTimeLine(timer);
-
-		const qreal steps = 100;
-		const QPointF ptStep = (m_pDealerButton->scenePos() - calcDealerBtnPos(snap->s_dealer)) / steps;
-		
-		for (int i = 0; i < static_cast<int>(steps); ++i)
-			anim->setPosAt(
-				i / steps,
-				QPointF(m_pDealerButton->scenePos() - (ptStep * i)));
-
-		timer->start();
+		m_pDealerButton->startAnimation(
+			wseats[snap->s_dealer]->pos() + wseats[snap->s_dealer]->boundingRectSeat().center());
 	}
 	
 	// Pots
@@ -574,38 +535,19 @@ void WTable::updateView()
 	
 	// CommunityCards
 	if (snap->state == Table::NewRound)
-	{
-		for (unsigned int i = 0; i < m_CommunityCards.size(); i++)
-		{
-			this->scene()->removeItem(m_CommunityCards[i]);
-			delete m_CommunityCards[i];
-		}
-
-		m_CommunityCards.clear();
-	}
+		for (unsigned int i = 0; i < 5; i++)
+			m_CommunityCards[i]->hide();
 
 	std::vector<Card> allcards;
 	snap->communitycards.copyCards(&allcards);
-
-	// load new community cards
-	if(allcards.size() > m_CommunityCards.size())
+	
+	// load community cards
+	for (unsigned int i = 0; i < allcards.size(); i++)
 	{
-		for (unsigned int i = m_CommunityCards.size(); i < allcards.size(); i++)
-		{
-			QGraphicsPixmapItem *p = new QGraphicsPixmapItem(
-				QPixmap(
-					QString("gfx/deck/default/%1.png").arg(allcards[i].getName())));
-
-			p->setTransformationMode(Qt::SmoothTransformation);
-			p->setPos(calcCCardsPos(i));
-			p->scale(0.3, 0.3);
-			p->show();
-			p->setZValue(5.0);
-
-			this->scene()->addItem(p);
-
-			m_CommunityCards.push_back(p);
-		}
+		m_CommunityCards[i]->setPixmap(
+			QPixmap(
+				QString("gfx/deck/default/%1.png").arg(allcards[i].getName())));
+		m_CommunityCards[i]->show();
 	}
 
 	this->viewport()->update();	// TODO: remove
@@ -622,7 +564,6 @@ void WTable::updateView()
 		
 		// maximum bet is stake size
 		m_pSliderAmount->setMaximum((int) s->stake);
-		m_pSliderCallAmount->setMaximum((int) s->stake);
 		
 		// show correct actions
 		if (s->sitout)
@@ -649,45 +590,24 @@ void WTable::updateView()
 			{
 				if ((int)snap->s_cur == snap->my_seat)
 				{
-					if (chkFold->checkState() == Qt::Checked)
+					if (chkAutoFoldCheck->checkState() == Qt::Checked)
 					{
-						actionFold();
-						chkFold->setCheckState(Qt::Unchecked);
-					}
-					else if (chkCheck->checkState() == Qt::Checked)
-					{
-						bool bGreaterBet = false;
-
-						for (unsigned int i=0; i < nMaxSeats; i++)
-						{
-							const seatinfo *seat = &(snap->seats[i]);
-	
-							if (seat->valid && seat->bet > s->bet)
-							{
-								bGreaterBet = true;
-									break;
-							}
-						}
+						if (greaterBet(*snap, s->bet))
+							actionFold();
+						else
+							actionCheckCall();
 						
-						if (bGreaterBet == false)
-							actionCheckCall();
-						else
-							stlayActions->setCurrentIndex(m_nActions);
-					
-						chkCheck->setCheckState(Qt::Unchecked);
+						chkAutoFoldCheck->setCheckState(Qt::Unchecked);
 					}
-					else if (chkCall->checkState() == Qt::Checked)
+					else if (chkAutoCheckCall->checkState() == Qt::Checked)
 					{
-						if (m_pSliderCallAmount->value() >= (int)snap->minimum_bet)
-							actionCheckCall();
-						else
-							stlayActions->setCurrentIndex(m_nActions);
-
-						chkCall->setCheckState(Qt::Unchecked);
+						actionCheckCall();
+						
+						chkAutoCheckCall->setCheckState(Qt::Unchecked);
 					}
 					else
 					{
- 						if ((int)s->stake == 0)
+ 						if ((int)s->stake == 0) // TODO: snap->state == Table::Showdown???? see line 584
 							stlayActions->setCurrentIndex(m_nNoAction);
 						else
 							stlayActions->setCurrentIndex(m_nActions);
@@ -696,7 +616,18 @@ void WTable::updateView()
 				else
 				{
 					if (s->stake > 0)
+					{
 						stlayActions->setCurrentIndex(m_nPreActions);
+						
+						qreal greater_bet = 0;
+// qDebug() << "id= " << snap->s_cur << " round= " << Table::BettingRound(snap->betting_round)<< " s->bet= " << s->bet;
+						// validate auto-call
+						if (greaterBet(*snap, s->bet, &greater_bet))
+						{
+							chkAutoCheckCall->setText(QString("Call %1").arg(greater_bet - s->bet));
+							chkAutoCheckCall->setCheckState(Qt::Unchecked);
+						}
+					}
 				}
 			}
 		}
@@ -850,7 +781,7 @@ void WTable::resizeEvent(QResizeEvent *event)
 			m_pDealerButton->pos().x() * ratio_x,
 			m_pDealerButton->pos().y() * ratio_y);
 
-		for (unsigned int i = 0; i < m_CommunityCards.size(); ++i)
+		for (unsigned int i = 0; i < 5; ++i)
 		{
 			m_CommunityCards[i]->setPos(
 				m_CommunityCards[i]->pos().x() * ratio_x,
@@ -873,4 +804,22 @@ void WTable::resizeEvent(QResizeEvent *event)
 	lblHandStrength->move(
 		(size.width() - lblHandStrength->width()) / 2,
 		220);
+}
+
+bool WTable::greaterBet(const table_snapshot& snap, const qreal& bet, qreal *pbet) const
+{
+	for (unsigned int i=0; i < nMaxSeats; i++)
+	{
+		const seatinfo *seat = &(snap.seats[i]);
+
+		if (seat->valid && seat->bet > bet)
+		{
+			if (pbet)
+				*pbet = seat->bet;
+
+			return true;
+		}
+	}
+
+	return false;
 }

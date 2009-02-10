@@ -25,10 +25,34 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <QGraphicsScene>
+
+#include <cmath>
+
+qreal normalize(QPointF& vector)
+{
+	const qreal len = std::sqrt(
+		vector.x() * vector.x() +
+		vector.y() * vector.y());
+
+	if(len != 0)
+	{
+		const qreal InvLen = 1 / len;
+
+		vector *= InvLen;
+	}
+	return len;
+}
 
 DealerButton::DealerButton()
 :	m_Image("gfx/table/dealer_button.png")
-{ }
+{
+	m_tlDealerBtn.setDuration(2000); // 2 seconds
+	m_tlDealerBtn.setFrameRange(0, 100);
+
+	m_animDealerBtn.setItem(this);
+	m_animDealerBtn.setTimeLine(&m_tlDealerBtn);
+}
 
 QRectF DealerButton::boundingRect() const
 {
@@ -56,9 +80,28 @@ void DealerButton::paint(
 		m_Image);
 }
 
-// void DealerButton::startAnimationTo() { }
-
-void DealerButton::timerEvent(QTimerEvent* event)
+void DealerButton::startAnimation(const QPointF& ptCenterSeat, int distance)
 {
+	if (m_tlDealerBtn.state() == QTimeLine::Running)
+		return;
 
+	const QPointF ptMid = this->scene()->sceneRect().center();
+	QPointF vDir = ptCenterSeat - ptMid;
+	
+	normalize(vDir);
+
+	const QPointF pt = ptCenterSeat - (vDir * distance);
+
+	static const qreal steps = 100;
+
+	const QPointF ptStep = (scenePos() - pt) / steps;
+
+	m_animDealerBtn.clear();
+		
+	for (int i = 0; i < static_cast<int>(steps); ++i)
+		m_animDealerBtn.setPosAt(
+			i / steps,
+			QPointF(this->scenePos() - (ptStep * i)));
+
+	m_tlDealerBtn.start();	
 }

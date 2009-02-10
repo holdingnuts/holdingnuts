@@ -35,6 +35,7 @@
 #include <QGridLayout>	// TODO: remove!!! only wmain needs this
 #include <QGraphicsView>
 #include <QGraphicsItemAnimation>
+#include <QList>
 
 #include "Card.hpp"
 #include "HoleCards.hpp"
@@ -70,7 +71,7 @@ typedef struct {
 	int my_seat;
 } table_snapshot;
 
-// class Seat;
+
 class QStackedLayout;
 class QLabel;
 class QSlider;
@@ -96,15 +97,19 @@ public:
 
 protected:
 	void closeEvent(QCloseEvent *event);
-	void resizeEvent(QResizeEvent * event);
+	void resizeEvent(QResizeEvent *event);
 	
 	QPointF calcSeatPos(unsigned int nSeatID) const;
-	QPointF calcDealerBtnPos(
-		unsigned int nSeatID,
-		int distance = 100) const;
-	QPointF calcCCardsPos(unsigned int nCard) const;
+	QPointF calcCCardsPos(
+		unsigned int nCard,
+		int table_width) const;
 	
 	void doSitout(bool bSitout);
+	
+	bool greaterBet(
+		const table_snapshot& snap,
+		const qreal& bet,
+		qreal *pbet = 0) const;
 
 private slots:
 	void actionFold();
@@ -131,7 +136,7 @@ private:
 	//! \brief Seats
 	Seat					*wseats[10];
 	//! \brief
-	std::vector<QGraphicsPixmapItem*>	m_CommunityCards;
+	QGraphicsPixmapItem		*m_CommunityCards[5];
 	//! \brief Timeout
 	QTimeLine				m_timeLine;
 	//! \brief Image Timeout
@@ -146,10 +151,8 @@ private:
 	QLabel			*lblPots;
 	QLabel			*lblHandStrength;
 	EditableSlider		*m_pSliderAmount;
-	EditableSlider		*m_pSliderCallAmount;
-	QCheckBox 		*chkFold;
-	QCheckBox		*chkCheck;
-	QCheckBox		*chkCall;
+	QCheckBox 		*chkAutoFoldCheck;
+	QCheckBox		*chkAutoCheckCall;
 	
 	// stackedlayout widgets id
 	int				m_nActions;
