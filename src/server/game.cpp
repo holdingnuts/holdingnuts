@@ -195,7 +195,7 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 		return false;
 	
 	vector<int> client_list;
-	g->getPlayerList(to_tid, client_list);
+	g->getPlayerList(client_list);
 	
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
