@@ -112,6 +112,7 @@ protected:
 	void stateNewRound(Table *t);
 	void stateBlinds(Table *t);
 	void stateBetting(Table *t);
+	void stateBettingEnd(Table *t);   // pseudo-state
 	void stateAskShow(Table *t);
 	void stateAllFolded(Table *t);
 	void stateShowdown(Table *t);

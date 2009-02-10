@@ -40,6 +40,7 @@ public:
 		NewRound,
 		Blinds,
 		Betting,
+		BettingEnd,  // pseudo-state
 		AskShow,
 		AllFolded,
 		Showdown,

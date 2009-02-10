@@ -877,10 +877,11 @@ void GameController::stateBetting(Table *t)
 		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
 		
+		sendTableSnapshot(t);
+		
 		t->resetLastPlayerActions();
 		
-		t->scheduleState(Table::Betting, 2);
-		sendTableSnapshot(t);
+		t->scheduleState(Table::BettingEnd, 2);
 	}
 	else
 	{
@@ -905,6 +906,12 @@ void GameController::stateBetting(Table *t)
 		snprintf(msg, sizeof(msg), "[%d], it's your turn!", p->client_id);
 		chat(p->client_id, t->table_id, msg);
 	}
+}
+
+void GameController::stateBettingEnd(Table *t)
+{
+	t->state = Table::Betting;
+	sendTableSnapshot(t);
 }
 
 void GameController::stateAskShow(Table *t)
@@ -1144,7 +1151,7 @@ void GameController::stateDelay(Table *t)
 	if ((unsigned int) difftime(time(NULL), t->delay_start) >= t->delay)
 		t->delay = 0;
 #else
-	t->state = t->scheduled_state;
+	t->delay = 0;
 #endif
 }
 
@@ -1162,6 +1169,8 @@ int GameController::handleTable(Table *t)
 		stateBlinds(t);
 	else if (t->state == Table::Betting)
 		stateBetting(t);
+	else if (t->state == Table::BettingEnd)
+		stateBettingEnd(t);
 	else if (t->state == Table::AskShow)
 		stateAskShow(t);
 	else if (t->state == Table::AllFolded)
