@@ -513,7 +513,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		}
 		else
 		{
-			if ((int)s->stake == 0 /*|| !bGreaterBet*/)  // FIXME: do not show actions if there is no more action if nothing changes the betting round
+			if ((int)s->stake == 0 || (!bGreaterBet && snap->s_lastbet == (unsigned int)snap->my_seat))  // FIXME: do not show actions if there is no action possible for this betting round
 				stlayActions->setCurrentIndex(m_nNoAction);
 			else
 			{
