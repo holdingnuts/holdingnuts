@@ -846,6 +846,7 @@ int gameloop()
 			g->setGameId(gid);
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));
 			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
+			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
 			games[gid] = g;
 		}
 	}
