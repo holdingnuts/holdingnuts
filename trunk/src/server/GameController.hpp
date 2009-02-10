@@ -80,7 +80,9 @@ public:
 	unsigned int getPlayerMax() const { return max_players; };
 	unsigned int getPlayerCount() const { return players.size(); };
 	bool getPlayerList(std::vector<int> &client_list) const;
+#if 0
 	bool getPlayerList(int tid, std::vector<int> &client_list) const;
+#endif
 	
 	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);

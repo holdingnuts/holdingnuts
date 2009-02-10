@@ -134,6 +134,7 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 	return true;
 }
 
+#if 0
 bool GameController::getPlayerList(int tid, vector<int> &client_list) const
 {
 	client_list.clear();
@@ -155,6 +156,7 @@ bool GameController::getPlayerList(int tid, vector<int> &client_list) const
 	
 	return true;
 }
+#endif
 
 void GameController::chat(int tid, const char* msg)
 {
@@ -1240,8 +1242,10 @@ void GameController::tick()
 			}
 			
 			// FIXME: remove table ...
+#if 0
 			started = false;
 			players.clear();
+#endif
 			delete t;
 			tables.clear();
 			
