@@ -65,44 +65,37 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 	{
 		case Player::None:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
-				m_strAmount.clear();
 			break;
 		case Player::Check:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActCheck;
-				
-				if (amount > 0.0)
-					m_strAmount.setNum(amount, 'f', 2);
-				else
-					m_strAmount.clear();
 			break;
 		case Player::Fold:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActFold;
 			break;
 		case Player::Call:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActCall;
-				m_strAmount.setNum(amount, 'f', 2);
 			break;
 		case Player::Bet:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActBet;
-				m_strAmount.setNum(amount, 'f', 2);
 			break;
 		case Player::Raise:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActRaise;
-				m_strAmount.setNum(amount, 'f', 2);
 			break;
 		case Player::Show:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActShow;
-				m_strAmount.clear();
 			break;
 		case Player::Muck:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActMuck;
-				m_strAmount.clear();
 			break;
 		case Player::Allin:
 				m_pCurrentActionImg = &SeatImages::Instance().imgActAllin;
-				m_strAmount.setNum(amount, 'f', 2);
 			break;
 	}
+	
+	if (amount > 0.0)
+		m_strAmount.setNum(amount, 'f', 2);
+	else
+		m_strAmount.clear();
 }
 
 void Seat::setCurrent(bool cur, int sec_timeout)
@@ -275,7 +268,7 @@ void Seat::paint(
 			seat_width - 10,
 			seat_height - 30),
 		Qt::AlignLeft,
-		"$" + m_strStake);
+		m_strStake);
 	
 	// TODO: find right textposition
 	qreal tx_pos = 0;
@@ -299,14 +292,14 @@ void Seat::paint(
 		painter->drawImage(
 			QRectF(
 				seat_width + m_pCurrentActionImg->width() - (sx_card * 1.5),
-				-sy_card,
+				-(sy_card + 2),
 				sx_card,
 				sy_card),
 			m_FirstCard);
 		painter->drawImage(
 			QRectF(
 				seat_width + m_pCurrentActionImg->width() - sx_card,
-				-sy_card,
+				-(sy_card + 2),
 				sx_card,
 				sy_card),
 			m_SecondCard);
