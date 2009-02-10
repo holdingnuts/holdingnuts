@@ -457,8 +457,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	else if (!s->in_round ||
 		!(snap->state == Table::Blinds ||
 			snap->state == Table::Betting ||
-			snap->state == Table::AskShow) 
-		/* || isNoMoreAction(snap) */)  // FIXME: implement this one
+			snap->state == Table::AskShow)
+		/*|| isNoMoreActionPossible(snap)*/)  // FIXME: doesn't work that easy
 	{
 		stlayActions->setCurrentIndex(m_nNoAction);
 	}
@@ -495,13 +495,18 @@ void WTable::evaluateActions(const table_snapshot *snap)
 						btnBetRaise->setText(tr("Bet"));
 				}
 				
+				// handle allin-case
 				if (greatest_bet >= s->stake + s->bet)
 				{
 					btnCheckCall->setVisible(false);
+					m_pSliderAmount->setVisible(false);
 					btnBetRaise->setText(tr("Allin"));
 				}
 				else
+				{
 					btnCheckCall->setVisible(true);
+					m_pSliderAmount->setVisible(true);
+				}
 				
 				stlayActions->setCurrentIndex(m_nActions);
 			}
@@ -917,7 +922,7 @@ bool WTable::greaterBet(const table_snapshot *snap, const qreal& bet, qreal *pbe
 	{
 		const seatinfo *seat = &(snap->seats[i]);
 
-		if (seat->valid && seat->bet > cur_bet)
+		if (seat->valid && seat->in_round && seat->bet > cur_bet)
 			cur_bet = seat->bet;
 	}
 	
@@ -926,3 +931,26 @@ bool WTable::greaterBet(const table_snapshot *snap, const qreal& bet, qreal *pbe
 	
 	return (cur_bet > bet);
 }
+
+#if 0
+bool WTable::isNoMoreActionPossible(const table_snapshot *snap)
+{
+	unsigned int countPlayers = 0;
+	unsigned int countAllin = 0;
+	
+	for (unsigned int i=0; i < nMaxSeats; i++)
+	{
+		const seatinfo *seat = &(snap->seats[i]);
+		
+		if (seat->valid && seat->in_round)
+		{
+			countPlayers++;
+			
+			if ((int)seat->stake == 0)
+				countAllin++;
+		}
+	}
+	
+	return (countAllin >= countPlayers - 1);
+}
+#endif
