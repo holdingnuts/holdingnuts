@@ -31,4 +31,5 @@ config.set("perm_create_user",	true);			// allow regular user to create games
 config.set("dbg_testgame_players",	3);		// testgames with X players
 config.set("dbg_testgame_games",	2);		// start X testgames
 config.set("dbg_testgame_timeout",	30);		// player timeout in seconds
+config.set("dbg_testgame_stakes",	1500);		// initial player stake
 #endif

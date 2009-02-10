@@ -49,6 +49,8 @@ GameController::GameController()
 	started = false;
 	max_players = 10;
 	
+	player_stakes = 1500.0f;
+	
 	blind.blindrule = BlindByTime;
 	blind.blinds_time = 60 * 4;
 	blind.blinds_factor = 2.0f;
@@ -66,7 +68,7 @@ bool GameController::addPlayer(int client_id)
 	
 	Player p;
 	p.client_id = client_id;
-	p.stake = 1500.0f;
+	p.stake = player_stakes;
 	p.next_action.valid = false;
 	p.sitout = false;
 	
@@ -109,6 +111,16 @@ bool GameController::setPlayerMax(unsigned int max)
 		return false;
 	
 	max_players = max;
+	return true;
+}
+
+bool GameController::setPlayerStakes(float stake)
+{
+	if (!(int) stake)
+		return false;
+	
+	player_stakes = stake;
+	
 	return true;
 }
 

@@ -282,13 +282,13 @@ int test_gamecontroller1()
 	
 	game.setPlayerMax(4);
 	game.addPlayer(0);
-	game.setPlayerStake(0, 100.0f);
+	game.debugSetPlayerStake(0, 100.0f);
 	game.addPlayer(1);
-	game.setPlayerStake(1, 20.0f);
+	game.debugSetPlayerStake(1, 20.0f);
 	game.addPlayer(2);
-	game.setPlayerStake(2, 50.0f);
+	game.debugSetPlayerStake(2, 50.0f);
 	game.addPlayer(3);
-	game.setPlayerStake(3, 30.0f);
+	game.debugSetPlayerStake(3, 30.0f);
 	
 	do_ticks(&game);  // New round started // 0: You're under the gun!
 	

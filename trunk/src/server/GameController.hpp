@@ -73,6 +73,9 @@ public:
 	void setPlayerTimeout(unsigned int respite) { timeout = respite; };
 	unsigned int getPlayerTimeout() const { return timeout; };
 	
+	bool setPlayerStakes(float stake);
+	float getPlayerStakes() const { return player_stakes; } ;
+	
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() const { return max_players; };
 	unsigned int getPlayerCount() const { return players.size(); };
@@ -92,7 +95,7 @@ public:
 	float determineMinimumBet(Table *t) const;
 	
 #ifdef DEBUG
-	void setPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
+	void debugSetPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
 #endif
 	
 protected:
@@ -136,6 +139,8 @@ private:
 	
 	time_t timeout_start;
 	unsigned int timeout;
+	
+	float player_stakes;
 	
 	struct {
 		float amount;
