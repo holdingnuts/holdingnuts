@@ -471,8 +471,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	}
 	else
 	{
-		qreal greater_bet;
-		bool bGreaterBet = greaterBet(snap, s->bet, &greater_bet);
+		qreal greatest_bet = 0;
+		bool bGreaterBet = greaterBet(snap, s->bet, &greatest_bet);
 		
 		if (snap->s_cur == (unsigned int)snap->my_seat)
 		{
@@ -495,6 +495,14 @@ void WTable::evaluateActions(const table_snapshot *snap)
 						btnBetRaise->setText(tr("Bet"));
 				}
 				
+				if (greatest_bet >= s->stake + s->bet)
+				{
+					btnCheckCall->setVisible(false);
+					btnBetRaise->setText(tr("Allin"));
+				}
+				else
+					btnCheckCall->setVisible(true);
+				
 				stlayActions->setCurrentIndex(m_nActions);
 			}
 		}
@@ -507,7 +515,11 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				if (bGreaterBet)
 				{
 					chkAutoFoldCheck->setText(tr("Fold"));
-					chkAutoCheckCall->setText(QString("Call %1").arg(greater_bet - s->bet));
+					
+					if (greatest_bet >= s->stake + s->bet)
+						chkAutoCheckCall->setText(tr("Allin"));
+					else
+						chkAutoCheckCall->setText(QString("Call %1").arg(greatest_bet - s->bet));
 				}
 				else
 				{
@@ -685,7 +697,7 @@ void WTable::updateView()
 					chkAutoCheckCall->setCheckState(Qt::Unchecked);
 				}
 			}
-			else
+			else  // validate pre-actions
 			{
 				if (chkAutoCheckCall->checkState() == Qt::Checked)
 				{
@@ -760,13 +772,17 @@ void WTable::actionBetRaise()
 
 	if (snap->my_seat == -1)
 		return;
-
-	const qreal amount = static_cast<qreal>(m_pSliderAmount->value());
 	
-	if (amount == snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
+	qreal greatest_bet = 0;
+	greaterBet(snap, 0, &greatest_bet);
+	
+	if (greatest_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Allin);
 	else
+	{
+		const qreal amount = static_cast<qreal>(m_pSliderAmount->value());
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, amount + snap->seats[snap->my_seat].bet);
+	}
 }
 
 void WTable::actionShow()
