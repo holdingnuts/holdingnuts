@@ -253,13 +253,14 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	for (unsigned int j = 0; j < 5; j++)
 	{
 		m_CommunityCards[j] = new QGraphicsPixmapItem(
-			QPixmap(QString("gfx/deck/default/back.png")));
+			QPixmap(QString("gfx/deck/default/blank.png")));
 
 		m_CommunityCards[j]->setPos(
 			calcCCardsPos(j, static_cast<int>(pScene->width())));
 		m_CommunityCards[j]->setTransformationMode(Qt::SmoothTransformation);
 		m_CommunityCards[j]->scale(0.3, 0.3);
 		m_CommunityCards[j]->setZValue(5.0);
+		m_CommunityCards[j]->hide();
 
 		pScene->addItem(m_CommunityCards[j]);
 	}
