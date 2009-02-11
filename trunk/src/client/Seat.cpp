@@ -98,19 +98,9 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 		m_strAmount.clear();
 }
 
-void Seat::setCurrent(bool cur, int sec_timeout)
+void Seat::setCurrent(bool cur)
 {
 	m_bCurrent = cur;
-/*	
-	if (m_bCurrent && sec_timeout)
-	{
-		m_timeLine.setDuration(sec_timeout * 1000);
-		m_timeLine.setFrameRange(0, SeatImages::Instance().imgTimeout.width());
-		m_timeLine.start();
-	}
-	else
-		m_timeLine.stop();
-*/		
 }
 
 void Seat::setSitout(bool sitout)
@@ -214,25 +204,7 @@ void Seat::paint(
 			seat_width + m_pCurrentActionImg->width(),
 			seat_height),
 		*imgBack);
-/*	
-	if (m_bCurrent)
-	{
-		painter->drawImage(
-			QRectF(
-				0,
-				SeatImages::Instance().imgBackCurrent.height(),
-				SeatImages::Instance().imgTimeout.width(),
-				SeatImages::Instance().imgTimeout.height()),
-			SeatImages::Instance().imgTimeout);
-		painter->fillRect(
-			QRectF(
-				0,
-				SeatImages::Instance().imgBackCurrent.height(),
-				m_timeLine.currentFrame(),
-				SeatImages::Instance().imgTimeout.height()),
-			QBrush(Qt::black));
-	}
-*/	
+	
 	// action
 	if (m_pCurrentActionImg)
 	{
@@ -255,7 +227,7 @@ void Seat::paint(
 	painter->drawText(
 		QRectF(
 			10,
-			15,
+			12,
 			seat_width - 10,
 			fm_bold.height()),
 		Qt::AlignLeft,
@@ -264,7 +236,7 @@ void Seat::paint(
 	painter->drawText(
 		QRectF(
 			10,
-			seat_height * 0.5,
+			45,
 			seat_width - 10,
 			seat_height - 30),
 		Qt::AlignLeft,
