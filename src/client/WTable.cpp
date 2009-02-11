@@ -504,6 +504,12 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					m_pSliderAmount->setVisible(false);
 					btnBetRaise->setText(tr("Allin"));
 				}
+				else if (snap->minimum_bet >= snap->seats[snap->my_seat].stake)
+				{
+					btnCheckCall->setVisible(true);
+					m_pSliderAmount->setVisible(false);
+					btnBetRaise->setText(tr("Allin"));
+				}
 				else
 				{
 					btnCheckCall->setVisible(true);
