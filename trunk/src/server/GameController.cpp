@@ -606,7 +606,7 @@ void GameController::stateBetting(Table *t)
 	bool auto_action = false;
 	
 	Player::PlayerAction action;
-	float amount;
+	float amount = 0.0f;
 	
 	float minimum_bet = determineMinimumBet(t);
 	

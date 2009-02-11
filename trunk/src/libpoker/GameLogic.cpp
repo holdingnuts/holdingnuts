@@ -141,7 +141,7 @@ bool GameLogic::isTwoPair(std::vector<Card> *allcards, std::vector<Card> *rank, 
 bool GameLogic::isStraight(vector<Card> *allcards, const int suit, vector<Card> *rank)
 {
 	bool is_straight = false;
-	int last_face = -1, count;
+	int last_face = -1, count = 0;
 	Card high;
 	
 	for (vector<Card>::iterator e = allcards->begin(); e != allcards->end(); e++)
@@ -219,7 +219,7 @@ bool GameLogic::isXOfAKind(vector<Card> *allcards, const unsigned int n, vector<
 	bool is_xofakind = false;
 	int face = -1;
 	Card high;
-	unsigned int count;
+	unsigned int count = 0;
 	
 	// count face of cards, break on n of a kind
 	for (vector<Card>::iterator e = allcards->begin(); e != allcards->end(); e++)

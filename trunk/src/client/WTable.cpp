@@ -885,7 +885,9 @@ void WTable::slotShow()
 
 void WTable::slotTimeup(int seat)
 {
+#ifdef DEBUG
 	qDebug() << "timeup seat= " << seat;
+#endif
 }
 
 void WTable::resizeEvent(QResizeEvent *event)

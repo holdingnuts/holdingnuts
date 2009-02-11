@@ -276,6 +276,7 @@ void do_ticks(GameController *game, unsigned int ticks=30)
 		game->tick();
 }
 
+#ifdef DEBUG
 int test_gamecontroller1()
 {
 	GameController game;
@@ -313,7 +314,7 @@ int test_gamecontroller1()
 	
 	return 0;
 }
-
+#endif
 
 int main(void)
 {
@@ -350,7 +351,9 @@ int main(void)
 #endif
 
 #if 0
+#ifdef DEBUG
 	test_gamecontroller1();
+#endif
 #endif
 
 	return 0;
