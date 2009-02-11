@@ -759,11 +759,15 @@ void WTable::closeEvent(QCloseEvent *event)
 void WTable::actionFold()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Fold);
+	
+	//stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionCheckCall()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Call);
+	
+	//stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionBetRaise()
@@ -782,23 +786,32 @@ void WTable::actionBetRaise()
 	qreal greatest_bet = 0;
 	greaterBet(snap, 0, &greatest_bet);
 	
-	if (greatest_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
+	if (greatest_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet ||
+		snap->minimum_bet >= snap->seats[snap->my_seat].stake)
+	{
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Allin);
+	}
 	else
 	{
 		const qreal amount = static_cast<qreal>(m_pSliderAmount->value());
-		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, amount + snap->seats[snap->my_seat].bet);
+		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, amount);
 	}
+	
+	//stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionShow()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Show);
+	
+	//stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionMuck()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Muck);
+	
+	//stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::doSitout(bool bSitout)
