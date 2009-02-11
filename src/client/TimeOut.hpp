@@ -21,26 +21,43 @@
  */
 
 
-#include "SeatImages.hpp"
+#ifndef _HOLDING_NUTS_TIMEOUT_H
+#define _HOLDING_NUTS_TIMEOUT_H
 
-const SeatImages& SeatImages::Instance()
+#include <QGraphicsItem>
+#include <QTimeLine>
+#include <QGraphicsItemAnimation>
+
+class TimeOut : public QObject, public QGraphicsItem
 {
-	static SeatImages instance;
+	Q_OBJECT
 
-	return instance;
-}
+public:
+	TimeOut();
 
-SeatImages::SeatImages()
-:	imgBack("gfx/table/seat.png"),
-	imgBackCurrent("gfx/table/seat_current.png"),
-	imgBackSitout("gfx/table/seat_sitout.png"),
-	imgActNone("gfx/table/action_none.png"),
-	imgActBet("gfx/table/action_bet.png"),
-	imgActCall("gfx/table/action_call.png"),
-	imgActCheck("gfx/table/action_check.png"),
-	imgActFold("gfx/table/action_fold.png"),
-	imgActMuck("gfx/table/action_muck.png"),
-	imgActRaise("gfx/table/action_raise.png"),
-	imgActShow("gfx/table/action_show.png"),
-	imgActAllin("gfx/table/action_allin.png")
-{ }
+	QRectF boundingRect() const;
+
+	void paint(
+		QPainter* painter,
+		const QStyleOptionGraphicsItem* option,
+		QWidget* widget);
+
+	void start(int seat, int sec_timeout);
+	
+Q_SIGNALS:
+	void timeup(int);
+
+private Q_SLOTS:
+	void update(int frame);
+
+private:
+	const QImage			m_Image;
+	//! \brief Timeline Dealerbutton Animation
+	QTimeLine				m_tl;
+	//! \brief Framenumber
+	int						m_nFrame;
+	//! \brief Seat ID
+	int						m_nSeat;
+};
+
+#endif /* _HOLDING_NUTS_TIMEOUT_H */

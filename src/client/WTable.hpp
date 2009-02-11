@@ -80,6 +80,7 @@ class QSlider;
 class ChatBox;
 class DealerButton;
 class EditableSlider;
+class TimeOut;
 
 class WTable : public QGraphicsView
 {
@@ -104,6 +105,7 @@ protected:
 	QPointF calcCCardsPos(
 		unsigned int nCard,
 		int table_width) const;
+	QPointF calcTimeoutPos(unsigned int nSeatID) const;
 	
 	void doSitout(bool bSitout);
 
@@ -130,7 +132,7 @@ private slots:
 	void actionAutoCheckCall(int state);
 
 	void slotShow();
-	
+	void slotTimeup(int seat);
 	
 private:
 	//! \brief Game ID
@@ -144,14 +146,10 @@ private:
 	DealerButton			*m_pDealerButton;
 	//! \brief Seats
 	Seat					*wseats[10];
-	//! \brief
+	//! \brief Community Cards
 	QGraphicsPixmapItem		*m_CommunityCards[5];
 	//! \brief Timeout
-	QTimeLine				m_timeLine;
-	//! \brief Image Timeout
-	QGraphicsPixmapItem		*m_pImgTimeout;
-	//! \brief shear Animation from Timeout
-	QGraphicsItemAnimation	m_animTimeout;
+	TimeOut					*m_pTimeout;
 	
 	// ui
 	ChatBox			*m_pChat;

@@ -51,6 +51,7 @@
 #include "Seat.hpp"
 #include "DealerButton.hpp"
 #include "EditableSlider.hpp"
+#include "TimeOut.hpp"
 
 using namespace std;
 
@@ -224,32 +225,20 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	pScene->addItem(m_pImgTable);
 
 	m_pDealerButton = new DealerButton;
-	// QGraphicsPixmapItem(QPixmap("gfx/table/dealer_button.png"));
 	m_pDealerButton->scale(0.5, 0.5);
 	m_pDealerButton->setPos(
 		pScene->width() / 5, pScene->height() / 2);
 
 	pScene->addItem(m_pDealerButton);
-/* TODO: fix
-	m_pImgTimeout = new QGraphicsPixmapItem(QPixmap("gfx/table/timeout.png"));
-	m_pImgTimeout->setTransformationMode(Qt::SmoothTransformation);
-	m_pImgTimeout->scale(0.5, 0.5);
-	m_pImgTimeout->setPos(50, 50);
 
-	pScene->addItem(m_pImgTimeout);
-	
-	m_timeLine.setDuration(5000);
-	m_timeLine.setFrameRange(0, m_pImgTimeout->pixmap().width());
-	
-	m_animTimeout.setItem(m_pImgTimeout);
-	m_animTimeout.setTimeLine(&m_timeLine);
+	m_pTimeout = new TimeOut;
+	m_pTimeout->scale(0.5, 0.5);
+	m_pTimeout->hide();
 
-	for (int i = 0; i < 5000; ++i)
-		m_animTimeout.setShearAt(
-			i / 5000,
-			m_timeLine.frameForTime(5000 - i),
-			0);
-*/
+	connect(m_pTimeout, SIGNAL(timeup(int)), this, SLOT(slotTimeup(int)));
+
+	pScene->addItem(m_pTimeout);
+
 	for (unsigned int j = 0; j < 5; j++)
 	{
 		m_CommunityCards[j] = new QGraphicsPixmapItem(
@@ -428,6 +417,18 @@ QPointF WTable::calcCCardsPos(unsigned int nCard, int table_width) const
 		275);
 }
 
+QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
+{
+	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
+	
+	QPointF pt = wseats[nSeatID]->scenePos();
+
+	pt.ry() += wseats[nSeatID]->boundingRectSeat().height() - 
+		m_pTimeout->boundingRect().height();
+
+	return pt;
+}
+
 void WTable::evaluateActions(const table_snapshot *snap)
 {
 	// player does not sit at table
@@ -573,8 +574,11 @@ void WTable::updateView()
 			
 			if (snap->state > Table::ElectDealer)
 			{
-				wseats[i]->setCurrent(snap->s_cur == i, ginfo->player_timeout);
-				// m_timeLine.start();
+				wseats[i]->setCurrent(snap->s_cur == i);
+				
+				m_pTimeout->show();
+				m_pTimeout->setPos(calcTimeoutPos(snap->s_cur));
+				m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
 			}
 			
 			if (seat->in_round)
@@ -873,6 +877,11 @@ void WTable::slotShow()
 	show();
 }
 
+void WTable::slotTimeup(int seat)
+{
+	qDebug() << "timeup seat= " << seat;
+}
+
 void WTable::resizeEvent(QResizeEvent *event)
 {
 	const QSize& size = event->size();
@@ -911,6 +920,11 @@ void WTable::resizeEvent(QResizeEvent *event)
 			
 			m_CommunityCards[i]->scale(ratio_x, ratio_y);				
 		}
+		
+		m_pTimeout->setPos(
+			m_pTimeout->pos().x() * ratio_x,
+			m_pTimeout->pos().y() * ratio_y);
+		m_pTimeout->scale(ratio_x, ratio_y);
 	}	
 
 	m_pChat->move(20, size.height() - m_pChat->height() - 10);
