@@ -760,7 +760,8 @@ void GameController::stateBetting(Table *t)
 		if (action == Player::Bet || action == Player::Raise || action == Player::Allin)
 		{
 			// only re-open betting round if amount greater than table-bet
-			if (t->seats[t->cur_player].bet > t->bet_amount && t->seats[t->cur_player].bet >= minimum_bet)
+			// FIXME: bug: other players need to do an action even on none-minimum-bet
+			if (t->seats[t->cur_player].bet > t->bet_amount /*&& t->seats[t->cur_player].bet >= minimum_bet*/)
 			{
 				t->last_bet_player = t->cur_player;
 				t->last_bet_amount = t->bet_amount;     // needed for minimum-bet
