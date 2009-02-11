@@ -770,14 +770,14 @@ void WTable::actionFold()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Fold);
 	
-	//stlayActions->setCurrentIndex(m_nNoAction);
+	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionCheckCall()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Call);
 	
-	//stlayActions->setCurrentIndex(m_nNoAction);
+	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionBetRaise()
@@ -807,21 +807,21 @@ void WTable::actionBetRaise()
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, amount);
 	}
 	
-	//stlayActions->setCurrentIndex(m_nNoAction);
+	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionShow()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Show);
 	
-	//stlayActions->setCurrentIndex(m_nNoAction);
+	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionMuck()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Muck);
 	
-	//stlayActions->setCurrentIndex(m_nNoAction);
+	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::doSitout(bool bSitout)
