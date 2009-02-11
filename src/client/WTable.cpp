@@ -171,6 +171,7 @@ QDebug operator << (QDebug s, const seatinfo& si)
 	s << "\t client_id= " << si.client_id << "\n";
 	s << "\t valid= " << (si.valid ? "true" : "false") << "\n";
 	s << "\t in_round= " << (si.in_round ? "true" : "false") << "\n";
+	s << "\t sitout= " << (si.sitout ? "true" : "false") << "\n";
 	s << "\t PlayerAction= " << si.action << "\n";
 	s << "\t bet= " << si.bet << "\n";
 	s << "\t stake= " << si.stake << "\n";
@@ -582,10 +583,22 @@ void WTable::updateView()
 			{
 				wseats[i]->setCurrent(snap->s_cur == i);
 				
-				m_pTimeout->show();
-				m_pTimeout->setPos(calcTimeoutPos(snap->s_cur));
-				m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
-			}
+				if ((snap->state == Table::Blinds || 
+					snap->state == Table::Betting) &&
+					snap->seats[snap->s_cur].stake > 0 &&
+					snap->seats[snap->s_cur].sitout == false)
+				{
+					m_pTimeout->setPos(calcTimeoutPos(snap->s_cur));
+					m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
+					m_pTimeout->show();
+
+				}
+				else
+				{
+					m_pTimeout->hide();
+					m_pTimeout->stop();
+				}
+			}			
 			
 			if (seat->in_round)
 			{
