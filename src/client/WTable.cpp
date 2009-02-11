@@ -443,12 +443,12 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	
 	// minimum bet
 	if (snap->minimum_bet > s->stake)
-		m_pSliderAmount->setMinimum((int) s->stake);
+		m_pSliderAmount->setMinimum((int) s->stake + (int) s->bet);
 	else
 		m_pSliderAmount->setMinimum((int) snap->minimum_bet);
 	
 	// maximum bet is stake size
-	m_pSliderAmount->setMaximum((int) s->stake);
+	m_pSliderAmount->setMaximum((int) s->stake + (int) s->bet);
 	
 	
 	// evaluate available actions
@@ -504,7 +504,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					m_pSliderAmount->setVisible(false);
 					btnBetRaise->setText(tr("Allin"));
 				}
-				else if (snap->minimum_bet >= snap->seats[snap->my_seat].stake)
+				else if (snap->minimum_bet >= s->stake + s->bet)
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(false);
@@ -797,7 +797,7 @@ void WTable::actionBetRaise()
 	greaterBet(snap, 0, &greatest_bet);
 	
 	if (greatest_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet ||
-		snap->minimum_bet >= snap->seats[snap->my_seat].stake)
+		snap->minimum_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
 	{
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Allin);
 	}
