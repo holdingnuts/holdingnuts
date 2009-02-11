@@ -51,7 +51,7 @@ void TimeOut::paint(
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget)
 {
-	this->setZValue(9);
+	this->setZValue(10);
 
 	painter->setRenderHint(QPainter::SmoothPixmapTransform);
 
@@ -69,9 +69,15 @@ void TimeOut::paint(
 
 void TimeOut::start(int seat, int sec_timeout)
 {
+	if (m_nSeat == seat && m_tl.state() == QTimeLine::Running)
+		return;
+
 	if (m_tl.state() == QTimeLine::Running)
+	{
 		m_tl.stop();
-		
+		m_tl.setCurrentTime(0);
+	}
+	
 	m_tl.setDuration(sec_timeout * 1000);
 	m_tl.start();
 	
@@ -82,7 +88,7 @@ void TimeOut::update(int frame)
 {
 	m_nFrame = frame;
 	
-	if (frame == m_Image.width())
+	if (m_nFrame == m_Image.width())
 		emit timeup(m_nSeat);
 	
 	scene()->update(this->boundingRect());
