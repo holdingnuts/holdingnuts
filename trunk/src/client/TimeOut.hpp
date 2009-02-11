@@ -43,6 +43,7 @@ public:
 		QWidget* widget);
 
 	void start(int seat, int sec_timeout);
+	void stop();
 	
 Q_SIGNALS:
 	void timeup(int);

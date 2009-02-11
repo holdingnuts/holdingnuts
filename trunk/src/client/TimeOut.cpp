@@ -69,19 +69,19 @@ void TimeOut::paint(
 
 void TimeOut::start(int seat, int sec_timeout)
 {
-	if (m_nSeat == seat && m_tl.state() == QTimeLine::Running)
-		return;
-
 	if (m_tl.state() == QTimeLine::Running)
-	{
-		m_tl.stop();
-		m_tl.setCurrentTime(0);
-	}
+		this->stop();
 	
 	m_tl.setDuration(sec_timeout * 1000);
 	m_tl.start();
 	
 	m_nSeat = seat;
+}
+
+void TimeOut::stop()
+{
+	m_tl.stop();
+	m_tl.setCurrentTime(0);
 }
 
 void TimeOut::update(int frame)
