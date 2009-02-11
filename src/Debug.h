@@ -38,6 +38,15 @@
 	do { fprintf(stderr, "[%10s]  "s"\n", level, __VA_ARGS__) ; fflush(stderr); } while(0)
 
 #endif /* _MSC_VER */
+
+#else
+
+#ifndef _MSC_VER
+# define dbg_msg(level, s, args...)
+#else /* _MSC_VER */
+# define dbg_msg(level, s, ...)
+#endif /* _MSC_VER */
+
 #endif /* DEBUG */
 
 #endif /* _DEBUG_H */
