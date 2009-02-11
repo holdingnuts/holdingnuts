@@ -805,9 +805,6 @@ void GameController::stateBetting(Table *t)
 	// is next the player who did the last bet/action? if yes, end this betting round
 	if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
 	{
-		sendTableSnapshot(t);
-		
-		
 		// collect bets into pot
 		t->collectBets();
 		
@@ -841,7 +838,7 @@ void GameController::stateBetting(Table *t)
 		case Table::River:
 			// last_bet_player MUST show his hand
 			t->seats[t->last_bet_player].showcards = true;
-			// FIXME: set last action ?
+			p->last_action = Player::Show;
 			
 			// set the player behind last action as current player
 			t->cur_player = t->getNextActivePlayer(t->last_bet_player);
@@ -881,6 +878,7 @@ void GameController::stateBetting(Table *t)
 		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
 		
+		sendTableSnapshot(t);
 		
 		t->resetLastPlayerActions();
 		
