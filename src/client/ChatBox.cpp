@@ -27,6 +27,7 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QDebug>
 
 ChatBox::ChatBox(
 	const QString& title,
@@ -59,6 +60,8 @@ ChatBox::ChatBox(
 		lchat->addWidget(m_pEditChat);
 
 	this->setLayout(lchat);
+	
+	m_nFontPointSize = this->fontPointSize();
 }
 
 void ChatBox::addMessage(const QString& msg, const QColor& color)
@@ -66,6 +69,7 @@ void ChatBox::addMessage(const QString& msg, const QColor& color)
 	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
 	m_pEditChatLog->setTextColor(color);
 	m_pEditChatLog->setFontWeight(QFont::Normal);
+	m_pEditChatLog->setFontPointSize(m_nFontPointSize);	
 	m_pEditChatLog->insertPlainText(msg + "\r\n");
 }
 
@@ -74,6 +78,7 @@ void ChatBox::addMessage(const QString& from, const QString& msg)
 	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
 	m_pEditChatLog->setTextColor(Qt::black);
 	m_pEditChatLog->setFontWeight(QFont::Bold);
+	m_pEditChatLog->setFontPointSize(m_nFontPointSize);	
 	m_pEditChatLog->insertPlainText("[" + from + "]");
 	m_pEditChatLog->setFontWeight(QFont::Normal);
 	m_pEditChatLog->insertPlainText(": " + msg + "\r\n");
@@ -84,9 +89,20 @@ void ChatBox::addMessage(const QString& from, const QString& msg, const QColor& 
 	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
 	m_pEditChatLog->setTextColor(color);
 	m_pEditChatLog->setFontWeight(QFont::Bold);
+	m_pEditChatLog->setFontPointSize(m_nFontPointSize);	
 	m_pEditChatLog->insertPlainText("[" + from + "]");
 	m_pEditChatLog->setFontWeight(QFont::Normal);
 	m_pEditChatLog->insertPlainText(": " + msg + "\r\n");
+}
+
+void ChatBox::setFontPointSize(int size)
+{
+	m_nFontPointSize = size;
+}
+
+int ChatBox::fontPointSize() const
+{
+	return m_pEditChatLog->currentFont().pointSize();
 }
 
 void ChatBox::actionChat()

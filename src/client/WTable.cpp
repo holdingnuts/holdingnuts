@@ -352,6 +352,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_LayoutActions->setLayout(stlayActions);
 	
 	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 120, this);
+	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 2);
 	m_pChat->show();
 	
 	lblPots = new QLabel("Pot 0: 0.00", this);
