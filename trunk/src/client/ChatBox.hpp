@@ -55,6 +55,10 @@ public:
 		const QString& msg,
 		const QColor& color);
 
+	void setFontPointSize(int size);
+
+	int fontPointSize() const;	
+
 protected:
 	ChatBox();
 
@@ -64,6 +68,7 @@ private slots:
 protected:
 	int			m_nGameID;
 	int			m_nTableID;
+	int			m_nFontPointSize;
 	QLineEdit*		m_pEditChat;
 	QTextEdit*		m_pEditChatLog;
 };
