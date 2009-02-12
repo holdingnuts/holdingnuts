@@ -213,7 +213,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QGraphicsScene* pScene = new QGraphicsScene(0, 0, 900, 700, this);
 
 	pScene->setBackgroundBrush(QPixmap("gfx/table/background.png"));
-	
+	// add scene immediately to view
+	this->setScene(pScene);
 	// don't use bsptree
 	pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -245,11 +246,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		m_CommunityCards[j] = new QGraphicsPixmapItem(
 			QPixmap(QString("gfx/deck/default/blank.png")));
 
-		m_CommunityCards[j]->setPos(
-			calcCCardsPos(j, static_cast<int>(pScene->width())));
 		m_CommunityCards[j]->setTransformationMode(Qt::SmoothTransformation);
 		m_CommunityCards[j]->scale(0.3, 0.3);
 		m_CommunityCards[j]->setZValue(5.0);
+		m_CommunityCards[j]->setPos(calcCCardsPos(j));
 		m_CommunityCards[j]->hide();
 
 		pScene->addItem(m_CommunityCards[j]);
@@ -265,16 +265,12 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	}
 
 	// view
-	this->setScene(pScene);
 //	this->setRenderHint(QPainter::HighQualityAntialiasing);
 	this->setRenderHint(QPainter::SmoothPixmapTransform);
 	this->setCacheMode(QGraphicsView::CacheBackground);
-	
-	// TODO: kannst du die min-window size noch runtersetzen? kann so auf meinem EeePC in der 
-	// schule nicht das ganze fenster sehen :)
 	this->setMinimumSize(
-		static_cast<int>(pScene->width()),
-		static_cast<int>(pScene->height()));
+		static_cast<int>(scene()->width() * 0.75),
+		static_cast<int>(scene()->height() * 0.75));
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/pclient.ico"));
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -352,7 +348,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_LayoutActions->setLayout(stlayActions);
 	
 	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 120, this);
-	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 2);
+	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
 	m_pChat->show();
 	
 	lblPots = new QLabel("Pot 0: 0.00", this);
@@ -370,6 +366,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 {
 	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
+	Q_ASSERT_X(scene(), __func__, "bad scene pointer");
+	Q_ASSERT_X(wseats[nSeatID], __func__, "bad seat pointer");
 
 	//		8	9	0
 	//	 7			   1
@@ -377,51 +375,61 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 	//   6			   2
 	//		5	4	3
 
-	// TODO: note size from seat images
-	// TODO: calc seat position
 	static const qreal height_start = 72;
+	
+	const QRectF& rcSeat = wseats[nSeatID]->boundingRectSeat(); // QRectF(0,0 119.5x49) 
+	const QRectF& rcScene = this->scene()->sceneRect();	// QRectF(0,0 900x700)
 
 	switch (nSeatID)
 	{
 		case 0:
-			return QPointF(600, height_start);
+			return QPointF(rcScene.width() * 0.65, height_start);
 		case 1:
-			return QPointF(750, 190);
+			return QPointF(rcScene.width() * 0.8, rcScene.height() * 0.25);
 		case 2:
-			return QPointF(750, 340);
+			return QPointF(rcScene.width() * 0.8, 340);
 		case 3:
-			return QPointF(600, 449);
+			return QPointF(rcScene.width() * 0.65, 449);
 		case 4:
-			return QPointF(400, 449);
+			return QPointF(rcScene.width() * 0.5 - rcSeat.width() * 0.5, 449);
 		case 5:
-			return QPointF(200, 449);
+			return QPointF(rcScene.width() * 0.35 - rcSeat.width(), 449);
 		case 6:
-			return QPointF(50, 340);
+			return QPointF(rcScene.width() * 0.2 - rcSeat.width(), 340);
 		case 7:
-			return QPointF(50, 190);
+			return QPointF(rcScene.width() * 0.2 - rcSeat.width(), 190);
 		case 8:
-			return QPointF(200, height_start);
+			return QPointF(rcScene.width() * 0.35 - rcSeat.width(), height_start);
 		case 9:
-			return QPointF(400, height_start);
+			return QPointF(rcScene.width() * 0.5 - rcSeat.width() * 0.5, height_start);
 	}
 	return QPointF(0, 0);
 }
 
-QPointF WTable::calcCCardsPos(unsigned int nCard, int table_width) const
+QPointF WTable::calcCCardsPos(unsigned int nCard) const
 {
 	Q_ASSERT_X(nCard < 5, __func__, "invalided Card Number");
+	Q_ASSERT_X(scene(), __func__, "bad scene pointer");
+	Q_ASSERT_X(m_CommunityCards[nCard], __func__, "bad community card pointer");
 
-	static const qreal card_spacing = 8;
-	static const qreal card_width = 80;	// card_width = 72 + spacing
+	QRectF rc = m_CommunityCards[nCard]->boundingRect();
+	const QTransform m = m_CommunityCards[nCard]->transform();
+	
+	rc = m.mapRect(rc);
+
+	const qreal card_spacing = rc.width() * 0.1;
+	const qreal card_width = rc.width() + card_spacing;
 
 	return QPointF(
-		((table_width - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
-		275);
+		((scene()->width() - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
+		scene()->height() * 0.4);
 }
 
 QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
 {
 	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
+	Q_ASSERT_X(wseats[nSeatID], __func__, "bad seat pointer");
+	Q_ASSERT_X(m_pTimeout, __func__, "bad timeout pointer");
 	
 	QPointF pt = wseats[nSeatID]->scenePos();
 
@@ -657,7 +665,8 @@ void WTable::updateView()
 	if (snap->state == Table::NewRound)
 	{
 		m_pDealerButton->startAnimation(
-			wseats[snap->s_dealer]->pos() + wseats[snap->s_dealer]->boundingRectSeat().center());
+			wseats[snap->s_dealer]->pos() + wseats[snap->s_dealer]->boundingRectSeat().center(),
+			125);
 	}
 	
 	// Pots
