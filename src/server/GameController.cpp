@@ -838,7 +838,6 @@ void GameController::stateBetting(Table *t)
 		case Table::River:
 			// last_bet_player MUST show his hand
 			t->seats[t->last_bet_player].showcards = true;
-			p->last_action = Player::Show;
 			
 			// set the player behind last action as current player
 			t->cur_player = t->getNextActivePlayer(t->last_bet_player);
