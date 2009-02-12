@@ -32,14 +32,14 @@ EditableSlider::EditableSlider(QWidget *parent)
 	m_nMin(0),
 	m_nMax(0)
 {
-	m_pEdit = new QLineEdit("0");
+	m_pEdit = new QLineEdit("0", this);
 	m_pEdit->setAlignment(Qt::AlignRight);
 		
 	m_pValidator = new QIntValidator(m_pEdit);
 	
 	m_pEdit->setValidator(m_pValidator);
 			
-	m_pSlider = new QSlider(Qt::Horizontal);
+	m_pSlider = new QSlider(Qt::Horizontal, this);
 	m_pSlider->setTickInterval(10);
 	m_pSlider->setSingleStep(1);
 	m_pSlider->setRange(0, 100);
@@ -47,7 +47,7 @@ EditableSlider::EditableSlider(QWidget *parent)
 	
 	connect(m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
 	
-	QVBoxLayout *layout = new QVBoxLayout(parent);
+	QVBoxLayout *layout = new QVBoxLayout(this);
 		layout->setSizeConstraint(QLayout::SetMinimumSize); 
 		layout->addWidget(m_pEdit);
 		layout->addWidget(m_pSlider);

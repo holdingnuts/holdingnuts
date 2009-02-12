@@ -102,9 +102,7 @@ protected:
 	void resizeEvent(QResizeEvent *event);
 	
 	QPointF calcSeatPos(unsigned int nSeatID) const;
-	QPointF calcCCardsPos(
-		unsigned int nCard,
-		int table_width) const;
+	QPointF calcCCardsPos(unsigned int nCard) const;
 	QPointF calcTimeoutPos(unsigned int nSeatID) const;
 	
 	void doSitout(bool bSitout);
