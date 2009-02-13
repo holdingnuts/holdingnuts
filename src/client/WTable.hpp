@@ -151,7 +151,6 @@ private:
 	
 	// ui
 	ChatBox			*m_pChat;
-	QLabel			*m_LayoutActions;
 	QStackedLayout		*stlayActions;
 	QLabel			*lblPots;
 	QLabel			*lblHandStrength;

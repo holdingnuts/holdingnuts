@@ -45,7 +45,7 @@ public:
 		int gid = 0,
 		int tid = -1,
 		InputLineAlignment align = INPUTLINE_TOP,
-		int nTextLogHeight = 100,
+		int nTextLogHeight = 0,
 		QWidget *parent = 0);
 
 	void addMessage(const QString& msg, const QColor& color);
