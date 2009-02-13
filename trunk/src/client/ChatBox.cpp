@@ -47,9 +47,11 @@ ChatBox::ChatBox(
 
 	m_pEditChatLog = new QTextEdit(this);
 	m_pEditChatLog->setReadOnly(true);
-	m_pEditChatLog->setFixedHeight(nTextLogHeight);
+	
+	if(nTextLogHeight > 0)
+		m_pEditChatLog->setFixedHeight(nTextLogHeight);
 
-	QVBoxLayout *lchat = new QVBoxLayout();
+	QVBoxLayout *lchat = new QVBoxLayout(this);
 
 	if (align == INPUTLINE_TOP)
 		lchat->addWidget(m_pEditChat);

@@ -34,6 +34,7 @@ TimeOut::TimeOut()
 	m_nSeat(0)
 {
 	m_tl.setFrameRange(0, m_Image.width());
+	m_tl.setUpdateInterval(175);
 	
 	connect(&m_tl, SIGNAL(frameChanged(int)), this, SLOT(update(int)));
 }

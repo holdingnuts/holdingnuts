@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
 
@@ -265,7 +266,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	}
 
 	// view
-//	this->setRenderHint(QPainter::HighQualityAntialiasing);
 	this->setRenderHint(QPainter::SmoothPixmapTransform);
 	this->setCacheMode(QGraphicsView::CacheBackground);
 	this->setMinimumSize(
@@ -340,27 +340,37 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_nPostActions = stlayActions->addWidget(pagePostActions);
 	m_nNoAction = stlayActions->addWidget(pageNoActions);
 	m_nSitoutActions = stlayActions->addWidget(pageSitoutActions);
-
-	m_LayoutActions = new QLabel(this);
-	m_LayoutActions->setPixmap(QPixmap("gfx/table/actions.png"));
-	m_LayoutActions->setScaledContents(true);
-	m_LayoutActions->setFixedSize(400, 70);
-	m_LayoutActions->setLayout(stlayActions);
 	
-	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 120, this);
+	QLabel *lblActions = new QLabel(this);
+	lblActions->setPixmap(QPixmap("gfx/table/actions.png"));
+	lblActions->setScaledContents(true);
+	lblActions->setFixedSize(400, 70);
+	lblActions->setLayout(stlayActions);
+
+	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
 	m_pChat->show();
 	
 	lblPots = new QLabel("Pot 0: 0.00", this);
-	lblPots->setFixedWidth(static_cast<int>(pScene->width()));
 	lblPots->setAlignment(Qt::AlignCenter);
 	
 	lblHandStrength = new QLabel("HandStrength", this);
-	lblHandStrength->setFixedWidth(static_cast<int>(pScene->width()));
 	lblHandStrength->setAlignment(Qt::AlignCenter);
-	
-	if (!config.getBool("ui_show_handstrength"))
-		lblHandStrength->setVisible(false);
+	lblHandStrength->setVisible(config.getBool("ui_show_handstrength"));
+
+	QGridLayout *mainLayout = new QGridLayout(this);
+
+	mainLayout->addItem(
+		new QSpacerItem(1, 225, QSizePolicy::Expanding, QSizePolicy::Expanding), 0, 0);
+	mainLayout->addWidget(lblPots, 1, 0, 1, 4, Qt::AlignHCenter);
+	mainLayout->addWidget(lblHandStrength, 2, 0, 1, 4, Qt::AlignHCenter);
+	mainLayout->addItem(
+		new QSpacerItem(1, 360, QSizePolicy::Expanding, QSizePolicy::Expanding), 3, 0);
+	mainLayout->addWidget(m_pChat, 4, 0);
+	mainLayout->addWidget(lblActions, 4, 3);
+	mainLayout->setHorizontalSpacing(10);
+
+	this->setLayout(mainLayout);
 }
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
@@ -600,7 +610,6 @@ void WTable::updateView()
 					m_pTimeout->setPos(calcTimeoutPos(snap->s_cur));
 					m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
 					m_pTimeout->show();
-
 				}
 				else
 				{
@@ -654,7 +663,7 @@ void WTable::updateView()
 				wseats[i]->showSmallCards(false);
 			}
 
-//			this->scene()->update(wseats[i]->boundingRect());
+			this->scene()->update(wseats[i]->boundingRect());
 			
 		}
 		else
@@ -694,11 +703,7 @@ void WTable::updateView()
 				QString("gfx/deck/default/%1.png").arg(allcards[i].getName())));
 		m_CommunityCards[i]->show();
 	}
-	
-	
-	this->viewport()->update();	// TODO: remove
-	
-	
+
 	evaluateActions(snap);
 	
 	
@@ -957,20 +962,6 @@ void WTable::resizeEvent(QResizeEvent *event)
 			m_pTimeout->pos().y() * ratio_y);
 		m_pTimeout->scale(ratio_x, ratio_y);
 	}	
-
-	m_pChat->move(20, size.height() - m_pChat->height() - 10);
-
-	m_LayoutActions->move(
-		m_pChat->width() + ((size.width() - m_pChat->width() - m_LayoutActions->width()) / 2),
-		size.height() - (m_pChat->height() / 2) - (m_LayoutActions->height() / 2));
-
-	lblPots->move(
-		(size.width() - lblPots->width()) / 2,
-		200);
-	
-	lblHandStrength->move(
-		(size.width() - lblHandStrength->width()) / 2,
-		220);
 }
 
 bool WTable::greaterBet(const table_snapshot *snap, const qreal& bet, qreal *pbet) const
