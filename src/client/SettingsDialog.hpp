@@ -21,53 +21,35 @@
  */
 
 
-#ifndef _WMAIN_H
-#define _WMAIN_H
+#ifndef _SETTINGS_DIALOG_H
+#define _SETTINGS_DIALOG_H
 
-#include <QWidget>
+#include <QDialog>
 
-class ChatBox;
-class QLineEdit;
-class QPushButton;
-class QTextEdit;
+class QDialogButtonBox;
+class QFileInfo;
+class QTabWidget;
 
-class WMain : public QWidget
+
+class GeneralTab : public QWidget
 {
 Q_OBJECT
 
 public:
-	WMain(QWidget *parent = 0);
-
-	void addLog(const QString& line);
-
-	void addChat(const QString& from, const QString& text);
-	void addServerMessage(const QString& text);
-	void addServerErrorMessage(int code, const QString& text);
-
-	void updateConnectionStatus();
-
-	QString getUsername() const;
-
-private slots:
-	void actionConnect();
-	void actionClose();
-	void slotSrvTextChanged();
-	void actionRegister();
-	void actionSettings();
-	void actionTest();
-
-private:
-	QLineEdit*	editUsername;
-
-	QLineEdit*	editSrvAddr;
-	QPushButton*	btnConnect;
-	QPushButton*	btnClose;
-
-	QTextEdit*	editLog;
-
-	ChatBox*	m_pChat;
-	
-	QLineEdit	*editRegister;   // debug, remove later
+	GeneralTab(QWidget *parent = 0);
 };
 
-#endif	/* _WMAIN_H */
+
+class SettingsDialog : public QDialog
+{
+Q_OBJECT
+
+public:
+	SettingsDialog(QWidget *parent = 0);
+
+private:
+	QTabWidget *tabWidget;
+	QDialogButtonBox *buttonBox;
+};
+
+#endif /* _SETTINGS_DIALOG_H */
