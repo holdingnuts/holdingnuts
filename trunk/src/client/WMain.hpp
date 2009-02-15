@@ -57,8 +57,6 @@ private slots:
 	void actionTest();
 
 private:
-	QLineEdit*	editUsername;
-
 	QLineEdit*	editSrvAddr;
 	QPushButton*	btnConnect;
 	QPushButton*	btnClose;

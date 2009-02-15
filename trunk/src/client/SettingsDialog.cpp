@@ -21,20 +21,27 @@
  */
 
 
- #include <QtGui>
+#include <QtGui>
 
- #include "SettingsDialog.hpp"
+#include "SettingsDialog.hpp"
 
 
-SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
+SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *parent) : QDialog(parent)
 {
+	cfg = &cp;
+	configfile = filename;
+	
+	setWindowTitle(tr("Settings"));
+	
 	tabWidget = new QTabWidget;
-	tabWidget->addTab(new GeneralTab(), tr("General"));
+	tabGeneral = new QWidget;
+	tabWidget->addTab(tabGeneral, tr("General"));
+	tabWidget->addTab(new QWidget(), tr("Appearance"));
 	
 	buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
 					| QDialogButtonBox::Cancel);
 	
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(actionOk()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 	
 	QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -42,14 +49,41 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 	mainLayout->addWidget(buttonBox);
 	setLayout(mainLayout);
 	
-	setWindowTitle(tr("Settings"));
+	
+	// tabGeneral
+	QLabel *labelPlayerName = new QLabel(tr("Player name:"), tabGeneral);
+	editPlayerName = new QLineEdit(QString::fromStdString(cfg->get("player_name")), tabGeneral);
+	
+	QLabel *labelUUID = new QLabel(tr("UUID:"), tabGeneral);
+	editUUID = new QLineEdit(QString::fromStdString(cfg->get("uuid")), tabGeneral);
+	
+	QLabel *labelLog = new QLabel(tr("Log to file:"), tabGeneral);
+	checkLog = new QCheckBox("", tabGeneral);
+	checkLog->setCheckState(cfg->getBool("log") ? Qt::Checked : Qt::Unchecked);
+	
+	QGridLayout *gridLayout = new QGridLayout;
+	gridLayout->addWidget(labelPlayerName, 0, 0);
+	gridLayout->addWidget(editPlayerName, 0, 1);
+	gridLayout->addWidget(labelUUID, 1, 0);
+	gridLayout->addWidget(editUUID, 1, 1);
+	gridLayout->addWidget(labelLog, 2, 0);
+	gridLayout->addWidget(checkLog, 2, 1);
+	tabGeneral->setLayout(gridLayout);
 }
 
-GeneralTab::GeneralTab(QWidget *parent) : QWidget(parent)
+void SettingsDialog::actionOk()
 {
-	QLabel *labelTest = new QLabel(tr("Test"));
+	bool bError = false;
 	
-	QVBoxLayout *mainLayout = new QVBoxLayout;
-	mainLayout->addWidget(labelTest);
-	setLayout(mainLayout);
+	if (!bError)
+	{
+		// tabGeneral
+		cfg->set("player_name", editPlayerName->text().toStdString());
+		cfg->set("uuid", editUUID->text().toStdString());
+		cfg->set("log", (checkLog->checkState() == Qt::Checked) ? true : false);
+		
+		cfg->save(configfile);
+		
+		accept();
+	}
 }

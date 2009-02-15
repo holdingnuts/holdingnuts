@@ -26,30 +26,37 @@
 
 #include <QDialog>
 
+#include "ConfigParser.hpp"
+
 class QDialogButtonBox;
 class QFileInfo;
 class QTabWidget;
-
-
-class GeneralTab : public QWidget
-{
-Q_OBJECT
-
-public:
-	GeneralTab(QWidget *parent = 0);
-};
-
+class QLineEdit;
+class QCheckBox;
 
 class SettingsDialog : public QDialog
 {
 Q_OBJECT
 
 public:
-	SettingsDialog(QWidget *parent = 0);
+	SettingsDialog(const char *filename, ConfigParser &cp, QWidget *parent = 0);
 
 private:
 	QTabWidget *tabWidget;
+	QWidget *tabGeneral;
+	
 	QDialogButtonBox *buttonBox;
+	
+	const char *configfile;
+	ConfigParser *cfg;
+	
+	// tabGeneral
+	QLineEdit *editPlayerName;
+	QLineEdit *editUUID;
+	QCheckBox *checkLog;
+	
+private slots:
+	void actionOk();
 };
 
 #endif /* _SETTINGS_DIALOG_H */
