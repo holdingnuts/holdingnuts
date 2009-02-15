@@ -27,6 +27,7 @@
 
 #include "Config.h"
 #include "Debug.h"
+#include "SysAccess.h"
 #include "ConfigParser.hpp"
 
 #include "pclient.hpp"
@@ -43,17 +44,6 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	//setFixedSize(200, 120);
 	setWindowTitle(tr("HoldingNuts Foyer"));
 	setWindowIcon(QIcon(":/res/pclient.ico"));
-	
-	QGroupBox *groupInfo = new QGroupBox(tr("User info"));
-	
-	QLabel *lblUsername = new QLabel(tr("Username:"), this);
-	editUsername = new QLineEdit(QString::fromStdString(config.get("player_name")), this);
-	
-	QGridLayout *lInfo = new QGridLayout();
-	lInfo->addWidget(lblUsername, 0, 0);
-	lInfo->addWidget(editUsername, 0, 1);
-	
-	groupInfo->setLayout(lInfo);
 	
 	////
 	
@@ -109,7 +99,6 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	
 	// final layout
 	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addWidget(groupInfo);
 	layout->addWidget(groupSrv);
 	layout->addWidget(m_pChat);
 	layout->addLayout(lRegister);
@@ -159,7 +148,7 @@ void WMain::updateConnectionStatus()
 
 QString WMain::getUsername() const
 {
-	return editUsername->text();
+	return QString::fromStdString(config.get("player_name"));
 }
 
 void WMain::actionConnect()
@@ -190,7 +179,10 @@ void WMain::actionRegister()
 
 void WMain::actionSettings()
 {
-	SettingsDialog dialogSettings;
+	char cfgfile[1024];
+	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
+	
+	SettingsDialog dialogSettings(cfgfile, config);
 	dialogSettings.exec();
 }
 
