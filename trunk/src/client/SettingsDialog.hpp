@@ -33,6 +33,7 @@ class QFileInfo;
 class QTabWidget;
 class QLineEdit;
 class QCheckBox;
+class QComboBox;
 
 class SettingsDialog : public QDialog
 {
@@ -44,6 +45,7 @@ public:
 private:
 	QTabWidget *tabWidget;
 	QWidget *tabGeneral;
+	QWidget *tabAppearance;
 	
 	QDialogButtonBox *buttonBox;
 	
@@ -54,9 +56,14 @@ private:
 	QLineEdit *editPlayerName;
 	QLineEdit *editUUID;
 	QCheckBox *checkLog;
+	QComboBox *comboLocale;
+	
+	// tabAppearance
+	QCheckBox *checkHandStrength;
 	
 private slots:
 	void actionOk();
+	void actionGenUUID();
 };
 
 #endif /* _SETTINGS_DIALOG_H */
