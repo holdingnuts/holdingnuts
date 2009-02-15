@@ -42,6 +42,7 @@
 #endif
 
 #include <QUuid>
+#include <QMessageBox>
 
 //////////////
 
@@ -876,8 +877,34 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connected = false;
 	connecting = false;
 	
+	// app icon
 	Q_INIT_RESOURCE(pclient);
+}
+
+PClient::~PClient()
+{
+	Q_CLEANUP_RESOURCE(pclient);
+}
+
+int PClient::init()
+{
+	// change into data-dir
+	const char *datadir = sys_data_path();
+	if (datadir)
+	{
+		log_msg("main", "Using data-directory: %s", datadir);
+		sys_chdir(datadir);
+	}
+	else
+	{
+		log_msg("main", "Error: data-directory was not found");
+		QMessageBox::critical(NULL, "Error", "The data directory was not found.");
+		
+		return 1;
+	}
 	
+	
+	// load locale
 	QString locale;
 	if (config.get("locale").length())
 		locale = QString::fromStdString(config.get("locale"));
@@ -894,6 +921,8 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	else
 		log_msg("main", "Error: Cannot load locale: %s", locale.toStdString().c_str());
 	
+	
+	// main window
 	wMain = new WMain();
 	wMain->updateConnectionStatus();
 	wMain->show();
@@ -906,11 +935,8 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 	}
 #endif
-}
-
-PClient::~PClient()
-{
-	Q_CLEANUP_RESOURCE(pclient);
+	
+	return 0;
 }
 
 bool config_load()
@@ -976,23 +1002,12 @@ int main(int argc, char **argv)
 #endif
 	
 	
-	// change into data-dir
-	const char *datadir = sys_data_path();
-	if (datadir)
-	{
-		log_msg("main", "Using data-directory: %s", datadir);
-		sys_chdir(datadir);
-	}
-	else
-	{
-		log_msg("main", "Error: data-directory was not found");
-		return 1;
-	}
-	
-	
 	network_init();
 	
 	PClient app(argc, argv);
+	if (app.init())
+		return 1;
+	
 	int retval = app.exec();
 	
 	network_shutdown();
