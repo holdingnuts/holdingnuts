@@ -23,6 +23,7 @@
 #include "WMain.hpp"
 #include "ChatBox.hpp"
 #include "WTable.hpp"
+#include "SettingsDialog.hpp"
 
 #include "Config.h"
 #include "Debug.h"
@@ -101,6 +102,9 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	QPushButton *btnTest = new QPushButton(tr("Test"), this);
 	connect(btnTest, SIGNAL(clicked()), this, SLOT(actionTest()));
 	
+	QPushButton *btnSettings = new QPushButton(tr("Settings"), this);
+	connect(btnSettings, SIGNAL(clicked()), this, SLOT(actionSettings()));
+	
 	m_pChat = new ChatBox(tr("Foyer Chat"), ((PClient*)qApp)->getMyCId(), -1);
 	
 	// final layout
@@ -109,6 +113,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	layout->addWidget(groupSrv);
 	layout->addWidget(m_pChat);
 	layout->addLayout(lRegister);
+	layout->addWidget(btnSettings);
 	layout->addWidget(btnTest);
 	
 	setLayout(layout);
@@ -181,6 +186,12 @@ void WMain::actionRegister()
 {
 	const int gid = editRegister->text().toInt();
 	((PClient*)qApp)->doRegister(gid);
+}
+
+void WMain::actionSettings()
+{
+	SettingsDialog dialogSettings;
+	dialogSettings.exec();
 }
 
 void WMain::slotSrvTextChanged()

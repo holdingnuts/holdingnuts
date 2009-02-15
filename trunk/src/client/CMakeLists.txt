@@ -30,32 +30,30 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
-# CMAKE_LIBRARY_PATH=c:/mingw/lib
-# CMAKE_INCLUDE_PATH=c:/mingw/include/SDL
-
-##Find_Package ( SDL REQUIRED )
-##Find_Package ( SDL_image REQUIRED )
 Find_Package ( Qt4 REQUIRED )
 
 # http://www.qtforum.org/article/26305/problem-running-configure-to-install-qt.html
 
 INCLUDE(${QT_USE_FILE})
 
-include_directories (
-##	${SDL_INCLUDE_DIR}
-	#${QT_INCLUDES}    # done by QT_USE_FILE
-)
 
 SET(QtApp_RCCS pclient.qrc)
 
 QT4_ADD_RESOURCES(QtApp_RCC_SRCS ${QtApp_RCCS})
 
-QT4_WRAP_CPP(sources_MOC pclient.hpp WMain.hpp WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp)
+QT4_WRAP_CPP (
+	sources_MOC pclient.hpp
+	WMain.hpp SettingsDialog.hpp
+	WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp
+)
 
 add_executable (
 	pclient
 	WIN32    # when building for windows: do not show the console window
-	pclient.cpp ${aux_obj} WMain.cpp WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp ${sources_MOC} ${QtApp_RCC_SRCS}
+	pclient.cpp ${aux_obj}
+	WMain.cpp SettingsDialog.cpp
+	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
+	${sources_MOC} ${QtApp_RCC_SRCS}
 )
 
 target_link_libraries (
@@ -63,9 +61,6 @@ target_link_libraries (
    Poker Network SysAccess System
    ${QT_LIBRARIES}
    ${aux_lib}
-##   ${SDL_LIBRARY}
-##   ${SDLIMAGE_LIBRARY}
-##   SDLmain
 )
 
 ############################################################
