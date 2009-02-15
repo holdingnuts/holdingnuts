@@ -87,6 +87,9 @@ public:
 	bool addPlayer(int client_id);
 	bool removePlayer(int client_id);
 	
+	void setOwner(int cid) { owner = cid; };
+	int getOwner() const { return owner; };
+	
 	void chat(int tid, const char* msg);
 	void chat(int cid, int tid, const char* msg);
 	
@@ -154,6 +157,8 @@ private:
 	} blind;
 	
 	unsigned int hand_no;
+	
+	int owner;   // owner of a game
 };
 
 #endif /* _GAMECONTROLLER_H */
