@@ -882,11 +882,15 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	else
 		locale = QLocale::system().name().left(2);
 	
-	log_msg("main", "Using locale: %s", locale.toStdString().c_str());
 	
 	QTranslator *translator = new QTranslator();
-	translator->load("i18n/hn_" + locale);
-	installTranslator(translator);
+	if (translator->load("i18n/hn_" + locale))
+	{
+		installTranslator(translator);
+		log_msg("main", "Using locale: %s", locale.toStdString().c_str());
+	}
+	else
+		log_msg("main", "Error: Cannot load locale: %s", locale.toStdString().c_str());
 	
 	wMain = new WMain();
 	wMain->updateConnectionStatus();
