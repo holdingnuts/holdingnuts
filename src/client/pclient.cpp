@@ -909,18 +909,23 @@ int PClient::init()
 	if (config.get("locale").length())
 		locale = QString::fromStdString(config.get("locale"));
 	else
-		locale = QLocale::system().name().left(2);
-	
-	
-	QTranslator *translator = new QTranslator();
-	if (translator->load("i18n/hn_" + locale))
 	{
-		installTranslator(translator);
-		log_msg("main", "Using locale: %s", locale.toStdString().c_str());
+		locale = QLocale::system().name().left(2);
+		log_msg("main", "Auto-detected locale: %s", locale.toStdString().c_str());
 	}
-	else
-		log_msg("main", "Error: Cannot load locale: %s", locale.toStdString().c_str());
 	
+	
+	if (locale != "en")  // no locale
+	{
+		QTranslator *translator = new QTranslator();
+		if (translator->load("i18n/hn_" + locale))
+		{
+			installTranslator(translator);
+			log_msg("main", "Using locale: %s", locale.toStdString().c_str());
+		}
+		else
+			log_msg("main", "Error: Cannot load locale: %s", locale.toStdString().c_str());
+	}
 	
 	// main window
 	wMain = new WMain();
