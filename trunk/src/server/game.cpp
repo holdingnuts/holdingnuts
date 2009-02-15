@@ -49,6 +49,7 @@ extern ConfigParser config;
 static char msg[1024];
 
 static map<int,GameController*> games;
+static unsigned int gid_counter = 0;
 
 static vector<clientcon> clients;
 static unsigned int cid_counter = 0;
@@ -648,7 +649,87 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		return -1;
 	}
 	
-	//  TODO:
+	// FIXME: check user-create limit
+	// FIXME: check game-count limit
+	
+	bool cmderr = false;
+	
+	struct {
+		string name;
+		int type;
+		unsigned int max_players;
+		unsigned int stake;
+		unsigned int timeout;
+	} ginfo = {
+		"user_game",
+		10,
+		GameController::SNG,
+		1500,
+		30
+	};
+	
+	
+	string infostr;
+	Tokenizer it;
+	
+	while (t.getNext(infostr))
+	{
+		it.parse(infostr, ":");
+		
+		string infotype, infoarg;
+		it.getNext(infotype);
+		
+		bool havearg = it.getNext(infoarg);
+		
+		if (infotype == "type" && havearg)
+		{
+			ginfo.type = Tokenizer::string2int(infoarg);
+			
+			if (ginfo.type != GameController::SNG)
+				cmderr = true;
+		}
+		else if (infotype == "players" && havearg)
+		{
+			ginfo.max_players = Tokenizer::string2int(infoarg);
+			
+			if (ginfo.max_players < 2 || ginfo.max_players > 10)
+				cmderr = true;
+		}
+		else if (infotype == "stake" && havearg)
+		{
+			ginfo.stake = Tokenizer::string2int(infoarg);
+			
+			if (ginfo.stake < 10)
+				cmderr = true;
+		}
+		else if (infotype == "timeout" && havearg)
+		{
+			ginfo.timeout = Tokenizer::string2int(infoarg);
+			
+			if (ginfo.timeout < 10 || ginfo.timeout > 5*60)
+				cmderr = true;
+		}
+	}
+	
+	if (!cmderr)
+	{
+		GameController *g = new GameController();
+		const int gid = ++gid_counter;
+		g->setGameId(gid);
+		g->setPlayerMax(ginfo.max_players);
+		g->setPlayerTimeout(ginfo.timeout);
+		g->setPlayerStakes(ginfo.stake);
+		g->addPlayer(client->id);
+		g->setOwner(client->id);
+		games[gid] = g;
+		
+		send_ok(client);
+		
+		snprintf(msg, sizeof(msg), "Your game '%d' has been created.", gid);
+		client_chat(-1, client->id, msg);
+	}
+	else
+		send_err(client);
 	
 	return 0;
 }
@@ -848,6 +929,8 @@ int gameloop()
 			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
 			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
 			games[gid] = g;
+			
+			gid_counter++;
 		}
 	}
 #endif
