@@ -41,6 +41,8 @@
 # include <signal.h>
 #endif
 
+#include <QUuid>
+
 //////////////
 
 ConfigParser config;
@@ -926,6 +928,12 @@ bool config_load()
 		log_msg("config", "Loaded configuration from %s", cfgfile);
 	else
 	{
+		// generate an UUID
+		QUuid uuid = QUuid::createUuid();
+		QString suuid = uuid.toString();
+		suuid.chop(1);
+		config.set("uuid", suuid.remove(0, 1).toStdString());
+		
 		if (config.save(cfgfile))
 			log_msg("config", "Saved initial configuration to %s", cfgfile);
 	}
