@@ -30,6 +30,8 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
+SET( QT_USE_QTNETWORK true )
+
 Find_Package ( Qt4 REQUIRED )
 
 # http://www.qtforum.org/article/26305/problem-running-configure-to-install-qt.html
@@ -58,7 +60,7 @@ add_executable (
 
 target_link_libraries (
    pclient
-   Poker Network SysAccess System
+   Poker SysAccess System
    ${QT_LIBRARIES}
    ${aux_lib}
 )

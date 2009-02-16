@@ -25,7 +25,6 @@
 #include "Logger.h"
 #include "Debug.h"
 #include "SysAccess.h"
-#include "Tokenizer.hpp"
 #include "ConfigParser.hpp"
 
 #include "Protocol.h"
@@ -36,10 +35,6 @@
 #include <cstdlib>
 #include <cstdio>
 #include <string>
-
-#if !defined(PLATFORM_WINDOWS)
-# include <signal.h>
-#endif
 
 #include <QUuid>
 #include <QMessageBox>
@@ -54,22 +49,9 @@ static games_type		games;
 
 //////////////
 
-int send_msg(const char *msg)
-{
-	char buf[1024];
-	const int len = snprintf(buf, sizeof(buf), "%s\n", msg);
-	const int bytes = socket_write(srv.sock, buf, len);
-	
-	// FIXME: send remaining bytes if not all have been sent
-	
-	if (len != bytes)
-		log_msg("connectsock", "(%d) warning: not all bytes written (%d != %d)", srv.sock, len, bytes);
-	
-	return bytes;
-}
 
 // server command PSERVER <version> <client-id>
-void server_cmd_pserver(Tokenizer& t)
+void PClient::serverCmdPserver(Tokenizer &t)
 {
 	unsigned int version = t.getNextInt();
 	srv.cid = t.getNextInt();
@@ -82,13 +64,13 @@ void server_cmd_pserver(Tokenizer& t)
 	char msg[1024];
 	// send user info
 	snprintf(msg, sizeof(msg), "INFO name:%s",
-			 ((PClient*)qApp)->wMain->getUsername().toStdString().c_str());
+			 wMain->getUsername().toStdString().c_str());
 		
-	send_msg(msg);
+	netSendMsg(msg);
 }
 
 // server command ERR [<code>] [<text>]
-void server_cmd_err(Tokenizer& t)
+void PClient::serverCmdErr(Tokenizer &t)
 {
 	const int err_code = t.getNextInt();
 	const std::string smsg = t.getTillEnd();
@@ -96,12 +78,12 @@ void server_cmd_err(Tokenizer& t)
 	log_msg("cmd", "error executing command (id=%d code=%d): %s",
 		srv.last_msgid, err_code, smsg.c_str());
 	
-	((PClient*)qApp)->wMain->addServerErrorMessage(err_code, QString::fromStdString(smsg));
+	wMain->addServerErrorMessage(err_code, QString::fromStdString(smsg));
 }
 
 // server command MSG <from> <sender-name> <message>
 // from := { -1 | <game-id>:<table-id> | <client-id> | <gid>:<tid>:<cid> }   # -1 server
-void server_cmd_msg(Tokenizer& t)
+void PClient::serverCmdMsg(Tokenizer &t)
 {
 	const std::string idfrom = t.getNext();
 
@@ -151,7 +133,7 @@ void server_cmd_msg(Tokenizer& t)
 
 	if (gid != -1 && tid != -1)
 	{
-		tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+		tableinfo* tinfo = getTableInfo(gid, tid);
 
 		Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
 			
@@ -163,13 +145,13 @@ void server_cmd_msg(Tokenizer& t)
 	else
 	{
 		if (from == -1) // message from server to foyer
-			((PClient*)qApp)->wMain->addServerMessage(qchatmsg);
+			wMain->addServerMessage(qchatmsg);
 		else // message from user to foyer
-			((PClient*)qApp)->wMain->addChat(qsfrom, qchatmsg);
+			wMain->addChat(qsfrom, qchatmsg);
 	}
 }
 
-void server_cmd_snap(Tokenizer& t)
+void PClient::serverCmdSnap(Tokenizer &t)
 {
 	std::string from = t.getNext();
 	Tokenizer ft;
@@ -187,7 +169,7 @@ void server_cmd_snap(Tokenizer& t)
 			
 			if (sstate == "start")
 			{
-				((PClient*)qApp)->wMain->addServerMessage(
+				wMain->addServerMessage(
 					QString("Game (%1) has been started.").arg(gid));
 				
 				games[gid].registered = true;
@@ -203,11 +185,11 @@ void server_cmd_snap(Tokenizer& t)
 				
 				// request the game-info
 				snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", gid);
-				send_msg(msg);
+				netSendMsg(msg);
 				
 				// request the player-list of the game
 				snprintf(msg, sizeof(msg), "REQUEST playerlist %d", gid);
-				send_msg(msg);
+				netSendMsg(msg);
 			}
 			else if (sstate == "end")
 				log_msg("game", "game ended");
@@ -215,7 +197,7 @@ void server_cmd_snap(Tokenizer& t)
 		break;
 	case SnapTable:
 		{
-			tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+			tableinfo *tinfo = getTableInfo(gid, tid);
 			
 			if (!tinfo)
 				return;
@@ -359,7 +341,7 @@ void server_cmd_snap(Tokenizer& t)
 	
 	case SnapHoleCards:
 		{
-			tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(gid, tid);
+			tableinfo *tinfo = getTableInfo(gid, tid);
 			
 			if (!tinfo)
 				return;
@@ -383,7 +365,7 @@ void server_cmd_snap(Tokenizer& t)
 	}
 }
 
-void server_cmd_playerlist(Tokenizer& t)
+void PClient::serverCmdPlayerlist(Tokenizer &t)
 {
 	char msg[1024];
 	
@@ -392,10 +374,10 @@ void server_cmd_playerlist(Tokenizer& t)
 	std::string sreq = t.getTillEnd();
 	
 	snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq.c_str());
-	send_msg(msg);
+	netSendMsg(msg);
 }
 
-void server_cmd_clientinfo(Tokenizer& t)
+void PClient::serverCmdClientinfo(Tokenizer &t)
 {
 	int cid = t.getNextInt();
 	
@@ -421,7 +403,7 @@ void server_cmd_clientinfo(Tokenizer& t)
 	players[cid] = pi;
 }
 
-void server_cmd_gameinfo(Tokenizer& t)
+void PClient::serverCmdGameinfo(Tokenizer &t)
 {
 	int gid = t.getNextInt();
 	
@@ -450,7 +432,7 @@ void server_cmd_gameinfo(Tokenizer& t)
 	}
 }
 
-int server_execute(const char *cmd)
+int PClient::serverExecute(const char *cmd)
 {
 	Tokenizer t;
 	t.parse(cmd);  // parse the command line
@@ -479,12 +461,12 @@ int server_execute(const char *cmd)
 	if (!srv.introduced)   // state: not introduced
 	{
 		if (command == "PSERVER")
-			server_cmd_pserver(t);
+			serverCmdPserver(t);
 		else if (command == "ERR")
 		{
-			server_cmd_err(t);
+			serverCmdErr(t);
 			
-			((PClient*)qApp)->doClose();
+			doClose();
 		}
 		else if (command == "OK")
 		{
@@ -494,11 +476,11 @@ int server_execute(const char *cmd)
 		{
 			// protocol error: maybe this isn't a pserver
 			log_msg("introduce", "protocol error");
-			((PClient*)qApp)->wMain->addServerErrorMessage(
+			wMain->addServerErrorMessage(
 				ErrProtocol, "Protocol error. The remote station doesn't seem to be a pserver.");
 			
 			// FIXME: don't do a regular/clean close (no QUIT sequence)
-			((PClient*)qApp)->doClose();
+			doClose();
 		}
 	}
 	else if (command == "OK")
@@ -506,23 +488,23 @@ int server_execute(const char *cmd)
 		
 	}
 	else if (command == "ERR")
-		server_cmd_err(t);
+		serverCmdErr(t);
 	else if (command == "MSG")
-		server_cmd_msg(t);
+		serverCmdMsg(t);
 	else if (command == "SNAP")
-		server_cmd_snap(t);
+		serverCmdSnap(t);
 	else if (command == "PLAYERLIST")
-		server_cmd_playerlist(t);
+		serverCmdPlayerlist(t);
 	else if (command == "CLIENTINFO")
-		server_cmd_clientinfo(t);
+		serverCmdClientinfo(t);
 	else if (command == "GAMEINFO")
-		server_cmd_gameinfo(t);
+		serverCmdGameinfo(t);
 	
 	return 0;
 }
 
 // returns zero if no cmd was found or no bytes remaining after exec
-int server_parsebuffer()
+int PClient::serverParsebuffer()
 {
 	//log_msg("clientsock", "(%d) parse (bufferlen=%d)", srv.sock, srv.buflen);
 	
@@ -549,7 +531,7 @@ int server_parsebuffer()
 		cmd[found_nl] = '\0';
 		
 		//log_msg("clientsock", "(%d) command: '%s' (len=%d)", srv.sock, cmd, found_nl);
-		if (server_execute(cmd) != -1)
+		if (serverExecute(cmd) != -1)
 		{
 			// move the rest to front
 			memmove(srv.msgbuf, srv.msgbuf + found_nl + 1, srv.buflen - (found_nl + 1));
@@ -567,88 +549,12 @@ int server_parsebuffer()
 	return retval;
 }
 
-int server_handle()
-{
-	socktype sock = srv.sock;
-	char buf[1024];
-	int bytes;
-	
-	// return early on client close/error
-	if ((bytes = socket_read(sock, buf, sizeof(buf))) <= 0)
-		return bytes;
-	
-//	log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
-
-	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
-	{
-		log_msg("connectsock", "(%d) error: buffer size exceeded", sock);
-		srv.buflen = 0;
-	}
-	else
-	{
-		memcpy(srv.msgbuf + srv.buflen, buf, bytes);
-		srv.buflen += bytes;
-		
-		// parse and execute all commands in queue
-		while (server_parsebuffer());
-	}
-	
-	return bytes;
-}
-
-int connectsock_create(const char *server, unsigned int port)
-{
-	int connectfd;
-	socktype sock;
-	struct sockaddr_in addr;
-
-	if ((connectfd = socket_create(PF_INET, SOCK_STREAM, 0)) == -1)
-	{
-		log_msg("connectsock", "socket() failed (%d: %s)", errno, strerror(errno));
-		return -2;
-	}
-	
-	sock = connectfd;
-	
-	struct hostent *host_entry;
-	host_entry = gethostbyname(server);
-	
-	if(!host_entry)
-	{
-		log_msg("connectsock", "gethostbyname() for %s failed (%d: %s)", server, errno, strerror(errno));
-		return -3;
-	}
-	
-	memcpy(&addr.sin_addr.s_addr, host_entry->h_addr_list[0], host_entry->h_length);
-	addr.sin_family = host_entry->h_addrtype;
-	addr.sin_port = htons(port);
-	
-	socket_setnonblocking(sock);
-	
-	int status = socket_connect(sock, (struct sockaddr*)&addr, sizeof(addr));
-	
-	// check for immediate error
-	if (status < 0 && !network_isinprogress())
-		return status;
-	
-	return sock;
-}
 
 bool PClient::doConnect(QString strServer, unsigned int port)
 {
 	wMain->addLog(tr("Connecting..."));
-	connectfd = connectsock_create(strServer.toStdString().c_str(), port);
 	
-	if (connectfd < 0)
-		return false;
-	
-	snw = new QSocketNotifier(connectfd, QSocketNotifier::Write);
-	connect(snw, SIGNAL(activated(int)), this, SLOT(slotConnected(int)));
-	
-	connect_timer = new QTimer(this);
-	connect(connect_timer, SIGNAL(timeout()), this, SLOT(slotConnectTimeout()));
-	connect_timer->setSingleShot(true);
-	connect_timer->start(CLIENT_CONNECT_TIMEOUT * 1000);
+	tcpSocket->connectToHost(strServer, port);
 	
 	connecting = true;
 	
@@ -659,23 +565,10 @@ bool PClient::doConnect(QString strServer, unsigned int port)
 
 void PClient::doClose()
 {
-	if (connecting)
-	{
-		delete snw;
-		delete connect_timer;
-		connecting = false;
-	}
-	else
-	{
-		delete snr;
-		send_msg("QUIT");
-		connected = false;
-	}
+	if (!connecting)
+		netSendMsg("QUIT");
 	
-	socket_close(connectfd);
-	
-	wMain->addLog(tr("Connection closed."));
-	wMain->updateConnectionStatus();
+	tcpSocket->abort();
 }
 
 void PClient::doRegister(int gid)
@@ -688,7 +581,7 @@ void PClient::doRegister(int gid)
 	snprintf(msg, sizeof(msg), "REGISTER %d",
 		gid);
 		
-	send_msg(msg);
+	netSendMsg(msg);
 }
 
 bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
@@ -740,78 +633,9 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 		snprintf(msg, sizeof(msg), "ACTION %d %s",
 			gid, saction);
 	
-	send_msg(msg);
+	netSendMsg(msg);
 	
 	return true;
-}
-
-void PClient::slotConnectTimeout()
-{
-	wMain->addLog(tr("Connection timeout."));
-	
-	delete snw;
-	delete connect_timer;      // FIXME: can't delete on event handler
-	
-	connected = false;
-	connecting = false;
-	
-	wMain->updateConnectionStatus();
-}
-
-void PClient::slotConnected(int n)
-{
-	snw->setEnabled(false);
-	
-	wMain->addLog(tr("Connected."));
-	
-	delete snw;   // FIXME: can't delete on event handler
-	delete connect_timer;
-	
-	memset(&srv, 0, sizeof(srv));
-	srv.sock = connectfd;
-	
-	connected = true;
-	connecting = false;
-	
-	snr = new QSocketNotifier(connectfd, QSocketNotifier::Read);
-	connect(snr, SIGNAL(activated(int)), this, SLOT(slotReceived(int)));
-	
-	wMain->updateConnectionStatus();
-	
-	
-	// send protocol introduction
-	char msg[1024];
-	snprintf(msg, sizeof(msg), "PCLIENT %d %s",
-		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
-		config.get("uuid").c_str());
-	
-	send_msg(msg);
-}
-
-void PClient::slotReceived(int n)
-{
-#ifdef PLATFORM_WINDOWS
-	// http://doc.trolltech.com/4.4/qsocketnotifier.html#notes-for-windows-users
-	snr->setEnabled(false);
-#endif
-	
-	const int status = server_handle();
-	
-	if (status <= 0)
-	{
-		wMain->addLog(tr("Connection closed."));
-		
-		delete snr;    // FIXME: can't delete on event handler
-		socket_close(srv.sock);
-		connected = false;
-		
-		wMain->updateConnectionStatus();
-	}
-	
-#ifdef PLATFORM_WINDOWS
-	// http://doc.trolltech.com/4.4/qsocketnotifier.html#notes-for-windows-users
-	snr->setEnabled(true);
-#endif
 }
 
 void PClient::chatAll(const QString& text)
@@ -822,7 +646,7 @@ void PClient::chatAll(const QString& text)
 	
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "CHAT %d %s", -1, text.simplified().toStdString().c_str());
-	send_msg(msg);
+	netSendMsg(msg);
 }
 
 void PClient::chat(const QString& text, int gid, int tid)
@@ -832,7 +656,7 @@ void PClient::chat(const QString& text, int gid, int tid)
 
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "CHAT %d:%d %s", gid, tid, text.simplified().toStdString().c_str());
-	send_msg(msg);
+	netSendMsg(msg);
 }
 
 gameinfo* PClient::getGameInfo(int gid)
@@ -872,10 +696,100 @@ void PClient::slotDbgRegister()
 }
 #endif
 
+int PClient::netSendMsg(const char *msg)
+{
+	char buf[1024];
+	const int len = snprintf(buf, sizeof(buf), "%s\n", msg);
+	const int bytes = tcpSocket->write(buf, len);
+	
+	// FIXME: send remaining bytes if not all have been sent
+	
+	if (len != bytes)
+		log_msg("connectsock", "warning: not all bytes written (%d != %d)", len, bytes);
+	
+	return bytes;
+}
+
+void PClient::netRead()
+{
+	char buf[1024];
+	int bytes;
+	
+	// return early on client close/error
+	if ((bytes = tcpSocket->read(buf, sizeof(buf))) <= 0)
+		return;
+	
+//	log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
+
+	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
+	{
+		log_msg("connectsock", "error: buffer size exceeded");
+		srv.buflen = 0;
+	}
+	else
+	{
+		memcpy(srv.msgbuf + srv.buflen, buf, bytes);
+		srv.buflen += bytes;
+		
+		// parse and execute all commands in queue
+		while (serverParsebuffer());
+	}
+	
+	return;
+}
+
+void PClient::netError(QAbstractSocket::SocketError socketError)
+{
+	wMain->addLog(tr("Connection error: %1.").arg(tcpSocket->errorString()));
+	
+	connected = false;
+	connecting = false;
+	
+	wMain->updateConnectionStatus();
+}
+
+void PClient::netConnected()
+{
+	wMain->addLog(tr("Connected."));
+	
+	memset(&srv, 0, sizeof(srv));
+	
+	connected = true;
+	connecting = false;
+	
+	wMain->updateConnectionStatus();
+	
+	
+	// send protocol introduction
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "PCLIENT %d %s",
+		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
+		config.get("uuid").c_str());
+	
+	netSendMsg(msg);
+}
+
+void PClient::netDisconnected()
+{
+	wMain->addLog(tr("Connection closed."));
+	
+	connected = false;
+	connecting = false;
+	
+	wMain->updateConnectionStatus();
+}
+
 PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 {
 	connected = false;
 	connecting = false;
+	
+	tcpSocket = new QTcpSocket(this);
+	connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(netRead()));
+	connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+		this, SLOT(netError(QAbstractSocket::SocketError)));
+	connect(tcpSocket, SIGNAL(connected()), this, SLOT(netConnected()));
+	connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(netDisconnected()));
 	
 	// app icon
 	Q_INIT_RESOURCE(pclient);
@@ -980,10 +894,6 @@ int main(int argc, char **argv)
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
 		qVersion());
 	
-#if !defined(PLATFORM_WINDOWS)
-	// ignore broken-pipe signal eventually caused by sockets
-	signal(SIGPIPE, SIG_IGN);
-#endif
 	
 	// load config
 	config_load();
@@ -1007,15 +917,12 @@ int main(int argc, char **argv)
 #endif
 	
 	
-	network_init();
-	
 	PClient app(argc, argv);
 	if (app.init())
 		return 1;
 	
 	int retval = app.exec();
 	
-	network_shutdown();
 	
 	// close log-file
 	if (fplog)

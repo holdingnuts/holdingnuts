@@ -28,6 +28,8 @@
 #include <vector>
 #include <map>
 
+//#include <QTcpSocket>
+#include <QtNetwork>
 #include <QApplication>
 #include <QTranslator>
 #include <QLocale>
@@ -36,7 +38,7 @@
 #include <QDir>
 #include <QRegExp>
 
-#include "Network.h"
+#include "Tokenizer.hpp"
 
 #include "Card.hpp"
 #include "HoleCards.hpp"
@@ -49,8 +51,6 @@
 
 
 typedef struct {
-	socktype sock;
-	
 	char msgbuf[1024];
 	int buflen;
 	int last_msgid;
@@ -95,10 +95,23 @@ public:
 	
 	int init();
 	
+	int netSendMsg(const char *msg);
+	
 	bool doConnect(QString strServer, unsigned int port);
 	void doClose();
 	
 	bool isConnected() const { return connected || connecting; };
+	
+	int serverExecute(const char *cmd);
+	int serverParsebuffer();
+	
+	void serverCmdPserver(Tokenizer &t);
+	void serverCmdErr(Tokenizer &t);
+	void serverCmdMsg(Tokenizer &t);
+	void serverCmdSnap(Tokenizer &t);
+	void serverCmdPlayerlist(Tokenizer &t);
+	void serverCmdClientinfo(Tokenizer &t);
+	void serverCmdGameinfo(Tokenizer &t);
 	
 	void chatAll(const QString& text);
 	void chat(const QString& text, int gid, int tid);
@@ -122,11 +135,14 @@ private:
 	QTimer *connect_timer;
 	bool connected;
 	bool connecting;
+	
+	QTcpSocket *tcpSocket;
 
 private slots:
-	void slotConnected(int n);
-	void slotReceived(int n);
-	void slotConnectTimeout();
+	void netRead();
+	void netError(QAbstractSocket::SocketError socketError);
+	void netConnected();
+	void netDisconnected();
 	
 #ifdef DEBUG
 	void slotDbgRegister();
