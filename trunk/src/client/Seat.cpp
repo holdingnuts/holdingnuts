@@ -42,6 +42,8 @@ Seat::Seat(unsigned int id, QWidget *parent)
 	m_bCurrent(false)
 {
 	m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
+	
+	this->setZValue(8);
 }
 
 void Seat::setValid(bool valid)
@@ -178,16 +180,11 @@ void Seat::paint(
 	if (!m_bValid)
 		return;
 	
-	
 	// image card backside
 	static QImage imgCardBackside("gfx/deck/default/back.png");
 	
-	this->setZValue(8);
-		
 	const qreal seat_width = SeatImages::Instance().imgBack.width();
 	const qreal seat_height = SeatImages::Instance().imgBack.height();
-
-	painter->setRenderHint(QPainter::SmoothPixmapTransform);
 	
 	const QImage *imgBack;
 	if (m_bSitout)
@@ -196,6 +193,10 @@ void Seat::paint(
 		imgBack = &(SeatImages::Instance().imgBackCurrent);
 	else
 		imgBack = &(SeatImages::Instance().imgBack);
+
+	painter->save();
+	painter->setRenderHint(QPainter::Antialiasing);
+	painter->setRenderHint(QPainter::SmoothPixmapTransform);
 	
 	painter->drawImage(
 			QRectF(
@@ -218,11 +219,26 @@ void Seat::paint(
 	}
 
 	// TODO: font
-	static const QFont normal_font("Arial", 18,  QFont::Normal);
-	static const QFont bold_font("Arial", 18,  QFont::Bold);
+	static QFont normal_font("Arial", 18,  QFont::Normal);
+	static QFont bold_font("Arial", 18,  QFont::Bold);
+	
+	normal_font.setStyleStrategy(QFont::ForceOutline);
+	bold_font.setStyleStrategy(QFont::ForceOutline);
 	
 	static const QFontMetrics fm_bold(bold_font);
+
+	QPainterPath pathTxtName;
+	pathTxtName.addText(10, fm_bold.height() + 10, bold_font, m_strName);
 	
+	painter->fillPath(pathTxtName, Qt::black);
+	
+	QPainterPath pathTxtStake;
+	pathTxtStake.addText(10, 75, normal_font, m_strStake);
+	
+	painter->fillPath(pathTxtStake, Qt::black);
+/*
+TODO: QPainterPath test
+
 	painter->setFont(bold_font);
 	painter->drawText(
 		QRectF(
@@ -232,6 +248,7 @@ void Seat::paint(
 			fm_bold.height()),
 		Qt::AlignLeft,
 		m_strName);
+
 	painter->setFont(normal_font);
 	painter->drawText(
 		QRectF(
@@ -241,7 +258,7 @@ void Seat::paint(
 			seat_height - 30),
 		Qt::AlignLeft,
 		m_strStake);
-	
+*/
 	// TODO: find right textposition
 	qreal tx_pos = 0;
 	qreal ty_pos = 0;
@@ -300,6 +317,8 @@ void Seat::paint(
 				sy_mini_card),
 			imgCardBackside);
 	}
+	
+	painter->restore();
 }
 
 void Seat::calcSCardPos(qreal& x, qreal& y) const
