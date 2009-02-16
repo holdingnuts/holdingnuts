@@ -28,12 +28,10 @@
 #include <vector>
 #include <map>
 
-//#include <QTcpSocket>
-#include <QtNetwork>
 #include <QApplication>
+#include <QtNetwork>
 #include <QTranslator>
 #include <QLocale>
-#include <QSocketNotifier>
 #include <QTimer>
 #include <QDir>
 #include <QRegExp>
@@ -95,23 +93,10 @@ public:
 	
 	int init();
 	
-	int netSendMsg(const char *msg);
-	
 	bool doConnect(QString strServer, unsigned int port);
 	void doClose();
 	
 	bool isConnected() const { return connected || connecting; };
-	
-	int serverExecute(const char *cmd);
-	int serverParsebuffer();
-	
-	void serverCmdPserver(Tokenizer &t);
-	void serverCmdErr(Tokenizer &t);
-	void serverCmdMsg(Tokenizer &t);
-	void serverCmdSnap(Tokenizer &t);
-	void serverCmdPlayerlist(Tokenizer &t);
-	void serverCmdClientinfo(Tokenizer &t);
-	void serverCmdGameinfo(Tokenizer &t);
 	
 	void chatAll(const QString& text);
 	void chat(const QString& text, int gid, int tid);
@@ -125,18 +110,28 @@ public:
 	playerinfo* getPlayerInfo(int cid);
 	int getMyCId();
 	
-	WMain *wMain;
+	WMain* getMainWnd() const { return wMain; };
 	
 private:
-	
-	int connectfd;
-	QSocketNotifier *snw, *snr;
-	
-	QTimer *connect_timer;
+	WMain *wMain;
+		
 	bool connected;
 	bool connecting;
 	
 	QTcpSocket *tcpSocket;
+	
+	int netSendMsg(const char *msg);
+	
+	int serverExecute(const char *cmd);
+	int serverParsebuffer();
+	
+	void serverCmdPserver(Tokenizer &t);
+	void serverCmdErr(Tokenizer &t);
+	void serverCmdMsg(Tokenizer &t);
+	void serverCmdSnap(Tokenizer &t);
+	void serverCmdPlayerlist(Tokenizer &t);
+	void serverCmdClientinfo(Tokenizer &t);
+	void serverCmdGameinfo(Tokenizer &t);
 
 private slots:
 	void netRead();

@@ -170,7 +170,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			if (sstate == "start")
 			{
 				wMain->addServerMessage(
-					QString("Game (%1) has been started.").arg(gid));
+					QString(tr("Game (%1) has been started.").arg(gid)));
 				
 				games[gid].registered = true;
 				games[gid].tables[tid].sitting = true;
@@ -192,7 +192,12 @@ void PClient::serverCmdSnap(Tokenizer &t)
 				netSendMsg(msg);
 			}
 			else if (sstate == "end")
-				log_msg("game", "game ended");
+			{
+				wMain->addServerMessage(
+					QString(tr("Game (%1) has been ended.").arg(gid)));
+				
+				// FIXME: remove game
+			}
 		}
 		break;
 	case SnapTable:
