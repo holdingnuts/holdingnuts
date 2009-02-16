@@ -791,7 +791,7 @@ void WTable::addServerMessage(const QString& text)
 
 void WTable::closeEvent(QCloseEvent *event)
 {
-	((PClient*)qApp)->wMain->addLog("table window closed");
+	((PClient*)qApp)->getMainWnd()->addLog("table window closed");
 }
 
 void WTable::actionFold()
