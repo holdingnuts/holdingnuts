@@ -347,7 +347,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblActions->setFixedSize(400, 70);
 	lblActions->setLayout(stlayActions);
 
-	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM);
+	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
 	m_pChat->show();
 	
@@ -368,7 +368,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		new QSpacerItem(1, 360, QSizePolicy::Expanding, QSizePolicy::Expanding), 3, 0);
 	mainLayout->addWidget(m_pChat, 4, 0);
 	mainLayout->addWidget(lblActions, 4, 3);
+	mainLayout->setColumnStretch(2, 2);
 	mainLayout->setHorizontalSpacing(10);
+	mainLayout->setColumnStretch(4, 2);
 
 	this->setLayout(mainLayout);
 }
@@ -921,6 +923,8 @@ void WTable::slotTimeup(int seat)
 void WTable::resizeEvent(QResizeEvent *event)
 {
 	const QSize& size = event->size();
+	
+	qDebug() << "resizeEvent size= " << size;
 
 	this->scene()->setSceneRect(
 		QRectF(0, 0, size.width(), size.height()));

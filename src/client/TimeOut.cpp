@@ -33,9 +33,12 @@ TimeOut::TimeOut()
 	m_nFrame(0),
 	m_nSeat(0)
 {
-	m_tl.setFrameRange(0, m_Image.width());
-	m_tl.setUpdateInterval(175);
+	this->setEnabled(false);
+	this->setZValue(10);
 	
+	m_tl.setFrameRange(0, m_Image.width());
+	m_tl.setUpdateInterval(350);
+
 	connect(&m_tl, SIGNAL(frameChanged(int)), this, SLOT(update(int)));
 }
 
@@ -52,20 +55,19 @@ void TimeOut::paint(
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget)
 {
-	this->setZValue(10);
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+	
+	painter->save();
 
-	painter->setRenderHint(QPainter::SmoothPixmapTransform);
+	painter->setClipRegion(
+		QRect(m_nFrame, 0, m_Image.width(), m_Image.height()));
 
 	painter->drawImage(
-		QRectF(
-			0,
-			0,
-			m_Image.width(),
-			m_Image.height()),
+		QRectF(0, 0, m_Image.width(), m_Image.height()),
 		m_Image);
 
-	if (m_nFrame > 0)
-		painter->fillRect(0, 0, m_nFrame, m_Image.height(), Qt::black);
+	painter->restore();
 }
 
 void TimeOut::start(int seat, int sec_timeout)
@@ -75,7 +77,7 @@ void TimeOut::start(int seat, int sec_timeout)
 	
 	m_tl.setDuration(sec_timeout * 1000);
 	m_tl.start();
-	
+
 	m_nSeat = seat;
 }
 
@@ -91,6 +93,8 @@ void TimeOut::update(int frame)
 	
 	if (m_nFrame == m_Image.width())
 		emit timeup(m_nSeat);
-	
-	scene()->update(this->boundingRect());
+
+//	scene()->invalidate(
+//		this->boundingRect(),
+//		QGraphicsScene::ItemLayer);
 }

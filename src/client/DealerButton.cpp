@@ -52,6 +52,8 @@ DealerButton::DealerButton()
 
 	m_animDealerBtn.setItem(this);
 	m_animDealerBtn.setTimeLine(&m_tlDealerBtn);
+	
+	this->setZValue(10);
 }
 
 QRectF DealerButton::boundingRect() const
@@ -67,10 +69,8 @@ void DealerButton::paint(
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget)
 {
-	this->setZValue(10);
-
+	painter->save();
 	painter->setRenderHint(QPainter::SmoothPixmapTransform);
-
 	painter->drawImage(
 		QRectF(
 			0,
@@ -78,6 +78,7 @@ void DealerButton::paint(
 			m_Image.width(),
 			m_Image.height()),
 		m_Image);
+	painter->restore();	
 }
 
 void DealerButton::startAnimation(const QPointF& ptCenterSeat, int distance)
@@ -92,16 +93,9 @@ void DealerButton::startAnimation(const QPointF& ptCenterSeat, int distance)
 
 	const QPointF pt = ptCenterSeat - (vDir * distance);
 
-	static const qreal steps = 100;
-
-	const QPointF ptStep = (scenePos() - pt) / steps;
-
 	m_animDealerBtn.clear();
-		
-	for (int i = 0; i < static_cast<int>(steps); ++i)
-		m_animDealerBtn.setPosAt(
-			i / steps,
-			QPointF(this->scenePos() - (ptStep * i)));
+	m_animDealerBtn.setPosAt(0, this->scenePos());
+	m_animDealerBtn.setPosAt(1, pt);
 
 	m_tlDealerBtn.start();	
 }
