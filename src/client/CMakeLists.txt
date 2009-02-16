@@ -12,8 +12,6 @@ link_directories(
 
 IF (WIN32)
 	IF (MINGW)
-		LIST(APPEND aux_lib ws2_32)
-		
 		ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/pclient_res.obj
 			COMMAND ${WINDRES}
 			-I${CMAKE_CURRENT_SOURCE_DIR}
@@ -23,8 +21,6 @@ IF (WIN32)
 		
 		LIST(APPEND aux_obj pclient_res.obj)
 	ELSE (MINGW)
-		LIST(APPEND aux_lib wsock32)
-		
 		# FIXME: use VC resource compiler rc.exe
 	ENDIF (MINGW)
 ENDIF (WIN32)
