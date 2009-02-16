@@ -29,10 +29,11 @@
 #include "Debug.h"
 
 // cards size
-const qreal Seat::sx_card = 107;
+const qreal Seat::sx_card = 96;
 const qreal Seat::sy_card = 140;
+
 // mini cards size
-const qreal Seat::sx_mini_card = 45;
+const qreal Seat::sx_mini_card = 41;
 const qreal Seat::sy_mini_card = 60;
 
 Seat::Seat(unsigned int id, QWidget *parent)
