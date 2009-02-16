@@ -45,10 +45,6 @@
 
 
 
-/* timeout for connection attempt to server (in seconds) */
-#define CLIENT_CONNECT_TIMEOUT  10
-
-
 #if defined(PLATFORM_WINDOWS)
 # define CONFIG_APPNAME "HoldingNuts"
 #else
