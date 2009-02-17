@@ -134,9 +134,11 @@ void PClient::serverCmdMsg(Tokenizer &t)
 	if (gid != -1 && tid != -1)
 	{
 		tableinfo* tinfo = getTableInfo(gid, tid);
-
-		Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
-			
+		
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
 		if (cid == -1) // message from server to table
 			tinfo->window->addServerMessage(qchatmsg);
 		else // message from user to table
@@ -172,24 +174,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 				wMain->addServerMessage(
 					QString(tr("Game (%1) has been started.").arg(gid)));
 				
-				games[gid].registered = true;
-				games[gid].tables[tid].sitting = true;
-				games[gid].tables[tid].subscribed = true;
-				games[gid].tables[tid].window = new WTable(gid, tid);
-				
-				// show table after some delay (give time to retrieve player-info)
-				QTimer::singleShot(2000, games[gid].tables[tid].window, SLOT(slotShow()));
-				
-				
-				char msg[1024];
-				
-				// request the game-info
-				snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", gid);
-				netSendMsg(msg);
-				
-				// request the player-list of the game
-				snprintf(msg, sizeof(msg), "REQUEST playerlist %d", gid);
-				netSendMsg(msg);
+				addTable(gid, tid);
 			}
 			else if (sstate == "end")
 			{
@@ -205,7 +190,10 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			tableinfo *tinfo = getTableInfo(gid, tid);
 			
 			if (!tinfo)
-				return;
+			{
+				addTable(gid, tid);
+				tinfo = getTableInfo(gid, tid);
+			}
 			
 			table_snapshot &table = tinfo->snap;
 			HoleCards &holecards = tinfo->holecards;
@@ -349,7 +337,10 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			tableinfo *tinfo = getTableInfo(gid, tid);
 			
 			if (!tinfo)
-				return;
+			{
+				addTable(gid, tid);
+				tinfo = getTableInfo(gid, tid);
+			}
 			
 			HoleCards &h = tinfo->holecards;
 			
@@ -554,6 +545,51 @@ int PClient::serverParsebuffer()
 	return retval;
 }
 
+bool PClient::addTable(int gid, int tid)
+{
+	bool bRequestInfo = false;
+	gameinfo *game = getGameInfo(gid);
+	
+	if (!game)
+	{
+		games[gid];  // FIXME: better way of adding item
+		game = getGameInfo(gid);
+		
+		game->registered = true;
+		
+		bRequestInfo = true;
+	}
+	
+	tableinfo *table = getTableInfo(gid, tid);
+	
+	if (!table)
+	{
+		game->tables[tid];  // FIXME: better way of adding item
+		table = getTableInfo(gid, tid);
+		
+		table->sitting = true;
+		table->subscribed = true;
+		table->window = new WTable(gid, tid);
+		
+		// show table after some delay (give time to retrieve player-info)
+		QTimer::singleShot(2000, table->window, SLOT(slotShow()));
+	}
+	
+	if (bRequestInfo)
+	{
+		char msg[1024];
+		
+		// request the game-info
+		snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", gid);
+		netSendMsg(msg);
+		
+		// request the player-list of the game
+		snprintf(msg, sizeof(msg), "REQUEST playerlist %d", gid);
+		netSendMsg(msg);
+	}
+	
+	return true;
+}
 
 bool PClient::doConnect(QString strServer, unsigned int port)
 {

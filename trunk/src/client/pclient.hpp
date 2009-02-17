@@ -132,6 +132,8 @@ private:
 	void serverCmdPlayerlist(Tokenizer &t);
 	void serverCmdClientinfo(Tokenizer &t);
 	void serverCmdGameinfo(Tokenizer &t);
+	
+	bool addTable(int gid, int tid);
 
 private slots:
 	void netRead();
