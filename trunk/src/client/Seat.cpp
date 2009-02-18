@@ -21,12 +21,15 @@
  */
 
 
-#include <QPainter>
-#include <QFont>
-
 #include "Seat.hpp"
 #include "SeatImages.hpp"
 #include "Debug.h"
+#include "ConfigParser.hpp"
+
+#include <QPainter>
+#include <QFont>
+
+extern ConfigParser config;
 
 // cards size
 const qreal Seat::sx_card = 96;
@@ -129,30 +132,34 @@ QRectF Seat::boundingRect() const
 	qreal width = SeatImages::Instance().imgBack.width() + m_pCurrentActionImg->width();
 	qreal height = SeatImages::Instance().imgBack.height();
 
-	if (m_bMySeat)
-		height += sy_card;
+	// bigcards
+	y = -(sy_card + 2);
+	height += sy_card + 2;
 
 	//		8	9	0
 	//	 7			   1
 	// 						
 	//   6			   2
 	//		5	4	3
+	 
+	// smallcards
 	switch (m_nID)
 	{
 		case 1: case 2:
-				x = -sx_mini_card;
+				x = -(sx_mini_card * 1.4 + 5);
+				width += sx_mini_card * 1.4 + 5;
 			break;
 		case 3: case 4: case 5:
-				y = -sy_mini_card;
+			/* smallcards size includes already in bigcards size */
 			break;
 		case 8: case 9: case 0:
-				height += sy_mini_card;
+				height += sy_mini_card + 5;
 			break;
 		case 6: case 7:
-				width += sx_mini_card;
+				width += sx_mini_card * 1.4;
 			break;
 	}
-
+	
 	QRectF rc(x, y, width, height);
 	QTransform m = this->transform();
 	
@@ -319,6 +326,14 @@ TODO: QPainterPath test
 			imgCardBackside);
 	}
 	
+#ifdef DEBUG	
+	if (config.getBool("dbg_bbox"))
+	{
+		painter->setPen(Qt::blue);
+		painter->drawRect(this->boundingRect());
+	}
+#endif
+	
 	painter->restore();
 }
 
@@ -338,14 +353,14 @@ void Seat::calcSCardPos(qreal& x, qreal& y) const
 			break;
 		case 3: case 4: case 5:
 				x = 0;
-				y = -(SeatImages::Instance().imgBack.height() + 5);
+				y = -(sy_mini_card + 5);
 			break;
 		case 8: case 9: case 0:
 				x = 0;
 				y = SeatImages::Instance().imgBack.height() + 5;
 			break;
 		case 6: case 7:
-				x = SeatImages::Instance().imgBack.width();
+				x = SeatImages::Instance().imgBack.width() + sx_mini_card + 5;
 				y = 0;
 			break;
 	}
