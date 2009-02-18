@@ -203,7 +203,7 @@ QDebug operator << (QDebug s, const table_snapshot& t)
 const unsigned int WTable::nMaxSeats = 10;
 
 WTable::WTable(int gid, int tid, QWidget *parent)
-:	QGraphicsView(parent),
+:	QWidget(parent),
 	m_nGid(gid),
 	m_nTid(tid),
 	m_pImgTable(0)
@@ -211,36 +211,28 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	//setAttribute(Qt::WA_DeleteOnClose); // FIXME: implement correctly
 
 	// scene
-	QGraphicsScene* pScene = new QGraphicsScene(0, 0, 900, 700, this);
+	m_pScene = new QGraphicsScene(this);
 
-	pScene->setBackgroundBrush(QPixmap("gfx/table/background.png"));
-	// add scene immediately to view
-	this->setScene(pScene);
+	m_pScene->setBackgroundBrush(Qt::black);//QPixmap("gfx/table/background.png"));
 	// don't use bsptree
-	pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
+	m_pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
 	m_pImgTable = new QGraphicsPixmapItem(QPixmap("gfx/table/table.png"));
 	m_pImgTable->setTransformationMode(Qt::SmoothTransformation);
-	m_pImgTable->scale(
-		pScene->width() / m_pImgTable->pixmap().width(),
-		(pScene->height() - 150) / m_pImgTable->pixmap().height()); // 150 == height chatbox
 
-	pScene->addItem(m_pImgTable);
+	m_pScene->addItem(m_pImgTable);
 
 	m_pDealerButton = new DealerButton;
-	m_pDealerButton->scale(0.5, 0.5);
-	m_pDealerButton->setPos(
-		pScene->width() / 5, pScene->height() / 2);
+	m_pDealerButton->setPos(m_pImgTable->boundingRect().center());
 
-	pScene->addItem(m_pDealerButton);
+	m_pScene->addItem(m_pDealerButton);
 
 	m_pTimeout = new TimeOut;
-	m_pTimeout->scale(0.5, 0.5);
 	m_pTimeout->hide();
 
 	connect(m_pTimeout, SIGNAL(timeup(int)), this, SLOT(slotTimeup(int)));
 
-	pScene->addItem(m_pTimeout);
+	m_pScene->addItem(m_pTimeout);
 
 	for (unsigned int j = 0; j < 5; j++)
 	{
@@ -248,34 +240,49 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 			QPixmap(QString("gfx/deck/default/blank.png")));
 
 		m_CommunityCards[j]->setTransformationMode(Qt::SmoothTransformation);
-		m_CommunityCards[j]->scale(0.3, 0.3);
+		m_CommunityCards[j]->scale(0.7, 0.7);
 		m_CommunityCards[j]->setZValue(5.0);
 		m_CommunityCards[j]->setPos(calcCCardsPos(j));
 		m_CommunityCards[j]->hide();
 
-		pScene->addItem(m_CommunityCards[j]);
+		m_pScene->addItem(m_CommunityCards[j]);
 	}
 
 	for (unsigned int i = 0; i < nMaxSeats; i++)
 	{
 		wseats[i] = new Seat(i, this);
-		wseats[i]->scale(0.5, 0.5);
 		wseats[i]->setPos(calcSeatPos(i));
 
-		pScene->addItem(wseats[i]);
+		m_pScene->addItem(wseats[i]);
 	}
 
+	QFont font = QApplication::font();
+	
+	font.setPointSize(20); 
+	font.setBold(true);
+	
+	const QFontMetrics fm(font);
+	const QPointF ptCenter = m_pImgTable->boundingRect().center();
+	
+	m_pTxtPots = m_pScene->addSimpleText("Pot 0: 0.00", font);
+	m_pTxtPots->setPos(ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2), 200);
+	m_pTxtPots->setZValue(3);
+	
+	m_pTxtHandStrength = m_pScene->addSimpleText("HandStrength", font);
+	m_pTxtHandStrength->setPos(calcHandStrengthPos());
+	m_pTxtHandStrength->setZValue(3);
+	m_pTxtHandStrength->setVisible(config.getBool("ui_show_handstrength"));
+
 	// view
-	this->setRenderHint(QPainter::SmoothPixmapTransform);
-	this->setCacheMode(QGraphicsView::CacheBackground);
-	this->setMinimumSize(
-		static_cast<int>(scene()->width() * 0.75),
-		static_cast<int>(scene()->height() * 0.75));
-	this->setWindowTitle(tr("HoldingNuts table"));
-	this->setWindowIcon(QIcon(":/res/pclient.ico"));
-	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	this->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+	m_pView = new QGraphicsView(m_pScene);
+	m_pView->setRenderHint(QPainter::SmoothPixmapTransform);
+	m_pView->setCacheMode(QGraphicsView::CacheNone);
+	m_pView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_pView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//	m_pView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);	// TODO: find a better updatemode
+	m_pView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	m_pView->setOptimizationFlag(QGraphicsView::DontClipPainter, true);
+	m_pView->setFrameStyle(QFrame::Plain);
 
 	// ui - widgets
 	QPushButton *btnFold = new QPushButton(tr("Fold"), this);
@@ -303,7 +310,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	chkAutoCheckCall = new QCheckBox("Check/Call", this);
 	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
 	
-	m_pSliderAmount = new EditableSlider;
+	m_pSliderAmount = new EditableSlider(this);
 
 	QHBoxLayout *lActions = new QHBoxLayout();
 	lActions->addWidget(btnFold);
@@ -348,72 +355,87 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblActions->setLayout(stlayActions);
 
 	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 0, this);
+	m_pChat->setFixedHeight(150);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
 	m_pChat->show();
-	
-	lblPots = new QLabel("Pot 0: 0.00", this);
-	lblPots->setAlignment(Qt::AlignCenter);
-	
-	lblHandStrength = new QLabel("HandStrength", this);
-	lblHandStrength->setAlignment(Qt::AlignCenter);
-	lblHandStrength->setVisible(config.getBool("ui_show_handstrength"));
 
 	QGridLayout *mainLayout = new QGridLayout(this);
 
-	mainLayout->addItem(
-		new QSpacerItem(1, 225, QSizePolicy::Expanding, QSizePolicy::Expanding), 0, 0);
-	mainLayout->addWidget(lblPots, 1, 0, 1, 4, Qt::AlignHCenter);
-	mainLayout->addWidget(lblHandStrength, 2, 0, 1, 4, Qt::AlignHCenter);
-	mainLayout->addItem(
-		new QSpacerItem(1, 360, QSizePolicy::Expanding, QSizePolicy::Expanding), 3, 0);
-	mainLayout->addWidget(m_pChat, 4, 0);
-	mainLayout->addWidget(lblActions, 4, 3);
+	mainLayout->addWidget(m_pView, 0, 0, 1, 5);
+	mainLayout->addWidget(m_pChat, 1, 0);
+	mainLayout->addWidget(lblActions, 1, 3);
 	mainLayout->setColumnStretch(2, 2);
-	mainLayout->setHorizontalSpacing(10);
 	mainLayout->setColumnStretch(4, 2);
 
 	this->setLayout(mainLayout);
+	
+	// set background color to black
+	QPalette p = palette();
+	p.setColor(QPalette::Window, Qt::black);
+	this->setPalette(p);
+
+	this->setMinimumSize(800, 600);
+	this->setWindowTitle(tr("HoldingNuts table"));
+	this->setWindowIcon(QIcon(":/res/pclient.ico"));
+	this->show();
+	this->resize(800, 600);
+}
+
+WTable::~WTable()
+{
+	delete m_pImgTable;
+	delete m_pDealerButton;
+	delete m_pTimeout;
+	delete m_pTxtPots;
+	delete m_pTxtHandStrength;
+
+	for (unsigned int j = 0; j < 5; j++)
+		delete m_CommunityCards[j];
+
+	for (unsigned int i = 0; i < nMaxSeats; i++)
+		delete wseats[i];
+		
+	delete stlayActions;
+	delete m_pSliderAmount;
 }
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 {
 	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
-	Q_ASSERT_X(scene(), __func__, "bad scene pointer");
 	Q_ASSERT_X(wseats[nSeatID], __func__, "bad seat pointer");
+	Q_ASSERT_X(m_pImgTable, __func__, "bad table image pointer");
 
 	//		8	9	0
 	//	 7			   1
 	// 						
 	//   6			   2
 	//		5	4	3
-
-	static const qreal height_start = 72;
 	
-	const QRectF& rcSeat = wseats[nSeatID]->boundingRectSeat(); // QRectF(0,0 119.5x49) 
-	const QRectF& rcScene = this->scene()->sceneRect();	// QRectF(0,0 900x700)
+	const QRectF& rcSeat = wseats[nSeatID]->boundingRectSeat();
+	const QRectF& rcTable = this->m_pImgTable->boundingRect();
 
 	switch (nSeatID)
 	{
 		case 0:
-			return QPointF(rcScene.width() * 0.65, height_start);
+			return QPointF(rcTable.width() * 0.65, 0);
 		case 1:
-			return QPointF(rcScene.width() * 0.8, rcScene.height() * 0.25);
+			return QPointF(rcTable.width() - rcSeat.width() * 0.75, rcTable.height() * 0.30);
 		case 2:
-			return QPointF(rcScene.width() * 0.8, 340);
+			return QPointF(rcTable.width() - rcSeat.width() * 0.75, rcTable.height() * 0.65);
 		case 3:
-			return QPointF(rcScene.width() * 0.65, 449);
+			return QPointF(rcTable.width() * 0.65, rcTable.height() - rcSeat.height());
 		case 4:
-			return QPointF(rcScene.width() * 0.5 - rcSeat.width() * 0.5, 449);
+			return QPointF(rcTable.width() * 0.5 - rcSeat.width() * 0.5, rcTable.height() - rcSeat.height());
 		case 5:
-			return QPointF(rcScene.width() * 0.35 - rcSeat.width(), 449);
+			return QPointF(rcTable.width() * 0.35 - rcSeat.width(), rcTable.height() - rcSeat.height());
 		case 6:
-			return QPointF(rcScene.width() * 0.2 - rcSeat.width(), 340);
+			return QPointF(-(rcSeat.width() * 0.25), rcTable.height() * 0.65);
 		case 7:
-			return QPointF(rcScene.width() * 0.2 - rcSeat.width(), 190);
+			return QPointF(-(rcSeat.width() * 0.25), rcTable.height() * 0.30);
 		case 8:
-			return QPointF(rcScene.width() * 0.35 - rcSeat.width(), height_start);
+			return QPointF(rcTable.width() * 0.35 - rcSeat.width(), 0);
 		case 9:
-			return QPointF(rcScene.width() * 0.5 - rcSeat.width() * 0.5, height_start);
+			return QPointF(rcTable.width() * 0.5 - rcSeat.width() * 0.5, 0);
 	}
 	return QPointF(0, 0);
 }
@@ -421,7 +443,7 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 QPointF WTable::calcCCardsPos(unsigned int nCard) const
 {
 	Q_ASSERT_X(nCard < 5, __func__, "invalided Card Number");
-	Q_ASSERT_X(scene(), __func__, "bad scene pointer");
+	Q_ASSERT_X(m_pScene, __func__, "bad scene pointer");
 	Q_ASSERT_X(m_CommunityCards[nCard], __func__, "bad community card pointer");
 
 	QRectF rc = m_CommunityCards[nCard]->boundingRect();
@@ -433,8 +455,8 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 	const qreal card_width = rc.width() + card_spacing;
 
 	return QPointF(
-		((scene()->width() - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
-		scene()->height() * 0.4);
+		((m_pScene->width() - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
+		m_pScene->height() * 0.4);
 }
 
 QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
@@ -449,6 +471,19 @@ QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
 		m_pTimeout->boundingRect().height();
 
 	return pt;
+}
+
+QPointF WTable::calcHandStrengthPos() const
+{
+	Q_ASSERT_X(m_pTxtHandStrength, __func__, "bad hand strength pointer");
+	Q_ASSERT_X(m_pImgTable, __func__, "bad table image pointer");
+
+	static const QFontMetrics fm(m_pTxtHandStrength->font());
+	static const QPointF ptCenter = m_pImgTable->boundingRect().center();
+	
+	return QPointF(
+		ptCenter.x() - (fm.width(m_pTxtHandStrength->text()) / 2),
+		200 + fm.height());
 }
 
 void WTable::evaluateActions(const table_snapshot *snap)
@@ -665,8 +700,8 @@ void WTable::updateView()
 				wseats[i]->showSmallCards(false);
 			}
 
-			this->scene()->update(wseats[i]->boundingRect());
-			
+			// schedule scene update
+			wseats[i]->update(wseats[i]->boundingRect());
 		}
 		else
 			wseats[i]->setValid(false);
@@ -687,7 +722,7 @@ void WTable::updateView()
 		strPots.append(
 			QString("Pot %1: %2 ").arg(t+1).arg(snap->pots.at(t), 0, 'f', 2));
 	}
-	lblPots->setText(strPots);
+	m_pTxtPots->setText(strPots);
 	
 	// CommunityCards
 	if (snap->state == Table::NewRound)
@@ -769,16 +804,17 @@ void WTable::updateView()
 				GameLogic::getStrength(&(tinfo->holecards), &(snap->communitycards), &strength);
 				const char *sstrength = HandStrength::getRankingName(strength.getRanking());
 				
-				lblHandStrength->setText(sstrength);
+				m_pTxtHandStrength->setText(sstrength);
+				m_pTxtHandStrength->setPos(calcHandStrengthPos());
 			}
 			else
-				lblHandStrength->clear();
+				m_pTxtHandStrength->setText(QString());
 		}
 		else
-			lblHandStrength->clear();
+			m_pTxtHandStrength->setText(QString());
 	}
 	else
-		lblHandStrength->clear();
+		m_pTxtHandStrength->setText(QString());
 }
 
 void WTable::addChat(const QString& from, const QString& text)
@@ -922,50 +958,7 @@ void WTable::slotTimeup(int seat)
 
 void WTable::resizeEvent(QResizeEvent *event)
 {
-	const QSize& size = event->size();
-	
-	qDebug() << "resizeEvent size= " << size;
-
-	this->scene()->setSceneRect(
-		QRectF(0, 0, size.width(), size.height()));
-
-	if (event->oldSize().isValid())
-	{
-		const qreal ratio_x = 
-			static_cast<qreal>(event->size().width()) / 
-			static_cast<qreal>(event->oldSize().width());
-		const qreal ratio_y = 
-			static_cast<qreal>(event->size().height()) / 
-			static_cast<qreal>(event->oldSize().height());
-
-		m_pImgTable->scale(ratio_x, ratio_y);
-		
-		for (unsigned int i = 0; i < nMaxSeats; ++i)
-		{
-			wseats[i]->setPos(
-				wseats[i]->pos().x() * ratio_x,
-				wseats[i]->pos().y() * ratio_y);
-			wseats[i]->scale(ratio_x, ratio_y);
-		}
-		
-		m_pDealerButton->setPos(
-			m_pDealerButton->pos().x() * ratio_x,
-			m_pDealerButton->pos().y() * ratio_y);
-
-		for (unsigned int i = 0; i < 5; ++i)
-		{
-			m_CommunityCards[i]->setPos(
-				m_CommunityCards[i]->pos().x() * ratio_x,
-				m_CommunityCards[i]->pos().y() * ratio_y);
-			
-			m_CommunityCards[i]->scale(ratio_x, ratio_y);				
-		}
-		
-		m_pTimeout->setPos(
-			m_pTimeout->pos().x() * ratio_x,
-			m_pTimeout->pos().y() * ratio_y);
-		m_pTimeout->scale(ratio_x, ratio_y);
-	}	
+	m_pView->fitInView(m_pScene->itemsBoundingRect());
 }
 
 bool WTable::greaterBet(const table_snapshot *snap, const qreal& bet, qreal *pbet) const

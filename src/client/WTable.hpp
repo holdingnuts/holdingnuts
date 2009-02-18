@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
 
@@ -82,12 +83,14 @@ class DealerButton;
 class EditableSlider;
 class TimeOut;
 
-class WTable : public QGraphicsView
+class WTable : public QWidget
 {
 Q_OBJECT
 
 public:
 	WTable(int gid, int tid, QWidget *parent = 0);
+	
+	~WTable();
 	
 	void updateView();
 
@@ -104,6 +107,7 @@ protected:
 	QPointF calcSeatPos(unsigned int nSeatID) const;
 	QPointF calcCCardsPos(unsigned int nCard) const;
 	QPointF calcTimeoutPos(unsigned int nSeatID) const;
+	QPointF calcHandStrengthPos() const;
 	
 	void doSitout(bool bSitout);
 
@@ -137,6 +141,9 @@ private:
 	const int	m_nGid;
 	//! \brief Table ID
 	const int	m_nTid;
+	
+	QGraphicsView			*m_pView;
+	QGraphicsScene			*m_pScene;
 
 	//! \brief Tableimage
 	QGraphicsPixmapItem		*m_pImgTable;
@@ -148,13 +155,14 @@ private:
 	QGraphicsPixmapItem		*m_CommunityCards[5];
 	//! \brief Timeout
 	TimeOut					*m_pTimeout;
+
+	QGraphicsSimpleTextItem *m_pTxtPots;
+	QGraphicsSimpleTextItem *m_pTxtHandStrength;
 	
 	// ui
 	ChatBox			*m_pChat;
-	QStackedLayout		*stlayActions;
-	QLabel			*lblPots;
-	QLabel			*lblHandStrength;
-	EditableSlider		*m_pSliderAmount;
+	QStackedLayout	*stlayActions;
+	EditableSlider	*m_pSliderAmount;
 	QPushButton		*btnCheckCall;
 	QPushButton		*btnBetRaise;
 	QCheckBox 		*chkAutoFoldCheck;
