@@ -22,11 +22,14 @@
 
 
 #include "TimeOut.hpp"
+#include "ConfigParser.hpp"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
 #include <QDebug>
+
+extern ConfigParser config;
 
 TimeOut::TimeOut()
 :	m_Image("gfx/table/timeout.png"),
@@ -37,7 +40,7 @@ TimeOut::TimeOut()
 	this->setZValue(10);
 	
 	m_tl.setFrameRange(0, m_Image.width());
-	m_tl.setUpdateInterval(350);
+	m_tl.setUpdateInterval(200);
 
 	connect(&m_tl, SIGNAL(frameChanged(int)), this, SLOT(update(int)));
 }
@@ -67,6 +70,14 @@ void TimeOut::paint(
 		QRectF(0, 0, m_Image.width(), m_Image.height()),
 		m_Image);
 
+#ifdef DEBUG	
+	if (config.getBool("dbg_bbox"))
+	{
+		painter->setPen(Qt::blue);
+		painter->drawRect(this->boundingRect());
+	}
+#endif
+
 	painter->restore();
 }
 
@@ -94,7 +105,7 @@ void TimeOut::update(int frame)
 	if (m_nFrame == m_Image.width())
 		emit timeup(m_nSeat);
 
-//	scene()->invalidate(
-//		this->boundingRect(),
-//		QGraphicsScene::ItemLayer);
+	Q_ASSERT_X(scene(), __func__, "bad scene pointer");
+
+	QGraphicsItem::update(this->boundingRect());
 }
