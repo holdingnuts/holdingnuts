@@ -60,9 +60,20 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	log_msg("server", "Server running version %d.%d.%d. Your client ID is %d",
 			  VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
 							   srv.cid);
+	
 
-	char msg[1024];
+	// there is a newer version available
+	if (VERSION_GETREVISION(version) > VERSION_REVISION)
+	{
+		const QString sversion = QString(
+			tr("There is a newer version of HoldingNuts available (at least %1.%2.%3)"
+				).arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_GETREVISION(version)));
+		wMain->addServerMessage(sversion);
+	}
+	
+	
 	// send user info
+	char msg[1024];
 	snprintf(msg, sizeof(msg), "INFO name:%s",
 			 wMain->getUsername().toStdString().c_str());
 		
@@ -79,6 +90,12 @@ void PClient::serverCmdErr(Tokenizer &t)
 		srv.last_msgid, err_code, smsg.c_str());
 	
 	wMain->addServerErrorMessage(err_code, QString::fromStdString(smsg));
+	
+	// check for version mismatch
+	if (err_code == ErrWrongVersion)
+		QMessageBox::critical(wMain, "Error",
+			tr("The version of this client isn't compatible anymore "
+				"with the server. Please download a recent version."));
 }
 
 // server command MSG <from> <sender-name> <message>
