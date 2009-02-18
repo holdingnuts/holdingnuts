@@ -101,6 +101,9 @@ private:
 	time_t delay_start;
 	unsigned int delay;
 	
+	// player timeout
+	time_t timeout_start;
+	
 	bool nomoreaction;
 	BettingRound betround;
 	
