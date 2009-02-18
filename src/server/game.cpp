@@ -56,6 +56,7 @@ static unsigned int cid_counter = 0;
 
 
 static clientconar_type con_archive;
+static time_t last_conarchive_cleanup = 0;   // last time scan
 
 
 GameController* get_game_by_id(int gid)
@@ -914,6 +915,25 @@ int client_handle(socktype sock)
 	return bytes;
 }
 
+void remove_expired_conar_entries()
+{
+	time_t curtime = time(NULL);
+	unsigned int expire = config.getInt("conarchive_expire");
+	
+	for (clientconar_type::iterator e = con_archive.begin(); e != con_archive.end();)
+	{
+		clientcon_archive *conar = &(e->second);
+		
+		if ((unsigned int)difftime(curtime, conar->logout_time) > expire)
+		{
+			dbg_msg("clientar", "removing expired entry %s", e->first.c_str());
+			con_archive.erase(e++);
+		}
+		else
+			++e;
+	}
+}
+
 int gameloop()
 {
 #ifdef DEBUG
@@ -935,6 +955,7 @@ int gameloop()
 	}
 #endif
 	
+	
 	// handle all games
 	for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
 	{
@@ -942,7 +963,15 @@ int gameloop()
 		g->tick();
 	}
 	
-	// TODO: delete all expired archived connection-data (con_archive)
+	
+	// delete all expired archived connection-data (con_archive)
+	if ((unsigned int)difftime(time(NULL), last_conarchive_cleanup) > 5 * 60)
+	{
+		dbg_msg("clientar", "scanning for expired entries");
+		remove_expired_conar_entries();
+		
+		last_conarchive_cleanup = time(NULL);
+	}
 	
 	return 0;
 }
