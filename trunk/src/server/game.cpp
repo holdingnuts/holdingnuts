@@ -320,7 +320,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
 		
 		// re-assign cid if this client was previously connected (and cid isn't already connected)
-		bool use_uuid_cid = false;
+		bool use_prev_cid = false;
 		
 		if (uuid.length())
 		{
@@ -332,7 +332,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 				if (!conc)
 				{
 					client->id = it->second.id;
-					use_uuid_cid = true;
+					use_prev_cid = true;
 					
 					dbg_msg("uuid", "(%d) using previous cid (%d) for uuid '%s'", client->sock, client->id, client->uuid);
 				}
@@ -343,10 +343,10 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 				}
 			}
 			else
-				dbg_msg("uuid", "(%d) uuid '%s' not found", client->sock, client->uuid);
+				dbg_msg("uuid", "(%d) reserving uuid '%s'", client->sock, client->uuid);
 		}
 		
-		if (!use_uuid_cid)
+		if (!use_prev_cid)
 			client->id = cid_counter++;
 		
 		
