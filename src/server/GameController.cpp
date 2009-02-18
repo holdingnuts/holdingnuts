@@ -566,7 +566,7 @@ void GameController::stateBlinds(Table *t)
 	
 	
 	// initialize the player's timeout
-	timeout_start = time(NULL);
+	t->timeout_start = time(NULL);
 	
 	
 	// give out hole-cards
@@ -690,7 +690,7 @@ void GameController::stateBetting(Table *t)
 	{
 		// handle player timeout
 #ifndef SERVER_TESTING
-		if (p->sitout || (unsigned int)difftime(time(NULL), timeout_start) > timeout)
+		if (p->sitout || (unsigned int)difftime(time(NULL), t->timeout_start) > timeout)
 		{
 			// let player sit out (if not already sitting out)
 			p->sitout = true;
@@ -781,7 +781,7 @@ void GameController::stateBetting(Table *t)
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		
 		// initialize the player's timeout
-		timeout_start = time(NULL);
+		t->timeout_start = time(NULL);
 		
 		sendTableSnapshot(t);
 		t->resetLastPlayerActions();
@@ -830,7 +830,7 @@ void GameController::stateBetting(Table *t)
 			t->cur_player = t->getNextActivePlayer(t->last_bet_player);
 			
 			// initialize the player's timeout
-			timeout_start = time(NULL);
+			t->timeout_start = time(NULL);
 			
 			
 			// end of hand, do showdown/ ask for show
@@ -858,7 +858,7 @@ void GameController::stateBetting(Table *t)
 			t->cur_player = t->getNextActivePlayer(t->dealer);
 		
 		// re-initialize the player's timeout
-		timeout_start = time(NULL);
+		t->timeout_start = time(NULL);
 		
 		
 		// first action for next betting round is at this player
@@ -879,7 +879,7 @@ void GameController::stateBetting(Table *t)
 		
 		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
-		timeout_start = time(NULL);
+		t->timeout_start = time(NULL);
 		
 		t->scheduleState(Table::Betting, 1);
 		sendTableSnapshot(t);
@@ -930,7 +930,7 @@ void GameController::stateAskShow(Table *t)
 #ifndef SERVER_TESTING
 		// handle player timeout
 		const int timeout = 4;   // FIXME: configurable
-		if ((int)difftime(time(NULL), timeout_start) > timeout || p->sitout)
+		if ((int)difftime(time(NULL), t->timeout_start) > timeout || p->sitout)
 		{
 			// default on showdown is "to show"
 			// Note: client needs to determine if it's hand is
@@ -980,7 +980,7 @@ void GameController::stateAskShow(Table *t)
 			// find next player
 			t->cur_player = t->getNextActivePlayer(t->cur_player);
 			
-			timeout_start = time(NULL);
+			t->timeout_start = time(NULL);
 		}
 	}
 }

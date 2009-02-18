@@ -140,6 +140,7 @@ private:
 	GameType type;
 	LimitRule limit;
 	float player_stakes;
+	unsigned int timeout;
 	
 	players_type players;
 	tables_type tables;
@@ -155,12 +156,6 @@ private:
 	unsigned int hand_no;
 	
 	int owner;   // owner of a game
-	
-	
-	// FIXME: move to table!! per-table value
-	// player timeout
-	time_t timeout_start;
-	unsigned int timeout;
 };
 
 #endif /* _GAMECONTROLLER_H */
