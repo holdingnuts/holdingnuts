@@ -37,12 +37,12 @@
 #include "GameLogic.hpp"
 
 
-typedef std::map<int,Table*>	tables_type;
-
-
 class GameController
 {
 public:
+	typedef std::map<int,Table*>	tables_type;
+	typedef std::map<int,Player*>	players_type;
+	
 	typedef enum {
 		RingGame,   // Cash game
 		FreezeOut,  // Tournament
@@ -80,12 +80,12 @@ public:
 	unsigned int getPlayerMax() const { return max_players; };
 	unsigned int getPlayerCount() const { return players.size(); };
 	bool getPlayerList(std::vector<int> &client_list) const;
-#if 0
-	bool getPlayerList(int tid, std::vector<int> &client_list) const;
-#endif
 	
-	bool addPlayer(int client_id);
-	bool removePlayer(int client_id);
+	bool isStarted() const { return started; };
+	
+	bool addPlayer(int cid);
+	bool removePlayer(int cid);
+	bool isPlayer(int cid);
 	
 	void setOwner(int cid) { owner = cid; };
 	int getOwner() const { return owner; };
@@ -139,14 +139,10 @@ private:
 	
 	GameType type;
 	LimitRule limit;
-	
-	std::vector<Player> players;
-	tables_type tables;
-	
-	time_t timeout_start;
-	unsigned int timeout;
-	
 	float player_stakes;
+	
+	players_type players;
+	tables_type tables;
 	
 	struct {
 		float amount;
@@ -159,6 +155,12 @@ private:
 	unsigned int hand_no;
 	
 	int owner;   // owner of a game
+	
+	
+	// FIXME: move to table!! per-table value
+	// player timeout
+	time_t timeout_start;
+	unsigned int timeout;
 };
 
 #endif /* _GAMECONTROLLER_H */

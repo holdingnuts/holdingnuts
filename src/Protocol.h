@@ -16,6 +16,7 @@ typedef enum {
 	ErrProtocol = 0x1,
 	ErrWrongVersion = 0x2,
 	ErrNotImplemented = 0x3,
+	ErrParameters = 0x4,
 	ErrServerFull = 0x10,
 	ErrNoPermission = 0x100
 } cmderror;

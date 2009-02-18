@@ -263,7 +263,14 @@ bool client_remove(socktype sock)
 			bool send_msg = false;
 			if (client->state & SentInfo)
 			{
-				// TODO: remove player from unstarted games
+				// remove player from unstarted games
+				for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
+				{
+					GameController *g = e->second;
+					if (g->isPlayer(client->id) && !g->isStarted())
+						g->removePlayer(client->id);
+				}
+				
 				
 				snprintf(msg, sizeof(msg),
 					"'%s' (%d) left foyer",
@@ -545,39 +552,96 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 
 int client_cmd_register(clientcon *client, Tokenizer &t)
 {
-	bool cmderr = false;
-	
 	if (!t.count())
-		cmderr = true;
-	else
 	{
-		int gid = t.getNextInt();
-		GameController *g;
-		if ((g = get_game_by_id(gid)))
-		{
-			g->removePlayer(client->id);
-			
-			if (g->addPlayer(client->id))
-			{
-				snprintf(msg, sizeof(msg),
-					"'%s' (%d) joined game %d (%d/%d)",
-					client->name, client->id, gid,
-					g->getPlayerCount(), g->getPlayerMax());
-				
-				log_msg("game", "%s", msg);
-				client_chat(-1, -1, msg);
-			}
-			else
-				cmderr = true;
-		}
-		else
-			cmderr = true;
+		send_err(client, ErrParameters);
+		return 1;
 	}
 	
-	if (!cmderr)
-		send_ok(client);
-	else
-		send_err(client);
+	int gid = t.getNextInt();
+	GameController *g;
+	if (!(g = get_game_by_id(gid)))
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (g->isStarted())
+	{
+		send_err(client, 0 /*FIXME*/, "game has already been started");
+		return 1;
+	}
+	
+	if (g->isPlayer(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are already registered");
+		return 1;
+	}
+	
+	if (!g->addPlayer(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to register");
+		return 1;
+	}
+	
+	
+	snprintf(msg, sizeof(msg),
+		"'%s' (%d) joined game %d (%d/%d)",
+		client->name, client->id, gid,
+		g->getPlayerCount(), g->getPlayerMax());
+	
+	log_msg("game", "%s", msg);
+	client_chat(-1, -1, msg);
+	
+	send_ok(client);
+	
+	return 0;
+}
+
+int client_cmd_unregister(clientcon *client, Tokenizer &t)
+{
+	if (!t.count())
+	{
+		send_err(client, ErrParameters);
+		return 1;
+	}
+	
+	int gid = t.getNextInt();
+	GameController *g;
+	if (!(g = get_game_by_id(gid)))
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (g->isStarted())
+	{
+		send_err(client, 0 /*FIXME*/, "game has already been started");
+		return 1;
+	}
+	
+	if (!g->isPlayer(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are not registered");
+		return 1;
+	}
+	
+	if (!g->removePlayer(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to unregister");
+		return 1;
+	}
+	
+	
+	snprintf(msg, sizeof(msg),
+		"'%s' (%d) parted game %d (%d/%d)",
+		client->name, client->id, gid,
+		g->getPlayerCount(), g->getPlayerMax());
+	
+	log_msg("game", "%s", msg);
+	client_chat(-1, -1, msg);
+	
+	send_ok(client);
 	
 	return 0;
 }
@@ -815,6 +879,8 @@ int client_execute(clientcon *client, const char *cmd)
 		client_cmd_request(client, t);
 	else if (command == "REGISTER")
 		client_cmd_register(client, t);
+	else if (command == "UNREGISTER")
+		client_cmd_unregister(client, t);
 	else if (command == "ACTION")
 		client_cmd_action(client, t);
 	else if (command == "CREATE")
