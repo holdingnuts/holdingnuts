@@ -28,5 +28,6 @@ using namespace std;
 
 Player::Player()
 {
-
+	next_action.valid = false;
+	sitout = false;
 }

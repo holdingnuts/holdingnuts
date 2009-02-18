@@ -61,48 +61,59 @@ GameController::GameController()
 	type = SNG;
 }
 
-bool GameController::addPlayer(int client_id)
+bool GameController::addPlayer(int cid)
 {
+	// is the game already started or full?
 	if (started || players.size() == max_players)
 		return false;
 	
-	Player p;
-	p.client_id = client_id;
-	p.stake = player_stakes;
-	p.next_action.valid = false;
-	p.sitout = false;
+	// is the client already a player?
+	if (isPlayer(cid))
+		return false;
 	
-	players.push_back(p);
+	Player *p = new Player;
+	p->client_id = cid;
+	p->stake = player_stakes;
+	
+	players[cid] = p;
 	
 	return true;
 }
 
-bool GameController::removePlayer(int client_id)
+bool GameController::removePlayer(int cid)
 {
+	// don't allow removing if game has already been started
 	if (started)
 		return false;
-		
-	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)
-	{
-		if (e->client_id == client_id)
-		{
-			players.erase(e);
-			return true;
-		}
-	}
 	
-	return false;
+	players_type::iterator it = players.find(cid);
+	
+	if (it == players.end())
+		return false;
+	
+	players.erase(it);
+	
+	return true;
+}
+
+bool GameController::isPlayer(int cid)
+{
+	players_type::const_iterator it = players.find(cid);
+	
+	if (it == players.end())
+		return false;
+	
+	return true;
 }
 
 Player* GameController::findPlayer(int cid)
 {
-	for (unsigned int i=0; i < players.size(); i++)
-	{
-		if (players[i].client_id == cid)
-			return &(players[i]);
-	}
+	players_type::const_iterator it = players.find(cid);
 	
-	return NULL;
+	if (it == players.end())
+		return NULL;
+	
+	return it->second;
 }
 
 bool GameController::setPlayerMax(unsigned int max)
@@ -128,40 +139,16 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 {
 	client_list.clear();
 	
-	for (unsigned int i=0; i < players.size(); i++)
-		client_list.push_back(players[i].client_id);
+	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
+		client_list.push_back(e->first);
 	
 	return true;
 }
-
-#if 0
-bool GameController::getPlayerList(int tid, vector<int> &client_list) const
-{
-	client_list.clear();
-	
-	tables_type::const_iterator it = tables.find(tid);
-	if (it == tables.end())
-		return false;
-	
-	const Table *t = it->second;
-	
-	for (unsigned int i=0; i < 10; i++)
-	{
-		if (!t->seats[i].occupied)
-			continue;
-		
-		const Player *p = t->seats[i].player;
-		client_list.push_back(p->client_id);
-	}
-	
-	return true;
-}
-#endif
 
 void GameController::chat(int tid, const char* msg)
 {
-	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)
-		client_chat(game_id, tid, e->client_id, msg);
+	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
+		client_chat(game_id, tid, e->first, msg);
 }
 
 void GameController::chat(int cid, int tid, const char* msg)
@@ -171,8 +158,8 @@ void GameController::chat(int cid, int tid, const char* msg)
 
 void GameController::snap(int tid, int sid, const char* msg)
 {
-	for (vector<Player>::iterator e = players.begin(); e != players.end(); e++)
-		client_snapshot(game_id, tid, e->client_id, sid, msg);
+	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
+		client_snapshot(game_id, tid, e->first, sid, msg);
 }
 
 void GameController::snap(int cid, int tid, int sid, const char* msg)
@@ -1206,6 +1193,7 @@ void GameController::tick()
 			
 			memset(t->seats, 0, sizeof(Table::Seat) * 10);
 			
+			players_type::const_iterator e = players.begin();
 			for (unsigned int i=0; i < players.size() && i < 10; i++)
 			{
 				Table::Seat seat;
@@ -1213,8 +1201,10 @@ void GameController::tick()
 				memset(&seat, 0, sizeof(Table::Seat));
 				seat.occupied = true;
 				seat.seat_no = i;
-				seat.player = &(players[i]);
+				seat.player = e->second;
 				t->seats[i] = seat;
+				
+				e++;
 			}
 			t->dealer = 0;
 			t->state = Table::GameStart;
