@@ -1,6 +1,15 @@
 cmake_minimum_required (VERSION 2.6)
 
-set(DEBUG     1)
+# check for inner-source-build
+STRING (COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" in_source)
+IF (in_source)
+	MESSAGE( "Inner-source-builds should not be used. For an outer-source-build create a separate build-directory and run cmake within it again.") 
+ENDIF (in_source)
+
+# default build-type is DEBUG
+IF (NOT CMAKE_BUILD_TYPE)
+	SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Build types are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
+ENDIF (NOT CMAKE_BUILD_TYPE)
 
 ################################################################################
 
@@ -12,10 +21,10 @@ if (WIN32)
 	set(PLATFORM_STR  "win32")
 	add_definitions(-DPLATFORM_WINDOWS)
 endif (WIN32)
-if (MACOSX)
+if (APPLE)
 	set(PLATFORM_STR  "macosx")
 	add_definitions(-DPLATFORM_MACOSX)
-endif (MACOSX)
+endif (APPLE)
 IF (NOT PLATFORM_STR)
  set(PLATFORM_STR  "unix")
  MESSAGE("No target platform specified, using default (${PLATFORM_STR})")
@@ -28,18 +37,14 @@ option (UPDATE_TRANSLATIONS "Update source translations")
 
 ################################################################################
 
-if (DEBUG)
-	add_definitions(-g -O0 -DDEBUG=${DEBUG})
-else (DEBUG)
-	add_definitions(-O2 -fstack-protector -fstack-protector-all)
-endif (DEBUG)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions(-DDEBUG=1)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
-add_definitions(-Wall)  #-pedantic #-DPLATFORM_STR=${PLATFORM_STR}
+add_definitions(-Wall)  #-pedantic -fstack-protector -fstack-protector-all
 
 ################################################################################
 
 project (HOLDINGNUTS)
 
 add_subdirectory (src)
-
-
