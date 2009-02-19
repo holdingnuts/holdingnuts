@@ -224,7 +224,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	m_pDealerButton = new DealerButton;
 	m_pDealerButton->setPos(m_pImgTable->boundingRect().center());
-
+	
 	m_pScene->addItem(m_pDealerButton);
 
 	m_pTimeout = new TimeOut;
@@ -254,6 +254,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		wseats[i]->setPos(calcSeatPos(i));
 
 		m_pScene->addItem(wseats[i]);
+		
+		// calculate dealer button pos
+		m_ptDealerBtn[i] = calcDealerBtnPos(i);
 	}
 
 	QFont font = QApplication::font();
@@ -265,7 +268,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	const QPointF ptCenter = m_pImgTable->boundingRect().center();
 	
 	m_pTxtPots = m_pScene->addSimpleText("Pot 0: 0.00", font);
-	m_pTxtPots->setPos(ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2), 200);
+	m_pTxtPots->setPos(calcPotsPos());
 	m_pTxtPots->setZValue(3);
 	
 	m_pTxtHandStrength = m_pScene->addSimpleText("HandStrength", font);
@@ -483,7 +486,61 @@ QPointF WTable::calcHandStrengthPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtHandStrength->text()) / 2),
-		200 + fm.height());
+		230 + fm.height());
+}
+
+QPointF WTable::calcPotsPos() const
+{
+	Q_ASSERT_X(m_pTxtPots, __func__, "bad text pots pointer");
+	Q_ASSERT_X(m_pImgTable, __func__, "bad table image pointer");
+
+	static const QFontMetrics fm(m_pTxtPots->font());
+	static const QPointF ptCenter = m_pImgTable->boundingRect().center();
+	
+	return QPointF(
+		ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2),
+		230);
+}
+
+QPointF WTable::calcDealerBtnPos(
+	unsigned int nSeatID, 
+	int offset) const
+{
+	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
+	Q_ASSERT_X(wseats[nSeatID], __func__, "bad seat pointer");
+	Q_ASSERT_X(m_pDealerButton, __func__, "bad table image pointer");
+	
+	QPointF pt = wseats[nSeatID]->sceneBoundingRect().center();
+
+	//		8	9	0
+	//	 7			   1
+	// 						
+	//   6			   2
+	//		5	4	3
+	
+	switch (nSeatID)
+	{
+		case 0: case 8: case 9:
+				pt.ry() += (wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + offset);
+			break;
+		case 1: case 2:
+				pt.rx() -= (
+					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
+					m_pDealerButton->sceneBoundingRect().width() + 
+					offset);
+			break;
+		case 3: case 4: case 5:
+				pt.ry() -= (
+					wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 
+					m_pDealerButton->sceneBoundingRect().height() + 
+					offset);
+			break;
+		case 6: case 7:
+				pt.rx() += (wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + offset);
+			break;
+	}
+
+	return pt;
 }
 
 void WTable::evaluateActions(const table_snapshot *snap)
@@ -709,11 +766,7 @@ void WTable::updateView()
 	
 	// dealerbutton
 	if (snap->state == Table::NewRound)
-	{
-		m_pDealerButton->startAnimation(
-			wseats[snap->s_dealer]->pos() + wseats[snap->s_dealer]->boundingRectSeat().center(),
-			125);
-	}
+		m_pDealerButton->startAnimation(m_ptDealerBtn[snap->s_dealer]);
 	
 	// Pots
 	QString strPots;
@@ -723,6 +776,7 @@ void WTable::updateView()
 			QString("Pot %1: %2 ").arg(t+1).arg(snap->pots.at(t), 0, 'f', 2));
 	}
 	m_pTxtPots->setText(strPots);
+	m_pTxtPots->setPos(calcPotsPos());
 	
 	// CommunityCards
 	if (snap->state == Table::NewRound)
@@ -951,9 +1005,7 @@ void WTable::slotShow()
 
 void WTable::slotTimeup(int seat)
 {
-#ifdef DEBUG
 	qDebug() << "timeup seat= " << seat;
-#endif
 }
 
 void WTable::resizeEvent(QResizeEvent *event)

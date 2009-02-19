@@ -42,7 +42,12 @@ public:
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 
-	void startAnimation(const QPointF& ptCenterSeat, int distance = 100);
+	//! \brief start animation from current pos to center of the seat
+	//! \brief minus distance
+	void startAnimation(const QPointF& ptCenterSeat, int distance);
+
+	//! \brief start animation from current pos to target pos
+	void startAnimation(const QPointF& ptTraget);
 
 private:
 	const QImage	m_Image;
