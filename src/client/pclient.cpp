@@ -61,13 +61,15 @@ void PClient::serverCmdPserver(Tokenizer &t)
 			  VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
 							   srv.cid);
 	
-
+	
 	// there is a newer version available
-	if (VERSION_GETREVISION(version) > VERSION_REVISION)
+	if (version > VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION))
 	{
-		const QString sversion = QString(
-			tr("There is a newer version of HoldingNuts available (at least %1.%2.%3)"
-				).arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_GETREVISION(version)));
+		const QString sversion =
+			tr("There is a newer version of HoldingNuts available (at least %1.%2.%3)")
+				.arg(VERSION_GETMAJOR(version))
+				.arg(VERSION_GETMINOR(version))
+				.arg(VERSION_GETREVISION(version));
 		wMain->addServerMessage(sversion);
 	}
 	
@@ -897,6 +899,14 @@ int PClient::init()
 		}
 		else
 			log_msg("main", "Error: Cannot load locale: %s", locale.toStdString().c_str());
+		
+		// load qt localization; first try system version, then our own copy
+		QTranslator *qt_translator = new QTranslator();
+		if (qt_translator->load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath)) ||
+			qt_translator->load("i18n/qt_" + locale))
+		{
+			installTranslator(qt_translator);
+		}
 	}
 	
 	// main window
