@@ -91,11 +91,17 @@ void DealerButton::startAnimation(const QPointF& ptCenterSeat, int distance)
 	
 	normalize(vDir);
 
-	const QPointF pt = ptCenterSeat - (vDir * distance);
+	startAnimation(ptCenterSeat - (vDir * distance));
+}
+
+void DealerButton::startAnimation(const QPointF& ptTraget)
+{
+	if (m_tlDealerBtn.state() == QTimeLine::Running)
+		return;
 
 	m_animDealerBtn.clear();
 	m_animDealerBtn.setPosAt(0, this->scenePos());
-	m_animDealerBtn.setPosAt(1, pt);
+	m_animDealerBtn.setPosAt(1, ptTraget);
 
-	m_tlDealerBtn.start();	
+	m_tlDealerBtn.start();
 }

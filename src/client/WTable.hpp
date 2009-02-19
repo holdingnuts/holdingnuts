@@ -37,7 +37,6 @@
 #include <QGridLayout>	// TODO: remove!!! only wmain needs this
 #include <QGraphicsView>
 #include <QGraphicsItemAnimation>
-#include <QList>
 
 #include "Card.hpp"
 #include "HoleCards.hpp"
@@ -108,6 +107,10 @@ protected:
 	QPointF calcCCardsPos(unsigned int nCard) const;
 	QPointF calcTimeoutPos(unsigned int nSeatID) const;
 	QPointF calcHandStrengthPos() const;
+	QPointF calcPotsPos() const;
+	QPointF calcDealerBtnPos(
+		unsigned int nSeatID, 
+		int offset = 20) const;
 	
 	void doSitout(bool bSitout);
 
@@ -130,7 +133,6 @@ private slots:
 	void actionMuck();
 	void actionBack();
 	void actionSitout();
-	
 	void actionAutoCheckCall(int state);
 
 	void slotShow();
@@ -145,17 +147,12 @@ private:
 	QGraphicsView			*m_pView;
 	QGraphicsScene			*m_pScene;
 
-	//! \brief Tableimage
+	// scene items
 	QGraphicsPixmapItem		*m_pImgTable;
-	//! \brief Dealer Button
 	DealerButton			*m_pDealerButton;
-	//! \brief Seats
 	Seat					*wseats[10];
-	//! \brief Community Cards
 	QGraphicsPixmapItem		*m_CommunityCards[5];
-	//! \brief Timeout
 	TimeOut					*m_pTimeout;
-
 	QGraphicsSimpleTextItem *m_pTxtPots;
 	QGraphicsSimpleTextItem *m_pTxtHandStrength;
 	
@@ -175,7 +172,10 @@ private:
 	int				m_nNoAction;
 	int				m_nSitoutActions;
 	
-	qreal				m_autocall_amount;
+	qreal			m_autocall_amount;
+	
+	// precomputed dealerbtn positions
+	QPointF			m_ptDealerBtn[10];
 };
 
 #endif /* _WTABLE_H */
