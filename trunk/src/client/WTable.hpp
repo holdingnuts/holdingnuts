@@ -88,7 +88,6 @@ Q_OBJECT
 
 public:
 	WTable(int gid, int tid, QWidget *parent = 0);
-	
 	~WTable();
 	
 	void updateView();
@@ -96,7 +95,6 @@ public:
 	void addChat(const QString& from, const QString& text);
 	void addServerMessage(const QString& text);
 	
-public:
 	static const unsigned int	nMaxSeats;
 
 protected:
@@ -137,6 +135,8 @@ private slots:
 
 	void slotShow();
 	void slotTimeup(int seat);
+	
+	void actionScreenshot();
 	
 private:
 	//! \brief Game ID
