@@ -38,11 +38,13 @@
 #include <QVBoxLayout>
 #include <QTimeLine>
 #include <QGraphicsItemAnimation>
+#include <QShortcut>
 
 #include "Config.h"
 #include "Debug.h"
 #include "Logger.h"
 #include "ConfigParser.hpp"
+#include "SysAccess.h"
 #include "GameLogic.hpp"
 
 #include "pclient.hpp"
@@ -371,6 +373,11 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	mainLayout->setColumnStretch(4, 2);
 
 	this->setLayout(mainLayout);
+	
+	
+	// assign shortcut for making screenshot
+	QShortcut *shortcutScreenshot = new QShortcut(Qt::Key_F10, this);
+	connect(shortcutScreenshot, SIGNAL(activated()), this, SLOT(actionScreenshot()));
 	
 	// set background color to black
 	QPalette p = palette();
@@ -1053,3 +1060,22 @@ bool WTable::isNoMoreActionPossible(const table_snapshot *snap)
 	return (countAllin >= countPlayers - 1);
 }
 #endif
+
+void WTable::actionScreenshot()
+{
+	QString pathScrshot = QString(sys_config_path()) + "/screenshots";
+	QDateTime datetime = QDateTime::currentDateTime();
+	QString filename = QString("holdingnuts_%1.png")
+		.arg(datetime.toString("yyyy-MM-dd_hh.mm.ss"));
+	
+	if (!sys_isdir(pathScrshot.toStdString().c_str()))
+		sys_mkdir(pathScrshot.toStdString().c_str());
+	
+	// grab the content of this window
+	QPixmap pixShot = QPixmap::grabWidget(this);
+	
+	if (pixShot.save(pathScrshot + "/" + filename, "PNG"))
+		addServerMessage(tr("Saved screenshot: %1.").arg(filename));
+	else
+		addServerMessage(tr("Unable to save screenshot in %1.").arg(pathScrshot));
+}
