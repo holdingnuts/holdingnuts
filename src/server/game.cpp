@@ -267,7 +267,7 @@ bool client_remove(socktype sock)
 				for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
 				{
 					GameController *g = e->second;
-					if (g->isPlayer(client->id) && !g->isStarted())
+					if (!g->isStarted() && g->isPlayer(client->id))
 						g->removePlayer(client->id);
 				}
 				
@@ -1003,7 +1003,7 @@ void remove_expired_conar_entries()
 int gameloop()
 {
 #ifdef DEBUG
-	// initially add a game for debugging purpose
+	// initially add games for debugging purpose
 	if (!games.size())
 	{
 		for (int i=0; i < config.getInt("dbg_testgame_games"); i++)
@@ -1011,6 +1011,7 @@ int gameloop()
 			GameController *g = new GameController();
 			const int gid = i;
 			g->setGameId(gid);
+			g->setRestart(true);
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));
 			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
 			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
@@ -1023,10 +1024,32 @@ int gameloop()
 	
 	
 	// handle all games
-	for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
+	for (map<int,GameController*>::iterator e = games.begin(); e != games.end();)
 	{
 		GameController *g = e->second;
-		g->tick();
+		if (g->tick() < 0)
+		{
+			if (g->getRestart())
+			{
+				const int gid = ++gid_counter;
+				GameController *newgame = new GameController();
+				
+				newgame->setGameId(gid);
+				newgame->setRestart(true);
+				newgame->setPlayerMax(g->getPlayerMax());
+				newgame->setPlayerTimeout(g->getPlayerTimeout());
+				newgame->setPlayerStakes(g->getPlayerStakes());
+				games[gid] = newgame;
+				
+				log_msg("game", "restarted game (old: %d, new: %d)",
+					g->getGameId(), newgame->getGameId());
+			}
+			
+			delete g;
+			games.erase(e++);
+		}
+		else
+			++e;
 	}
 	
 	
