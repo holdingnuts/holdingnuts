@@ -145,8 +145,8 @@ void PClient::serverCmdMsg(Tokenizer &t)
 
 			if(it != players.end())
 				name = it->second.name;
-				
-			qchatmsg.replace(rx, "'" + name + "'");
+			
+			qchatmsg.replace(rx, name);
 		}
 	}
 
