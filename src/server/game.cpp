@@ -664,7 +664,7 @@ int client_cmd_action(clientcon *client, Tokenizer &t)
 			string samount;
 			float amount = t.getNextFloat();
 			
-			Player::PlayerAction a;
+			Player::PlayerAction a = Player::None;
 			
 			if (action == "check")
 				a = Player::Check;
