@@ -55,7 +55,7 @@ bool Tokenizer::parse(string str, string sep)
 		if (token_start != -1)
 		{
 			bool end_tok = false;
-			int token_end;
+			int token_end = 0;
 			
 			if (!quote_open)
 			{
