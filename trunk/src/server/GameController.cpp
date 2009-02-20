@@ -47,6 +47,7 @@ GameController::GameController()
 	game_id = -1;
 	
 	started = false;
+	ended = false;
 	max_players = 10;
 	
 	player_stakes = 1500.0f;
@@ -1127,6 +1128,8 @@ void GameController::stateEndRound(Table *t)
 		}
 	}
 	
+	sendTableSnapshot(t);
+	
 	t->dealer = t->getNextPlayer(t->dealer);
 	
 	t->scheduleState(Table::NewRound, 4);
@@ -1175,81 +1178,104 @@ int GameController::handleTable(Table *t)
 	return 0;
 }
 
-void GameController::tick()
+void GameController::start()
+{
+	log_msg("game", "game %d has been started", game_id);
+	
+	started = true;
+	
+	// TODO: support more than 1 table
+	const int tid = 0;
+	Table *t = new Table();
+	t->setTableId(tid);
+	
+	memset(t->seats, 0, sizeof(Table::Seat) * 10);
+	
+	players_type::const_iterator e = players.begin();
+	for (unsigned int i=0; i < players.size() && i < 10; i++)
+	{
+		Table::Seat seat;
+		
+		memset(&seat, 0, sizeof(Table::Seat));
+		seat.occupied = true;
+		seat.seat_no = i;
+		seat.player = e->second;
+		t->seats[i] = seat;
+		
+		e++;
+	}
+	t->dealer = 0;
+	t->state = Table::GameStart;
+	tables[tid] = t;
+	
+	blind.last_blinds_time = time(NULL);
+	
+	snap(tid, SnapGameState, "start");
+	
+	sendTableSnapshot(t);
+	
+	t->scheduleState(Table::NewRound, 5);
+}
+
+int GameController::tick()
 {
 	if (!started)
 	{
-		// start a game
+		// start game if player count reached
 		if (getPlayerCount() == max_players)
+			start();
+		else
+			return 0;
+	}
+	else if (ended)
+	{
+		// delay before game gets deleted
+		if ((unsigned int) difftime(time(NULL), ended_time) >= 2 * 60)
 		{
-			log_msg("game", "game %d has been started", game_id);
+			// remove all players
+			for (players_type::iterator e = players.begin(); e != players.end();)
+				players.erase(e++);
 			
-			started = true;
-			
-			// TODO: support more than 1 table
-			const int tid = 0;
-			Table *t = new Table();
-			t->setTableId(tid);
-			
-			memset(t->seats, 0, sizeof(Table::Seat) * 10);
-			
-			players_type::const_iterator e = players.begin();
-			for (unsigned int i=0; i < players.size() && i < 10; i++)
-			{
-				Table::Seat seat;
-				
-				memset(&seat, 0, sizeof(Table::Seat));
-				seat.occupied = true;
-				seat.seat_no = i;
-				seat.player = e->second;
-				t->seats[i] = seat;
-				
-				e++;
-			}
-			t->dealer = 0;
-			t->state = Table::GameStart;
-			tables[tid] = t;
-			
-			blind.last_blinds_time = time(NULL);
-			
-			snap(tid, SnapGameState, "start");
-			
-			sendTableSnapshot(t);
-			
-			t->scheduleState(Table::NewRound, 5);
+			return -1;
 		}
 		else
-			return;
+			return 0;
 	}
 	
 	// handle all tables
-	for (unsigned int i=0; i < tables.size(); i++)
+	for (tables_type::iterator e = tables.begin(); e != tables.end();)
 	{
-		Table *t = tables[i];
+		Table *t = e->second;
 		
 		// table closed?
 		if (handleTable(t) < 0)
 		{
-			for (unsigned int i=0; i < 10; i++)
+			// is this the last table?
+			if (tables.size() == 1)
 			{
-				if (t->seats[i].occupied)
+				// determine the last remaining player
+				for (unsigned int i=0; i < 10; i++)
 				{
-					Player *p = t->seats[i].player;
-					chat(p->client_id, t->table_id, "You won!");
-					break;
+					if (t->seats[i].occupied)
+					{
+						Player *p = t->seats[i].player;
+						chat(p->client_id, t->table_id, "You won!");
+						break;
+					}
 				}
+				
+				ended = true;
+				ended_time = time(NULL);
+				
+				snap(-1, SnapGameState, "end");
 			}
 			
-			// FIXME: remove table ...
-#if 0
-			started = false;
-			players.clear();
-#endif
 			delete t;
-			tables.clear();
-			
-			snap(-1, SnapGameState, "end");
-			break;
+			tables.erase(e++);
 		}
+		else
+			++e;
 	}
+	
+	return 0;
 }

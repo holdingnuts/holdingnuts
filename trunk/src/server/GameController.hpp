@@ -81,6 +81,9 @@ public:
 	unsigned int getPlayerCount() const { return players.size(); };
 	bool getPlayerList(std::vector<int> &client_list) const;
 	
+	void setRestart(bool bRestart) { restart = bRestart; };
+	bool getRestart() const { return restart; };
+	
 	bool isStarted() const { return started; };
 	
 	bool addPlayer(int cid);
@@ -95,21 +98,22 @@ public:
 	
 	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
 	
-	void tick();
-	
-	float determineMinimumBet(Table *t) const;
+	int tick();
 	
 #ifdef DEBUG
 	void debugSetPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
 #endif
 	
 protected:
+	void start();
+	
 	Player* findPlayer(int cid);
 	
 	void snap(int tid, int sid, const char* msg);
 	void snap(int cid, int tid, int sid, const char* msg);
 	
 	bool createWinlist(Table *t, std::vector< std::vector<HandStrength> > &winlist);
+	float determineMinimumBet(Table *t) const;
 	
 	int handleTable(Table *t);
 	void stateNewRound(Table *t);
@@ -156,6 +160,10 @@ private:
 	unsigned int hand_no;
 	
 	int owner;   // owner of a game
+	bool restart;   // should be restarted when ended?
+	
+	bool ended;
+	time_t ended_time;
 };
 
 #endif /* _GAMECONTROLLER_H */
