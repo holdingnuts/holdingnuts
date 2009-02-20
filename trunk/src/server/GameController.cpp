@@ -1122,7 +1122,9 @@ void GameController::stateEndRound(Table *t)
 		if ((int)p->stake == 0)
 		{
 			log_msg("stateEndRound", "removed player %d", p->client_id);
-			chat(p->client_id, t->table_id, "You broke!");
+			
+			snprintf(msg, sizeof(msg), "[%d] broke", p->client_id);
+			chat(t->table_id, msg);
 			
 			t->seats[i].occupied = false;
 		}
@@ -1253,17 +1255,6 @@ int GameController::tick()
 			// is this the last table?
 			if (tables.size() == 1)
 			{
-				// determine the last remaining player
-				for (unsigned int i=0; i < 10; i++)
-				{
-					if (t->seats[i].occupied)
-					{
-						Player *p = t->seats[i].player;
-						chat(p->client_id, t->table_id, "You won!");
-						break;
-					}
-				}
-				
 				ended = true;
 				ended_time = time(NULL);
 				

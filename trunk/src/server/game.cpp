@@ -273,7 +273,7 @@ bool client_remove(socktype sock)
 				
 				
 				snprintf(msg, sizeof(msg),
-					"'%s' (%d) left foyer",
+					"%s (%d) left foyer",
 					client->name, client->id);
 				
 				send_msg = true;
@@ -404,7 +404,7 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 		
 		// send broadcast message to foyer
 		snprintf(msg, sizeof(msg),
-			"'%s' (%d) joined foyer",
+			"%s (%d) joined foyer",
 			client->name, client->id);
 		
 		client_chat(-1, -1, msg);
@@ -586,7 +586,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	
 	
 	snprintf(msg, sizeof(msg),
-		"'%s' (%d) joined game %d (%d/%d)",
+		"%s (%d) joined game %d (%d/%d)",
 		client->name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
@@ -634,7 +634,7 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 	
 	
 	snprintf(msg, sizeof(msg),
-		"'%s' (%d) parted game %d (%d/%d)",
+		"%s (%d) parted game %d (%d/%d)",
 		client->name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
