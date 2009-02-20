@@ -29,7 +29,7 @@
 
 
 /* the default port the server is listening on */
-#define DEFAULT_SERVER_PORT  12345
+#define DEFAULT_SERVER_PORT  40888
 
 /* the hard-limit of clients which can connect */
 #define SERVER_CLIENT_HARDLIMIT  250
