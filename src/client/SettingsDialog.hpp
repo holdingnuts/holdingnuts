@@ -28,8 +28,6 @@
 
 #include "ConfigParser.hpp"
 
-class QDialogButtonBox;
-class QFileInfo;
 class QTabWidget;
 class QLineEdit;
 class QCheckBox;
@@ -46,8 +44,6 @@ private:
 	QTabWidget *tabWidget;
 	QWidget *tabGeneral;
 	QWidget *tabAppearance;
-	
-	QDialogButtonBox *buttonBox;
 	
 	const char *configfile;
 	ConfigParser *cfg;
