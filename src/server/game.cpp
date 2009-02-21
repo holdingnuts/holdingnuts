@@ -397,10 +397,13 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 	if (!(client->state & SentInfo))
 	{
 		// store UUID in connection-archive
-		clientcon_archive ar;
-		memset(&ar, 0, sizeof(ar));
-		ar.id = client->id;
-		con_archive[client->uuid] = ar;
+		if (*client->uuid)
+		{
+			clientcon_archive ar;
+			memset(&ar, 0, sizeof(ar));
+			ar.id = client->id;
+			con_archive[client->uuid] = ar;
+		}
 		
 		// send broadcast message to foyer
 		snprintf(msg, sizeof(msg),
@@ -990,7 +993,7 @@ void remove_expired_conar_entries()
 	{
 		clientcon_archive *conar = &(e->second);
 		
-		if ((unsigned int)difftime(curtime, conar->logout_time) > expire)
+		if (conar->logout_time && (unsigned int)difftime(curtime, conar->logout_time) > expire)
 		{
 			dbg_msg("clientar", "removing expired entry %s", e->first.c_str());
 			con_archive.erase(e++);
