@@ -40,8 +40,8 @@ SET(QtApp_RCCS pclient.qrc)
 QT4_ADD_RESOURCES(QtApp_RCC_SRCS ${QtApp_RCCS})
 
 QT4_WRAP_CPP (
-	sources_MOC pclient.hpp
-	WMain.hpp SettingsDialog.hpp
+	sources_MOC
+	pclient.hpp WMain.hpp SettingsDialog.hpp AboutDialog.hpp
 	WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp
 )
 
@@ -49,7 +49,7 @@ add_executable (
 	pclient
 	WIN32    # when building for windows: do not show the console window
 	pclient.cpp ${aux_obj}
-	WMain.cpp SettingsDialog.cpp
+	WMain.cpp SettingsDialog.cpp AboutDialog.cpp
 	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
 	${sources_MOC} ${QtApp_RCC_SRCS}
 )

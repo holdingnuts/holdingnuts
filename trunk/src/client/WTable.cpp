@@ -890,7 +890,7 @@ void WTable::addServerMessage(const QString& text)
 
 void WTable::closeEvent(QCloseEvent *event)
 {
-	((PClient*)qApp)->getMainWnd()->addLog("table window closed");
+	// FIXME: handle this case: send sitout if player (my_seat != -1 && sitout == false)
 }
 
 void WTable::actionFold()

@@ -24,6 +24,7 @@
 #include "ChatBox.hpp"
 #include "WTable.hpp"
 #include "SettingsDialog.hpp"
+#include "AboutDialog.hpp"
 
 #include "Config.h"
 #include "Debug.h"
@@ -93,6 +94,13 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	QPushButton *btnSettings = new QPushButton(tr("Settings"), this);
 	connect(btnSettings, SIGNAL(clicked()), this, SLOT(actionSettings()));
 	
+	QPushButton *btnAbout = new QPushButton(tr("About"), this);
+	connect(btnAbout, SIGNAL(clicked()), this, SLOT(actionAbout()));
+	
+	QHBoxLayout *lMisc = new QHBoxLayout();
+	lMisc->addWidget(btnSettings);
+	lMisc->addWidget(btnAbout);
+	
 	m_pChat = new ChatBox(tr("Foyer Chat"), ((PClient*)qApp)->getMyCId(), -1);
 	
 	// final layout
@@ -100,7 +108,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	layout->addWidget(groupSrv);
 	layout->addWidget(m_pChat);
 	layout->addLayout(lRegister);
-	layout->addWidget(btnSettings);
+	layout->addLayout(lMisc);
 #ifdef DEBUG
 	layout->addWidget(btnTest);
 #endif
@@ -191,6 +199,12 @@ void WMain::actionSettings()
 	
 	SettingsDialog dialogSettings(cfgfile, config);
 	dialogSettings.exec();
+}
+
+void WMain::actionAbout()
+{
+	AboutDialog dialogAbout;
+	dialogAbout.exec();
 }
 
 void WMain::slotSrvTextChanged()

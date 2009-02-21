@@ -41,8 +41,8 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 	tabWidget->addTab(tabGeneral, tr("General"));
 	tabWidget->addTab(tabAppearance, tr("Appearance"));
 	
-	buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
-					| QDialogButtonBox::Cancel);
+	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+					  Qt::Horizontal, this);
 	
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(actionOk()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));

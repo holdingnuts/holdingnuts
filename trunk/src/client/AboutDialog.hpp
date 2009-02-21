@@ -21,54 +21,21 @@
  */
 
 
-#ifndef _WMAIN_H
-#define _WMAIN_H
+#ifndef _ABOUT_DIALOG_H
+#define _ABOUT_DIALOG_H
 
-#include <QWidget>
+#include <QDialog>
 
-class ChatBox;
-class QLineEdit;
-class QPushButton;
-class QTextEdit;
 
-class WMain : public QWidget
+class AboutDialog : public QDialog
 {
 Q_OBJECT
 
 public:
-	WMain(QWidget *parent = 0);
-
-	void addLog(const QString &line);
-
-	void addChat(const QString &from, const QString &text);
-	void addServerMessage(const QString &text);
-	void addServerErrorMessage(int code, const QString &text);
-
-	void updateConnectionStatus();
-
-	QString getUsername() const;
+	AboutDialog(QWidget *parent = 0);
 
 private slots:
-	void actionConnect();
-	void actionClose();
-	void slotSrvTextChanged();
-	void actionRegister();
-	void actionUnregister();
-	void actionSettings();
-	void actionAbout();
-	
-#ifdef DEBUG
-	void actionTest();
-#endif
-
-private:
-	QLineEdit*	editSrvAddr;
-	QPushButton*	btnConnect;
-	QPushButton*	btnClose;
-	
-	ChatBox*	m_pChat;
-	
-	QLineEdit	*editRegister;   // debug, remove later
+	void actionHyperlink(const QString &link);
 };
 
-#endif	/* _WMAIN_H */
+#endif /* _ABOUT_DIALOG_H */
