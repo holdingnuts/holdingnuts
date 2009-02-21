@@ -1223,10 +1223,11 @@ int GameController::tick()
 {
 	if (!started)
 	{
-		// start game if player count reached
-		if (getPlayerCount() == max_players)
+		if (getPlayerCount() == max_players)  // start game if player count reached
 			start();
-		else
+		else if (!getPlayerCount() && !getRestart())  // delete game if no players registered
+			return -1;
+		else	// nothing to do, exit early
 			return 0;
 	}
 	else if (ended)
