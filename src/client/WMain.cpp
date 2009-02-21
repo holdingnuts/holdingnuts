@@ -68,15 +68,7 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	lsrvinp->addWidget(btnConnect);
 	lsrvinp->addWidget(btnClose);
 	
-	editLog = new QTextEdit(this);
-	editLog->setReadOnly(true);
-	editLog->setFixedHeight(60);
-	
-	QVBoxLayout *lsrv = new QVBoxLayout();
-	lsrv->addLayout(lsrvinp);
-	lsrv->addWidget(editLog);
-	
-	groupSrv->setLayout(lsrv);
+	groupSrv->setLayout(lsrvinp);
 	/////////////////////
 	
 	QPushButton *btnRegister = new QPushButton(tr("Register"), this);
@@ -93,8 +85,10 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	lRegister->addWidget(btnUnregister);
 	lRegister->addWidget(editRegister);
 	
+#ifdef DEBUG
 	QPushButton *btnTest = new QPushButton(tr("Test"), this);
 	connect(btnTest, SIGNAL(clicked()), this, SLOT(actionTest()));
+#endif
 	
 	QPushButton *btnSettings = new QPushButton(tr("Settings"), this);
 	connect(btnSettings, SIGNAL(clicked()), this, SLOT(actionSettings()));
@@ -107,27 +101,29 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	layout->addWidget(m_pChat);
 	layout->addLayout(lRegister);
 	layout->addWidget(btnSettings);
+#ifdef DEBUG
 	layout->addWidget(btnTest);
+#endif
 	
 	setLayout(layout);
 }
 
-void WMain::addLog(const QString& line)
+void WMain::addLog(const QString &line)
 {
-	editLog->append(line);
+	m_pChat->addMessage(line, Qt::darkGreen);
 }
 
-void WMain::addChat(const QString& from, const QString& text)
+void WMain::addChat(const QString &from, const QString &text)
 {
 	m_pChat->addMessage(from, text);
 }
 
-void WMain::addServerMessage(const QString& text)
+void WMain::addServerMessage(const QString &text)
 {
 	m_pChat->addMessage(text, Qt::blue);
 }
 
-void WMain::addServerErrorMessage(int code, const QString& text)
+void WMain::addServerErrorMessage(int code, const QString &text)
 {
 	QString qmsg = tr("Error") + ": " + text + " (Code: " + QString::number(code) + ")";
 	m_pChat->addMessage(qmsg, Qt::red);
@@ -168,12 +164,13 @@ void WMain::actionClose()
 	((PClient*)qApp)->doClose();
 }
 
-
+#ifdef DEBUG
 void WMain::actionTest()
 {
 	WTable *table = new WTable(0, 0);
 	table->slotShow();
 }
+#endif
 
 void WMain::actionRegister()
 {

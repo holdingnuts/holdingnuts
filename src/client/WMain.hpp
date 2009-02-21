@@ -38,11 +38,11 @@ Q_OBJECT
 public:
 	WMain(QWidget *parent = 0);
 
-	void addLog(const QString& line);
+	void addLog(const QString &line);
 
-	void addChat(const QString& from, const QString& text);
-	void addServerMessage(const QString& text);
-	void addServerErrorMessage(int code, const QString& text);
+	void addChat(const QString &from, const QString &text);
+	void addServerMessage(const QString &text);
+	void addServerErrorMessage(int code, const QString &text);
 
 	void updateConnectionStatus();
 
@@ -55,15 +55,16 @@ private slots:
 	void actionRegister();
 	void actionUnregister();
 	void actionSettings();
+	
+#ifdef DEBUG
 	void actionTest();
+#endif
 
 private:
 	QLineEdit*	editSrvAddr;
 	QPushButton*	btnConnect;
 	QPushButton*	btnClose;
-
-	QTextEdit*	editLog;
-
+	
 	ChatBox*	m_pChat;
 	
 	QLineEdit	*editRegister;   // debug, remove later
