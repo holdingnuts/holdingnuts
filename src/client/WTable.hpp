@@ -133,11 +133,13 @@ private slots:
 	void actionSitout();
 	void actionAutoCheckCall(int state);
 
-	void slotShow();
 	void slotTimeup(int seat);
 	
 	void actionScreenshot();
-	
+
+public slots:
+	void slotShow();
+
 private:
 	//! \brief Game ID
 	const int	m_nGid;

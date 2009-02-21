@@ -82,11 +82,15 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	QPushButton *btnRegister = new QPushButton(tr("Register"), this);
 	connect(btnRegister, SIGNAL(clicked()), this, SLOT(actionRegister()));
 	
+	QPushButton *btnUnregister = new QPushButton(tr("Unregister"), this);
+	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
+	
 	editRegister = new QLineEdit("0", this);
 	editRegister->setFixedWidth(30);
 	
 	QHBoxLayout *lRegister = new QHBoxLayout();
 	lRegister->addWidget(btnRegister);
+	lRegister->addWidget(btnUnregister);
 	lRegister->addWidget(editRegister);
 	
 	QPushButton *btnTest = new QPushButton(tr("Test"), this);
@@ -168,13 +172,19 @@ void WMain::actionClose()
 void WMain::actionTest()
 {
 	WTable *table = new WTable(0, 0);
-	table->show();
+	table->slotShow();
 }
 
 void WMain::actionRegister()
 {
 	const int gid = editRegister->text().toInt();
-	((PClient*)qApp)->doRegister(gid);
+	((PClient*)qApp)->doRegister(gid, true);
+}
+
+void WMain::actionUnregister()
+{
+	const int gid = editRegister->text().toInt();
+	((PClient*)qApp)->doRegister(gid, false);
 }
 
 void WMain::actionSettings()

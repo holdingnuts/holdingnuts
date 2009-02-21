@@ -631,15 +631,17 @@ void PClient::doClose()
 	tcpSocket->abort();
 }
 
-void PClient::doRegister(int gid)
+void PClient::doRegister(int gid, bool bRegister)
 {
 	char msg[1024];
 	
 	if (!connected)
 		return;
 	
-	snprintf(msg, sizeof(msg), "REGISTER %d",
-		gid);
+	if (bRegister)
+		snprintf(msg, sizeof(msg), "REGISTER %d", gid);
+	else
+		snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
 		
 	netSendMsg(msg);
 }
