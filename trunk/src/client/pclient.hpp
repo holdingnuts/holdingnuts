@@ -103,7 +103,7 @@ public:
 	
 	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
 	
-	void doRegister(int gid);
+	void doRegister(int gid, bool bRegister=true);
 	
 	gameinfo* getGameInfo(int gid);
 	tableinfo* getTableInfo(int gid, int tid);

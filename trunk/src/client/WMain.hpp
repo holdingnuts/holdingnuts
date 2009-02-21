@@ -53,6 +53,7 @@ private slots:
 	void actionClose();
 	void slotSrvTextChanged();
 	void actionRegister();
+	void actionUnregister();
 	void actionSettings();
 	void actionTest();
 

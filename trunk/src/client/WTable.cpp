@@ -387,7 +387,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setMinimumSize(800, 600);
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/pclient.ico"));
-	this->show();
 	this->resize(800, 600);
 }
 
@@ -672,7 +671,8 @@ void WTable::updateView()
 	int my_cid = ((PClient*)qApp)->getMyCId();
 	
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
-	Q_ASSERT_X(ginfo, __func__, "getGameInfo failed");
+	if (!ginfo)
+		return;
 	
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
@@ -1007,7 +1007,9 @@ void WTable::actionAutoCheckCall(int state)
 void WTable::slotShow()
 {
 	updateView();
+	
 	show();
+	m_pView->fitInView(m_pScene->itemsBoundingRect());
 }
 
 void WTable::slotTimeup(int seat)
