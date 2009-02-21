@@ -1029,6 +1029,7 @@ int gameloop()
 		GameController *g = e->second;
 		if (g->tick() < 0)
 		{
+			// replicate game if "restart" is set
 			if (g->getRestart())
 			{
 				const int gid = ++gid_counter;
@@ -1044,6 +1045,8 @@ int gameloop()
 				log_msg("game", "restarted game (old: %d, new: %d)",
 					g->getGameId(), newgame->getGameId());
 			}
+			
+			log_msg("game", "game %d has been deleted", g->getGameId());
 			
 			delete g;
 			games.erase(e++);
