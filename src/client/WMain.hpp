@@ -24,20 +24,20 @@
 #ifndef _WMAIN_H
 #define _WMAIN_H
 
-#include <QWidget>
+#include <QMainWindow>
 
 class ChatBox;
 class QLineEdit;
 class QPushButton;
 class QTextEdit;
 
-class WMain : public QWidget
+class WMain : public QMainWindow
 {
 Q_OBJECT
 
 public:
 	WMain(QWidget *parent = 0);
-
+	
 	void addLog(const QString &line);
 
 	void addChat(const QString &from, const QString &text);

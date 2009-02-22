@@ -113,32 +113,22 @@
 <context>
     <name>WMain</name>
     <message>
-        <location filename="../WMain.cpp" line="165"/>
+        <location filename="../WMain.cpp" line="192"/>
         <source>Error connecting.</source>
         <translation>Fehler beim Verbinden.</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="51"/>
+        <location filename="../WMain.cpp" line="73"/>
         <source>Connection</source>
         <translation>Verbindung</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="58"/>
-        <source>Connect</source>
-        <translation>Verbinden</translation>
-    </message>
-    <message>
-        <location filename="../WMain.cpp" line="62"/>
-        <source>Close</source>
-        <translation>Trennen</translation>
-    </message>
-    <message>
-        <location filename="../WMain.cpp" line="90"/>
+        <location filename="../WMain.cpp" line="130"/>
         <source>Test</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="46"/>
+        <location filename="../WMain.cpp" line="48"/>
         <source>HoldingNuts Foyer</source>
         <translation></translation>
     </message>
@@ -148,34 +138,49 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="75"/>
-        <source>Register</source>
-        <translation>Anmelden</translation>
-    </message>
-    <message>
-        <location filename="../WMain.cpp" line="94"/>
-        <source>Settings</source>
-        <translation>Einstellungen</translation>
-    </message>
-    <message>
-        <location filename="../WMain.cpp" line="104"/>
+        <location filename="../WMain.cpp" line="78"/>
         <source>Foyer Chat</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="136"/>
+        <location filename="../WMain.cpp" line="155"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="78"/>
-        <source>Unregister</source>
-        <translation>Abmelden</translation>
+        <location filename="../WMain.cpp" line="59"/>
+        <source>&amp;Connect</source>
+        <translation>&amp;Verbinden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="97"/>
-        <source>About</source>
-        <translation>Über</translation>
+        <location filename="../WMain.cpp" line="63"/>
+        <source>Cl&amp;ose</source>
+        <translation>&amp;Trennen</translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="82"/>
+        <source>&amp;Register</source>
+        <translation>&amp;Anmelden</translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="85"/>
+        <source>&amp;Unregister</source>
+        <translation>A&amp;bmelden</translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="115"/>
+        <source>&amp;Settings</source>
+        <translation>&amp;Einstellungen</translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="122"/>
+        <source>&amp;About</source>
+        <translation>&amp;Über</translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="135"/>
+        <source>&amp;Game</source>
+        <translation>&amp;Spiel</translation>
     </message>
 </context>
 <context>
