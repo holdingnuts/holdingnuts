@@ -37,29 +37,30 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QMenu>
+#include <QMenuBar>
+
 
 extern ConfigParser config;
 
-WMain::WMain(QWidget *parent) : QWidget(parent)
+WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 {
-	//setFixedSize(200, 120);
 	setWindowTitle(tr("HoldingNuts Foyer"));
 	setWindowIcon(QIcon(":/res/pclient.ico"));
 	
-	////
 	
-	QGroupBox *groupSrv = new QGroupBox(tr("Connection"));
-	
+	// connection
 	QLabel *lblHost = new QLabel(tr("Host:"), this);
 	
 	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host")), this);
 	connect(editSrvAddr, SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
+	connect(editSrvAddr, SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
-	btnConnect = new QPushButton(tr("Connect"), this);
+	btnConnect = new QPushButton(tr("&Connect"), this);
 	btnConnect->setEnabled(false);
 	connect(btnConnect, SIGNAL(clicked()), this, SLOT(actionConnect()));
 	
-	btnClose = new QPushButton(tr("Close"), this);
+	btnClose = new QPushButton(tr("Cl&ose"), this);
 	btnClose->setEnabled(false);
 	connect(btnClose, SIGNAL(clicked()), this, SLOT(actionClose()));
 		
@@ -69,13 +70,19 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	lsrvinp->addWidget(btnConnect);
 	lsrvinp->addWidget(btnClose);
 	
+	QGroupBox *groupSrv = new QGroupBox(tr("Connection"), this);
 	groupSrv->setLayout(lsrvinp);
-	/////////////////////
 	
-	QPushButton *btnRegister = new QPushButton(tr("Register"), this);
+	
+	// the foyer chat box
+	m_pChat = new ChatBox(tr("Foyer Chat"), ((PClient*)qApp)->getMyCId(), -1);
+	
+	
+	// game
+	QPushButton *btnRegister = new QPushButton(tr("&Register"), this);
 	connect(btnRegister, SIGNAL(clicked()), this, SLOT(actionRegister()));
 	
-	QPushButton *btnUnregister = new QPushButton(tr("Unregister"), this);
+	QPushButton *btnUnregister = new QPushButton(tr("&Unregister"), this);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
 	
 	editRegister = new QLineEdit("0", this);
@@ -85,35 +92,47 @@ WMain::WMain(QWidget *parent) : QWidget(parent)
 	lRegister->addWidget(btnRegister);
 	lRegister->addWidget(btnUnregister);
 	lRegister->addWidget(editRegister);
-	
-#ifdef DEBUG
-	QPushButton *btnTest = new QPushButton(tr("Test"), this);
-	connect(btnTest, SIGNAL(clicked()), this, SLOT(actionTest()));
-#endif
-	
-	QPushButton *btnSettings = new QPushButton(tr("Settings"), this);
-	connect(btnSettings, SIGNAL(clicked()), this, SLOT(actionSettings()));
-	
-	QPushButton *btnAbout = new QPushButton(tr("About"), this);
-	connect(btnAbout, SIGNAL(clicked()), this, SLOT(actionAbout()));
-	
-	QHBoxLayout *lMisc = new QHBoxLayout();
-	lMisc->addWidget(btnSettings);
-	lMisc->addWidget(btnAbout);
-	
-	m_pChat = new ChatBox(tr("Foyer Chat"), ((PClient*)qApp)->getMyCId(), -1);
+		
 	
 	// final layout
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->addWidget(groupSrv);
 	layout->addWidget(m_pChat);
 	layout->addLayout(lRegister);
-	layout->addLayout(lMisc);
+	
+	
+	// create a main widget containing the layout
+	QWidget *central = new QWidget(this);
+	central->setLayout(layout);
+	setCentralWidget(central);
+	
+	
+	// menus
+	QAction *action;
+
+	QMenu *game = new QMenu(this);
+
+	action = new QAction(tr("&Settings"), this);
+	action->setShortcut(tr("CTRL+S"));
+	connect(action, SIGNAL(triggered()), this, SLOT(actionSettings()));
+	game->addAction(action);
+	
+	game->addSeparator();
+	
+	action = new QAction(tr("&About"), this);
+	action->setShortcut(tr("CTRL+A"));
+	connect(action, SIGNAL(triggered()), this, SLOT(actionAbout()));
+	game->addAction(action);
+	
 #ifdef DEBUG
-	layout->addWidget(btnTest);
+	game->addSeparator();
+	
+	action = new QAction(tr("Test"), this);
+	connect(action, SIGNAL(triggered()), this, SLOT(actionTest()));
+	game->addAction(action);
 #endif
 	
-	setLayout(layout);
+	menuBar()->addMenu(game)->setText(tr("&Game"));
 }
 
 void WMain::addLog(const QString &line)
@@ -154,6 +173,11 @@ void WMain::updateConnectionStatus()
 	}
 }
 
+void WMain::slotSrvTextChanged()
+{
+	updateConnectionStatus();
+}
+
 QString WMain::getUsername() const
 {
 	return QString::fromStdString(config.get("player_name"));
@@ -161,6 +185,9 @@ QString WMain::getUsername() const
 
 void WMain::actionConnect()
 {
+	if (!editSrvAddr->text().length() || ((PClient*)qApp)->isConnected())
+		return;
+	
 	if (!((PClient*)qApp)->doConnect(editSrvAddr->text(), config.getInt("default_port")))
 		addLog(tr("Error connecting."));
 	else
@@ -205,12 +232,4 @@ void WMain::actionAbout()
 {
 	AboutDialog dialogAbout;
 	dialogAbout.exec();
-}
-
-void WMain::slotSrvTextChanged()
-{
-	if (!editSrvAddr->text().length() || ((PClient*)qApp)->isConnected())
-		btnConnect->setEnabled(false);
-	else
-		btnConnect->setEnabled(true);
 }
