@@ -410,9 +410,9 @@ WTable::~WTable()
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 {
-	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
-	Q_ASSERT_X(wseats[nSeatID], __func__, "bad seat pointer");
-	Q_ASSERT_X(m_pImgTable, __func__, "bad table image pointer");
+	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalided Seat Number");
+	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
+	Q_ASSERT_X(m_pImgTable, Q_FUNC_INFO, "bad table image pointer");
 
 	//		8	9	0
 	//	 7			   1
@@ -451,9 +451,9 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 
 QPointF WTable::calcCCardsPos(unsigned int nCard) const
 {
-	Q_ASSERT_X(nCard < 5, __func__, "invalided Card Number");
-	Q_ASSERT_X(m_pScene, __func__, "bad scene pointer");
-	Q_ASSERT_X(m_CommunityCards[nCard], __func__, "bad community card pointer");
+	Q_ASSERT_X(nCard < 5, Q_FUNC_INFO, "invalided Card Number");
+	Q_ASSERT_X(m_pScene, Q_FUNC_INFO, "bad scene pointer");
+	Q_ASSERT_X(m_CommunityCards[nCard], Q_FUNC_INFO, "bad community card pointer");
 
 	QRectF rc = m_CommunityCards[nCard]->boundingRect();
 	const QTransform m = m_CommunityCards[nCard]->transform();
@@ -470,22 +470,21 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 
 QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
 {
-	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
-	Q_ASSERT_X(wseats[nSeatID], __func__, "bad seat pointer");
-	Q_ASSERT_X(m_pTimeout, __func__, "bad timeout pointer");
+	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalided Seat Number");
+	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
+	Q_ASSERT_X(m_pTimeout, Q_FUNC_INFO, "bad timeout pointer");
 	
 	QPointF pt = wseats[nSeatID]->scenePos();
 
-	pt.ry() += wseats[nSeatID]->boundingRectSeat().height() - 
-		m_pTimeout->boundingRect().height();
+	pt.ry() += wseats[nSeatID]->boundingRectSeat().height();
 
 	return pt;
 }
 
 QPointF WTable::calcHandStrengthPos() const
 {
-	Q_ASSERT_X(m_pTxtHandStrength, __func__, "bad hand strength pointer");
-	Q_ASSERT_X(m_pImgTable, __func__, "bad table image pointer");
+	Q_ASSERT_X(m_pTxtHandStrength, Q_FUNC_INFO, "bad hand strength pointer");
+	Q_ASSERT_X(m_pImgTable, Q_FUNC_INFO, "bad table image pointer");
 
 	static const QFontMetrics fm(m_pTxtHandStrength->font());
 	static const QPointF ptCenter = m_pImgTable->boundingRect().center();
@@ -497,8 +496,8 @@ QPointF WTable::calcHandStrengthPos() const
 
 QPointF WTable::calcPotsPos() const
 {
-	Q_ASSERT_X(m_pTxtPots, __func__, "bad text pots pointer");
-	Q_ASSERT_X(m_pImgTable, __func__, "bad table image pointer");
+	Q_ASSERT_X(m_pTxtPots, Q_FUNC_INFO, "bad text pots pointer");
+	Q_ASSERT_X(m_pImgTable, Q_FUNC_INFO, "bad table image pointer");
 
 	static const QFontMetrics fm(m_pTxtPots->font());
 	static const QPointF ptCenter = m_pImgTable->boundingRect().center();
@@ -512,9 +511,9 @@ QPointF WTable::calcDealerBtnPos(
 	unsigned int nSeatID, 
 	int offset) const
 {
-	Q_ASSERT_X(nSeatID < nMaxSeats, __func__, "invalided Seat Number");
-	Q_ASSERT_X(wseats[nSeatID], __func__, "bad seat pointer");
-	Q_ASSERT_X(m_pDealerButton, __func__, "bad table image pointer");
+	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalided Seat Number");
+	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
+	Q_ASSERT_X(m_pDealerButton, Q_FUNC_INFO, "bad table image pointer");
 	
 	QPointF pt = wseats[nSeatID]->sceneBoundingRect().center();
 
@@ -675,10 +674,10 @@ void WTable::updateView()
 		return;
 	
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
+	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, __func__, "invalid snapshot pointer");
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 	
 	
 	for (unsigned int i=0; i < nMaxSeats; i++)
@@ -911,11 +910,11 @@ void WTable::actionBetRaise()
 {
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
-	Q_ASSERT_X(tinfo, __func__, "getTableInfo failed");
+	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
 	
 	table_snapshot *snap = &(tinfo->snap);
 	
-	Q_ASSERT_X(snap, __func__, "invalid snapshot pointer");
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 
 	if (snap->my_seat == -1)
 		return;
