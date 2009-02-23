@@ -290,7 +290,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pView->setFrameStyle(QFrame::Plain);
 
 	// ui - widgets
-	QPushButton *btnFold = new QPushButton(tr("Fold"), this);
+	QPushButton *btnFold = new QPushButton(tr("&Fold"), this);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
 	
 	btnCheckCall = new QPushButton("Check/Call", this);
@@ -299,16 +299,16 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	btnBetRaise = new QPushButton("Bet/Raise", this);
 	connect(btnBetRaise, SIGNAL(clicked()), this, SLOT(actionBetRaise()));
 	
-	QPushButton *btnShow = new QPushButton(tr("Show"), this);
+	QPushButton *btnShow = new QPushButton(tr("&Show"), this);
 	connect(btnShow, SIGNAL(clicked()), this, SLOT(actionShow()));
 	
-	QPushButton *btnMuck = new QPushButton(tr("Muck"), this);
+	QPushButton *btnMuck = new QPushButton(tr("&Muck"), this);
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
-	QPushButton *btnBack = new QPushButton(tr("I'm back"), this);
+	QPushButton *btnBack = new QPushButton(tr("I'm &back"), this);
 	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
 	
-	QPushButton *btnSitout = new QPushButton(tr("Sitout"), this);
+	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
 	
 	chkAutoFoldCheck = new QCheckBox("Fold/Check", this);
@@ -374,6 +374,34 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	this->setLayout(mainLayout);
 	
+	// shortcuts
+	shortcutFold = new QShortcut(tr("Ctrl+F"), btnFold);
+	connect(shortcutFold, SIGNAL(activated()), this, SLOT(actionFold()));
+
+	shortcutCallCheck = new QShortcut(tr("Ctrl+C"), btnCheckCall);
+	connect(shortcutCallCheck, SIGNAL(activated()), this, SLOT(actionCheckCall()));
+
+	shortcutBet = new QShortcut(tr("Ctrl+B"), btnBetRaise);
+	connect(shortcutBet, SIGNAL(activated()), this, SLOT(actionBetRaise()));
+
+	shortcutRaise = new QShortcut(tr("Ctrl+R"), btnBetRaise);
+	connect(shortcutRaise, SIGNAL(activated()), this, SLOT(actionBetRaise()));
+
+	shortcutAllin = new QShortcut(tr("Ctrl+A"), btnBetRaise);
+	shortcutAllin->setEnabled(false);
+	connect(shortcutAllin, SIGNAL(activated()), this, SLOT(actionBetRaise()));
+
+	shortcutMuck = new QShortcut(tr("Ctrl+M"), btnMuck);
+	connect(shortcutMuck, SIGNAL(activated()), this, SLOT(actionMuck()));
+
+	shortcutShow = new QShortcut(tr("Ctrl+S"), btnShow);
+	connect(shortcutShow, SIGNAL(activated()), this, SLOT(actionShow()));
+	
+	shortcutSitout = new QShortcut(tr("Ctrl+O"), this);
+	connect(shortcutSitout, SIGNAL(activated()), this, SLOT(actionSitout()));
+	
+	shortcutBack = new QShortcut(tr("Ctrl+B"), this);
+	connect(shortcutBack, SIGNAL(activated()), this, SLOT(actionBack()));
 	
 	// assign shortcut for making screenshot
 	QShortcut *shortcutScreenshot = new QShortcut(Qt::Key_F10, this);
@@ -603,17 +631,30 @@ void WTable::evaluateActions(const table_snapshot *snap)
 			{
 				if (bGreaterBet)
 				{
-					btnCheckCall->setText(tr("Call"));
-					btnBetRaise->setText(tr("Raise"));
+					btnCheckCall->setText(tr("&Call"));
+					btnBetRaise->setText(tr("&Raise"));
+					
+					shortcutBet->setEnabled(false);
+					shortcutRaise->setEnabled(true);
 				}
 				else
 				{
-					btnCheckCall->setText(tr("Check"));
+					btnCheckCall->setText(tr("&Check"));
 					
 					if (greaterBet(snap, 0))
-						btnBetRaise->setText(tr("Raise"));
+					{
+						btnBetRaise->setText(tr("&Raise"));
+						
+						shortcutBet->setEnabled(false);
+						shortcutRaise->setEnabled(true);
+					}
 					else
-						btnBetRaise->setText(tr("Bet"));
+					{
+						btnBetRaise->setText(tr("&Bet"));
+						
+						shortcutBet->setEnabled(true);
+						shortcutRaise->setEnabled(false);
+					}
 				}
 				
 				// handle allin-case
@@ -621,18 +662,27 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(false);
 					m_pSliderAmount->setVisible(false);
-					btnBetRaise->setText(tr("Allin"));
+					btnBetRaise->setText(tr("&Allin"));
+					shortcutAllin->setEnabled(true);
+					shortcutBet->setEnabled(false);
+					shortcutRaise->setEnabled(false);
 				}
 				else if (snap->minimum_bet >= s->stake + s->bet)
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(false);
-					btnBetRaise->setText(tr("Allin"));
+					btnBetRaise->setText(tr("&Allin"));
+					shortcutAllin->setEnabled(true);
+					shortcutBet->setEnabled(false);
+					shortcutRaise->setEnabled(false);
 				}
 				else
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(true);
+					shortcutAllin->setEnabled(false);
+					shortcutBet->setEnabled(true);
+					shortcutRaise->setEnabled(true);
 				}
 				
 				stlayActions->setCurrentIndex(m_nActions);

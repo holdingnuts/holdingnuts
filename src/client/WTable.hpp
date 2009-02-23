@@ -76,6 +76,7 @@ typedef struct {
 class QStackedLayout;
 class QLabel;
 class QSlider;
+class QShortcut;
 
 class ChatBox;
 class DealerButton;
@@ -178,6 +179,17 @@ private:
 	
 	// precomputed dealerbtn positions
 	QPointF			m_ptDealerBtn[10];
+	
+	// shortcuts
+	QShortcut		*shortcutFold;
+	QShortcut		*shortcutCallCheck;
+	QShortcut		*shortcutBet;
+	QShortcut		*shortcutRaise;
+	QShortcut		*shortcutAllin;
+	QShortcut		*shortcutMuck;
+	QShortcut		*shortcutShow;
+	QShortcut		*shortcutSitout;
+	QShortcut		*shortcutBack;
 };
 
 #endif /* _WTABLE_H */
