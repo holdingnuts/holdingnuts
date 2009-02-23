@@ -39,8 +39,6 @@ option (UPDATE_TRANSLATIONS "Update source translations")
 
 
 # Doxygen documentation
-include (Documentation)
-
 if (BUILD_DOCUMENTATION)
 	add_subdirectory (doxygen)
 endif (BUILD_DOCUMENTATION)

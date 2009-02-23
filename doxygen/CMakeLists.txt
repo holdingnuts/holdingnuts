@@ -1,6 +1,6 @@
-# http://www.stack.nl/~dimitri/doxygen/config.html
+include (Documentation)
 
-set (BUILD_DOXYGEN ON)
+#set (BUILD_DOXYGEN ON)
 #set (DOCUMENTATION_HTML_TARZ ON)
 
 set (DOXYFILE "Doxyfile")
