@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
+project (HOLDINGNUTS)
+
 # check for inner-source-build
 STRING (COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" in_source)
 IF (in_source)
@@ -35,6 +37,15 @@ ENDIF (NOT PLATFORM_STR)
 
 option (UPDATE_TRANSLATIONS "Update source translations")
 
+
+# Doxygen documentation
+include (Documentation)
+
+if (BUILD_DOCUMENTATION)
+	add_subdirectory (doxygen)
+endif (BUILD_DOCUMENTATION)
+
+
 ################################################################################
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -44,7 +55,5 @@ endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 add_definitions(-Wall)  #-pedantic -fstack-protector -fstack-protector-all
 
 ################################################################################
-
-project (HOLDINGNUTS)
 
 add_subdirectory (src)
