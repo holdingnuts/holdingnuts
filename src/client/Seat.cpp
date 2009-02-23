@@ -153,7 +153,7 @@ QRectF Seat::boundingRect() const
 			/* smallcards size includes already in bigcards size */
 			break;
 		case 8: case 9: case 0:
-				height += sy_mini_card + 5;
+				height += sy_mini_card + 15;
 			break;
 		case 6: case 7:
 				width += sx_mini_card * 1.4;
@@ -244,35 +244,13 @@ void Seat::paint(
 	pathTxtStake.addText(10, 75, normal_font, m_strStake);
 	
 	painter->fillPath(pathTxtStake, Qt::black);
-/*
-TODO: QPainterPath test
 
-	painter->setFont(bold_font);
-	painter->drawText(
-		QRectF(
-			10,
-			12,
-			seat_width - 10,
-			fm_bold.height()),
-		Qt::AlignLeft,
-		m_strName);
-
-	painter->setFont(normal_font);
-	painter->drawText(
-		QRectF(
-			10,
-			45,
-			seat_width - 10,
-			seat_height - 30),
-		Qt::AlignLeft,
-		m_strStake);
-*/
-	// TODO: find right textposition
 	qreal tx_pos = 0;
 	qreal ty_pos = 0;
 			
 	calcBetTextPos(tx_pos, ty_pos, fm_bold.width(m_strAmount));
 	
+	// TODO: QPainterPath test
 	painter->setFont(bold_font);
 	painter->drawText(
 		QRectF(
@@ -357,7 +335,7 @@ void Seat::calcSCardPos(qreal& x, qreal& y) const
 			break;
 		case 8: case 9: case 0:
 				x = 0;
-				y = SeatImages::Instance().imgBack.height() + 5;
+				y = SeatImages::Instance().imgBack.height() + 15;
 			break;
 		case 6: case 7:
 				x = SeatImages::Instance().imgBack.width() + sx_mini_card + 5;
@@ -386,7 +364,7 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 			break;
 		case 8: case 9: case 0:
 				x = sx_mini_card * 1.7;
-				y = SeatImages::Instance().imgBack.height() + 10;
+				y = SeatImages::Instance().imgBack.height() + 20;
 			break;
 		case 6: case 7:
 				x = SeatImages::Instance().imgBack.width();
