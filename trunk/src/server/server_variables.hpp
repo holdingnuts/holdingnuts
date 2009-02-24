@@ -29,6 +29,7 @@ config.set("perm_create_user",		true);			// allow regular user to create games
 config.set("conarchive_expire",		15 * 60);		// stored connection data expiration (seconds)
 config.set("flood_chat_interval",	10);			// flood-protect: interval for measureing (seconds)
 config.set("flood_chat_per_interval",	5);			// flood-protect: count of messages allowed in interval
+config.set("flood_chat_mute",		60);			// flood-protect: mute time (seconds)
 
 #ifdef DEBUG
 config.set("dbg_testgame_players",	3);		// testgames with X players

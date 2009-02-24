@@ -443,26 +443,34 @@ int client_cmd_chat(clientcon *client, Tokenizer &t)
 		cmderr = true;
 	else
 	{
-		// check for flooding
-		if ((unsigned int)difftime(time(NULL), client->last_chat) > (unsigned int)config.getInt("flood_chat_interval"))
+		// flooding-protection
+		int time_since_last_chat = (int) difftime(time(NULL), client->last_chat);
+		
+		// is the client still muted?
+		if (time_since_last_chat < 0)
 		{
+			send_err(client, 0, "you are still muted");
+			return 0;
+		}
+		
+		if ((unsigned int)time_since_last_chat > (unsigned int) config.getInt("flood_chat_interval"))
+		{
+			// reset flood-measure for new interval
 			client->last_chat = time(NULL);
 			client->chat_count = 0;
 		}
 		
-		client->chat_count++;
-		
-		unsigned int chat_count_limit = config.getInt("flood_chat_per_interval");
-		if (client->chat_count == chat_count_limit - 1)
+		// is client flooding?
+		if (++client->chat_count >= (unsigned int) config.getInt("flood_chat_per_interval"))
 		{
-			client_chat(-1, client->id, "Warning: Stop flooding!");
-		}
-		else if (client->chat_count >= chat_count_limit)
-		{
-			// disconnect disturbing client
-			log_msg("flooding", "client (%d) flooded chat", client->id);
-			client_chat(-1, client->id, "You were disconnected due to flooding.");
-			return -1;
+			log_msg("flooding", "client (%d) caught flooding the chat", client->id);
+			
+			// mute client for n-seconds
+			client->last_chat = time(NULL) + config.getInt("flood_chat_mute");
+			client->chat_count = 0;
+			
+			send_err(client, 0, "you have been muted for some time");
+			return 0;
 		}
 		
 		
