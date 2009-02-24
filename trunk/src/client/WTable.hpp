@@ -137,6 +137,8 @@ private slots:
 	void slotTimeup(int seat);
 	
 	void actionScreenshot();
+	
+	void actionChat(QString msg);
 
 public slots:
 	void slotShow();

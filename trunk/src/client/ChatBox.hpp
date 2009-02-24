@@ -18,11 +18,12 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
-#ifndef _HOLDING_NUTS_CHAT_BOX_H
-#define _HOLDING_NUTS_CHAT_BOX_H
+#ifndef _HOLDINGNUTS_CHATBOX_H
+#define _HOLDINGNUTS_CHATBOX_H
 
 #include <QGroupBox>
 
@@ -42,21 +43,14 @@ public:
 
 	ChatBox(
 		const QString& title,
-		int gid = 0,
-		int tid = -1,
 		InputLineAlignment align = INPUTLINE_TOP,
 		int nTextLogHeight = 0,
 		QWidget *parent = 0);
-
-	void addMessage(const QString& msg, const QColor& color);
-	void addMessage(const QString& from, const QString& msg);
-	void addMessage(
-		const QString& from,
-		const QString& msg,
-		const QColor& color);
-
+	
+	void addMessage(const QString &msg, const QString &from = "", const QColor &color = Qt::black);
+	void addMessage(const QString &msg, const QColor &color = Qt::black);
+	
 	void setFontPointSize(int size);
-
 	int fontPointSize() const;	
 
 protected:
@@ -65,12 +59,15 @@ protected:
 private slots:
 	void actionChat();
 
-protected:
+signals:
+     void dispatchedMessage(QString msg);
+
+private:
 	int			m_nGameID;
 	int			m_nTableID;
 	int			m_nFontPointSize;
-	QLineEdit*		m_pEditChat;
-	QTextEdit*		m_pEditChatLog;
+	QLineEdit		*m_pEditChat;
+	QTextEdit		*m_pEditChatLog;
 };
 
-#endif /* _HOLDING_NUTS_CHAT_BOX_H */
+#endif /* _HOLDINGNUTS_CHATBOX_H */

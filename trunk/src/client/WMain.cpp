@@ -75,8 +75,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	
 	// the foyer chat box
-	m_pChat = new ChatBox(tr("Foyer Chat"), ((PClient*)qApp)->getMyCId(), -1);
-	
+	m_pChat = new ChatBox(tr("Foyer Chat"), ChatBox::INPUTLINE_TOP, 0, this);
+	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 	
 	// game
 	QPushButton *btnRegister = new QPushButton(tr("&Register"), this);
@@ -142,7 +142,7 @@ void WMain::addLog(const QString &line)
 
 void WMain::addChat(const QString &from, const QString &text)
 {
-	m_pChat->addMessage(from, text);
+	m_pChat->addMessage(text, from);
 }
 
 void WMain::addServerMessage(const QString &text)
@@ -232,4 +232,9 @@ void WMain::actionAbout()
 {
 	AboutDialog dialogAbout;
 	dialogAbout.exec();
+}
+
+void WMain::actionChat(QString msg)
+{
+	((PClient*)qApp)->chatAll(msg);
 }
