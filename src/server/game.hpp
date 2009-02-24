@@ -25,12 +25,17 @@
 #define _GAME_H
 
 #include <vector>
+#include <map>
+#include <string>
 #include <ctime>
 
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
 #include "Protocol.h"
+
+#include "GameController.hpp"
+
 
 typedef enum {
 	Connected = 0x01,
@@ -62,11 +67,15 @@ typedef struct {
 	time_t logout_time;
 } clientcon_archive;
 
+
+typedef std::map<int,GameController*>	games_type;
+
+typedef std::vector<clientcon>	clients_type;
 typedef std::map<std::string,clientcon_archive>	clientconar_type;
 
 // used by pserver.cpp
 int gameloop();
-std::vector<clientcon>& get_client_vector();
+clients_type& get_client_vector();
 bool client_add(socktype sock, sockaddr_in *saddr);
 bool client_remove(socktype sock);
 int client_handle(socktype sock);
