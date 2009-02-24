@@ -18,6 +18,7 @@ typedef enum {
 	ErrNotImplemented = 0x3,
 	ErrParameters = 0x4,
 	ErrServerFull = 0x10,
+	ErrMaxConnectionsPerIP = 0x11,
 	ErrNoPermission = 0x100
 } cmderror;
 

@@ -32,7 +32,7 @@
 #define DEFAULT_SERVER_PORT  40888
 
 /* the hard-limit of clients which can connect */
-#define SERVER_CLIENT_HARDLIMIT  250
+#define SERVER_CLIENT_HARDLIMIT  1000
 
 /* max pending connections for listening socket */
 #define SERVER_LISTEN_BACKLOG  3

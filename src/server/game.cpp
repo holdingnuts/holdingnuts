@@ -229,7 +229,7 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *me
 bool client_add(socktype sock, sockaddr_in *saddr)
 {
 	// drop client if maximum connection count is reached
-	if (clients.size() == SERVER_CLIENT_HARDLIMIT || (int)clients.size() == config.getInt("max_clients"))
+	if (clients.size() == SERVER_CLIENT_HARDLIMIT || clients.size() == (unsigned int) config.getInt("max_clients"))
 	{
 		send_response(sock, false, -1, ErrServerFull, "server full");
 		socket_close(sock);
@@ -237,8 +237,30 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 		return false;
 	}
 	
-	clientcon client;
 	
+	// drop client if maximum connections per IP is reached
+	const unsigned int connection_max = (unsigned int) config.getInt("max_connections_per_ip");
+	if (connection_max)
+	{
+		unsigned int connection_count = 0;
+		for (vector<clientcon>::const_iterator client = clients.begin(); client != clients.end(); client++)
+		{
+			// does the IP match?
+			if (!memcmp(&client->saddr.sin_addr, &saddr->sin_addr, sizeof(saddr->sin_addr)))
+			{
+				if (++connection_count == connection_max)
+				{
+					send_response(sock, false, -1, ErrMaxConnectionsPerIP, "connection limit per IP is reached");
+					socket_close(sock);
+					
+					return false;
+				}
+			}
+		}
+	}
+	
+	// add the client
+	clientcon client;
 	memset(&client, 0, sizeof(client));
 	client.sock = sock;
 	client.saddr = *saddr;
