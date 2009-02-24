@@ -59,6 +59,10 @@ typedef struct {
 	unsigned int version;
 	char uuid[40];  // 16*2 + 4 sep + \0 = 37
 	char name[64];
+	
+	// flood-protection
+	time_t last_chat;
+	unsigned int chat_count;
 } clientcon;
 
 typedef struct {

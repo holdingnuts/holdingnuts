@@ -443,6 +443,29 @@ int client_cmd_chat(clientcon *client, Tokenizer &t)
 		cmderr = true;
 	else
 	{
+		// check for flooding
+		if ((unsigned int)difftime(time(NULL), client->last_chat) > (unsigned int)config.getInt("flood_chat_interval"))
+		{
+			client->last_chat = time(NULL);
+			client->chat_count = 0;
+		}
+		
+		client->chat_count++;
+		
+		unsigned int chat_count_limit = config.getInt("flood_chat_per_interval");
+		if (client->chat_count == chat_count_limit - 1)
+		{
+			client_chat(-1, client->id, "Warning: Stop flooding!");
+		}
+		else if (client->chat_count >= chat_count_limit)
+		{
+			// disconnect disturbing client
+			log_msg("flooding", "client (%d) flooded chat", client->id);
+			client_chat(-1, client->id, "You were disconnected due to flooding.");
+			return -1;
+		}
+		
+		
 		Tokenizer ct;
 		ct.parse(t.getNext(), ":");
 		string chatmsg = t.getTillEnd();
@@ -882,35 +905,33 @@ int client_execute(clientcon *client, const char *cmd)
 	if (!(client->state & Introduced))  // state: not introduced
 	{
 		if (command == "PCLIENT")
-			client_cmd_pclient(client, t);
+			return client_cmd_pclient(client, t);
 		else
 		{
 			// seems not to be a pclient
 			send_err(client, ErrProtocol, "protocol error");
-			client_remove(client->sock);
 			return -1;
 		}
 	}
 	else if (command == "INFO")
-		client_cmd_info(client, t);
+		return client_cmd_info(client, t);
 	else if (command == "CHAT")
-		client_cmd_chat(client, t);
+		return client_cmd_chat(client, t);
 	else if (command == "REQUEST")
-		client_cmd_request(client, t);
+		return client_cmd_request(client, t);
 	else if (command == "REGISTER")
-		client_cmd_register(client, t);
+		return client_cmd_register(client, t);
 	else if (command == "UNREGISTER")
-		client_cmd_unregister(client, t);
+		return client_cmd_unregister(client, t);
 	else if (command == "ACTION")
-		client_cmd_action(client, t);
+		return client_cmd_action(client, t);
 	else if (command == "CREATE")
-		client_cmd_create(client, t);
+		return client_cmd_create(client, t);
 	else if (command == "AUTH")
-		client_cmd_auth(client, t);
+		return client_cmd_auth(client, t);
 	else if (command == "QUIT")
 	{
 		send_ok(client);
-		client_remove(client->sock);
 		return -1;
 	}
 	else
@@ -957,7 +978,10 @@ int client_parsebuffer(clientcon *client)
 			retval = client->buflen;
 		}
 		else
+		{
+			client_remove(client->sock);
 			retval = 0;
+		}
 	}
 	else
 		retval = 0;
