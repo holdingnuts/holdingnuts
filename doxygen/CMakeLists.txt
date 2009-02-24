@@ -12,8 +12,7 @@ set (DOXYGEN_INPUT
 	\"${HOLDINGNUTS_SOURCE_DIR}/src/libpoker\" \\
 	\"${HOLDINGNUTS_SOURCE_DIR}/src/system\" \\
 	\"${HOLDINGNUTS_SOURCE_DIR}/src/server\" \\
-	\"${HOLDINGNUTS_SOURCE_DIR}/src/client\" \\
-	\"${HOLDINGNUTS_SOURCE_DIR}/src/test\""
+	\"${HOLDINGNUTS_SOURCE_DIR}/src/client\""
 )
 
 configure_file (
