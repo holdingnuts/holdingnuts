@@ -25,10 +25,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <vector>
-#include <map>
-#include <string>
-
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
@@ -37,9 +33,8 @@
 #include "Tokenizer.hpp"
 #include "ConfigParser.hpp"
 
-
-#include "GameController.hpp"
 #include "game.hpp"
+
 
 using namespace std;
 
@@ -48,10 +43,10 @@ extern ConfigParser config;
 // temporary buffer for sending messages
 static char msg[1024];
 
-static map<int,GameController*> games;
+static games_type games;
 static unsigned int gid_counter = 0;
 
-static vector<clientcon> clients;
+static clients_type clients;
 static unsigned int cid_counter = 0;
 
 
@@ -61,7 +56,7 @@ static time_t last_conarchive_cleanup = 0;   // last time scan
 
 GameController* get_game_by_id(int gid)
 {
-	map<int,GameController*>::const_iterator it = games.find(gid);
+	games_type::const_iterator it = games.find(gid);
 	if (it != games.end())
 		return it->second;
 	else
@@ -69,7 +64,7 @@ GameController* get_game_by_id(int gid)
 }
 
 // for pserver.cpp filling FD_SET
-vector<clientcon>& get_client_vector()
+clients_type& get_client_vector()
 {
 	return clients;
 }
@@ -150,7 +145,7 @@ bool client_chat(int from, int to, const char *message)
 	
 	if (to == -1)
 	{
-		for (vector<clientcon>::iterator e = clients.begin(); e != clients.end(); e++)
+		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
 		{
 			if (!(e->state & Introduced))  // do not send broadcast to non-introduced clients
 				continue;
@@ -243,7 +238,7 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	if (connection_max)
 	{
 		unsigned int connection_count = 0;
-		for (vector<clientcon>::const_iterator client = clients.begin(); client != clients.end(); client++)
+		for (clients_type::const_iterator client = clients.begin(); client != clients.end(); client++)
 		{
 			// does the IP match?
 			if (!memcmp(&client->saddr.sin_addr, &saddr->sin_addr, sizeof(saddr->sin_addr)))
@@ -276,7 +271,7 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 
 bool client_remove(socktype sock)
 {
-	for (vector<clientcon>::iterator client = clients.begin(); client != clients.end(); client++)
+	for (clients_type::iterator client = clients.begin(); client != clients.end(); client++)
 	{
 		if (client->sock == sock)
 		{
@@ -286,7 +281,7 @@ bool client_remove(socktype sock)
 			if (client->state & SentInfo)
 			{
 				// remove player from unstarted games
-				for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
+				for (games_type::iterator e = games.begin(); e != games.end(); e++)
 				{
 					GameController *g = e->second;
 					if (!g->isStarted() && g->isPlayer(client->id))
@@ -529,7 +524,7 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		else if (request == "gamelist")
 		{
 			string gamelist;
-			for (map<int,GameController*>::iterator e = games.begin(); e != games.end(); e++)
+			for (games_type::iterator e = games.begin(); e != games.end(); e++)
 			{
 				const int gid = e->first;
 				
@@ -1049,7 +1044,7 @@ int gameloop()
 	
 	
 	// handle all games
-	for (map<int,GameController*>::iterator e = games.begin(); e != games.end();)
+	for (games_type::iterator e = games.begin(); e != games.end();)
 	{
 		GameController *g = e->second;
 		if (g->tick() < 0)
