@@ -359,10 +359,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblActions->setFixedSize(400, 70);
 	lblActions->setLayout(stlayActions);
 
-	m_pChat	= new ChatBox("", m_nGid, m_nTid, ChatBox::INPUTLINE_BOTTOM, 0, this);
+	m_pChat	= new ChatBox("", ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->setFixedHeight(150);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
-	m_pChat->show();
+	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 	QGridLayout *mainLayout = new QGridLayout(this);
 
@@ -929,7 +929,7 @@ void WTable::updateView()
 
 void WTable::addChat(const QString& from, const QString& text)
 {
-	m_pChat->addMessage(from, text);
+	m_pChat->addMessage(text, from);
 }
 
 void WTable::addServerMessage(const QString& text)
@@ -1129,4 +1129,9 @@ void WTable::actionScreenshot()
 		addServerMessage(tr("Saved screenshot: %1.").arg(filename));
 	else
 		addServerMessage(tr("Unable to save screenshot in %1.").arg(pathScrshot));
+}
+
+void WTable::actionChat(QString msg)
+{
+	((PClient*)qApp)->chat(msg, m_nGid, m_nTid);
 }

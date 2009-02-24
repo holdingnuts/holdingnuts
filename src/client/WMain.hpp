@@ -51,11 +51,16 @@ public:
 private slots:
 	void actionConnect();
 	void actionClose();
+	
 	void slotSrvTextChanged();
+	
 	void actionRegister();
 	void actionUnregister();
+	
 	void actionSettings();
 	void actionAbout();
+	
+	void actionChat(QString msg);
 	
 #ifdef DEBUG
 	void actionTest();

@@ -18,28 +18,23 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
 #include "ChatBox.hpp"
-#include "pclient.hpp"
 
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QVBoxLayout>
-#include <QDebug>
+#include <QScrollBar>
+
 
 ChatBox::ChatBox(
 	const QString& title,
-	int gid,
-	int tid,
 	InputLineAlignment align,
 	int nTextLogHeight,
-	QWidget *parent)
-
-:	QGroupBox(title, parent),
-	m_nGameID(gid),
-	m_nTableID(tid)
+	QWidget *parent) : QGroupBox(title, parent)
 {
 	m_pEditChat = new QLineEdit(this);
 
@@ -66,35 +61,54 @@ ChatBox::ChatBox(
 	m_nFontPointSize = this->fontPointSize();
 }
 
-void ChatBox::addMessage(const QString& msg, const QColor& color)
+void ChatBox::addMessage(const QString &msg, const QString &from, const QColor &color)
 {
+	// save current scroll-position
+	QScrollBar *sb = m_pEditChatLog->verticalScrollBar();
+	int scrollpos = sb->value();
+	bool was_bottom = (sb->value() == sb->maximum());
+	
+	// save current cursor
+	QTextCursor c = m_pEditChatLog->textCursor();
+	
+	// move cursor position to end
 	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
+	int new_pos = m_pEditChatLog->textCursor().position();
+	
+	// set format at current cursor position
 	m_pEditChatLog->setTextColor(color);
+	m_pEditChatLog->setFontPointSize(m_nFontPointSize);
+	
+	// is the message from other client
+	if (from.length())
+	{
+		m_pEditChatLog->setFontWeight(QFont::Bold);
+		m_pEditChatLog->insertPlainText("[" + from + "] ");
+	}
+	
 	m_pEditChatLog->setFontWeight(QFont::Normal);
-	m_pEditChatLog->setFontPointSize(m_nFontPointSize);	
 	m_pEditChatLog->insertPlainText(msg + "\r\n");
+	
+	// restore previous cursor position and selection
+	if (new_pos != c.position())
+		m_pEditChatLog->setTextCursor(c);
+	
+	// was the scroll-position at bottom?
+	if (was_bottom)
+	{
+		// the the new scroll-position to bottom in order to display multilines completely
+		sb->setValue(sb->maximum());
+	}
+	else
+	{
+		// restore old position
+		sb->setValue(scrollpos);
+	}
 }
 
-void ChatBox::addMessage(const QString& from, const QString& msg)
+void ChatBox::addMessage(const QString &msg, const QColor &color)
 {
-	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
-	m_pEditChatLog->setTextColor(Qt::black);
-	m_pEditChatLog->setFontWeight(QFont::Bold);
-	m_pEditChatLog->setFontPointSize(m_nFontPointSize);	
-	m_pEditChatLog->insertPlainText("[" + from + "]");
-	m_pEditChatLog->setFontWeight(QFont::Normal);
-	m_pEditChatLog->insertPlainText(": " + msg + "\r\n");
-}
-
-void ChatBox::addMessage(const QString& from, const QString& msg, const QColor& color)
-{
-	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
-	m_pEditChatLog->setTextColor(color);
-	m_pEditChatLog->setFontWeight(QFont::Bold);
-	m_pEditChatLog->setFontPointSize(m_nFontPointSize);	
-	m_pEditChatLog->insertPlainText("[" + from + "]");
-	m_pEditChatLog->setFontWeight(QFont::Normal);
-	m_pEditChatLog->insertPlainText(": " + msg + "\r\n");
+	addMessage(msg, "", color);
 }
 
 void ChatBox::setFontPointSize(int size)
@@ -111,11 +125,8 @@ void ChatBox::actionChat()
 {
 	if (m_pEditChat->text().length())
 	{
-		if (m_nTableID == -1) // foyer chat
-			((PClient*)qApp)->chatAll(m_pEditChat->text());
-		else
-			((PClient*)qApp)->chat(m_pEditChat->text(), m_nGameID, m_nTableID);
-
+		emit dispatchedMessage(m_pEditChat->text());
+		
 		m_pEditChat->clear();
 		m_pEditChat->setFocus();
 	}
