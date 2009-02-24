@@ -71,15 +71,18 @@ typedef struct {
 	WTable *window;
 } tableinfo;
 
+typedef std::map<int,tableinfo>		tables_type;
+
+
 typedef struct {
 	bool registered;
 	unsigned int player_timeout;
-	std::map<int,tableinfo> tables;
+	tables_type tables;
 } gameinfo;
 
+typedef std::map<int,gameinfo>		games_type;
 
 typedef std::map<int,playerinfo>	players_type;
-typedef std::map<int,gameinfo>		games_type;
 
 
 

@@ -839,6 +839,26 @@ void PClient::netDisconnected()
 	connecting = false;
 	
 	wMain->updateConnectionStatus();
+	
+	
+	// reset all game related data and close table-windows
+	for (games_type::iterator e = games.begin(); e != games.end(); e++)
+	{
+		tables_type &tables = e->second.tables;
+		for (tables_type::iterator t = tables.begin(); t != tables.end(); t++)
+		{
+			tableinfo *table = &(t->second);
+			
+			if (table->window)
+			{
+				table->window->close();
+				delete table->window;
+			}
+		}
+	}
+	
+	players.clear();
+	games.clear();
 }
 
 PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
