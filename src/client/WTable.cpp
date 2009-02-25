@@ -417,7 +417,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setMinimumSize(640, 480);
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/pclient.ico"));
-	this->resize(800, 750);
+	this->resize(800, 630);
 }
 
 WTable::~WTable()
@@ -1072,8 +1072,9 @@ void WTable::slotTimeup(int seat)
 
 void WTable::resizeEvent(QResizeEvent *event)
 {
-	// preserve aspect ratio of our view (ratio: 3/4)
-	m_pView->resize((int)(m_pView->height() / 0.75f), m_pView->height());
+	// preserve aspect ratio of our view
+	const float aspect_ratio = 0.6f;
+	m_pView->resize((int)(m_pView->height() / aspect_ratio), m_pView->height());
 	m_pView->move(width()/2 - m_pView->width() / 2, m_pView->y());
 	
 	m_pView->fitInView(m_pScene->itemsBoundingRect());
