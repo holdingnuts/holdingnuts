@@ -49,6 +49,8 @@ public:
 	QString getUsername() const;
 
 private slots:
+	void closeEvent(QCloseEvent *event);
+	
 	void actionConnect();
 	void actionClose();
 	

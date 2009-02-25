@@ -39,7 +39,7 @@
 #include <QTextEdit>
 #include <QMenu>
 #include <QMenuBar>
-
+#include <QCloseEvent>
 
 extern ConfigParser config;
 
@@ -237,4 +237,15 @@ void WMain::actionAbout()
 void WMain::actionChat(QString msg)
 {
 	((PClient*)qApp)->chatAll(msg);
+}
+
+void WMain::closeEvent(QCloseEvent *event)
+{
+	if (((PClient*)qApp)->isTableWindowRemaining())
+	{
+		event->ignore();
+		showMinimized();
+	}
+	else
+		event->accept();
 }

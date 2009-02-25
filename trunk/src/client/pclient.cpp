@@ -861,6 +861,29 @@ void PClient::netDisconnected()
 	games.clear();
 }
 
+bool PClient::isTableWindowRemaining()
+{
+	// FIXME: make use of QApplication::lastWindowClosed(), but Qt::WA_QuitOnClose flag needed for table-windows
+	
+	// check if there are open windows
+	for (games_type::iterator e = games.begin(); e != games.end(); e++)
+	{
+		tables_type &tables = e->second.tables;
+		for (tables_type::iterator t = tables.begin(); t != tables.end(); t++)
+		{
+			tableinfo *table = &(t->second);
+			
+			if (table->window)
+			{
+				if (table->window->isVisible())
+					return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
 PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 {
 	connected = false;
