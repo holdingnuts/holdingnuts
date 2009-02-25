@@ -215,7 +215,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	// scene
 	m_pScene = new QGraphicsScene(this);
 
-	m_pScene->setBackgroundBrush(Qt::black);//QPixmap("gfx/table/background.png"));
+	//m_pScene->setBackgroundBrush(Qt::black);//QPixmap("gfx/table/background.png"));
 	// don't use bsptree
 	m_pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -288,7 +288,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	m_pView->setOptimizationFlag(QGraphicsView::DontClipPainter, true);
 	m_pView->setFrameStyle(QFrame::Plain);
-
+	m_pView->setStyleSheet("background: transparent");
+	
 	// ui - widgets
 	QPushButton *btnFold = new QPushButton(tr("&Fold"), this);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
@@ -411,11 +412,12 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPalette p = palette();
 	p.setColor(QPalette::Window, Qt::black);
 	this->setPalette(p);
+	
 
-	this->setMinimumSize(800, 600);
+	this->setMinimumSize(640, 480);
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/pclient.ico"));
-	this->resize(800, 600);
+	this->resize(800, 800);
 }
 
 WTable::~WTable()
@@ -1068,6 +1070,10 @@ void WTable::slotTimeup(int seat)
 
 void WTable::resizeEvent(QResizeEvent *event)
 {
+	// preserve aspect ratio of our view (ratio: 3/4)
+	m_pView->resize((int)(m_pView->height() / 0.75f), m_pView->height());
+	m_pView->move(width()/2 - m_pView->width() / 2, m_pView->y());
+	
 	m_pView->fitInView(m_pScene->itemsBoundingRect());
 }
 
