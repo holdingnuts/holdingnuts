@@ -114,6 +114,7 @@ public:
 	int getMyCId();
 	
 	WMain* getMainWnd() const { return wMain; };
+	bool isTableWindowRemaining();
 	
 private:
 	WMain *wMain;
