@@ -306,7 +306,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnMuck = new QPushButton(tr("&Muck"), this);
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
-	QPushButton *btnBack = new QPushButton(tr("I'm &back"), this);
+	QPushButton *btnBack = new QPushButton(tr("I'm bac&k"), this);
 	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
 	
 	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
