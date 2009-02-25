@@ -417,7 +417,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setMinimumSize(640, 480);
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/pclient.ico"));
-	this->resize(800, 800);
+	this->resize(800, 750);
 }
 
 WTable::~WTable()
@@ -1060,7 +1060,9 @@ void WTable::slotShow()
 	updateView();
 	
 	show();
-	m_pView->fitInView(m_pScene->itemsBoundingRect());
+	
+	// FIXME: better solution
+	resizeEvent(NULL);
 }
 
 void WTable::slotTimeup(int seat)
