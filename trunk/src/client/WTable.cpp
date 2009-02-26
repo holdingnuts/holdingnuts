@@ -408,9 +408,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QShortcut *shortcutScreenshot = new QShortcut(Qt::Key_F10, this);
 	connect(shortcutScreenshot, SIGNAL(activated()), this, SLOT(actionScreenshot()));
 	
-	// set background color to black
+	// set background
 	QPalette p = palette();
-	p.setColor(QPalette::Window, Qt::black);
+	p.setBrush(QPalette::Window, QBrush(QPixmap("gfx/table/background.png")));
 	this->setPalette(p);
 	
 
