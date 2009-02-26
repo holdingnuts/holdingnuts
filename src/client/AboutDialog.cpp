@@ -30,7 +30,8 @@
 #include "AboutDialog.hpp"
 
 
-AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
+AboutDialog::AboutDialog(QWidget *parent)
+	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
 	setWindowTitle(tr("About"));
 	setWindowIcon(QIcon(":/res/pclient.ico"));
