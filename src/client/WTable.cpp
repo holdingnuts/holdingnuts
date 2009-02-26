@@ -726,7 +726,8 @@ void WTable::updateView()
 		return;
 	
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	if (!tinfo)
+		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
