@@ -30,6 +30,6 @@ config.set("ui_show_handstrength", 	true);		// display hand strength on table
 
 #ifdef DEBUG
 config.set("dbg_register",	-1);			// automatically connect and register to a game (value is gid)
-config.set("dbg_bbox",	true);				// show bounding boxes around scene items
-config.set("dbg_srv_cmd",	true);			// log every message from server
+config.set("dbg_bbox",	false);				// show bounding boxes around scene items
+config.set("dbg_srv_cmd",	false);			// log every message from server
 #endif

@@ -116,14 +116,21 @@ public:
 	WMain* getMainWnd() const { return wMain; };
 	bool isTableWindowRemaining();
 	
+	//! \brief query playerlist from Server
+	void requestPlayerlist(int gid);
+	
 private:
 	WMain *wMain;
 		
 	bool connected;
 	bool connecting;
 	
-	QTcpSocket *tcpSocket;
+	QTcpSocket	*tcpSocket;
+
+	//! \brief timer updates the gamelist
+	QTimer		*timer;
 	
+private:	
 	int netSendMsg(const char *msg);
 	
 	int serverExecute(const char *cmd);
@@ -136,6 +143,7 @@ private:
 	void serverCmdPlayerlist(Tokenizer &t);
 	void serverCmdClientinfo(Tokenizer &t);
 	void serverCmdGameinfo(Tokenizer &t);
+	void serverCmdGamelist(Tokenizer &t);
 	
 	bool addTable(int gid, int tid);
 
@@ -144,6 +152,9 @@ private slots:
 	void netError(QAbstractSocket::SocketError socketError);
 	void netConnected();
 	void netDisconnected();
+	
+	//! \brief query gamelist from Server
+	void requestGamelist();
 	
 #ifdef DEBUG
 	void slotDbgRegister();

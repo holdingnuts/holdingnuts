@@ -49,6 +49,21 @@ static games_type		games;
 
 //////////////
 
+#ifdef DEBUG
+#	include <QDebug>
+
+QDebug operator << (QDebug s, const tableinfo& t)
+{
+	s << "tableinfo\n";
+	s << "\t sitting= " << (t.sitting ? "true" : "false") << "\n";
+	s << "\t subscribed= " << (t.subscribed ? "true" : "false") << "\n";
+	s << "end tableinfo" << "\n";
+	
+	return s;
+}
+
+#endif /* DEBUG */
+
 
 // server command PSERVER <version> <client-id>
 void PClient::serverCmdPserver(Tokenizer &t)
@@ -380,6 +395,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 	}
 }
 
+// server command PLAYERLIST <gid> <client-id> [...]
 void PClient::serverCmdPlayerlist(Tokenizer &t)
 {
 	char msg[1024];
@@ -392,6 +408,7 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 	netSendMsg(msg);
 }
 
+// server command CLIENTINFO <client-id> <type>:<value> [...]
 void PClient::serverCmdClientinfo(Tokenizer &t)
 {
 	int cid = t.getNextInt();
@@ -416,6 +433,11 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 	
 	//update_player_info(&pi);
 	players[cid] = pi;
+	
+	// update playerlist
+	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
+
+	wMain->addPlayer(pi.name);
 }
 
 void PClient::serverCmdGameinfo(Tokenizer &t)
@@ -426,10 +448,13 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	if (git == games.end())
 	{
-		// FIXME: butt ugly... find smarter way of adding "empty" element
-		games[gid];
-		git = games.find(gid);
+		games.insert(
+			git, 
+			games_type::value_type(gid, games_type::mapped_type()));
 	}
+	
+	std::string playerscount;
+	std::string maxplayers;
 	
 	std::string sinfo;
 	while (t.getNext(sinfo))
@@ -444,6 +469,33 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 		{
 			git->second.player_timeout = Tokenizer::string2int(ivalue);
 		}
+		
+		else if (itype == "player")
+		{
+			playerscount = it.getNext();
+			maxplayers = it.getNext();
+		}
+	}
+	
+	// update gamelist
+	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
+	
+	wMain->updateGamelist(
+		gid,
+		QString("game %1").arg(gid),
+		QString::fromStdString(playerscount),
+		QString::fromStdString(maxplayers));
+}
+
+void PClient::serverCmdGamelist(Tokenizer &t)
+{
+	for (unsigned int i = 0; i < t.count(); ++i)
+	{
+		char msg[128];
+		
+		// get game info
+		snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", t.getNextInt());
+		netSendMsg(msg);
 	}
 }
 
@@ -455,7 +507,10 @@ int PClient::serverExecute(const char *cmd)
 	if (!t.count())
 		return 0;
 	
-	//dbg_msg("server_execute", "cmd= %s", cmd);
+#ifdef DEBUG
+	if (config.getBool("dbg_srv_cmd"))
+		dbg_msg("server_execute", "cmd= %s", cmd);
+#endif
 	
 	// extract message-id if present
 	const char firstchar = t[0][0];
@@ -514,7 +569,9 @@ int PClient::serverExecute(const char *cmd)
 		serverCmdClientinfo(t);
 	else if (command == "GAMEINFO")
 		serverCmdGameinfo(t);
-	
+	else if (command == "GAMELIST")
+		serverCmdGamelist(t);
+
 	return 0;
 }
 
@@ -821,7 +878,6 @@ void PClient::netConnected()
 	
 	wMain->updateConnectionStatus();
 	
-	
 	// send protocol introduction
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "PCLIENT %d %s",
@@ -829,10 +885,14 @@ void PClient::netConnected()
 		config.get("uuid").c_str());
 	
 	netSendMsg(msg);
+	
+	timer->start(2000);
 }
 
 void PClient::netDisconnected()
 {
+	timer->stop();
+
 	wMain->addLog(tr("Connection closed."));
 	
 	connected = false;
@@ -859,6 +919,20 @@ void PClient::netDisconnected()
 	
 	players.clear();
 	games.clear();
+}
+
+void PClient::requestPlayerlist(int gid)
+{
+	char msg[256];
+		
+	// request the player-list of the game
+	snprintf(msg, sizeof(msg), "REQUEST playerlist %d", gid);
+	netSendMsg(msg);
+}
+
+void PClient::requestGamelist()
+{
+	netSendMsg("REQUEST gamelist");
 }
 
 bool PClient::isTableWindowRemaining()
@@ -896,6 +970,9 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connect(tcpSocket, SIGNAL(connected()), this, SLOT(netConnected()));
 	connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(netDisconnected()));
 	
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(requestGamelist()));
+
 	// app icon
 	Q_INIT_RESOURCE(pclient);
 }
