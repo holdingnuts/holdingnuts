@@ -25,12 +25,20 @@
 #define _WMAIN_H
 
 #include <QMainWindow>
+#include <QItemSelection>
 
 class ChatBox;
+class StringListModel;
+
 class QLineEdit;
 class QPushButton;
 class QTextEdit;
+class QStandardItemModel;
+class QTreeView;
+class QListView;
 
+
+//! \brief Mainwindow
 class WMain : public QMainWindow
 {
 Q_OBJECT
@@ -43,9 +51,28 @@ public:
 	void addChat(const QString &from, const QString &text);
 	void addServerMessage(const QString &text);
 	void addServerErrorMessage(int code, const QString &text);
+	
+	void addPlayer(const QString& name);
 
+	//! \brief Updates or add a Game to the Gamelist
+	//! \param name Gamename
+	void updateGamelist(
+		int gid,
+		const QString& name,
+		const QString& currentPlayers,
+		const QString& maxPlayers);
+
+	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();
 
+	//! \brief Clears the Modelgamelist
+	void clearGamelist();
+
+	//! \brief Clears the Playerlist
+	void clearPlayerlist();
+
+	//! \brief Returns the current Username
+	//! \return Name
 	QString getUsername() const;
 
 private slots:
@@ -68,14 +95,34 @@ private slots:
 	void actionTest();
 #endif
 
+	void gameListSelectionChanged(
+		const QItemSelection& selected,
+		const QItemSelection& deselected);
+
 private:
-	QLineEdit*	editSrvAddr;
-	QPushButton*	btnConnect;
-	QPushButton*	btnClose;
+	//! \brief Editbox server adress
+	QLineEdit				*editSrvAddr;
+	//! \brief Connect Button
+	QPushButton				*btnConnect;
+	//! \brief Close connection Button
+	QPushButton				*btnClose;
 	
-	ChatBox*	m_pChat;
+	//! \Brief Chatbox
+	ChatBox					*m_pChat;
 	
-	QLineEdit	*editRegister;   // debug, remove later
+	//! \brief MVC Model
+	// TODO: replace model with own model class
+	QStandardItemModel		*modelGameList;
+	//! \brief MVC View
+	QTreeView				*viewGameList;
+	
+	//! \brief MVC Model
+	StringListModel			*modelPlayerList;
+	//! \brief Playerliste from game
+	QListView 	 			*viewPlayerList;
+	
+	//! \brief create new game
+	QPushButton				*btnCreateGame;
 };
 
 #endif	/* _WMAIN_H */
