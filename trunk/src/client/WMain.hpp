@@ -91,9 +91,7 @@ private slots:
 	
 	void actionChat(QString msg);
 	
-#ifdef DEBUG
 	void actionTest();
-#endif
 
 	void gameListSelectionChanged(
 		const QItemSelection& selected,

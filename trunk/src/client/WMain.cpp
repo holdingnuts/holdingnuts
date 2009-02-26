@@ -312,13 +312,13 @@ void WMain::actionClose()
 	((PClient*)qApp)->doClose();
 }
 
-#ifdef DEBUG
 void WMain::actionTest()
 {
+#ifdef DEBUG
 	WTable *table = new WTable(0, 0);
 	table->slotShow();
-}
 #endif
+}
 
 void WMain::actionRegister()
 {

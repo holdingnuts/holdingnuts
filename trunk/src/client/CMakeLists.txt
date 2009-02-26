@@ -39,6 +39,7 @@ SET(QtApp_RCCS pclient.qrc)
 
 QT4_ADD_RESOURCES(QtApp_RCC_SRCS ${QtApp_RCCS})
 
+# Warning: older CMake versions (2.6-patch-0) do not provide moc-qt4 with preprocessor definitions
 QT4_WRAP_CPP (
 	sources_MOC
 	pclient.hpp WMain.hpp SettingsDialog.hpp AboutDialog.hpp StringListModel.hpp
