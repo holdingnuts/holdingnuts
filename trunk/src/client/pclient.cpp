@@ -91,7 +91,7 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	// send user info
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "INFO name:%s",
+	snprintf(msg, sizeof(msg), "INFO \"name:%s\"",
 			 wMain->getUsername().toStdString().c_str());
 		
 	netSendMsg(msg);
@@ -455,6 +455,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	std::string playerscount;
 	std::string maxplayers;
+	std::string name;
 	
 	std::string sinfo;
 	while (t.getNext(sinfo))
@@ -475,6 +476,18 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 			playerscount = it.getNext();
 			maxplayers = it.getNext();
 		}
+		else if (itype == "name")
+		{
+			name = ivalue.c_str();
+		}
+		else if (itype == "type")
+		{
+			// FIXME: see Protocol.h
+		}
+		else if (itype == "mode")
+		{
+			// FIXME: see Protocol.h
+		}
 	}
 	
 	// update gamelist
@@ -482,7 +495,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	wMain->updateGamelist(
 		gid,
-		QString("game %1").arg(gid),
+		QString("%1 (%2)").arg(QString::fromStdString(name)).arg(gid),
 		QString::fromStdString(playerscount),
 		QString::fromStdString(maxplayers));
 }
