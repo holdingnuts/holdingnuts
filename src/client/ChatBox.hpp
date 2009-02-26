@@ -29,6 +29,7 @@
 
 class QLineEdit;
 class QTextEdit;
+class QPushButton;
 
 class ChatBox : public QGroupBox
 {
@@ -53,6 +54,8 @@ public:
 	void setFontPointSize(int size);
 	int fontPointSize() const;	
 
+	void showChatBtn(bool bShow);
+
 protected:
 	ChatBox();
 
@@ -68,6 +71,8 @@ private:
 	int			m_nFontPointSize;
 	QLineEdit		*m_pEditChat;
 	QTextEdit		*m_pEditChatLog;
+	//! \brief send message button, default is hidden
+	QPushButton		*m_pSendMsg;
 };
 
 #endif /* _HOLDINGNUTS_CHATBOX_H */
