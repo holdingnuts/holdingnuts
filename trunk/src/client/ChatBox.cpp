@@ -28,7 +28,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QScrollBar>
-
+#include <QPushButton>
 
 ChatBox::ChatBox(
 	const QString& title,
@@ -46,15 +46,26 @@ ChatBox::ChatBox(
 	if(nTextLogHeight > 0)
 		m_pEditChatLog->setFixedHeight(nTextLogHeight);
 
-	QVBoxLayout *lchat = new QVBoxLayout(this);
+	m_pSendMsg = new QPushButton(tr("Chat"), this);
+	m_pSendMsg->setVisible(false);
+
+	connect(m_pSendMsg, SIGNAL(clicked()), this, SLOT(actionChat()));
+
+	// layout
+	QHBoxLayout *lInputLine = new QHBoxLayout;
+	
+	lInputLine->addWidget(m_pEditChat);
+	lInputLine->addWidget(m_pSendMsg);
+
+	QVBoxLayout *lchat = new QVBoxLayout;
 
 	if (align == INPUTLINE_TOP)
-		lchat->addWidget(m_pEditChat);
+		lchat->addLayout(lInputLine);
 
 	lchat->addWidget(m_pEditChatLog);
 
 	if (align == INPUTLINE_BOTTOM)
-		lchat->addWidget(m_pEditChat);
+		lchat->addLayout(lInputLine);
 
 	this->setLayout(lchat);
 	
@@ -119,6 +130,11 @@ void ChatBox::setFontPointSize(int size)
 int ChatBox::fontPointSize() const
 {
 	return m_pEditChatLog->currentFont().pointSize();
+}
+
+void ChatBox::showChatBtn(bool bShow)
+{
+	m_pSendMsg->setVisible(bShow);
 }
 
 void ChatBox::actionChat()
