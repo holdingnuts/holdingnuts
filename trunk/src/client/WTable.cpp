@@ -409,11 +409,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	connect(shortcutScreenshot, SIGNAL(activated()), this, SLOT(actionScreenshot()));
 	
 	// set background
-	QPalette p = palette();
-	p.setBrush(QPalette::Window, QBrush(QPixmap("gfx/table/background.png")));
-	this->setPalette(p);
+	QPalette p(this->palette());
+	p.setBrush(QPalette::Background, QBrush(QPixmap("gfx/table/background.png")));
+	this->setPalette(p);	
 	
-
 	this->setMinimumSize(640, 480);
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/pclient.ico"));
