@@ -25,7 +25,17 @@
 #define _PROTOCOL_H
 
 typedef enum {
-	SnapGameState=1,
+	GameTypeHoldem = 0x100
+} gametype;
+
+typedef enum {
+	GameModeRingGame	= 0x1, // Cash game
+	GameModeFreezeOut	= 0x2, // Tournament
+	GameModeSNG		= 0x4  // Sit'n'Go
+} gamemode;
+
+typedef enum {
+	SnapGameState = 0x1,
 	SnapTable,
 	SnapHoleCards
 } snaptype;

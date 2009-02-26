@@ -137,7 +137,7 @@ bool client_chat(int from, int to, const char *message)
 	{
 		clientcon* fromclient = get_client_by_id(from);
 		
-		snprintf(msg, sizeof(msg), "MSG %d %s %s",
+		snprintf(msg, sizeof(msg), "MSG %d \"%s\" %s",
 			from,
 			(fromclient) ? fromclient->name : "???",
 			message);
@@ -196,7 +196,7 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 	
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
-		snprintf(msg, sizeof(msg), "MSG %d:%d:%d %s %s",
+		snprintf(msg, sizeof(msg), "MSG %d:%d:%d \"%s\" %s",
 			to_gid, to_tid, from_cid,
 			(fromclient) ? fromclient->name : "???",
 			message);
@@ -503,6 +503,46 @@ int client_cmd_chat(clientcon *client, Tokenizer &t)
 	return 0;
 }
 
+bool client_cmd_request_gameinfo(clientcon *client, Tokenizer &t)
+{
+	string sgid;
+	while (t.getNext(sgid))   // FIXME: have maximum for count of requests
+	{
+		const int gid = Tokenizer::string2int(sgid);
+		const GameController *g;
+		if ((g = get_game_by_id(gid)))
+		{
+			int game_mode = 0;
+			switch ((int)g->getGameType())
+			{
+			case GameController::SNG:
+				game_mode = GameModeSNG;
+				break;
+			case GameController::FreezeOut:
+				game_mode = GameModeFreezeOut;
+				break;
+			case GameController::RingGame:
+				game_mode = GameModeRingGame;
+				break;
+			}
+			
+			snprintf(msg, sizeof(msg),
+				"GAMEINFO %d type:%d mode:%d player:%d:%d timeout:%d \"name:%s\"",
+				gid,
+				(int) GameTypeHoldem,
+				game_mode,
+				g->getPlayerMax(),
+				g->getPlayerCount(),
+				g->getPlayerTimeout(),
+				g->getName().c_str());
+			
+			send_msg(client->sock, msg);
+		}
+	}
+	
+	return true;
+}
+
 int client_cmd_request(clientcon *client, Tokenizer &t)
 {
 	bool cmderr = false;
@@ -523,7 +563,7 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 				if ((c = get_client_by_id(cid)))
 				{
 					snprintf(msg, sizeof(msg),
-						"CLIENTINFO %d name:%s",
+						"CLIENTINFO %d \"name:%s\"",
 						cid,
 						c->name);
 					
@@ -532,26 +572,7 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 			}
 		}
 		else if (request == "gameinfo")
-		{
-			string sgid;
-			while (t.getNext(sgid))   // FIXME: have maximum for count of requests
-			{
-				const int gid = Tokenizer::string2int(sgid);
-				const GameController *g;
-				if ((g = get_game_by_id(gid)))
-				{
-					snprintf(msg, sizeof(msg),
-						"GAMEINFO %d type:%d player:%d:%d timeout:%d",
-						gid,
-						(int)g->getGameType(),
-						g->getPlayerMax(),
-						g->getPlayerCount(),
-						g->getPlayerTimeout());
-					
-					send_msg(client->sock, msg);
-				}
-			}
-		}
+			cmderr = !client_cmd_request_gameinfo(client, t);
 		else if (request == "gamelist")
 		{
 			string gamelist;
@@ -1063,6 +1084,7 @@ int gameloop()
 			GameController *g = new GameController();
 			const int gid = i;
 			g->setGameId(gid);
+			g->setName("HoldingNuts test game");
 			g->setRestart(true);
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));
 			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
@@ -1088,6 +1110,7 @@ int gameloop()
 				GameController *newgame = new GameController();
 				
 				newgame->setGameId(gid);
+				newgame->setName(g->getName());
 				newgame->setRestart(true);
 				newgame->setPlayerMax(g->getPlayerMax());
 				newgame->setPlayerTimeout(g->getPlayerTimeout());

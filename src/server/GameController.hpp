@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <map>
+#include <string>
 #include <ctime>
 
 #include "Card.hpp"
@@ -74,7 +75,10 @@ public:
 	unsigned int getPlayerTimeout() const { return timeout; };
 	
 	bool setPlayerStakes(float stake);
-	float getPlayerStakes() const { return player_stakes; } ;
+	float getPlayerStakes() const { return player_stakes; };
+	
+	std::string getName() const { return name; };
+	bool setName(const std::string &str) { name = str; return true; }; // FIXME: validate
 	
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() const { return max_players; };
@@ -164,6 +168,8 @@ private:
 	
 	bool ended;
 	time_t ended_time;
+	
+	std::string name;
 };
 
 #endif /* _GAMECONTROLLER_H */
