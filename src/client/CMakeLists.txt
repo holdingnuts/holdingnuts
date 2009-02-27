@@ -26,6 +26,12 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
+# use SDL only for audio
+Find_Package ( SDL REQUIRED )
+
+include_directories ( ${SDL_INCLUDE_DIR} )
+
+
 SET( QT_USE_QTNETWORK true )
 
 Find_Package ( Qt4 REQUIRED )
@@ -58,7 +64,7 @@ add_executable (
 target_link_libraries (
    pclient
    Poker SysAccess System
-   ${QT_LIBRARIES}
+   ${QT_LIBRARIES} ${SDL_LIBRARY}
    ${aux_lib}
 )
 
