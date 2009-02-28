@@ -45,6 +45,8 @@
 #include <QListView>
 #include <QCloseEvent>
 
+#include "Audio.h"
+#include "data.h"
 
 extern ConfigParser config;
 
@@ -206,7 +208,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 #ifdef DEBUG
 	game->addSeparator();
 	
-	action = new QAction(tr("Test"), this);
+	action = new QAction(tr("&Test"), this);
+	action->setShortcut(tr("CTRL+T"));
 	connect(action, SIGNAL(triggered()), this, SLOT(actionTest()));
 	game->addAction(action);
 #endif
@@ -317,6 +320,9 @@ void WMain::actionTest()
 #ifdef DEBUG
 	WTable *table = new WTable(0, 0);
 	table->slotShow();
+	
+	dbg_msg("DEBUG", "playing test sound");
+	audio_play(SOUND_TEST_1);
 #endif
 }
 
