@@ -58,6 +58,7 @@ add_executable (
 	pclient.cpp ${aux_obj}
 	WMain.cpp SettingsDialog.cpp AboutDialog.cpp StringListModel.cpp
 	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
+	Audio.c
 	${sources_MOC} ${QtApp_RCC_SRCS}
 )
 

@@ -39,8 +39,8 @@
 #include <QUuid>
 #include <QMessageBox>
 
-// this is the right way to include SDL includes (see SDL FAQ)
-#include "SDL.h"
+#include "Audio.h"
+#include "data.h"
 
 //////////////
 
@@ -1047,6 +1047,11 @@ int PClient::init()
 		}
 	}
 	
+	
+	// load sounds
+	audio_load(SOUND_TEST_1, "audio/test.wav");
+	
+	
 	// main window
 	wMain = new WMain();
 	wMain->updateConnectionStatus();
@@ -1092,22 +1097,6 @@ bool config_load()
 	return true;
 }
 
-int init_sdl()
-{
-	if (SDL_Init(SDL_INIT_AUDIO) < 0)
-	{
-		log_msg("init_sdl", "Error initalizing SDL: %s", SDL_GetError());
-		return 1;
-	}
-	
-	return 0;
-}
-
-void deinit_sdl()
-{
-	SDL_Quit();
-}
-
 int main(int argc, char **argv)
 {
 	log_set(stdout, 0);
@@ -1139,11 +1128,7 @@ int main(int argc, char **argv)
 #endif
 	
 	// initialize SDL for audio
-	if (init_sdl())
-	{
-		log_msg("main", "There was an error initalizing SDL. Exiting...");
-		return 1;
-	}
+	audio_init();
 	
 	PClient app(argc, argv);
 	if (app.init())
@@ -1157,7 +1142,7 @@ int main(int argc, char **argv)
 		file_close(fplog);
 	
 	// cleanup SDL
-	deinit_sdl();
+	audio_deinit();
 	
 	return retval;
 }
