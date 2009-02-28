@@ -39,6 +39,9 @@
 #include <QUuid>
 #include <QMessageBox>
 
+#include "Audio.h"
+#include "data.h"
+
 //////////////
 
 ConfigParser config;
@@ -1044,6 +1047,11 @@ int PClient::init()
 		}
 	}
 	
+	
+	// load sounds
+	audio_load(SOUND_TEST_1, "audio/test.wav");
+	
+	
 	// main window
 	wMain = new WMain();
 	wMain->updateConnectionStatus();
@@ -1119,6 +1127,8 @@ int main(int argc, char **argv)
 	/*filetype *dbglog = */ file_reopen(dbgfile, mode_write, stderr);  // omit closing
 #endif
 	
+	// initialize SDL for audio
+	audio_init();
 	
 	PClient app(argc, argv);
 	if (app.init())
@@ -1130,6 +1140,9 @@ int main(int argc, char **argv)
 	// close log-file
 	if (fplog)
 		file_close(fplog);
+	
+	// cleanup SDL
+	audio_deinit();
 	
 	return retval;
 }

@@ -26,6 +26,12 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
+# use SDL only for audio
+Find_Package ( SDL REQUIRED )
+
+include_directories ( ${SDL_INCLUDE_DIR} )
+
+
 SET( QT_USE_QTNETWORK true )
 
 Find_Package ( Qt4 REQUIRED )
@@ -52,13 +58,14 @@ add_executable (
 	pclient.cpp ${aux_obj}
 	WMain.cpp SettingsDialog.cpp AboutDialog.cpp StringListModel.cpp
 	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
+	Audio.c
 	${sources_MOC} ${QtApp_RCC_SRCS}
 )
 
 target_link_libraries (
    pclient
    Poker SysAccess System
-   ${QT_LIBRARIES}
+   ${QT_LIBRARIES} ${SDL_LIBRARY}
    ${aux_lib}
 )
 
