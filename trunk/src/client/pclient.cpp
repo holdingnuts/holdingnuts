@@ -667,7 +667,7 @@ bool PClient::addTable(int gid, int tid)
 		QTimer::singleShot(2000, table->window, SLOT(slotShow()));
 	}
 	
-	if (bRequestInfo)
+	if (true /*bRequestInfo*/)  // FIXME: this doesn't work properly (especially on re-connect)
 	{
 		char msg[1024];
 		
@@ -676,8 +676,7 @@ bool PClient::addTable(int gid, int tid)
 		netSendMsg(msg);
 		
 		// request the player-list of the game
-		snprintf(msg, sizeof(msg), "REQUEST playerlist %d", gid);
-		netSendMsg(msg);
+		requestPlayerlist(gid);
 	}
 	
 	return true;
