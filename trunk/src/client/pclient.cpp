@@ -902,7 +902,7 @@ void PClient::netConnected()
 	
 	netSendMsg(msg);
 	
-	timer->start(2000);
+	timer->start(10000);
 }
 
 void PClient::netDisconnected()
@@ -1049,7 +1049,21 @@ int PClient::init()
 	
 	
 	// load sounds
-	audio_load(SOUND_TEST_1, "audio/test.wav");
+	struct sound {
+		unsigned int id;
+		const char *file;
+	} sounds[] = {
+		{ SOUND_TEST_1,		"audio/test.wav" },
+		{ SOUND_DEAL_1,		"audio/deal.wav" }
+	};
+	
+	const unsigned int sounds_count = sizeof(sounds) / sizeof(sounds[0]);
+	
+	for (unsigned int i=0; i < sounds_count; i++)
+	{
+		log_msg("audio", "Loading sound '%s' (%d)", sounds[i].file, sounds[i].id);
+		audio_load(sounds[i].id, sounds[i].file);
+	}
 	
 	
 	// main window

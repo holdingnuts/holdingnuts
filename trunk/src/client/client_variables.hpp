@@ -27,9 +27,11 @@ config.set("uuid",		"");			// unique ID for re-connect
 config.set("locale",		"");			// language/locale to use
 config.set("log",		true);			// log to file
 config.set("ui_show_handstrength", 	true);		// display hand strength on table
+config.set("sound",		true);			// play sounds
+config.set("sound_focus",	true);			// only play sound if window has focus
 
 #ifdef DEBUG
 config.set("dbg_register",	-1);			// automatically connect and register to a game (value is gid)
-config.set("dbg_bbox",	false);				// show bounding boxes around scene items
+config.set("dbg_bbox",		false);			// show bounding boxes around scene items
 config.set("dbg_srv_cmd",	false);			// log every message from server
 #endif

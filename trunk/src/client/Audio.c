@@ -21,7 +21,7 @@
  */
 
 
-// this is the most portable way to include SDL includes (see SDL FAQ)
+/* this is the most portable way to include SDL includes (see SDL FAQ) */
 #include "SDL.h"
 #include "SDL_audio.h"
 
@@ -34,7 +34,7 @@
 
 #define FMT_FREQ	44100
 #define FMT_FORMAT	AUDIO_S16
-#define FMT_CHANNELS	2
+#define FMT_CHANNELS	2	/* 1=mono, 2=stereo */
 #define FMT_SAMPLES	4192
 
 #define NUM_SOUNDS	2
@@ -51,7 +51,7 @@ struct sndslot {
 } slots[NUM_SLOTS];
 
 
-// callback-function prototype
+/* callback-function prototype */
 void audio_fill(void *unused, Uint8 *stream, int len);
 
 
@@ -85,7 +85,7 @@ int audio_init()
 
 int audio_deinit()
 {
-	// FIXME: free allocated sound-data
+	/* FIXME: free allocated sound-data */
 	
 	SDL_CloseAudio();
 	SDL_Quit();
@@ -107,18 +107,21 @@ int audio_load(unsigned int id, const char *file)
 		return 1;
 	}
 	
+#if 0
+	log_msg("audio_load", "file '%s': format:%d channels:%d freq:%d", file, wave.format, wave.channels, wave.freq);
+#endif
 	
 	/* convert the data */
-	if (SDL_BuildAudioCVT(cvt, wave.format, wave.channels, wave.freq, FMT_FORMAT, FMT_CHANNELS, FMT_FREQ) <= 0)
+	if (SDL_BuildAudioCVT(cvt, wave.format, wave.channels, wave.freq, FMT_FORMAT, FMT_CHANNELS, FMT_FREQ) < 0)
 	{
 		log_msg("audio", "SDL_BuildAudioCVT() failed: %s", SDL_GetError());
 		return 2;
 	}
 	
 	
-	cvt->buf = malloc(dlen * cvt->len_mult);
-	memcpy(cvt->buf, data, dlen);
 	cvt->len = dlen;
+	cvt->buf = malloc(cvt->len * cvt->len_mult);
+	memcpy(cvt->buf, data, cvt->len);
 	
 	SDL_FreeWAV(data);
 	
@@ -155,7 +158,7 @@ void audio_play(unsigned int id)
 	SDL_UnlockAudio();
 }
 
-// callback function
+/* callback function */
 void audio_fill(void *unused, Uint8 *stream, int len)
 {
 	int i;

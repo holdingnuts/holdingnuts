@@ -56,6 +56,10 @@
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
 
+#include "Audio.h"
+#include "data.h"
+
+
 using namespace std;
 
 extern ConfigParser config;
@@ -822,9 +826,20 @@ void WTable::updateView()
 			wseats[i]->setValid(false);
 	}
 	
-	// dealerbutton
-	if (snap->state == Table::NewRound)
+	
+	// remember last state change
+	static int last_state = -1;
+	
+	if (snap->state == Table::NewRound && last_state != snap->state)
+	{
+		// dealerbutton
 		m_pDealerButton->startAnimation(m_ptDealerBtn[snap->s_dealer]);
+		
+		playSound(SOUND_DEAL_1);
+	}
+	
+	last_state = snap->state;
+	
 	
 	// Pots
 	QString strPots;
@@ -1143,4 +1158,12 @@ void WTable::actionScreenshot()
 void WTable::actionChat(QString msg)
 {
 	((PClient*)qApp)->chat(msg, m_nGid, m_nTid);
+}
+
+void WTable::playSound(unsigned int id)
+{
+	if (!config.getBool("sound") || (config.getBool("sound_focus") && !isActiveWindow()))
+		return;
+	
+	audio_play(id);
 }
