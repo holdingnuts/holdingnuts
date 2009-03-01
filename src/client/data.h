@@ -19,4 +19,5 @@
 
 
 /* Sounds */
-#define SOUND_TEST_1	0x1
+#define SOUND_TEST_1		0x1
+#define SOUND_DEAL_1		0x2

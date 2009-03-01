@@ -123,6 +123,8 @@ protected:
 		const table_snapshot *snap,
 		const qreal& bet,
 		qreal *pbet = 0) const;
+	
+	void playSound(unsigned int id);
 
 private slots:
 	void actionFold();
