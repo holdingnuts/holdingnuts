@@ -650,6 +650,23 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 		return 1;
 	}
 	
+	// check for max-games-register limit
+	unsigned int register_limit = config.getInt("max_register_per_player");
+	unsigned int count = 0;
+	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
+	{
+		GameController *g = e->second;
+		
+		if (g->isPlayer(client->id))
+		{
+			if (++count == register_limit)
+			{
+				send_err(client, 0 /*FIXME*/, "you are registered to too many games");
+				return 1;
+			}
+		}
+	}
+	
 	if (!g->addPlayer(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to register");
