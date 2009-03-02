@@ -41,7 +41,8 @@ using namespace std;
 extern ConfigParser config;
 
 // temporary buffer for sending messages
-static char msg[1024];
+#define MSG_BUFFER_SIZE  (1024*16)
+static char msg[MSG_BUFFER_SIZE];
 
 static games_type games;
 static unsigned int gid_counter = 0;
@@ -89,7 +90,7 @@ clientcon* get_client_by_id(int cid)
 
 int send_msg(socktype sock, const char *message)
 {
-	char buf[1024];
+	char buf[MSG_BUFFER_SIZE];
 	const int len = snprintf(buf, sizeof(buf), "%s\r\n", message);
 	const int bytes = socket_write(sock, buf, len);
 	
@@ -102,7 +103,7 @@ int send_msg(socktype sock, const char *message)
 
 bool send_response(socktype sock, bool is_success, int last_msgid, int code=0, const char *str="")
 {
-	char buf[128];
+	char buf[512];
 	if (last_msgid == -1)
 		snprintf(buf, sizeof(buf), "%s %d %s",
 			is_success ? "OK" : "ERR", code, str);
@@ -126,7 +127,7 @@ bool send_err(clientcon *client, int code=0, const char *str="")
 // from client/foyer to client/foyer
 bool client_chat(int from, int to, const char *message)
 {
-	char msg[1024];
+	char msg[128];
 	
 	if (from == -1)
 	{
@@ -168,7 +169,7 @@ bool client_chat(int from, int to, const char *message)
 // from game/table to client
 bool client_chat(int from_gid, int from_tid, int to, const char *message)
 {
-	char msg[1024];
+	char msg[128];
 	
 	snprintf(msg, sizeof(msg), "MSG %d:%d %s %s",
 		from_gid, from_tid, (from_tid == -1) ? "game" : "table", message);
@@ -183,7 +184,7 @@ bool client_chat(int from_gid, int from_tid, int to, const char *message)
 // from client to game/table
 bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 {
-	char msg[1024];
+	char msg[128];
 	
 	clientcon* fromclient = get_client_by_id(from_cid);
 	
@@ -610,6 +611,15 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 				send_msg(client->sock, msg);
 			}
 		}
+		else if (request == "serverinfo")
+		{
+			snprintf(msg, sizeof(msg), "games=%d clients=%d con_archive=%d",
+				(int) games.size(),
+				(int) clients.size(),
+				(int) con_archive.size());
+			
+			client_chat(-1, client->id, msg);
+		}
 		else
 			cmderr = true;
 	}
@@ -661,7 +671,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 		{
 			if (++count == register_limit)
 			{
-				send_err(client, 0 /*FIXME*/, "you are registered to too many games");
+				send_err(client, 0 /*FIXME*/, "register limit per player is reached");
 				return 1;
 			}
 		}
@@ -1106,6 +1116,13 @@ int gameloop()
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));
 			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
 			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
+			
+			if (config.getBool("dbg_stresstest") && i > 10)
+			{
+				for (int j=0; j < config.getInt("dbg_testgame_players"); j++)
+					g->addPlayer(j*1000 + i);
+			}
+			
 			games[gid] = g;
 			
 			gid_counter++;
