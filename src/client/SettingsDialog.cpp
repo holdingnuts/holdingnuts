@@ -93,6 +93,22 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 			comboLocale->setCurrentIndex(i);
 	}
 	
+	// sound options
+	QLabel *labelSound = new QLabel(tr("Sounds"), tabGeneral);
+	checkSound = new QCheckBox(tr("enabled"), tabGeneral);
+	checkSound->setCheckState(cfg->getBool("sound") ? Qt::Checked : Qt::Unchecked);
+	checkSoundFocus = new QCheckBox(tr("only on focus"), tabGeneral);
+	checkSoundFocus->setCheckState(cfg->getBool("sound_focus") ? Qt::Checked : Qt::Unchecked);
+	
+	actionCheckStateSound(checkSound->checkState());
+	connect(checkSound, SIGNAL(stateChanged(int)), this, SLOT(actionCheckStateSound(int)));
+	
+	QHBoxLayout *layoutSound = new QHBoxLayout;
+	layoutSound->addWidget(checkSound);
+	layoutSound->addWidget(checkSoundFocus);
+	
+	
+	// basic layout
 	QGridLayout *gridGeneral = new QGridLayout;
 	gridGeneral->addWidget(labelPlayerName, 0, 0);
 	gridGeneral->addWidget(editPlayerName, 0, 1);
@@ -102,6 +118,8 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 	gridGeneral->addWidget(checkLog, 2, 1);
 	gridGeneral->addWidget(labelLocale, 3, 0);
 	gridGeneral->addWidget(comboLocale, 3, 1);
+	gridGeneral->addWidget(labelSound, 4, 0);
+	gridGeneral->addLayout(layoutSound, 4, 1);
 	tabGeneral->setLayout(gridGeneral);
 	
 	
@@ -137,6 +155,8 @@ void SettingsDialog::actionOk()
 		cfg->set("uuid", editUUID->text().toStdString());
 		cfg->set("log", (checkLog->checkState() == Qt::Checked) ? true : false);
 		cfg->set("locale", comboLocale->itemData(comboLocale->currentIndex()).toString().toStdString());
+		cfg->set("sound", (checkSound->checkState() == Qt::Checked) ? true : false);
+		cfg->set("sound_focus", (checkSoundFocus->checkState() == Qt::Checked) ? true : false);
 		
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
@@ -145,4 +165,10 @@ void SettingsDialog::actionOk()
 		
 		accept();
 	}
+}
+
+void SettingsDialog::actionCheckStateSound(int new_state)
+{
+	checkSoundFocus->setEnabled(
+		((Qt::CheckState)new_state == Qt::Checked) ? true : false);
 }
