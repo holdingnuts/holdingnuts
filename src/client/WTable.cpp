@@ -414,7 +414,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	// set background
 	QPalette p(this->palette());
-	p.setBrush(QPalette::Background, QBrush(QPixmap("gfx/table/background.png")));
+	p.setBrush(QPalette::Window, QBrush(QPixmap("gfx/table/background.png")));
 	this->setPalette(p);	
 	
 	this->setMinimumSize(640, 480);
