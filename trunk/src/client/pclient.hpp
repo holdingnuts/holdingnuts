@@ -49,7 +49,7 @@
 
 
 typedef struct {
-	char msgbuf[1024];
+	char msgbuf[1024*256];
 	int buflen;
 	int last_msgid;
 	
