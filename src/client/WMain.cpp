@@ -376,7 +376,9 @@ void WMain::gameListSelectionChanged(
 	{
 		clearPlayerlist();
 
+#if 0  // no, we won't do this here
 		((PClient*)qApp)->requestPlayerlist((*selected.begin()).topLeft().row());
+#endif
 	}
 }
 
