@@ -98,6 +98,10 @@ void PClient::serverCmdPserver(Tokenizer &t)
 			 wMain->getUsername().toStdString().c_str());
 		
 	netSendMsg(msg);
+	
+	// request initial game-list and start update-timer
+	requestGamelist();
+	timerGamelistUpdate->start(60000);
 }
 
 // server command ERR [<code>] [<text>]
@@ -405,12 +409,31 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 	
 	/* from */ t.getNextInt();
 	
-	std::string sreq = t.getTillEnd();
+	// client-list
+	std::string sreq_orig = t.getTillEnd();
+	std::string sreq_clean;
 	
-	// FIXME: delete cid from request which are already known
+	Tokenizer tcid;
+	tcid.parse(sreq_orig);
 	
-	snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq.c_str());
-	netSendMsg(msg);
+	std::string token;
+	while (tcid.getNext(token))
+	{
+		unsigned int cid = Tokenizer::string2int(token);
+		
+		// skip this client... if we already know him
+		if (getPlayerInfo(cid))
+			continue;
+		
+		sreq_clean += token + " ";
+	}
+	
+	// only request client-info if there are unknown clients left
+	if (sreq_clean.length())
+	{
+		snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq_clean.c_str());
+		netSendMsg(msg);
+	}
 }
 
 // server command CLIENTINFO <client-id> <type>:<value> [...]
@@ -877,6 +900,7 @@ void PClient::netRead()
 
 void PClient::netError(QAbstractSocket::SocketError socketError)
 {
+	log_msg("net", "Connection error: %s", tcpSocket->errorString().toStdString().c_str());
 	wMain->addLog(tr("Connection error: %1.").arg(tcpSocket->errorString()));
 	
 	connected = false;
@@ -904,19 +928,18 @@ void PClient::netConnected()
 		config.get("uuid").c_str());
 	
 	netSendMsg(msg);
-	
-	timer->start(10000);
 }
 
 void PClient::netDisconnected()
 {
-	timer->stop();
-	
 	log_msg("net", "Connection closed");
 	wMain->addLog(tr("Connection closed."));
 	
 	connected = false;
 	connecting = false;
+	
+	// stop the update-timer
+	timerGamelistUpdate->stop();
 	
 	wMain->updateConnectionStatus();
 	
@@ -990,8 +1013,9 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connect(tcpSocket, SIGNAL(connected()), this, SLOT(netConnected()));
 	connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(netDisconnected()));
 	
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(requestGamelist()));
+	// update timer
+	timerGamelistUpdate = new QTimer(this);
+	connect(timerGamelistUpdate, SIGNAL(timeout()), this, SLOT(requestGamelist()));
 
 	// app icon
 	Q_INIT_RESOURCE(pclient);
