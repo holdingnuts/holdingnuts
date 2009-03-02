@@ -530,14 +530,14 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 
 void PClient::serverCmdGamelist(Tokenizer &t)
 {
-	for (unsigned int i = 0; i < t.count(); ++i)
-	{
-		char msg[128];
-		
-		// get game info
-		snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", t.getNextInt());
-		netSendMsg(msg);
-	}
+	char msg[1024];
+	
+	// game-list
+	std::string sreq = t.getTillEnd();
+	
+	// get game info
+	snprintf(msg, sizeof(msg), "REQUEST gameinfo %s", sreq.c_str());
+	netSendMsg(msg);
 }
 
 int PClient::serverExecute(const char *cmd)
@@ -875,25 +875,28 @@ void PClient::netRead()
 	char buf[1024];
 	int bytes;
 	
-	// return early on client close/error
-	if ((bytes = tcpSocket->read(buf, sizeof(buf))) <= 0)
-		return;
-	
-//	log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
-
-	if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
+	do
 	{
-		log_msg("connectsock", "error: buffer size exceeded");
-		srv.buflen = 0;
-	}
-	else
-	{
-		memcpy(srv.msgbuf + srv.buflen, buf, bytes);
-		srv.buflen += bytes;
+		// return early if there's nothing to read
+		if ((bytes = tcpSocket->read(buf, sizeof(buf))) <= 0)
+			return;
 		
-		// parse and execute all commands in queue
-		while (serverParsebuffer());
-	}
+		//log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
+		
+		if (srv.buflen + bytes > (int)sizeof(srv.msgbuf))
+		{
+			log_msg("connectsock", "error: buffer size exceeded");
+			srv.buflen = 0;
+		}
+		else
+		{
+			memcpy(srv.msgbuf + srv.buflen, buf, bytes);
+			srv.buflen += bytes;
+			
+			// parse and execute all commands in queue
+			while (serverParsebuffer());
+		}
+	} while (sizeof(buf) == bytes);
 	
 	return;
 }
