@@ -157,7 +157,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	connect(btnClose, SIGNAL(clicked()), this, SLOT(actionClose()));
 		
 	QHBoxLayout *lConnect = new QHBoxLayout();
-	lConnect->addWidget(new QLabel(tr("Host:"), this));
+	lConnect->addWidget(new QLabel(tr("Server:"), this));
 	lConnect->addWidget(editSrvAddr);
 	lConnect->addWidget(btnConnect);
 	lConnect->addWidget(btnClose);
@@ -173,28 +173,32 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 
 	// new game
-	btnCreateGame = new QPushButton(tr("Create own Game"), this);
+	btnCreateGame = new QPushButton(tr("Create own game"), this);
 	btnCreateGame->setEnabled(false);
 	btnCreateGame->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	// final layout
+	// content layout
 	QGridLayout *layout = new QGridLayout;
 	// row 0
-	layout->addWidget(lblBanner, 0, 0, 1, 2);
-	// row 1
-//	layout->addWidget(groupSrv, 1, 0, 1, 2);
-	layout->addLayout(lConnect, 1, 0, 1, 2);
+//	layout->addWidget(groupSrv, 0, 0, 1, 2);
+	layout->addLayout(lConnect, 0, 0, 1, 2);
 	// row 2
-	layout->addWidget(viewGameList, 2, 0, 1, 1);
-	layout->addLayout(lGameInfo, 2, 1, 1, 1);
+	layout->addWidget(viewGameList, 1, 0, 1, 1);
+	layout->addLayout(lGameInfo, 1, 1, 1, 1);
 	// row 3
-	layout->addWidget(m_pChat, 3, 0, 1, 1);
-	layout->addWidget(btnCreateGame, 3, 1, 1, 1, Qt::AlignBottom | Qt::AlignRight);
+	layout->addWidget(m_pChat, 2, 0, 1, 1);
+	layout->addWidget(btnCreateGame, 2, 1, 1, 1, Qt::AlignBottom | Qt::AlignRight);
 	
 	layout->setColumnStretch(0, 2);
 	layout->setColumnMinimumWidth(0, 300);
 	layout->setColumnMinimumWidth(1, 150);
+	layout->setContentsMargins(11,11,11,11);  // use a default margin
 	
+	// the main layout with removed margins
+	QVBoxLayout *lMain = new QVBoxLayout;
+	lMain->addWidget(lblBanner);
+	lMain->addLayout(layout);
+	lMain->setContentsMargins(0,0,0,0);
 	
 	// widget decoration
 	QPalette mp(this->palette());
@@ -204,10 +208,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	this->setPalette(mp);
 	
 	
+	
 	// create a main widget containing the layout
 	QWidget *central = new QWidget(this);
 	
-	central->setLayout(layout);
+	central->setLayout(lMain);
 	this->setCentralWidget(central);
 	
 	
