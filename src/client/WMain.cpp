@@ -127,7 +127,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	
 	// connection
-	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host")), this);
+	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")), this);
 	connect(editSrvAddr, SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
 	connect(editSrvAddr, SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
@@ -304,7 +304,15 @@ void WMain::actionConnect()
 	if (!editSrvAddr->text().length() || ((PClient*)qApp)->isConnected())
 		return;
 	
-	if (!((PClient*)qApp)->doConnect(editSrvAddr->text(), config.getInt("default_port")))
+	// split up the connect-string: <hostname>:<port>
+	QStringList srvlist = editSrvAddr->text().split(":", QString::SkipEmptyParts);
+	
+	unsigned int port = config.getInt("default_port");
+	
+	if (srvlist.count() > 1)
+		port = srvlist.at(1).toInt();
+	
+	if (!((PClient*)qApp)->doConnect(srvlist.at(0), port))
 		addLog(tr("Error connecting."));
 	else
 		btnConnect->setEnabled(false);
