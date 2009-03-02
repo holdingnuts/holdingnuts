@@ -842,13 +842,18 @@ void WTable::updateView()
 	
 	
 	// Pots
-	QString strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
-	for (unsigned int t = 1; t < snap->pots.size(); ++t)
+	QString strPots;
+	if (snap->pots.at(0) > .0f)
 	{
-		strPots.append(
-			QString("  " + tr("Side pot %1: %2")
-				.arg(t).arg(snap->pots.at(t), 0, 'f', 2)));
+		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
+		for (unsigned int t = 1; t < snap->pots.size(); ++t)
+		{
+			strPots.append(
+				QString("  " + tr("Side pot %1: %2")
+					.arg(t).arg(snap->pots.at(t), 0, 'f', 2)));
+		}
 	}
+		
 	m_pTxtPots->setText(strPots);
 	m_pTxtPots->setPos(calcPotsPos());
 	
