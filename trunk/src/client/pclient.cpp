@@ -407,6 +407,8 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 	
 	std::string sreq = t.getTillEnd();
 	
+	// FIXME: delete cid from request which are already known
+	
 	snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq.c_str());
 	netSendMsg(msg);
 }
@@ -684,6 +686,7 @@ bool PClient::addTable(int gid, int tid)
 
 bool PClient::doConnect(QString strServer, unsigned int port)
 {
+	log_msg("net", "Connecting to %s:%d...", strServer.toStdString().c_str(), port);
 	wMain->addLog(tr("Connecting..."));
 	
 	tcpSocket->connectToHost(strServer, port);
@@ -884,6 +887,7 @@ void PClient::netError(QAbstractSocket::SocketError socketError)
 
 void PClient::netConnected()
 {
+	log_msg("net", "Connection established");
 	wMain->addLog(tr("Connected."));
 	
 	memset(&srv, 0, sizeof(srv));
@@ -907,7 +911,8 @@ void PClient::netConnected()
 void PClient::netDisconnected()
 {
 	timer->stop();
-
+	
+	log_msg("net", "Connection closed");
 	wMain->addLog(tr("Connection closed."));
 	
 	connected = false;

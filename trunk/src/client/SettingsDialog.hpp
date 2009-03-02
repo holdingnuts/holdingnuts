@@ -53,6 +53,7 @@ private:
 	QLineEdit *editUUID;
 	QCheckBox *checkLog;
 	QComboBox *comboLocale;
+	QCheckBox *checkSound, *checkSoundFocus;
 	
 	// tabAppearance
 	QCheckBox *checkHandStrength;
@@ -60,6 +61,7 @@ private:
 private slots:
 	void actionOk();
 	void actionGenUUID();
+	void actionCheckStateSound(int new_state);
 };
 
 #endif /* _SETTINGS_DIALOG_H */
