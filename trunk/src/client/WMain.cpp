@@ -55,18 +55,33 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 {
 	this->setWindowTitle(tr("HoldingNuts Foyer"));
 	this->setWindowIcon(QIcon(":/res/pclient.ico"));
-
+	
+	
 	// header
+	QLabel *lblBanner = new QLabel(this);
+	lblBanner->setPixmap(QPixmap("gfx/foyer/banner.png"));
+	lblBanner->setScaledContents(true);
+	lblBanner->setFixedHeight(85);
+	
+	QPalette p(lblBanner->palette());
+	p.setColor(QPalette::Window, Qt::white);
+	p.setColor(QPalette::WindowText, Qt::black);
+	lblBanner->setPalette(p);
+	
+	QLabel *lblWelcome = new QLabel("<qt>" + tr("Welcome") +
+		" <b>" + QString::fromStdString(config.get("player_name")) + "</b></qt>", this);
+	
 	QDateTime datetime = QDateTime::currentDateTime();
-
-	QLabel *lblWelcome = new QLabel(tr("Welcome"), this);
 //	QLabel *lblDateTime = new QLabel(datetime.toString("dddd, yyyy-MM-dd, hh:mm"), this);
+
 	QLabel *lblLogo = new QLabel(this);
-	lblLogo->setFixedSize(QSize(75, 75));
+	lblLogo->setPixmap(QPixmap(":res/hn_logo.png"));
+
 
 	QHBoxLayout *lHeader = new QHBoxLayout();
 	lHeader->addWidget(lblWelcome, Qt::AlignVCenter);
 	lHeader->addWidget(lblLogo);
+	lblBanner->setLayout(lHeader);
 
 	// model game
 	QStringList strlstHeaderLabels;
@@ -152,7 +167,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	
 	// the foyer chat box
-	m_pChat = new ChatBox(tr("Foyer Chat"), ChatBox::INPUTLINE_BOTTOM, 0, this);
+	m_pChat = new ChatBox("", ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
@@ -165,7 +180,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// final layout
 	QGridLayout *layout = new QGridLayout;
 	// row 0
-	layout->addLayout(lHeader, 0, 0, 1, 2);
+	layout->addWidget(lblBanner, 0, 0, 1, 2);
 	// row 1
 //	layout->addWidget(groupSrv, 1, 0, 1, 2);
 	layout->addLayout(lConnect, 1, 0, 1, 2);
@@ -180,11 +195,18 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	layout->setColumnMinimumWidth(0, 300);
 	layout->setColumnMinimumWidth(1, 150);
 	
-	// TODO: widgets decoration
-//	this->setStyleSheet("background-color: black");
-
+	
+	// widget decoration
+	QPalette mp(this->palette());
+	mp.setColor(QPalette::Window, Qt::black);
+	mp.setColor(QPalette::WindowText, Qt::gray);
+	//mp.setColor(QPalette::Text, Qt::gray);
+	this->setPalette(mp);
+	
+	
 	// create a main widget containing the layout
 	QWidget *central = new QWidget(this);
+	
 	central->setLayout(layout);
 	this->setCentralWidget(central);
 	
