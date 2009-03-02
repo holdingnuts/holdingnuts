@@ -273,7 +273,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	const QFontMetrics fm(font);
 	const QPointF ptCenter = m_pImgTable->boundingRect().center();
 	
-	m_pTxtPots = m_pScene->addSimpleText("Pot 0: 0.00", font);
+	m_pTxtPots = m_pScene->addSimpleText("Main pot: 0.00", font);
 	m_pTxtPots->setPos(calcPotsPos());
 	m_pTxtPots->setZValue(3);
 	
@@ -842,11 +842,12 @@ void WTable::updateView()
 	
 	
 	// Pots
-	QString strPots;
-	for (unsigned int t = 0; t < snap->pots.size(); ++t)
+	QString strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
+	for (unsigned int t = 1; t < snap->pots.size(); ++t)
 	{
 		strPots.append(
-			QString("Pot %1: %2 ").arg(t+1).arg(snap->pots.at(t), 0, 'f', 2));
+			QString("  " + tr("Side pot %1: %2")
+				.arg(t).arg(snap->pots.at(t), 0, 'f', 2)));
 	}
 	m_pTxtPots->setText(strPots);
 	m_pTxtPots->setPos(calcPotsPos());
