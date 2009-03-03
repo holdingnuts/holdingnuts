@@ -33,11 +33,11 @@ extern ConfigParser config;
 
 // cards size
 const qreal Seat::sx_card = 96;
-const qreal Seat::sy_card = 140;
+const qreal Seat::sy_card = 138;
 
 // mini cards size
 const qreal Seat::sx_mini_card = 41;
-const qreal Seat::sy_mini_card = 60;
+const qreal Seat::sy_mini_card = 58;
 
 Seat::Seat(unsigned int id, QWidget *parent)
 :	m_nID(id),
@@ -121,8 +121,13 @@ void Seat::setMySeat(bool bMyseat)
 
 void Seat::setCards(const char *c1, const char *c2)
 {
-	m_FirstCard.load(QString("gfx/deck/default/%1.png").arg(c1));
-	m_SecondCard.load(QString("gfx/deck/default/%1.png").arg(c2));
+	m_FirstCard.load(QString("gfx/deck/%1/%2.png")
+		.arg(QString::fromStdString(config.get("ui_card_deck")))
+		.arg(c1));
+	
+	m_SecondCard.load(QString("gfx/deck/%1/%2.png")
+		.arg(QString::fromStdString(config.get("ui_card_deck")))
+		.arg(c2));
 }
 
 QRectF Seat::boundingRect() const
@@ -189,7 +194,8 @@ void Seat::paint(
 		return;
 	
 	// image card backside
-	static QImage imgCardBackside("gfx/deck/default/back.png");
+	static QImage imgCardBackside(QString("gfx/deck/%1/back.png")
+		.arg(QString::fromStdString(config.get("ui_card_deck"))));
 	
 	const qreal seat_width = SeatImages::Instance().imgBack.width();
 	const qreal seat_height = SeatImages::Instance().imgBack.height();
@@ -201,10 +207,12 @@ void Seat::paint(
 		imgBack = &(SeatImages::Instance().imgBackCurrent);
 	else
 		imgBack = &(SeatImages::Instance().imgBack);
-
+	
+	
+	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+	
+	
 	painter->save();
-	painter->setRenderHint(QPainter::Antialiasing);
-	painter->setRenderHint(QPainter::SmoothPixmapTransform);
 	
 	painter->drawImage(
 			QRectF(
@@ -264,20 +272,22 @@ void Seat::paint(
 	// big-cards
 	if (m_bBigCards)
 	{
-		painter->drawImage(
+		painter->drawPixmap(
 			QRectF(
 				seat_width + m_pCurrentActionImg->width() - (sx_card * 1.5),
 				-(sy_card + 2),
 				sx_card,
 				sy_card),
-			m_FirstCard);
-		painter->drawImage(
+			m_FirstCard,
+			QRectF(0 , 0, m_FirstCard.width(), m_FirstCard.height()));
+		painter->drawPixmap(
 			QRectF(
 				seat_width + m_pCurrentActionImg->width() - sx_card,
 				-(sy_card + 2),
 				sx_card,
 				sy_card),
-			m_SecondCard);
+			m_SecondCard,
+			QRectF(0 , 0, m_SecondCard.width(), m_SecondCard.height()));
 	}
 	
 	// small cards

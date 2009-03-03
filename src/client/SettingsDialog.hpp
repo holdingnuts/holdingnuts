@@ -57,6 +57,7 @@ private:
 	
 	// tabAppearance
 	QCheckBox *checkHandStrength;
+	QComboBox *comboCarddeck;
 	
 private slots:
 	void actionOk();

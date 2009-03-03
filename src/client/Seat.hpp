@@ -88,9 +88,9 @@ private:
 	//! \brief Pointer to current Action Image
 	const QImage			*m_pCurrentActionImg;
 	//! \brief first Card
-	QImage					m_FirstCard;
+	QPixmap					m_FirstCard;
 	//! \brief second Card
-	QImage					m_SecondCard;
+	QPixmap					m_SecondCard;
 	//! \brief display big-cards
 	bool					m_bSmallCards;
 	//! \brief display small-cards

@@ -243,10 +243,11 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	for (unsigned int j = 0; j < 5; j++)
 	{
 		m_CommunityCards[j] = new QGraphicsPixmapItem(
-			QPixmap(QString("gfx/deck/default/blank.png")));
+			QPixmap(QString("gfx/deck/%1/blank.png")
+				.arg(QString::fromStdString(config.get("ui_card_deck")))));
 
 		m_CommunityCards[j]->setTransformationMode(Qt::SmoothTransformation);
-		m_CommunityCards[j]->scale(0.7, 0.7);
+		m_CommunityCards[j]->scale(1.1, 1.1);
 		m_CommunityCards[j]->setZValue(5.0);
 		m_CommunityCards[j]->setPos(calcCCardsPos(j));
 		m_CommunityCards[j]->hide();
@@ -870,7 +871,9 @@ void WTable::updateView()
 	{
 		m_CommunityCards[i]->setPixmap(
 			QPixmap(
-				QString("gfx/deck/default/%1.png").arg(allcards[i].getName())));
+				QString("gfx/deck/%1/%2.png")
+					.arg(QString::fromStdString(config.get("ui_card_deck")))
+					.arg(allcards[i].getName())));
 		m_CommunityCards[i]->show();
 	}
 
