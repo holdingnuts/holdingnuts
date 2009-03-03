@@ -128,9 +128,32 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 	checkHandStrength = new QCheckBox("", tabAppearance);
 	checkHandStrength->setCheckState(cfg->getBool("ui_show_handstrength") ? Qt::Checked : Qt::Unchecked);
 	
+	QLabel *labelCarddeck = new QLabel(tr("Card deck"), tabAppearance);
+	comboCarddeck = new QComboBox(tabAppearance);
+	
+	// card decks  // FIXME: retrieve directory listing
+	struct {
+		QString lId;
+		QString lName;
+	} decks[] = {
+		{ "default",	tr("Default") },
+		{ "classic",	tr("Classic") }
+	};
+	const unsigned int decks_count = sizeof(decks) / sizeof(decks[0]);
+	
+	for (unsigned int i=0; i < decks_count; i++)
+	{
+		comboCarddeck->addItem(decks[i].lName, decks[i].lId);
+		if (decks[i].lId.toStdString() == cfg->get("ui_card_deck"))
+			comboCarddeck->setCurrentIndex(i);
+	}
+	
+	
 	QGridLayout *gridAppearance = new QGridLayout;
 	gridAppearance->addWidget(labelHandStrength, 0, 0);
 	gridAppearance->addWidget(checkHandStrength, 0, 1);
+	gridAppearance->addWidget(labelCarddeck, 1, 0);
+	gridAppearance->addWidget(comboCarddeck, 1, 1);
 	tabAppearance->setLayout(gridAppearance);
 }
 
@@ -160,6 +183,7 @@ void SettingsDialog::actionOk()
 		
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
+		cfg->set("ui_card_deck", comboCarddeck->itemData(comboCarddeck->currentIndex()).toString().toStdString());
 		
 		cfg->save(configfile);
 		
