@@ -1095,7 +1095,12 @@ void WTable::resizeEvent(QResizeEvent *event)
 {
 	// preserve aspect ratio of our view
 	const float aspect_ratio = 0.6f;
-	m_pView->resize((int)(m_pView->height() / aspect_ratio), m_pView->height());
+	int new_width = (int)(m_pView->height() / aspect_ratio);
+	
+	if (new_width > this->width())
+		new_width = this->width();
+	
+	m_pView->resize(new_width, m_pView->height());
 	m_pView->move(width()/2 - m_pView->width() / 2, m_pView->y());
 	
 	m_pView->fitInView(m_pScene->itemsBoundingRect());
