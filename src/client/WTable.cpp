@@ -1097,6 +1097,7 @@ void WTable::resizeEvent(QResizeEvent *event)
 	const float aspect_ratio = 0.6f;
 	int new_width = (int)(m_pView->height() / aspect_ratio);
 	
+	// fit in window if preserving aspect-ratio is not possible
 	if (new_width > this->width())
 		new_width = this->width();
 	

@@ -241,7 +241,17 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	game->addAction(action);
 #endif
 	
+	game->addSeparator();
+	
+	action = new QAction(tr("&Quit"), this);
+	action->setShortcut(tr("CTRL+Q"));
+	connect(action, SIGNAL(triggered()), qApp, SLOT(quit()));
+	game->addAction(action);
+	
 	menuBar()->addMenu(game)->setText(tr("&Game"));
+	
+	// initially enable/disabled widgets
+	updateConnectionStatus();
 }
 
 void WMain::addLog(const QString &line)
@@ -288,7 +298,9 @@ void WMain::updateGamelist(
 
 void WMain::updateConnectionStatus()
 {
-	if (((PClient*)qApp)->isConnected())
+	bool is_connected = ((PClient*)qApp)->isConnected();
+	
+	if (is_connected)
 	{
 		btnConnect->setEnabled(false);
 		btnClose->setEnabled(true);
@@ -303,6 +315,8 @@ void WMain::updateConnectionStatus()
 		
 		clearGamelist();
 	}
+	
+	//m_pChat->setEnabled(is_connected);
 }
 
 void WMain::clearGamelist()
