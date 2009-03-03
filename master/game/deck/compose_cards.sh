@@ -17,10 +17,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
 
+# Usage: compose_cards.sh [4color]
 
-density=140
-font=Eras-Normal  #Baskerville-Normal  #Arial
+
+density=80
+font=Arial  #Eras-Normal  #Baskerville-Normal
 font_ratio=35
+font_kerning=-4
 
 ratio_suit_small=28
 ratio_suit_big=47
@@ -62,7 +65,7 @@ create_face()
 	esac
 
 	convert -font ${font} -pointsize ${ps} -background none \
-		-fill ${color} label:"${1}"  \
+		-fill ${color} -kerning ${font_kerning} label:"${1}"  \
 		tmp/face_${1}.png
 	
 	convert tmp/face_${1}.png -rotate 180 tmp/face_${1}_flip.png
@@ -73,10 +76,16 @@ create_suit()
 	ratio_small=$((density * ratio_suit_small / 100))
 	ratio_big=$((density * ratio_suit_big / 100))
 	
-	convert -density ${ratio_small} -background none suit_${1}.svg tmp/suit_${1}.png
+	if [[ ${four_color} == 1 ]] ; then
+		if [[ ${1} == d || ${1} == c ]] ; then
+			prefix="_4"
+		fi
+	fi
+	
+	convert -density ${ratio_small} -background none suit_${1}${prefix}.svg tmp/suit_${1}.png
 	#convert -flip tmp/suit_${1}.png tmp/suit_${1}_flip.png
 
-	convert -density ${ratio_big} -background none suit_${1}.svg tmp/suit_${1}_big.png
+	convert -density ${ratio_big} -background none suit_${1}${prefix}.svg tmp/suit_${1}_big.png
 }
 
 create_card()
@@ -137,6 +146,18 @@ create_blank_card()
 }
 
 ################################################################################
+
+if [[ $1 == "4color" ]] ; then
+	echo "Creating 4-color deck"
+	four_color=1
+else
+	echo "Creating 2-color deck"
+	
+	# use black/red for diamonds and clubs
+	color_d="${color_h}"
+	color_c="${color_s}"
+fi
+
 
 mkdir -p tmp output
 
