@@ -27,7 +27,6 @@
 #include "SysAccess.h"
 #include "ConfigParser.hpp"
 
-#include "Protocol.h"
 #include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
 
 #include "pclient.hpp"
@@ -52,21 +51,31 @@ static games_type		games;
 
 //////////////
 
-#ifdef DEBUG
-#	include <QDebug>
-
-QDebug operator << (QDebug s, const tableinfo& t)
+QString PClient::getGametype(gametype type)
 {
-	s << "tableinfo\n";
-	s << "\t sitting= " << (t.sitting ? "true" : "false") << "\n";
-	s << "\t subscribed= " << (t.subscribed ? "true" : "false") << "\n";
-	s << "end tableinfo" << "\n";
-	
-	return s;
+	switch (type)
+	{
+		case GameTypeHoldem:
+			return QString("Texas Hold'em");
+		default:
+			return QString("unkown gametype");
+	};
 }
 
-#endif /* DEBUG */
-
+QString PClient::getGamemode(gamemode mode)
+{
+	switch (mode)
+	{
+		case GameModeRingGame:
+			return QString("Cash game");
+		case GameModeFreezeOut:
+			return QString("Tournament");
+		case GameModeSNG:
+			return QString("Sit'n'Go");
+		default:
+			return QString("unkown gamemode");
+	};
+}
 
 // server command PSERVER <version> <client-id>
 void PClient::serverCmdPserver(Tokenizer &t)
@@ -407,7 +416,10 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 {
 	char msg[1024];
 	
-	/* from */ t.getNextInt();
+	games_type::iterator git = games.find(t.getNextInt());
+	// TODO: error handling -> if (git == games.end()) -> and now?
+	// clear game-player-list 
+	git->second.players.clear();
 	
 	// client-list
 	std::string sreq_orig = t.getTillEnd();
@@ -423,7 +435,12 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 		
 		// skip this client... if we already know him
 		if (getPlayerInfo(cid))
-			continue;
+		{
+			git->second.players.push_back(players[cid].name);
+				continue;
+		}
+		else
+			git->second.players.push_back("???");
 		
 		sreq_clean += token + " ";
 	}
@@ -468,6 +485,7 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 	wMain->addPlayer(pi.name);
 }
 
+// server command GAMEINFO <gid> <type>:<value> [...]
 void PClient::serverCmdGameinfo(Tokenizer &t)
 {
 	int gid = t.getNextInt();
@@ -476,16 +494,15 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	if (git == games.end())
 	{
-		games.insert(
+		// if no game found add a new one to the list
+		git = games.insert(
 			git, 
 			games_type::value_type(gid, games_type::mapped_type()));
 	}
-	
-	std::string playerscount;
-	std::string maxplayers;
-	std::string name;
-	
+
 	std::string sinfo;
+	int players_count = 0; 
+
 	while (t.getNext(sinfo))
 	{
 		Tokenizer it;
@@ -501,33 +518,38 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 		
 		else if (itype == "player")
 		{
-			playerscount = it.getNext();
-			maxplayers = it.getNext();
+			git->second.players_max = Tokenizer::string2int(ivalue);
+
+			players_count = it.getNextInt();
+			
+			if (players_count > 0)
+				requestPlayerlist(gid);
 		}
 		else if (itype == "name")
 		{
-			name = ivalue.c_str();
+			git->second.name = QString::fromStdString(ivalue);
 		}
 		else if (itype == "type")
 		{
-			// FIXME: see Protocol.h
+			git->second.type = static_cast<gametype>(Tokenizer::string2int(ivalue));
 		}
 		else if (itype == "mode")
 		{
-			// FIXME: see Protocol.h
+			git->second.mode = static_cast<gamemode>(Tokenizer::string2int(ivalue));
 		}
 	}
 	
 	// update gamelist
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
-	
+
 	wMain->updateGamelist(
 		gid,
-		QString("%1 (%2)").arg(QString::fromStdString(name)).arg(gid),
-		QString::fromStdString(playerscount),
-		QString::fromStdString(maxplayers));
+		QString("%1 (%2)").arg(git->second.name).arg(gid),
+		getGametype(git->second.type) + " " + getGamemode(git->second.mode),
+		QString("%1 / %2").arg(players_count).arg(git->second.players_max));
 }
 
+// server command GAMELIST <gid> [...]
 void PClient::serverCmdGamelist(Tokenizer &t)
 {
 	char msg[1024];
@@ -742,6 +764,9 @@ void PClient::doRegister(int gid, bool bRegister)
 		snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
 		
 	netSendMsg(msg);
+	
+	// update gamelist
+	requestGamelist();
 }
 
 bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
@@ -978,6 +1003,7 @@ void PClient::requestPlayerlist(int gid)
 
 void PClient::requestGamelist()
 {
+	// query gamelist
 	netSendMsg("REQUEST gamelist");
 }
 
