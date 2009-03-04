@@ -521,9 +521,6 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 			git->second.players_max = Tokenizer::string2int(ivalue);
 
 			players_count = it.getNextInt();
-			
-			if (players_count > 0)
-				requestPlayerlist(gid);
 		}
 		else if (itype == "name")
 		{

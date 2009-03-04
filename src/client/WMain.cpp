@@ -417,11 +417,10 @@ void WMain::gameListSelectionChanged(
 {
 	if (!selected.isEmpty())
 	{
-#if 0  // no, we won't do this here
-		clearPlayerlist();
+		//clearPlayerlist();
 
 		((PClient*)qApp)->requestPlayerlist((*selected.begin()).topLeft().row());
-#endif
+
 	// TODO:
 	// modelGameList->getPlayerList(selected_row)
 	// {
