@@ -21,30 +21,28 @@
  */
 
 
-#ifndef _HOLDING_NUTS_STRING_LIST_MODEL_H
-#define _HOLDING_NUTS_STRING_LIST_MODEL_H
+#ifndef _HOLDING_NUTS_GAME_LIST_TABLE_MODEL_H
+#define _HOLDING_NUTS_GAME_LIST_TABLE_MODEL_H
 
-#include <QAbstractListModel>
+#include <QAbstractTableModel>
 #include <QStringList>
 
-//! \brief simple, non-hierarchical, stringbased Modellist class
-class StringListModel : public QAbstractListModel
+//! \brief Gamelist Table Model
+class GameListTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
-	StringListModel(QObject *parent = 0);
+	GameListTableModel(QObject *parent = 0);
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const;
+	int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
-	QVariant data(const QModelIndex& index, int role) const;
-
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 	QVariant headerData(
 		int section,
 		Qt::Orientation orientation,
-		int role = Qt::DisplayRole) const;
-		
-	Qt::ItemFlags flags(const QModelIndex& index) const;
+		int role = Qt::DisplayRole) const;	
 	
 	bool setData(
 		const QModelIndex& index,
@@ -60,17 +58,28 @@ public:
 		int rows,
 		const QModelIndex &index = QModelIndex());
 
-	//! \brief add's a new value to list
+	//! \brief 
 	//! \param value
-	void add(const QVariant& value);
-	
-	void set(const QStringList& value);
-	
+	void updateRow(int gid, const QStringList& value);
+
+	void updateValue(int gid, int column, const QString& value);
+
+	void updateGameName(int gid, const QString& value);
+	void updateGameType(int gid, const QString& value);
+	void updatePlayers(int gid, const QString& value);
+	void updateGameState(int gid, const QString& value);
+
 	//! \brief clear's the list
 	void clear();
 
+#ifdef DEBUG
+	void dump();
+#endif
+
 private:
-	QStringList		stringList;
+	QStringList				strlstHeaderLabels;
+	
+	QList<QStringList>		lstRows; // QStringList == row[n,0], row[n,1],... 
 };
 
-#endif	/* _HOLDING_NUTS_STRING_LIST_MODEL_H */
+#endif	/* _HOLDING_NUTS_GAME_LIST_TABLE_MODEL_H */

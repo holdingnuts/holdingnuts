@@ -65,7 +65,7 @@ Qt::ItemFlags StringListModel::flags(const QModelIndex &index) const
 	if (!index.isValid())
 		return Qt::ItemIsEnabled;
 
-	return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+	return QAbstractItemModel::flags(index) | Qt::ItemIsSelectable;
 }
 
 bool StringListModel::setData(
@@ -105,6 +105,15 @@ void StringListModel::add(const QVariant& value)
 {
 	if (this->appendRows(1))
 		this->setData(createIndex(this->rowCount() - 1, 0), value);
+}
+
+void StringListModel::set(const QStringList& value)
+{
+	clear();
+
+	// not the best solution, but a save way to add variables
+	for (int i = 0; i < value.count(); ++i)
+		add(value.at(i));
 }
 
 void StringListModel::clear()

@@ -26,6 +26,7 @@
 #include "SettingsDialog.hpp"
 #include "AboutDialog.hpp"
 #include "StringListModel.hpp"
+#include "GameListTableModel.hpp"
 
 #include "Config.h"
 #include "Debug.h"
@@ -40,8 +41,8 @@
 #include <QTextEdit>
 #include <QMenu>
 #include <QMenuBar>
-#include <QTreeView>
-#include <QStandardItemModel>
+#include <QTableView>
+#include <QHeaderView>
 #include <QListView>
 #include <QCloseEvent>
 
@@ -84,23 +85,17 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lblBanner->setLayout(lHeader);
 
 	// model game
-	QStringList strlstHeaderLabels;
-	
-	strlstHeaderLabels << tr("Name") 
-		<< tr("Gametype") 
-		<< tr("Players") 
-		<< tr("Max. Players")
-		<< tr("State");
-		
-	modelGameList = new QStandardItemModel(0, strlstHeaderLabels.count(), this);
-	modelGameList->setHorizontalHeaderLabels(strlstHeaderLabels);
+	modelGameList = new GameListTableModel(this);
 
 	// view game
-	viewGameList = new QTreeView(this);
-	viewGameList->setRootIsDecorated(false);
-	viewGameList->setAlternatingRowColors(true);
-	viewGameList->setModel(modelGameList);
+	viewGameList = new QTableView(this);
+	viewGameList->setShowGrid(false);
+	viewGameList->horizontalHeader()->setHighlightSections(false);
+	viewGameList->verticalHeader()->hide();
+	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
+	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
+	viewGameList->setModel(modelGameList);
 	
 	connect(
 		viewGameList->selectionModel(),
@@ -162,9 +157,6 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lConnect->addWidget(btnConnect);
 	lConnect->addWidget(btnClose);
 
-//	QGroupBox *groupSrv = new QGroupBox(tr("Connection"), this);
-//	groupSrv->setLayout(lConnect);
-
 	
 	// the foyer chat box
 	m_pChat = new ChatBox("", ChatBox::INPUTLINE_BOTTOM, 0, this);
@@ -180,7 +172,6 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// content layout
 	QGridLayout *layout = new QGridLayout;
 	// row 0
-//	layout->addWidget(groupSrv, 0, 0, 1, 2);
 	layout->addLayout(lConnect, 0, 0, 1, 2);
 	// row 2
 	layout->addWidget(viewGameList, 1, 0, 1, 1);
@@ -277,23 +268,22 @@ void WMain::addServerErrorMessage(int code, const QString &text)
 
 void WMain::addPlayer(const QString& name)
 {
-//	modelPlayerList->appendRow(new QStandardItem(name));
+	// TODO: remove
 	modelPlayerList->add(name);
 }
 
 void WMain::updateGamelist(
 	int gid,
 	const QString& name,
-	const QString& currentPlayers,
-	const QString& maxPlayers)
+	const QString& type,
+	const QString& players)
 {
-	// QStandardItem * QStandardItemModel::itemFromIndex ( const QModelIndex & index )
-	// TODO: check for memory garbage
-	modelGameList->setItem(gid, 0, new QStandardItem(name));
-	modelGameList->setItem(gid, 1, new QStandardItem("gametype"));
-	modelGameList->setItem(gid, 2, new QStandardItem(currentPlayers));
-	modelGameList->setItem(gid, 3, new QStandardItem(maxPlayers));
-	modelGameList->setItem(gid, 4, new QStandardItem("gamestate"));
+	modelGameList->updateGameName(gid, name);
+	modelGameList->updateGameType(gid, type);
+	modelGameList->updatePlayers(gid, players);
+	
+	viewGameList->resizeColumnsToContents(); 
+	viewGameList->resizeRowsToContents(); 
 }
 
 void WMain::updateConnectionStatus()
@@ -313,21 +303,10 @@ void WMain::updateConnectionStatus()
 			btnConnect->setEnabled(false);
 		btnClose->setEnabled(false);
 		
-		clearGamelist();
+		modelGameList->clear();
 	}
 	
 	//m_pChat->setEnabled(is_connected);
-}
-
-void WMain::clearGamelist()
-{
-	// TODO: check for memory holes
-	modelGameList->removeRows(0, modelGameList->rowCount());
-}
-
-void WMain::clearPlayerlist()
-{
-	modelPlayerList->clear();
 }
 
 void WMain::slotSrvTextChanged()
@@ -338,6 +317,13 @@ void WMain::slotSrvTextChanged()
 QString WMain::getUsername() const
 {
 	return QString::fromStdString(config.get("player_name"));
+}
+
+GameListTableModel* WMain::getGameList() const
+{
+	Q_ASSERT_X(modelGameList, Q_FUNC_INFO, "invalid gamelist pointer");
+
+	return modelGameList;
 }
 
 void WMain::actionConnect()
@@ -377,7 +363,11 @@ void WMain::actionTest()
 
 void WMain::actionRegister()
 {
+	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
+	
 	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
 	
 	if (pSelect->hasSelection())
 	{
@@ -388,7 +378,11 @@ void WMain::actionRegister()
 
 void WMain::actionUnregister()
 {
+	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
+
 	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
 	
 	if (pSelect->hasSelection())
 	{
@@ -423,11 +417,17 @@ void WMain::gameListSelectionChanged(
 {
 	if (!selected.isEmpty())
 	{
+#if 0  // no, we won't do this here
 		clearPlayerlist();
 
-#if 0  // no, we won't do this here
 		((PClient*)qApp)->requestPlayerlist((*selected.begin()).topLeft().row());
 #endif
+	// TODO:
+	// modelGameList->getPlayerList(selected_row)
+	// {
+	// 	return lstGames[selected_row]->players(); lstGames == QMap<gid, gameinfo*>
+	// }
+
 	}
 }
 

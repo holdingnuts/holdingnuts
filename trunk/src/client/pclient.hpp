@@ -44,6 +44,8 @@
 #include "GameLogic.hpp"
 #include "Player.hpp"
 
+#include "Protocol.h"
+
 #include "WMain.hpp"
 #include "WTable.hpp"
 
@@ -61,7 +63,7 @@ typedef struct {
 typedef struct {
 	char name[255];
 } playerinfo;
-
+// TODO: why not replace with QStringList or something else
 
 typedef struct {
 	bool sitting;
@@ -73,15 +75,32 @@ typedef struct {
 
 typedef std::map<int,tableinfo>		tables_type;
 
-
 typedef struct {
-	bool registered;
-	unsigned int player_timeout;
-	tables_type tables;
+	// TODO: ???
+	bool			registered;
+	
+	//! \brief name of the game
+	QString			name;
+	//! \brief gametype see Protocol.h 
+	gametype		type;
+	//! \brief gamemode see Protocol.h 
+	gamemode		mode;
+	//! \brief timeout in seconds if no answer from player
+	unsigned int	player_timeout;
+	//! \brief current playerscount registered in game
+//	unsigned int	players_count;		// TODO: remove -> players.clount()
+	//! \brief maximum players allowed
+	unsigned int	players_max;
+	//! \brief registered Players
+	QStringList		players;
+
+	tables_type		tables;
 } gameinfo;
+// TODO: merge gameinfo with GameListTableModel { QMap<gid, gameinfo*> };
 
+// map<gid, gameinfo>
 typedef std::map<int,gameinfo>		games_type;
-
+// map<cid, playerinfo>
 typedef std::map<int,playerinfo>	players_type;
 
 
@@ -119,6 +138,9 @@ public:
 	//! \brief query playerlist from Server
 	void requestPlayerlist(int gid);
 	
+	static QString getGametype(gametype type);
+	static QString getGamemode(gamemode mode);
+	
 private:
 	WMain *wMain;
 		
@@ -152,7 +174,7 @@ private slots:
 	void netError(QAbstractSocket::SocketError socketError);
 	void netConnected();
 	void netDisconnected();
-	
+
 	//! \brief query gamelist from Server
 	void requestGamelist();
 	

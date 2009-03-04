@@ -29,12 +29,13 @@
 
 class ChatBox;
 class StringListModel;
+class GameListTableModel;
 
 class QLineEdit;
 class QPushButton;
 class QTextEdit;
 class QStandardItemModel;
-class QTreeView;
+class QTableView;
 class QListView;
 
 
@@ -52,28 +53,26 @@ public:
 	void addServerMessage(const QString &text);
 	void addServerErrorMessage(int code, const QString &text);
 	
+	// TODO: remove
 	void addPlayer(const QString& name);
 
+	// TODO: remove
 	//! \brief Updates or add a Game to the Gamelist
 	//! \param name Gamename
 	void updateGamelist(
 		int gid,
 		const QString& name,
-		const QString& currentPlayers,
-		const QString& maxPlayers);
+		const QString& type,
+		const QString& players);
 
 	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();
 
-	//! \brief Clears the Modelgamelist
-	void clearGamelist();
-
-	//! \brief Clears the Playerlist
-	void clearPlayerlist();
-
 	//! \brief Returns the current Username
 	//! \return Name
 	QString getUsername() const;
+	
+	GameListTableModel* getGameList() const;
 
 private slots:
 	void closeEvent(QCloseEvent *event);
@@ -109,10 +108,9 @@ private:
 	ChatBox					*m_pChat;
 	
 	//! \brief MVC Model
-	// TODO: replace model with own model class
-	QStandardItemModel		*modelGameList;
+	GameListTableModel		*modelGameList;
 	//! \brief MVC View
-	QTreeView				*viewGameList;
+	QTableView				*viewGameList;
 	
 	//! \brief MVC Model
 	StringListModel			*modelPlayerList;
