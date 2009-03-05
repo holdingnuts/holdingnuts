@@ -36,6 +36,7 @@
 #include "pclient.hpp"
 
 #include <cstdio>
+#include <vector>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
@@ -308,17 +309,43 @@ void WMain::updateConnectionStatus()
 
 void WMain::notifyPlayerInfo(int cid)
 {
+	dbg_msg("DEBUG", "notify playerinfo <%d>", cid);
+
+#if 0
 	const playerinfo *player = ((PClient*)qApp)->getPlayerInfo(cid);
 	
 	if (!player)
 		return;
+#endif
+
+	// FIXME: update the model only if cid is element of selected game;
+	//		and update only the needed items like in gamelistmodel
+	//		stringlistmodel should contain <cid> as row.value
+	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
 	
-	// TODO: how do i do that? there is no 
+	if (pSelect->hasSelection())
+	{
+		const int gid = pSelect->selectedRows().at(0).row();
+		dbg_msg("DEBUG", "select row-id: %d", gid);
+		updatePlayerList(gid);
+	}
+}
+
+void WMain::notifyPlayerList(int gid)
+{
+	dbg_msg("DEBUG", "notify playerlist <%d>", gid);
 	
-	//QString strName = QString(player->name);
-	// FIXME: QStringList listInfo; listinfo << strName; ...
+	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
 	
-	//modelPlayerList->updatePlayer(cid, listInfo);
+	if (pSelect->hasSelection())
+	{
+		const int sel_gid = pSelect->selectedRows().at(0).row();
+		
+		if (sel_gid == gid)
+			updatePlayerList(gid);
+	}
 }
 
 void WMain::updatePlayerList(int gid)
@@ -329,10 +356,10 @@ void WMain::updatePlayerList(int gid)
 	
 	if (!ginfo)
 		return;
-		
-	for (unsigned int i = 0; i < ginfo->players_count; ++i)
+	
+	for (std::vector<int>::const_iterator cit = ginfo->players.begin(); cit != ginfo->players.end(); cit++)
 	{
-		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(i);
+		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(*cit);
 			
 		if (pinfo)
 			modelPlayerList->add(pinfo->name);
@@ -398,6 +425,9 @@ void WMain::actionRegister()
 	{
 		const int gid = pSelect->selectedRows().at(0).row();
 		((PClient*)qApp)->doRegister(gid, true);
+		
+		((PClient*)qApp)->requestPlayerlist(gid);
+		updatePlayerList(gid);
 	}
 }
 
@@ -413,6 +443,9 @@ void WMain::actionUnregister()
 	{
 		const int gid = pSelect->selectedRows().at(0).row();
 		((PClient*)qApp)->doRegister(gid, false);
+		
+		((PClient*)qApp)->requestPlayerlist(gid);
+		updatePlayerList(gid);
 	}
 }
 
@@ -444,6 +477,7 @@ void WMain::gameListSelectionChanged(
 	{
 		const int selected_row = (*selected.begin()).topLeft().row();
 		
+		((PClient*)qApp)->requestGameinfo(selected_row);
 		((PClient*)qApp)->requestPlayerlist(selected_row);
 		
 		updatePlayerList(selected_row);
@@ -504,7 +538,7 @@ QString WMain::getGamestateString(gamestate state)
 
 void WMain::notifyGameinfoUpdate(int gid)
 {
-	gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
+	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
 	
 	updateGamelist(
