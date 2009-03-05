@@ -527,14 +527,23 @@ bool client_cmd_request_gameinfo(clientcon *client, Tokenizer &t)
 				break;
 			}
 			
+			int state = 0;
+			if (g->isStarted())
+				state = GameStateStarted;
+			else if (g->isEnded())
+				state = GameStateEnded;
+			else
+				state = GameStateWaiting;
+			
 			snprintf(msg, sizeof(msg),
-				"GAMEINFO %d type:%d mode:%d player:%d:%d timeout:%d \"name:%s\"",
+				"GAMEINFO %d type:%d mode:%d player:%d:%d timeout:%d state:%d \"name:%s\"",
 				gid,
 				(int) GameTypeHoldem,
 				game_mode,
 				g->getPlayerMax(),
 				g->getPlayerCount(),
 				g->getPlayerTimeout(),
+				state,
 				g->getName().c_str());
 			
 			send_msg(client->sock, msg);

@@ -63,7 +63,8 @@ public:
 		int gid,
 		const QString& name,
 		const QString& type,
-		const QString& players);
+		const QString& players,
+		const QString& state);
 
 	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();

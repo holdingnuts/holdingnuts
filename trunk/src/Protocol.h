@@ -25,14 +25,20 @@
 #define _PROTOCOL_H
 
 typedef enum {
-	GameTypeHoldem = 0x100
+	GameTypeHoldem = 0x1
 } gametype;
 
 typedef enum {
 	GameModeRingGame	= 0x1, // Cash game
 	GameModeFreezeOut	= 0x2, // Tournament
-	GameModeSNG		= 0x4  // Sit'n'Go
+	GameModeSNG		= 0x3  // Sit'n'Go
 } gamemode;
+
+typedef enum {
+	GameStateWaiting	= 0x1,
+	GameStateStarted	= 0x2,
+	GameStateEnded		= 0x3
+} gamestate;
 
 typedef enum {
 	SnapGameState = 0x1,

@@ -51,7 +51,8 @@ static games_type		games;
 
 //////////////
 
-QString PClient::getGametype(gametype type)
+// FIXME: move to WMain
+QString PClient::getGametypeString(gametype type)
 {
 	switch (type)
 	{
@@ -62,7 +63,8 @@ QString PClient::getGametype(gametype type)
 	};
 }
 
-QString PClient::getGamemode(gamemode mode)
+// FIXME: move to WMain
+QString PClient::getGamemodeString(gamemode mode)
 {
 	switch (mode)
 	{
@@ -74,6 +76,22 @@ QString PClient::getGamemode(gamemode mode)
 			return QString("Sit'n'Go");
 		default:
 			return QString("unkown gamemode");
+	};
+}
+
+// FIXME: move to WMain
+QString PClient::getGamestateString(gamestate state)
+{
+	switch (state)
+	{
+		case GameStateWaiting:
+			return QString(tr("Waiting"));
+		case GameStateStarted:
+			return QString(tr("Started"));
+		case GameStateEnded:
+			return QString(tr("Ended"));
+		default:
+			return QString("unkown gamestate");
 	};
 }
 
@@ -512,10 +530,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 		std::string ivalue = it.getNext();
 		
 		if (itype == "timeout")
-		{
 			git->second.player_timeout = Tokenizer::string2int(ivalue);
-		}
-		
 		else if (itype == "player")
 		{
 			git->second.players_max = Tokenizer::string2int(ivalue);
@@ -523,17 +538,13 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 			players_count = it.getNextInt();
 		}
 		else if (itype == "name")
-		{
 			git->second.name = QString::fromStdString(ivalue);
-		}
 		else if (itype == "type")
-		{
 			git->second.type = static_cast<gametype>(Tokenizer::string2int(ivalue));
-		}
 		else if (itype == "mode")
-		{
 			git->second.mode = static_cast<gamemode>(Tokenizer::string2int(ivalue));
-		}
+		else if (itype == "state")
+			git->second.state = static_cast<gamestate>(Tokenizer::string2int(ivalue));
 	}
 	
 	// update gamelist
@@ -542,8 +553,9 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	wMain->updateGamelist(
 		gid,
 		QString("%1 (%2)").arg(git->second.name).arg(gid),
-		getGametype(git->second.type) + " " + getGamemode(git->second.mode),
-		QString("%1 / %2").arg(players_count).arg(git->second.players_max));
+		getGametypeString(git->second.type) + " " + getGamemodeString(git->second.mode),
+		QString("%1 / %2").arg(players_count).arg(git->second.players_max),
+		getGamestateString(git->second.state));
 }
 
 // server command GAMELIST <gid> [...]
