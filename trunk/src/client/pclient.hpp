@@ -90,11 +90,11 @@ typedef struct {
 	//! \brief timeout in seconds if no answer from player
 	unsigned int	player_timeout;
 	//! \brief current playerscount registered in game
-//	unsigned int	players_count;		// TODO: remove -> players.clount()
+	unsigned int	players_count;
 	//! \brief maximum players allowed
 	unsigned int	players_max;
 	//! \brief registered Players
-	QStringList		players;
+	QStringList		players;   // FIXME: convert to vector<int> with cids
 
 	tables_type		tables;
 } gameinfo;
@@ -139,11 +139,6 @@ public:
 	
 	//! \brief query playerlist from Server
 	void requestPlayerlist(int gid);
-	
-	// FIXME: move these to WMain
-	static QString getGametypeString(gametype type);
-	static QString getGamemodeString(gamemode mode);
-	static QString getGamestateString(gamestate state);
 	
 private:
 	WMain *wMain;

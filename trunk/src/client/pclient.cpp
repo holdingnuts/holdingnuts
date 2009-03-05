@@ -51,50 +51,6 @@ static games_type		games;
 
 //////////////
 
-// FIXME: move to WMain
-QString PClient::getGametypeString(gametype type)
-{
-	switch (type)
-	{
-		case GameTypeHoldem:
-			return QString("Texas Hold'em");
-		default:
-			return QString("unkown gametype");
-	};
-}
-
-// FIXME: move to WMain
-QString PClient::getGamemodeString(gamemode mode)
-{
-	switch (mode)
-	{
-		case GameModeRingGame:
-			return QString("Cash game");
-		case GameModeFreezeOut:
-			return QString("Tournament");
-		case GameModeSNG:
-			return QString("Sit'n'Go");
-		default:
-			return QString("unkown gamemode");
-	};
-}
-
-// FIXME: move to WMain
-QString PClient::getGamestateString(gamestate state)
-{
-	switch (state)
-	{
-		case GameStateWaiting:
-			return QString(tr("Waiting"));
-		case GameStateStarted:
-			return QString(tr("Started"));
-		case GameStateEnded:
-			return QString(tr("Ended"));
-		default:
-			return QString("unkown gamestate");
-	};
-}
-
 // server command PSERVER <version> <client-id>
 void PClient::serverCmdPserver(Tokenizer &t)
 {
@@ -519,7 +475,6 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	}
 
 	std::string sinfo;
-	int players_count = 0; 
 
 	while (t.getNext(sinfo))
 	{
@@ -534,8 +489,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 		else if (itype == "player")
 		{
 			git->second.players_max = Tokenizer::string2int(ivalue);
-
-			players_count = it.getNextInt();
+			git->second.players_count = it.getNextInt();
 		}
 		else if (itype == "name")
 			git->second.name = QString::fromStdString(ivalue);
@@ -547,15 +501,9 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 			git->second.state = static_cast<gamestate>(Tokenizer::string2int(ivalue));
 	}
 	
-	// update gamelist
+	// notify WMain there's an updated gameinfo available
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
-
-	wMain->updateGamelist(
-		gid,
-		QString("%1 (%2)").arg(git->second.name).arg(gid),
-		getGametypeString(git->second.type) + " " + getGamemodeString(git->second.mode),
-		QString("%1 / %2").arg(players_count).arg(git->second.players_max),
-		getGamestateString(git->second.state));
+	wMain->notifyGameinfoUpdate(gid);
 }
 
 // server command GAMELIST <gid> [...]

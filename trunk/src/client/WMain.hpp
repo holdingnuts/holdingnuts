@@ -27,6 +27,8 @@
 #include <QMainWindow>
 #include <QItemSelection>
 
+#include <Protocol.h>
+
 class ChatBox;
 class StringListModel;
 class GameListTableModel;
@@ -65,7 +67,9 @@ public:
 		const QString& type,
 		const QString& players,
 		const QString& state);
-
+	
+	void notifyGameinfoUpdate(int gid);
+	
 	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();
 
@@ -75,6 +79,11 @@ public:
 	
 	GameListTableModel* getGameList() const;
 
+protected:
+	static QString getGametypeString(gametype type);
+	static QString getGamemodeString(gamemode mode);
+	static QString getGamestateString(gamestate state);
+	
 private slots:
 	void closeEvent(QCloseEvent *event);
 	

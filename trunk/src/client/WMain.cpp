@@ -443,3 +443,56 @@ void WMain::closeEvent(QCloseEvent *event)
 		event->accept();
 }
 
+QString WMain::getGametypeString(gametype type)
+{
+	switch (type)
+	{
+		case GameTypeHoldem:
+			return QString(tr("Texas Hold'em"));
+		default:
+			return QString(tr("unkown gametype"));
+	};
+}
+
+QString WMain::getGamemodeString(gamemode mode)
+{
+	switch (mode)
+	{
+		case GameModeRingGame:
+			return QString(tr("Cash game"));
+		case GameModeFreezeOut:
+			return QString(tr("Tournament"));
+		case GameModeSNG:
+			return QString(tr("Sit'n'Go"));
+		default:
+			return QString(tr("unkown gamemode"));
+	};
+}
+
+QString WMain::getGamestateString(gamestate state)
+{
+	switch (state)
+	{
+		case GameStateWaiting:
+			return QString(tr("Waiting"));
+		case GameStateStarted:
+			return QString(tr("Started"));
+		case GameStateEnded:
+			return QString(tr("Ended"));
+		default:
+			return QString(tr("unkown gamestate"));
+	};
+}
+
+void WMain::notifyGameinfoUpdate(int gid)
+{
+	gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
+	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
+	
+	updateGamelist(
+		gid,
+		QString("%1 (%2)").arg(gi->name).arg(gid),
+		getGametypeString(gi->type) + " " + getGamemodeString(gi->mode),
+		QString("%1 / %2").arg(gi->players_count).arg(gi->players_max),
+		getGamestateString(gi->state));
+}
