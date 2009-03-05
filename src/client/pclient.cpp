@@ -83,7 +83,6 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	// request initial game-list and start update-timer
 	requestGamelist();
-	timerGamelistUpdate->start(60000);
 }
 
 // server command ERR [<code>] [<text>]
@@ -917,9 +916,6 @@ void PClient::netDisconnected()
 	connected = false;
 	connecting = false;
 	
-	// stop the update-timer
-	timerGamelistUpdate->stop();
-	
 	wMain->updateConnectionStatus();
 	
 	
@@ -1011,10 +1007,6 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connect(tcpSocket, SIGNAL(connected()), this, SLOT(netConnected()));
 	connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(netDisconnected()));
 	
-	// update timer
-	timerGamelistUpdate = new QTimer(this);
-	connect(timerGamelistUpdate, SIGNAL(timeout()), this, SLOT(requestGamelist()));
-
 	// app icon
 	Q_INIT_RESOURCE(pclient);
 }

@@ -148,9 +148,6 @@ private:
 	bool connecting;
 	
 	QTcpSocket	*tcpSocket;
-
-	//! \brief timer updates the gamelist
-	QTimer		*timerGamelistUpdate;
 	
 private:	
 	int netSendMsg(const char *msg);

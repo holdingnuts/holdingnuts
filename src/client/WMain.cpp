@@ -242,6 +242,16 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	menuBar()->addMenu(game)->setText(tr("&Game"));
 	
+	
+	// gamelist update timer
+	timerGamelistUpdate = new QTimer(this);
+	connect(timerGamelistUpdate, SIGNAL(timeout()), qApp, SLOT(requestGamelist()));
+	
+	// current selected game update timer
+	timerSelectedGameUpdate = new QTimer(this);
+	connect(timerSelectedGameUpdate, SIGNAL(timeout()), this, SLOT(actionSelectedGameUpdate()));
+	
+	
 	// initially enable/disabled widgets
 	updateConnectionStatus();
 }
@@ -291,6 +301,12 @@ void WMain::updateConnectionStatus()
 	{
 		btnConnect->setEnabled(false);
 		btnClose->setEnabled(true);
+		
+		// update gamelist periodically
+		timerGamelistUpdate->start(60*1000);
+		
+		// update selected game periodically
+		timerSelectedGameUpdate->start(15*1000);
 	}
 	else
 	{
@@ -301,6 +317,10 @@ void WMain::updateConnectionStatus()
 		btnClose->setEnabled(false);
 		
 		modelGameList->clear();
+		modelPlayerList->clear();
+		
+		timerGamelistUpdate->stop();
+		timerSelectedGameUpdate->stop();
 	}
 	
 	//m_pChat->setEnabled(is_connected);
@@ -532,4 +552,23 @@ void WMain::notifyGameinfoUpdate(int gid)
 		getGametypeString(gi->type) + " " + getGamemodeString(gi->mode),
 		QString("%1 / %2").arg(gi->players_count).arg(gi->players_max),
 		getGamestateString(gi->state));
+}
+
+void WMain::actionSelectedGameUpdate()
+{
+	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
+	
+	// only update gameinfo is a game is selected
+	if (!pSelect->hasSelection())
+		return;
+	
+	const int gid = pSelect->selectedRows().at(0).row();
+	dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
+	
+	((PClient*)qApp)->requestGameinfo(gid);
+	((PClient*)qApp)->requestPlayerlist(gid);
+	
+	updatePlayerList(gid);
 }
