@@ -276,11 +276,13 @@ void WMain::updateGamelist(
 	int gid,
 	const QString& name,
 	const QString& type,
-	const QString& players)
+	const QString& players,
+	const QString& state)
 {
 	modelGameList->updateGameName(gid, name);
 	modelGameList->updateGameType(gid, type);
 	modelGameList->updatePlayers(gid, players);
+	modelGameList->updateGameState(gid, state);
 	
 	viewGameList->resizeColumnsToContents(); 
 	viewGameList->resizeRowsToContents(); 

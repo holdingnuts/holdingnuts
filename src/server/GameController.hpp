@@ -89,6 +89,7 @@ public:
 	bool getRestart() const { return restart; };
 	
 	bool isStarted() const { return started; };
+	bool isEnded() const { return ended; };
 	
 	bool addPlayer(int cid);
 	bool removePlayer(int cid);

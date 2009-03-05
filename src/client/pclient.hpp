@@ -85,6 +85,8 @@ typedef struct {
 	gametype		type;
 	//! \brief gamemode see Protocol.h 
 	gamemode		mode;
+	//! \brief gamestate
+	gamestate		state;
 	//! \brief timeout in seconds if no answer from player
 	unsigned int	player_timeout;
 	//! \brief current playerscount registered in game
@@ -138,8 +140,10 @@ public:
 	//! \brief query playerlist from Server
 	void requestPlayerlist(int gid);
 	
-	static QString getGametype(gametype type);
-	static QString getGamemode(gamemode mode);
+	// FIXME: move these to WMain
+	static QString getGametypeString(gametype type);
+	static QString getGamemodeString(gamemode mode);
+	static QString getGamestateString(gamestate state);
 	
 private:
 	WMain *wMain;
