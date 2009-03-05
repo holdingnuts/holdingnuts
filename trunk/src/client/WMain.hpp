@@ -103,6 +103,8 @@ private slots:
 	void gameListSelectionChanged(
 		const QItemSelection& selected,
 		const QItemSelection& deselected);
+	
+	void actionSelectedGameUpdate();
 
 private:
 	//! \brief Editbox server adress
@@ -127,6 +129,12 @@ private:
 	
 	//! \brief create new game
 	QPushButton				*btnCreateGame;
+	
+	//! \brief timer updates the gamelist
+	QTimer		*timerGamelistUpdate;
+	
+	//! \brief timer updates the selected game
+	QTimer		*timerSelectedGameUpdate;
 };
 
 #endif	/* _WMAIN_H */
