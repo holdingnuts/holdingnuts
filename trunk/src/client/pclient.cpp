@@ -475,33 +475,27 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 			git, 
 			games_type::value_type(gid, games_type::mapped_type()));
 	}
-
-	std::string sinfo;
-
-	while (t.getNext(sinfo))
-	{
-		Tokenizer it;
-		it.parse(sinfo, ":");
-		
-		std::string itype = it.getNext();
-		std::string ivalue = it.getNext();
-		
-		if (itype == "timeout")
-			git->second.player_timeout = Tokenizer::string2int(ivalue);
-		else if (itype == "player")
-		{
-			git->second.players_max = Tokenizer::string2int(ivalue);
-			git->second.players_count = it.getNextInt();
-		}
-		else if (itype == "name")
-			git->second.name = QString::fromStdString(ivalue);
-		else if (itype == "type")
-			git->second.type = static_cast<gametype>(Tokenizer::string2int(ivalue));
-		else if (itype == "mode")
-			git->second.mode = static_cast<gamemode>(Tokenizer::string2int(ivalue));
-		else if (itype == "state")
-			git->second.state = static_cast<gamestate>(Tokenizer::string2int(ivalue));
-	}
+	
+	gameinfo *gi = &(git->second);
+	
+	
+	// unpack info
+	const std::string sinfo = t.getNext();
+	
+	Tokenizer it;
+	it.parse(sinfo, ":");
+	
+	gi->type = (gametype) it.getNextInt();
+	gi->mode = (gamemode) it.getNextInt();
+	gi->state = (gamestate) it.getNextInt();
+	gi->players_max = it.getNextInt();
+	gi->players_count = it.getNextInt();
+	gi->player_timeout = it.getNextInt();
+	
+	
+	// game name
+	gi->name = QString::fromStdString(t.getNext());
+	
 	
 	// notify WMain there's an updated gameinfo available
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
