@@ -93,7 +93,7 @@ typedef struct {
 	//! \brief maximum players allowed
 	unsigned int	players_max;
 	//! \brief registered players
-//	std::vector<int>		players; // TODO: for what
+	std::vector<int>	players;
 	//
 	tables_type		tables;
 } gameinfo;
@@ -137,6 +137,9 @@ public:
 	
 	//! \brief query playerlist from Server
 	void requestPlayerlist(int gid);
+	
+	void requestGameinfo(const char *glist);
+	void requestGameinfo(int gid);
 	
 private:
 	WMain *wMain;

@@ -70,6 +70,7 @@ public:
 	void updateConnectionStatus();
 
 	void notifyPlayerInfo(int cid);
+	void notifyPlayerList(int gid);
 	
 	void updatePlayerList(int gid);
 

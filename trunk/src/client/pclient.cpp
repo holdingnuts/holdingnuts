@@ -398,7 +398,7 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 	Q_ASSERT_X(git != games.end(), Q_FUNC_INFO, "game not found");
 	
 	// clear current player list
-//	git->second.players.clear();
+	git->second.players.clear();
 	
 	// client-list
 	std::string sreq_orig = t.getTillEnd();
@@ -413,7 +413,7 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 		unsigned int cid = Tokenizer::string2int(token);
 		
 		// append cid to player list
-//		git->second.players.push_back(cid);
+		git->second.players.push_back(cid);
 		
 		// skip this client for the request... if we already know him
 		if (getPlayerInfo(cid))
@@ -428,6 +428,8 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 		snprintf(msg, sizeof(msg), "REQUEST clientinfo %s", sreq_clean.c_str());
 		netSendMsg(msg);
 	}
+	
+	wMain->notifyPlayerList(gid);
 }
 
 // server command CLIENTINFO <client-id> <type>:<value> [...]
@@ -512,14 +514,11 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 // server command GAMELIST <gid> [...]
 void PClient::serverCmdGamelist(Tokenizer &t)
 {
-	char msg[1024];
-	
 	// game-list
 	std::string sreq = t.getTillEnd();
 	
 	// get game info
-	snprintf(msg, sizeof(msg), "REQUEST gameinfo %s", sreq.c_str());
-	netSendMsg(msg);
+	requestGameinfo(sreq.c_str());
 }
 
 int PClient::serverExecute(const char *cmd)
@@ -676,11 +675,7 @@ bool PClient::addTable(int gid, int tid)
 	
 	if (true /*bRequestInfo*/)  // FIXME: this doesn't work properly (especially on re-connect)
 	{
-		char msg[1024];
-		
-		// request the game-info
-		snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", gid);
-		netSendMsg(msg);
+		requestGameinfo(gid);
 		
 		// request the player-list of the game
 		requestPlayerlist(gid);
@@ -725,8 +720,8 @@ void PClient::doRegister(int gid, bool bRegister)
 		
 	netSendMsg(msg);
 	
-	// update gamelist
-	requestGamelist();
+	// update gameinfo
+	requestGameinfo(gid);
 }
 
 bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
@@ -965,6 +960,24 @@ void PClient::requestGamelist()
 {
 	// query gamelist
 	netSendMsg("REQUEST gamelist");
+}
+
+void PClient::requestGameinfo(const char *glist)
+{
+	char msg[1024];
+	
+	// get game infos
+	snprintf(msg, sizeof(msg), "REQUEST gameinfo %s", glist);
+	netSendMsg(msg);
+}
+
+void PClient::requestGameinfo(int gid)
+{
+	char msg[1024];
+	
+	// get game info
+	snprintf(msg, sizeof(msg), "REQUEST gameinfo %ds", gid);
+	netSendMsg(msg);
 }
 
 bool PClient::isTableWindowRemaining()
