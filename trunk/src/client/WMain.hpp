@@ -55,6 +55,9 @@ public:
 	void addServerMessage(const QString &text);
 	void addServerErrorMessage(int code, const QString &text);
 
+	//! \brief Set the Connect Widgets to right State
+	void updateConnectionStatus();
+
 	//! \brief Updates or add a Game to the Gamelist
 	//! \param name Gamename
 	void updateGamelist(
@@ -65,23 +68,19 @@ public:
 		const QString& state);
 	
 	void notifyGameinfoUpdate(int gid);
-	
-	//! \brief Set the Connect Widgets to right State
-	void updateConnectionStatus();
 
 	void notifyPlayerInfo(int cid);
 	void notifyPlayerList(int gid);
 	
 	void updatePlayerList(int gid);
 
-	//! \brief Returns the current Username
-	//! \return Name
-	QString getUsername() const;
 
-protected:
 	static QString getGametypeString(gametype type);
 	static QString getGamemodeString(gamemode mode);
 	static QString getGamestateString(gamestate state);
+	
+protected:
+	void doRegister(bool bRegister);
 	
 private slots:
 	void closeEvent(QCloseEvent *event);

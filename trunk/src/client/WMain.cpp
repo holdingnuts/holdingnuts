@@ -274,7 +274,6 @@ void WMain::updateGamelist(
 	const QString& players,
 	const QString& state)
 {
-	//TODO: move code to notifyGameinfoUpdate()
 	modelGameList->updateGameName(gid, name);
 	modelGameList->updateGameType(gid, type);
 	modelGameList->updatePlayers(gid, players);
@@ -368,11 +367,6 @@ void WMain::updatePlayerList(int gid)
 	}
 }
 
-QString WMain::getUsername() const
-{
-	return QString::fromStdString(config.get("player_name"));
-}
-
 void WMain::actionConnect()
 {
 	if (!editSrvAddr->text().length() || ((PClient*)qApp)->isConnected())
@@ -413,7 +407,7 @@ void WMain::slotSrvTextChanged()
 	updateConnectionStatus();
 }
 
-void WMain::actionRegister()
+void WMain::doRegister(bool bRegister)
 {
 	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
 	
@@ -424,29 +418,20 @@ void WMain::actionRegister()
 	if (pSelect->hasSelection())
 	{
 		const int gid = pSelect->selectedRows().at(0).row();
-		((PClient*)qApp)->doRegister(gid, true);
+		((PClient*)qApp)->doRegister(gid, bRegister);
 		
-		((PClient*)qApp)->requestPlayerlist(gid);
 		updatePlayerList(gid);
 	}
 }
 
+void WMain::actionRegister()
+{
+	doRegister(true);
+}
+
 void WMain::actionUnregister()
 {
-	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
-
-	QItemSelectionModel *pSelect = viewGameList->selectionModel();
-
-	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
-	
-	if (pSelect->hasSelection())
-	{
-		const int gid = pSelect->selectedRows().at(0).row();
-		((PClient*)qApp)->doRegister(gid, false);
-		
-		((PClient*)qApp)->requestPlayerlist(gid);
-		updatePlayerList(gid);
-	}
+	doRegister(false);
 }
 
 void WMain::actionSettings()

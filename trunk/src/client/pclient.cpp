@@ -77,8 +77,7 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	// send user info
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "INFO \"name:%s\"",
-			 wMain->getUsername().toStdString().c_str());
+	snprintf(msg, sizeof(msg), "INFO \"name:%s\"", config.get("player_name").c_str());
 		
 	netSendMsg(msg);
 	
@@ -645,7 +644,6 @@ int PClient::serverParsebuffer()
 
 bool PClient::addTable(int gid, int tid)
 {
-	bool bRequestInfo = false;
 	gameinfo *game = getGameInfo(gid);
 	
 	if (!game)
@@ -654,8 +652,6 @@ bool PClient::addTable(int gid, int tid)
 		game = getGameInfo(gid);
 		
 		game->registered = true;
-		
-		bRequestInfo = true;
 	}
 	
 	tableinfo *table = getTableInfo(gid, tid);
@@ -673,13 +669,12 @@ bool PClient::addTable(int gid, int tid)
 		QTimer::singleShot(2000, table->window, SLOT(slotShow()));
 	}
 	
-	if (true /*bRequestInfo*/)  // FIXME: this doesn't work properly (especially on re-connect)
-	{
-		requestGameinfo(gid);
-		
-		// request the player-list of the game
-		requestPlayerlist(gid);
-	}
+	
+	// request the gameinfo
+	requestGameinfo(gid);
+	
+	// request the player-list of the game
+	requestPlayerlist(gid);
 	
 	return true;
 }
@@ -722,6 +717,7 @@ void PClient::doRegister(int gid, bool bRegister)
 	
 	// update gameinfo
 	requestGameinfo(gid);
+	requestPlayerlist(gid);
 }
 
 bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
