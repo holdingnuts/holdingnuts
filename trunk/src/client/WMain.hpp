@@ -54,11 +54,7 @@ public:
 	void addChat(const QString &from, const QString &text);
 	void addServerMessage(const QString &text);
 	void addServerErrorMessage(int code, const QString &text);
-	
-	// TODO: remove
-	void addPlayer(const QString& name);
 
-	// TODO: remove
 	//! \brief Updates or add a Game to the Gamelist
 	//! \param name Gamename
 	void updateGamelist(
@@ -73,11 +69,13 @@ public:
 	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();
 
+	void notifyPlayerInfo(int cid);
+	
+	void updatePlayerList(int gid);
+
 	//! \brief Returns the current Username
 	//! \return Name
 	QString getUsername() const;
-	
-	GameListTableModel* getGameList() const;
 
 protected:
 	static QString getGametypeString(gametype type);
@@ -123,9 +121,9 @@ private:
 	QTableView				*viewGameList;
 	
 	//! \brief MVC Model
-	StringListModel			*modelPlayerList;
+	StringListModel			*modelPlayerList;	// TODO: tablemodel
 	//! \brief Playerliste from game
-	QListView 	 			*viewPlayerList;
+	QListView 	 			*viewPlayerList;	// TODO: tableview
 	
 	//! \brief create new game
 	QPushButton				*btnCreateGame;

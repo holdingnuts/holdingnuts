@@ -390,10 +390,15 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 {
 	char msg[1024];
 	
-	games_type::iterator git = games.find(t.getNextInt());
-	// TODO: error handling -> if (git == games.end()) -> and now?
-	// clear game-player-list 
-	git->second.players.clear();
+	const int gid = t.getNextInt();
+
+	// find game
+	games_type::iterator git = games.find(gid);
+	
+	Q_ASSERT_X(git != games.end(), Q_FUNC_INFO, "game not found");
+	
+	// clear current player list
+//	git->second.players.clear();
 	
 	// client-list
 	std::string sreq_orig = t.getTillEnd();
@@ -407,14 +412,12 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 	{
 		unsigned int cid = Tokenizer::string2int(token);
 		
-		// skip this client... if we already know him
+		// append cid to player list
+//		git->second.players.push_back(cid);
+		
+		// skip this client for the request... if we already know him
 		if (getPlayerInfo(cid))
-		{
-			git->second.players.push_back(players[cid].name);
 				continue;
-		}
-		else
-			git->second.players.push_back("???");
 		
 		sreq_clean += token + " ";
 	}
@@ -453,10 +456,9 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 	//update_player_info(&pi);
 	players[cid] = pi;
 	
-	// update playerlist
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
-
-	wMain->addPlayer(pi.name);
+	
+	wMain->notifyPlayerInfo(cid);
 }
 
 // server command GAMEINFO <gid> <type>:<value> [...]
@@ -503,6 +505,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	// notify WMain there's an updated gameinfo available
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
+
 	wMain->notifyGameinfoUpdate(gid);
 }
 

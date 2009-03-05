@@ -63,7 +63,7 @@ typedef struct {
 typedef struct {
 	char name[255];
 } playerinfo;
-// TODO: why not replace with QStringList or something else
+
 
 typedef struct {
 	bool sitting;
@@ -76,14 +76,13 @@ typedef struct {
 typedef std::map<int,tableinfo>		tables_type;
 
 typedef struct {
-	// TODO: ???
-	bool			registered;
-	
+	//! \brief local player registered state
+ 	bool			registered;
 	//! \brief name of the game
 	QString			name;
-	//! \brief gametype see Protocol.h 
+	//! \brief gametype
 	gametype		type;
-	//! \brief gamemode see Protocol.h 
+	//! \brief gamemode
 	gamemode		mode;
 	//! \brief gamestate
 	gamestate		state;
@@ -93,12 +92,11 @@ typedef struct {
 	unsigned int	players_count;
 	//! \brief maximum players allowed
 	unsigned int	players_max;
-	//! \brief registered Players
-	QStringList		players;   // FIXME: convert to vector<int> with cids
-
+	//! \brief registered players
+//	std::vector<int>		players; // TODO: for what
+	//
 	tables_type		tables;
 } gameinfo;
-// TODO: merge gameinfo with GameListTableModel { QMap<gid, gameinfo*> };
 
 // map<gid, gameinfo>
 typedef std::map<int,gameinfo>		games_type;
