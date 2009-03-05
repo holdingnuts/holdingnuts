@@ -266,12 +266,6 @@ void WMain::addServerErrorMessage(int code, const QString &text)
 	m_pChat->addMessage(qmsg, Qt::red);
 }
 
-void WMain::addPlayer(const QString& name)
-{
-	// TODO: remove
-	modelPlayerList->add(name);
-}
-
 void WMain::updateGamelist(
 	int gid,
 	const QString& name,
@@ -279,6 +273,7 @@ void WMain::updateGamelist(
 	const QString& players,
 	const QString& state)
 {
+	//TODO: move code to notifyGameinfoUpdate()
 	modelGameList->updateGameName(gid, name);
 	modelGameList->updateGameType(gid, type);
 	modelGameList->updatePlayers(gid, players);
@@ -311,21 +306,44 @@ void WMain::updateConnectionStatus()
 	//m_pChat->setEnabled(is_connected);
 }
 
-void WMain::slotSrvTextChanged()
+void WMain::notifyPlayerInfo(int cid)
 {
-	updateConnectionStatus();
+	const playerinfo *player = ((PClient*)qApp)->getPlayerInfo(cid);
+	
+	if (!player)
+		return;
+	
+	// TODO: how do i do that? there is no 
+	
+	//QString strName = QString(player->name);
+	// FIXME: QStringList listInfo; listinfo << strName; ...
+	
+	//modelPlayerList->updatePlayer(cid, listInfo);
+}
+
+void WMain::updatePlayerList(int gid)
+{
+	modelPlayerList->clear();
+
+	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(gid);
+	
+	if (!ginfo)
+		return;
+		
+	for (unsigned int i = 0; i < ginfo->players_count; ++i)
+	{
+		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(i);
+			
+		if (pinfo)
+			modelPlayerList->add(pinfo->name);
+		else
+			modelPlayerList->add("???");
+	}
 }
 
 QString WMain::getUsername() const
 {
 	return QString::fromStdString(config.get("player_name"));
-}
-
-GameListTableModel* WMain::getGameList() const
-{
-	Q_ASSERT_X(modelGameList, Q_FUNC_INFO, "invalid gamelist pointer");
-
-	return modelGameList;
 }
 
 void WMain::actionConnect()
@@ -361,6 +379,11 @@ void WMain::actionTest()
 	dbg_msg("DEBUG", "playing test sound");
 	audio_play(SOUND_TEST_1);
 #endif
+}
+
+void WMain::slotSrvTextChanged()
+{
+	updateConnectionStatus();
 }
 
 void WMain::actionRegister()
@@ -419,16 +442,11 @@ void WMain::gameListSelectionChanged(
 {
 	if (!selected.isEmpty())
 	{
-		//clearPlayerlist();
-
-		((PClient*)qApp)->requestPlayerlist((*selected.begin()).topLeft().row());
-
-	// TODO:
-	// modelGameList->getPlayerList(selected_row)
-	// {
-	// 	return lstGames[selected_row]->players(); lstGames == QMap<gid, gameinfo*>
-	// }
-
+		const int selected_row = (*selected.begin()).topLeft().row();
+		
+		((PClient*)qApp)->requestPlayerlist(selected_row);
+		
+		updatePlayerList(selected_row);
 	}
 }
 
