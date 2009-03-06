@@ -27,7 +27,13 @@
 
 using namespace std;
 
-bool Tokenizer::isSep(char ch, string sep)
+Tokenizer::Tokenizer(string sep)
+{
+	this->index = 0;
+	this->sep = sep;
+}
+
+bool Tokenizer::isSep(char ch)
 {
 	for (unsigned int i=0; i < sep.length(); i++)
 	{
@@ -38,7 +44,7 @@ bool Tokenizer::isSep(char ch, string sep)
 	return false;
 }
 
-bool Tokenizer::parse(string str, string sep)
+bool Tokenizer::parse(const string& str)
 {
 	tokens.clear();
 	index = 0;
@@ -59,12 +65,12 @@ bool Tokenizer::parse(string str, string sep)
 			
 			if (!quote_open)
 			{
-				if (i == str.length()-1 && !isSep(cur_char, sep))
+				if (i == str.length()-1 && !isSep(cur_char))
 				{
 					end_tok = true;
 					token_end = i - token_start + 1;
 				}
-				else if (isSep(cur_char, sep))
+				else if (isSep(cur_char))
 				{
 					end_tok = true;
 					token_end = i - token_start;
@@ -86,7 +92,7 @@ bool Tokenizer::parse(string str, string sep)
 		}
 		else
 		{
-			if (!isSep(cur_char, sep))
+			if (!isSep(cur_char))
 			{
 				if (cur_char == '\"' && last_char != '\\')
 				{
@@ -194,3 +200,29 @@ float Tokenizer::string2float(string s)
 {
 	return (float)strtod(s.c_str(), NULL);
 }
+
+
+Tokenizer& operator>>(Tokenizer& t, int& i)
+{
+	i = t.getNextInt();
+	return t;
+}
+
+Tokenizer& operator>>(Tokenizer& t, float& f)
+{
+	f = t.getNextFloat();
+	return t;
+}
+
+Tokenizer& operator>>(Tokenizer& t, string& str)
+{
+	str = t.getNext();
+	return t;
+}
+
+Tokenizer& Tokenizer::operator--() // prefix
+{
+	popFirst();
+	return *this;
+}
+

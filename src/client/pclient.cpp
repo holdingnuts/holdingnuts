@@ -109,8 +109,8 @@ void PClient::serverCmdMsg(Tokenizer &t)
 {
 	const std::string idfrom = t.getNext();
 
-	Tokenizer ft;
-	ft.parse(idfrom, ":");
+	Tokenizer ft(":");
+	ft.parse(idfrom);
 		
 	int from = -1;
 	int gid = -1;
@@ -178,8 +178,8 @@ void PClient::serverCmdMsg(Tokenizer &t)
 void PClient::serverCmdSnap(Tokenizer &t)
 {
 	std::string from = t.getNext();
-	Tokenizer ft;
-	ft.parse(from, ":");
+	Tokenizer ft(":");
+	ft.parse(from);
 	int gid = ft.getNextInt();
 	int tid = ft.getNextInt();
 	
@@ -220,18 +220,18 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			table_snapshot &table = tinfo->snap;
 			HoleCards &holecards = tinfo->holecards;
 			
-			Tokenizer st;
+			Tokenizer st(":");
 			
 			// state:betting_round
 			std::string tmp = t.getNext();
-			st.parse(tmp, ":");
+			st.parse(tmp);
 			
 			table.state = st.getNextInt();
 			table.betting_round = st.getNextInt();
 			
 			// dealer:sb:bb:current
 			tmp = t.getNext();
-			st.parse(tmp, ":");
+			st.parse(tmp);
 			table.s_dealer = st.getNextInt();
 			table.s_sb = st.getNextInt();
 			table.s_bb = st.getNextInt();
@@ -244,8 +244,8 @@ void PClient::serverCmdSnap(Tokenizer &t)
 				std::string board = t.getNext().substr(3);
 				CommunityCards &cc = table.communitycards;
 				
-				Tokenizer ct;
-				ct.parse(board, ":");
+				Tokenizer ct(":");
+				ct.parse(board);
 				
 				if (ct.count() == 0)
 					cc.clear();
@@ -284,8 +284,8 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			do {
 				//log_msg("seat", "%s", tmp.c_str());
 				
-				Tokenizer st;
-				st.parse(tmp, ":");
+				Tokenizer st(":");
+				st.parse(tmp);
 				
 				unsigned int seat_no = Tokenizer::string2int(st.getNext().substr(1));
 				
@@ -330,8 +330,8 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			// pots
 			do {
 				//log_msg("pot", "%s", tmp.c_str());
-				Tokenizer pt;
-				pt.parse(tmp, ":");
+				Tokenizer pt(":");
+				pt.parse(tmp);
 				
 				pt.getNext();   // pot-no; unused
 				float potsize = pt.getNextFloat();
@@ -368,8 +368,8 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			
 			std::string hole = t.getNext();
 			
-			Tokenizer ct;
-			ct.parse(hole, ":");
+			Tokenizer ct(":");
+			ct.parse(hole);
 			
 			Card ch1(ct.getNext().c_str());
 			Card ch2(ct.getNext().c_str());
@@ -402,7 +402,7 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 	std::string sreq_orig = t.getTillEnd();
 	std::string sreq_clean;
 	
-	Tokenizer tcid;
+	Tokenizer tcid(" ");
 	tcid.parse(sreq_orig);
 	
 	std::string token;
@@ -441,8 +441,8 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 	std::string sinfo;
 	while (t.getNext(sinfo))
 	{
-		Tokenizer it;
-		it.parse(sinfo, ":");
+		Tokenizer it(":");
+		it.parse(sinfo);
 		
 		std::string itype = it.getNext();
 		std::string ivalue = it.getNext();
@@ -482,8 +482,8 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	// unpack info
 	const std::string sinfo = t.getNext();
 	
-	Tokenizer it;
-	it.parse(sinfo, ":");
+	Tokenizer it(":");
+	it.parse(sinfo);
 	
 	gi->type = (gametype) it.getNextInt();
 	gi->mode = (gamemode) it.getNextInt();
@@ -515,7 +515,7 @@ void PClient::serverCmdGamelist(Tokenizer &t)
 
 int PClient::serverExecute(const char *cmd)
 {
-	Tokenizer t;
+	Tokenizer t(" ");
 	t.parse(cmd);  // parse the command line
 	
 	if (!t.count())
