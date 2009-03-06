@@ -25,8 +25,8 @@
 #include "WTable.hpp"
 #include "SettingsDialog.hpp"
 #include "AboutDialog.hpp"
-#include "StringListModel.hpp"
 #include "GameListTableModel.hpp"
+#include "PlayerListTableModel.hpp"
 
 #include "Config.h"
 #include "Debug.h"
@@ -105,13 +105,18 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 		SLOT(gameListSelectionChanged(const QItemSelection&, const QItemSelection&)));
 
 	// model player
-	modelPlayerList = new StringListModel(this);
+	modelPlayerList = new PlayerListTableModel(this);
 
 	// view player
-	viewPlayerList = new QListView(this);
-	viewPlayerList->setAlternatingRowColors(true);
+	viewPlayerList = new QTableView(this);
+	viewPlayerList->setShowGrid(false);
+	viewPlayerList->horizontalHeader()->hide();	// TODO: enable if required
+	viewPlayerList->horizontalHeader()->setHighlightSections(false);
+	viewPlayerList->verticalHeader()->hide();
+	viewPlayerList->verticalHeader()->setHighlightSections(false);
+	viewPlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
+	viewPlayerList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	viewPlayerList->setModel(modelPlayerList);
-	viewPlayerList->setSelectionMode(QAbstractItemView::NoSelection);
 
 	// game
 	QPushButton *btnRegister = new QPushButton(tr("&Register"), this);
@@ -376,15 +381,18 @@ void WMain::updatePlayerList(int gid)
 	if (!ginfo)
 		return;
 	
-	for (std::vector<int>::const_iterator cit = ginfo->players.begin(); cit != ginfo->players.end(); cit++)
+	for (int i = 0; i < ginfo->players.size(); ++i)
 	{
-		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(*cit);
+		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(i);
 			
 		if (pinfo)
-			modelPlayerList->add(pinfo->name);
+			modelPlayerList->updatePlayerName(i, pinfo->name);
 		else
-			modelPlayerList->add("???");
+			modelPlayerList->updatePlayerName(i, "???");
 	}
+	
+	// viewPlayerList->resizeColumnsToContents(); // TODO: enable if required 
+	viewPlayerList->resizeRowsToContents(); 
 }
 
 void WMain::actionConnect()

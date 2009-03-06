@@ -30,8 +30,8 @@
 #include <Protocol.h>
 
 class ChatBox;
-class StringListModel;
 class GameListTableModel;
+class PlayerListTableModel;
 
 class QLineEdit;
 class QPushButton;
@@ -123,9 +123,9 @@ private:
 	QTableView				*viewGameList;
 	
 	//! \brief MVC Model
-	StringListModel			*modelPlayerList;	// TODO: tablemodel
+	PlayerListTableModel	*modelPlayerList;
 	//! \brief Playerliste from game
-	QListView 	 			*viewPlayerList;	// TODO: tableview
+	QTableView 	 			*viewPlayerList;
 	
 	//! \brief create new game
 	QPushButton				*btnCreateGame;
