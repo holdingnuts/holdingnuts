@@ -30,7 +30,9 @@
 class Tokenizer
 {
 public:
-	bool parse(std::string str, std::string sep = " \t\n");
+	Tokenizer(std::string sep = " \t\n");
+	
+	bool parse(const std::string& str);
 	bool getNext(std::string &str);
 	std::string getNext();
 	std::string getTillEnd(char sep=' ');
@@ -42,13 +44,22 @@ public:
 	unsigned int count() const { return tokens.size(); };
 	std::string operator[](const unsigned int i) const;
 	
-	static bool isSep(char ch, std::string sep);
+	bool isSep(char ch);
+	
 	static int string2int(std::string s, unsigned int base = 0);
 	static float string2float(std::string s);
+	
+	friend Tokenizer& operator>>(Tokenizer& left, int& i);
+	friend Tokenizer& operator>>(Tokenizer& left, float& f);
+	friend Tokenizer& operator>>(Tokenizer& left, std::string& str);
+	Tokenizer& operator--(); // prefix
+
 
 private:
 	std::vector<std::string> tokens;
 	unsigned int index;
+	
+	std::string sep;
 };
 
 #endif /* _TOKENIZER_H */

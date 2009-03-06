@@ -70,6 +70,24 @@ int test_tokenizer()
 	
 	cout << endl << flush;
 	
+	
+	///////////
+	
+	t.parse("Garbage FooBar 1 2 3 5.15");
+	
+	int gid, tid, cid;
+	float f;
+	std::string name;
+	
+	// pop first item
+	--t;
+	
+	// read items
+	t >> name >> gid >> tid >> cid >> f;
+	
+	
+	cout << "gid:" << gid << " tid:" << tid << " cid:" << cid << " name:" << name << " float:" << f << endl;
+	
 	return 0;
 }
 
@@ -127,14 +145,14 @@ int test_configparser()
 
 int main(void)
 {
-	test_tokenizer();
+	//test_tokenizer();
 	
-	test_sysaccess();
+	//test_sysaccess();
 	
-	test_configparser();
+	//test_configparser();
 	
-	const char *config_path = sys_config_path();
-	log_msg("sys", "config-path: _%s_", config_path);
+	//const char *config_path = sys_config_path();
+	//log_msg("sys", "config-path: _%s_", config_path);
 	
 	return 0;
 }
