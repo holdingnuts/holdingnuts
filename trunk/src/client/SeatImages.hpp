@@ -55,6 +55,9 @@ public:
 	const QImage		imgActShow;
 	//! \brief Action Image Allin
 	const QImage		imgActAllin;
+	
+	//! \brief Status Image Win
+	const QImage		imgStatusWin;	
 
 private:
 	SeatImages();

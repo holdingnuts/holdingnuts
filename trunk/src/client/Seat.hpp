@@ -43,6 +43,7 @@ public:
 	void setSitout(bool sitout);
 	void setMySeat(bool bMyseat);
 	void setAction(Player::PlayerAction action, qreal amount = 0.0);
+	void setWin(qreal amount = 0.0);
 	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
 	void showBigCards(bool bShow) { m_bBigCards = bShow; };

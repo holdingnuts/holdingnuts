@@ -209,7 +209,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 		
 		HandStrength strength;
 		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
-		strength.setId(p->client_id);
+		strength.setId(/*p->client_id*/ showdown_player);
 		
 		wl.push_back(strength);
 		
@@ -995,10 +995,10 @@ void GameController::stateAllFolded(Table *t)
 	chat(t->table_id, msg);
 	
 	p->stake += t->pots[0].amount;
-	
-	t->state = Table::EndRound;
+	t->seats[t->cur_player].bet = t->pots[0].amount;
 	
 	sendTableSnapshot(t);
+	t->scheduleState(Table::EndRound, 2);
 }
 
 void GameController::stateShowdown(Table *t)
@@ -1067,7 +1067,8 @@ void GameController::stateShowdown(Table *t)
 			// for each winning-player
 			for (unsigned int pi=0; pi < winner_count; pi++)
 			{
-				Player *p = findPlayer(tw[pi].getId());
+				Table::Seat *seat = &(t->seats[tw[pi].getId()]);
+				Player *p = seat->player;
 				
 				// skip pot if player not involved in it
 				if (!t->isPlayerInvolvedInPot(pot, p))
@@ -1083,6 +1084,9 @@ void GameController::stateShowdown(Table *t)
 				{
 					// transfer winning amount to player
 					p->stake += win_amount;
+					
+					// put winnings to seat (needed for snapshot)
+					seat->bet += win_amount;
 					
 					// count up overall cashed-out
 					cashout_amount += win_amount;
@@ -1102,10 +1106,9 @@ void GameController::stateShowdown(Table *t)
 	// reset all pots
 	t->pots.clear();
 	
-	
-	t->state = Table::EndRound;
-	
 	sendTableSnapshot(t);
+	
+	t->scheduleState(Table::EndRound, 2);
 }
 
 void GameController::stateEndRound(Table *t)
@@ -1134,7 +1137,7 @@ void GameController::stateEndRound(Table *t)
 	
 	t->dealer = t->getNextPlayer(t->dealer);
 	
-	t->scheduleState(Table::NewRound, 4);
+	t->scheduleState(Table::NewRound, 2);
 }
 
 void GameController::stateDelay(Table *t)
