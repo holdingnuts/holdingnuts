@@ -987,17 +987,13 @@ int client_execute(clientcon *client, const char *cmd)
 	// extract message-id if present
 	const char firstchar = t[0][0];
 	if (firstchar >= '0' && firstchar <= '9')
-	{
 		client->last_msgid = t.getNextInt();
-		--t;	// pop first
-	}
 	else
 		client->last_msgid = -1;
 	
 	
 	// get command argument
 	const string command = t.getNext();
-	--t;  // remove the command token
 	
 	
 	if (!(client->state & Introduced))  // state: not introduced
