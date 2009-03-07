@@ -788,6 +788,18 @@ void PClient::chat(const QString& text, int gid, int tid)
 	netSendMsg(msg);
 }
 
+bool PClient::createGame(const QString& name, unsigned int max_players, float stake)
+{
+	char msg[1024];
+	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%.2f \"name:%s\"",
+		max_players,
+		stake,
+		name.simplified().toStdString().c_str());
+	netSendMsg(msg);
+	
+	return true;
+}
+
 gameinfo* PClient::getGameInfo(int gid)
 {
 	if (games.find(gid) != games.end())

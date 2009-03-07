@@ -24,6 +24,7 @@
 #include "ChatBox.hpp"
 #include "WTable.hpp"
 #include "SettingsDialog.hpp"
+#include "CreateGameDialog.hpp"
 #include "AboutDialog.hpp"
 #include "GameListTableModel.hpp"
 #include "PlayerListTableModel.hpp"
@@ -119,11 +120,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewPlayerList->setModel(modelPlayerList);
 
 	// game
-	QPushButton *btnRegister = new QPushButton(tr("&Register"), this);
+	btnRegister = new QPushButton(tr("&Register"), this);
 	btnRegister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnRegister, SIGNAL(clicked()), this, SLOT(actionRegister()));
 	
-	QPushButton *btnUnregister = new QPushButton(tr("&Unregister"), this);
+	btnUnregister = new QPushButton(tr("&Unregister"), this);
 	btnUnregister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
 	
@@ -148,12 +149,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	connect(editSrvAddr, SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
 	btnConnect = new QPushButton(tr("&Connect"), this);
-	btnConnect->setEnabled(false);
 	btnConnect->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnConnect, SIGNAL(clicked()), this, SLOT(actionConnect()));
 	
 	btnClose = new QPushButton(tr("Cl&ose"), this);
-	btnClose->setEnabled(false);
 	btnClose->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnClose, SIGNAL(clicked()), this, SLOT(actionClose()));
 		
@@ -172,8 +171,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	// new game
 	btnCreateGame = new QPushButton(tr("Create own game"), this);
-	btnCreateGame->setEnabled(false);
 	btnCreateGame->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnCreateGame, SIGNAL(clicked()), this, SLOT(actionCreateGame()));
 
 	// content layout
 	QGridLayout *layout = new QGridLayout;
@@ -329,6 +328,9 @@ void WMain::updateConnectionStatus()
 	}
 	
 	//m_pChat->setEnabled(is_connected);
+	btnCreateGame->setEnabled(is_connected);
+	btnRegister->setEnabled(is_connected);
+	btnUnregister->setEnabled(is_connected);
 }
 
 void WMain::notifyPlayerInfo(int cid)
@@ -381,7 +383,7 @@ void WMain::updatePlayerList(int gid)
 	if (!ginfo)
 		return;
 	
-	for (int i = 0; i < ginfo->players.size(); ++i)
+	for (unsigned int i = 0; i < ginfo->players.size(); ++i)
 	{
 		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(i);
 			
@@ -405,7 +407,9 @@ void WMain::actionConnect()
 	
 	unsigned int port = config.getInt("default_port");
 	
-	if (srvlist.count() > 1)
+	if (!srvlist.count())
+		return;
+	else if (srvlist.count() > 1)
 		port = srvlist.at(1).toInt();
 	
 	if (!((PClient*)qApp)->doConnect(srvlist.at(0), port))
@@ -475,6 +479,18 @@ void WMain::actionAbout()
 {
 	AboutDialog dialogAbout;
 	dialogAbout.exec();
+}
+
+void WMain::actionCreateGame()
+{	
+	CreateGameDialog dialogCreateGame;
+	if (dialogCreateGame.exec() != QDialog::Accepted)
+		return;
+	
+	QString name = dialogCreateGame.getName();
+	unsigned int max_players = dialogCreateGame.getPlayers();
+	float stake = dialogCreateGame.getStake();
+	((PClient*)qApp)->createGame(name, max_players, stake);
 }
 
 void WMain::actionChat(QString msg)

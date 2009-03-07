@@ -881,6 +881,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			ginfo.type = Tokenizer::string2int(infoarg);
 			
+			// TODO: no other gamesmodes supported yet
 			if (ginfo.type != GameController::SNG)
 				cmderr = true;
 		}
@@ -905,6 +906,13 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 			if (ginfo.timeout < 10 || ginfo.timeout > 5*60)
 				cmderr = true;
 		}
+		else if (infotype == "name" && havearg)
+		{
+			if (infoarg.length() > 50)
+				infoarg = string(infoarg, 0, 50);
+			
+			ginfo.name = infoarg;
+		}
 	}
 	
 	if (!cmderr)
@@ -917,6 +925,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		g->setPlayerStakes(ginfo.stake);
 		g->addPlayer(client->id);
 		g->setOwner(client->id);
+		g->setName(ginfo.name);
 		games[gid] = g;
 		
 		send_ok(client);

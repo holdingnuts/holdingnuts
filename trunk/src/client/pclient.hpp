@@ -123,6 +123,8 @@ public:
 	void chatAll(const QString& text);
 	void chat(const QString& text, int gid, int tid);
 	
+	bool createGame(const QString& name, unsigned int max_players, float stake);
+	
 	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
 	
 	void doRegister(int gid, bool bRegister=true);
