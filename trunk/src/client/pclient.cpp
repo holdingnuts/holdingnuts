@@ -529,17 +529,13 @@ int PClient::serverExecute(const char *cmd)
 	// extract message-id if present
 	const char firstchar = t[0][0];
 	if (firstchar >= '0' && firstchar <= '9')
-	{
 		srv.last_msgid = t.getNextInt();
-		t.popFirst();
-	}
 	else
 		srv.last_msgid = -1;
 	
 	
 	// get command argument
 	const std::string command = t.getNext();
-	t.popFirst();   // remove the command token
 	
 	
 	if (!srv.introduced)   // state: not introduced
