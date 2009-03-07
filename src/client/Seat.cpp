@@ -104,6 +104,20 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 		m_strAmount.clear();
 }
 
+void Seat::setWin(qreal amount)
+{	
+	if (amount > 0.0)
+	{
+		m_strAmount.setNum(amount, 'f', 2);
+		m_pCurrentActionImg = &SeatImages::Instance().imgStatusWin;
+	}
+	else
+	{
+		m_strAmount.clear();
+		m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
+	}
+}
+
 void Seat::setCurrent(bool cur)
 {
 	m_bCurrent = cur;

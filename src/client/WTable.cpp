@@ -777,10 +777,17 @@ void WTable::updateView()
 			
 			if (seat->in_round)
 			{
-				if (seat->stake == 0)
-					wseats[i]->setAction(Player::Allin, seat->bet);
+				if (snap->state == Table::EndRound)
+				{
+					wseats[i]->setWin(seat->bet);
+				}
 				else
-					wseats[i]->setAction(seat->action, seat->bet);
+				{
+					if (seat->stake == 0)
+						wseats[i]->setAction(Player::Allin, seat->bet);
+					else
+						wseats[i]->setAction(seat->action, seat->bet);
+				}
 				
 				wseats[i]->setMySeat(my_cid == cid);
 				

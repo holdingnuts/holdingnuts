@@ -1175,7 +1175,7 @@ int gameloop()
 		GameController *g = e->second;
 		if (g->tick() < 0)
 		{
-			// replicate game if "restart" is set
+			// replicate game if "restart" is set  // FIXME: implement copy-constructor
 			if (g->getRestart())
 			{
 				const int gid = ++gid_counter;
