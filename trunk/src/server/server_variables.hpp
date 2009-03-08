@@ -24,6 +24,7 @@ config.set("port",			DEFAULT_SERVER_PORT);	// port the server is listening on
 config.set("max_clients",		200);			// limit for client connections
 config.set("max_connections_per_ip",	3);			// limit for connections per IP
 config.set("max_register_per_player",	2);			// limit for register per player
+config.set("max_create_per_player",	2);			// limit for create per player
 config.set("log",			true);			// log into file
 config.set("auth_password",		"");			// server authentication password
 config.set("perm_create_user",		true);			// allow regular user to create games

@@ -842,7 +842,24 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 	if (!config.getBool("perm_create_user") && !(client->state & Authed))
 	{
 		send_err(client, ErrNoPermission, "no permission");
-		return -1;
+		return 1;
+	}
+	
+	// check for max-games-create limit
+	unsigned int create_limit = config.getInt("max_create_per_player");
+	unsigned int count = 0;
+	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
+	{
+		GameController *g = e->second;
+		
+		if (g->getOwner() == client->id)
+		{
+			if (++count == create_limit)
+			{
+				send_err(client, 0 /*FIXME*/, "create limit per player is reached");
+				return 1;
+			}
+		}
 	}
 	
 	// FIXME: check user-create limit
@@ -1151,6 +1168,7 @@ int gameloop()
 			g->setGameId(gid);
 			g->setName("HoldingNuts test game");
 			g->setRestart(true);
+			g->setOwner(-1);
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));
 			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
 			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
@@ -1184,6 +1202,7 @@ int gameloop()
 				newgame->setGameId(gid);
 				newgame->setName(g->getName());
 				newgame->setRestart(true);
+				newgame->setOwner(g->getOwner());
 				newgame->setPlayerMax(g->getPlayerMax());
 				newgame->setPlayerTimeout(g->getPlayerTimeout());
 				newgame->setPlayerStakes(g->getPlayerStakes());
