@@ -49,6 +49,7 @@ GameController::GameController()
 	started = false;
 	ended = false;
 	max_players = 10;
+	restart = false;
 	
 	player_stakes = 1500.0f;
 	
