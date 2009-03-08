@@ -69,9 +69,7 @@ public:
 	//! \brief clear's the list
 	void clear();
 
-#ifdef DEBUG
 	void dump();
-#endif
 
 private:
 	QStringList				strlstHeaderLabels;
