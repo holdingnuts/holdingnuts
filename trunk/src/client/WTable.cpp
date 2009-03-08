@@ -749,7 +749,7 @@ void WTable::updateView()
 			if (pinfo)
 				wseats[i]->setName(pinfo->name);
 			else
-				wseats[i]->setName("???");
+				wseats[i]->setName(QString("??? (%1)").arg(cid));
 			
 			wseats[i]->setStake(seat->stake);
 			wseats[i]->setValid(true);
