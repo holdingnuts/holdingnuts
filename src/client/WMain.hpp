@@ -67,10 +67,11 @@ public:
 		const QString& players,
 		const QString& state);
 	
-	void notifyGameinfoUpdate(int gid);
+	void notifyGameinfo(int gid);
+	void notifyGamelist();
 
-	void notifyPlayerInfo(int cid);
-	void notifyPlayerList(int gid);
+	void notifyPlayerinfo(int cid);
+	void notifyPlayerlist(int gid);
 	
 	void updatePlayerList(int gid);
 
