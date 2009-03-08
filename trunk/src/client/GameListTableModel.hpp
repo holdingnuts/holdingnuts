@@ -76,9 +76,7 @@ public:
 	int findGidByRow(int row);
 	int findRowByGid(int gid);
 	
-#ifdef DEBUG
 	void dump();
-#endif
 
 private:
 	QStringList				strlstHeaderLabels;

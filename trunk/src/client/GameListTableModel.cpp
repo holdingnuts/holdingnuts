@@ -192,10 +192,11 @@ int GameListTableModel::findRowByGid(int gid)
 	return -1;
 }
 
-#ifdef DEBUG
 void GameListTableModel::dump()
 {
+#ifdef DEBUG
 	for (int i = 0; i < rowCount(); ++i)
 		qDebug() << "row(" << i << "gid" << datarows.at(i).gid << ") " << datarows.at(i).cols;
-}
 #endif
+}
+

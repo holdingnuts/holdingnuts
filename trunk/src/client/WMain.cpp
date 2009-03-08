@@ -583,7 +583,7 @@ void WMain::notifyGameinfo(int gid)
 void WMain::notifyGamelist()
 {
 	// FIXME: delete obsolete rows instead of clearing hole list
-	////modelGameList->clear();
+	modelGameList->clear();
 	
 	//const gamelist_type &glist = ((PClient*)qApp)->getGameList();
 }
