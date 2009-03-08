@@ -528,10 +528,10 @@ bool client_cmd_request_gameinfo(clientcon *client, Tokenizer &t)
 			}
 			
 			int state = 0;
-			if (g->isStarted())
-				state = GameStateStarted;
-			else if (g->isEnded())
+			if (g->isEnded())
 				state = GameStateEnded;
+			else if (g->isStarted())
+				state = GameStateStarted;
 			else
 				state = GameStateWaiting;
 			
