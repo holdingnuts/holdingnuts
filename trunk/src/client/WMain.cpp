@@ -333,7 +333,7 @@ void WMain::updateConnectionStatus()
 	btnUnregister->setEnabled(is_connected);
 }
 
-void WMain::notifyPlayerInfo(int cid)
+void WMain::notifyPlayerinfo(int cid)
 {
 	dbg_msg("DEBUG", "notify playerinfo <%d>", cid);
 
@@ -352,13 +352,13 @@ void WMain::notifyPlayerInfo(int cid)
 	
 	if (pSelect->hasSelection())
 	{
-		const int gid = pSelect->selectedRows().at(0).row();
+		const int gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
 		dbg_msg("DEBUG", "select row-id: %d", gid);
 		updatePlayerList(gid);
 	}
 }
 
-void WMain::notifyPlayerList(int gid)
+void WMain::notifyPlayerlist(int gid)
 {
 	dbg_msg("DEBUG", "notify playerlist <%d>", gid);
 	
@@ -367,7 +367,7 @@ void WMain::notifyPlayerList(int gid)
 	
 	if (pSelect->hasSelection())
 	{
-		const int sel_gid = pSelect->selectedRows().at(0).row();
+		const int sel_gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
 		
 		if (sel_gid == gid)
 			updatePlayerList(gid);
@@ -385,7 +385,7 @@ void WMain::updatePlayerList(int gid)
 	
 	for (unsigned int i = 0; i < ginfo->players.size(); ++i)
 	{
-		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(i);
+		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(ginfo->players[i]);
 			
 		if (pinfo)
 			modelPlayerList->updatePlayerName(i, pinfo->name);
@@ -449,7 +449,7 @@ void WMain::doRegister(bool bRegister)
 	
 	if (pSelect->hasSelection())
 	{
-		const int gid = pSelect->selectedRows().at(0).row();
+		const int gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
 		((PClient*)qApp)->doRegister(gid, bRegister);
 		
 		updatePlayerList(gid);
@@ -491,6 +491,8 @@ void WMain::actionCreateGame()
 	unsigned int max_players = dialogCreateGame.getPlayers();
 	float stake = dialogCreateGame.getStake();
 	((PClient*)qApp)->createGame(name, max_players, stake);
+	
+	((PClient*)qApp)->requestGamelist();
 }
 
 void WMain::actionChat(QString msg)
@@ -504,7 +506,7 @@ void WMain::gameListSelectionChanged(
 {
 	if (!selected.isEmpty())
 	{
-		const int selected_row = (*selected.begin()).topLeft().row();
+		const int selected_row = modelGameList->findGidByRow((*selected.begin()).topLeft().row());
 		
 		((PClient*)qApp)->requestGameinfo(selected_row);
 		((PClient*)qApp)->requestPlayerlist(selected_row);
@@ -565,7 +567,7 @@ QString WMain::getGamestateString(gamestate state)
 	};
 }
 
-void WMain::notifyGameinfoUpdate(int gid)
+void WMain::notifyGameinfo(int gid)
 {
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
@@ -578,6 +580,14 @@ void WMain::notifyGameinfoUpdate(int gid)
 		getGamestateString(gi->state));
 }
 
+void WMain::notifyGamelist()
+{
+	// FIXME: delete obsolete rows instead of clearing hole list
+	////modelGameList->clear();
+	
+	//const gamelist_type &glist = ((PClient*)qApp)->getGameList();
+}
+
 void WMain::actionSelectedGameUpdate()
 {
 	QItemSelectionModel *pSelect = viewGameList->selectionModel();
@@ -588,7 +598,7 @@ void WMain::actionSelectedGameUpdate()
 	if (!pSelect->hasSelection())
 		return;
 	
-	const int gid = pSelect->selectedRows().at(0).row();
+	const int gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
 	dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
 	
 	((PClient*)qApp)->requestGameinfo(gid);

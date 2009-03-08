@@ -37,7 +37,7 @@ GameListTableModel::GameListTableModel(QObject *parent)
 
 int GameListTableModel::rowCount(const QModelIndex& parent) const
 {
-	return lstRows.count();
+	return datarows.count();
 }
 
 int GameListTableModel::columnCount(const QModelIndex& parent) const
@@ -50,13 +50,13 @@ QVariant GameListTableModel::data(const QModelIndex& index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	if (index.row() > lstRows.size())
+	if (index.row() > datarows.size())
 		return QVariant();
 
 	if (role != Qt::DisplayRole)
 		return QVariant();
 
-	return lstRows.at(index.row()).at(index.column());
+	return datarows.at(index.row()).cols.at(index.column());
 }
 
 QVariant GameListTableModel::headerData(
@@ -80,30 +80,36 @@ bool GameListTableModel::setData(
 {
 	if (index.isValid() && role == Qt::EditRole)
 	{
-		lstRows[index.row()].replace(index.column(), value.toString());
+		datarows[index.row()].cols.replace(index.column(), value.toString());
 		
 		emit dataChanged(index, index);
 		
 		return true;
 	}
 	else
-		qDebug() << "GameListItemModel::setData() invalided index= " << index;
+		qDebug() << "GameListTableModel::setData() invalided index= " << index;
 
 	return false;
 }
 
 bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& parent)
 {
+	// FIXME:
+	position = this->rowCount();
+	rows = 1;
+	
+	
 	beginInsertRows(QModelIndex(), position, position + rows);
 
-	QStringList lstTemp;
-
+	dataitem di;
+	di.gid = -1;
+	
 	for (int j = 0; j < this->columnCount(); ++j)
-		lstTemp.insert(j, "");
+		di.cols.insert(j, "");
 
 	for (int i = position; i < (position + rows); ++i)
-		lstRows.insert(i, lstTemp);
-
+		datarows.insert(i, di);
+	
 	endInsertRows();
 	
 	return true;
@@ -114,6 +120,7 @@ bool GameListTableModel::appendRows(int rows, const QModelIndex& parent)
 	return this->insertRows(this->rowCount(), rows, parent);
 }
 
+#if 0
 void GameListTableModel::updateRow(int gid, const QStringList& value)
 {
 	if (gid /*row*/ >= this->rowCount())
@@ -122,13 +129,22 @@ void GameListTableModel::updateRow(int gid, const QStringList& value)
 	for (int j = 0; j < value.count(); ++j)
 		this->setData(createIndex(gid, j), value.at(j));
 }
+#endif
 
 void GameListTableModel::updateValue(int gid, int column, const QString& value)
 {
-	if (gid /*row*/ >= this->rowCount())
-		appendRows(this->rowCount() - gid + 1);
-
-	this->setData(createIndex(gid, column), value);
+	if (findRowByGid(gid) == -1)
+	{
+		appendRows(1);
+		datarows[this->rowCount() -1].gid = gid;
+		
+		dump();
+	}
+	
+	int row = findRowByGid(gid);
+	
+	
+	this->setData(createIndex(row, column), value);
 }
 
 void GameListTableModel::updateGameName(int gid, const QString& value)
@@ -154,20 +170,32 @@ void GameListTableModel::updateGameState(int gid, const QString& value)
 void GameListTableModel::clear()
 {
 	for (int i = 0; i < rowCount(); ++i)
-		lstRows[i].clear();
+		datarows[i].cols.clear();
 		
-	lstRows.clear();
+	datarows.clear();
 
 	reset();
+}
+
+int GameListTableModel::findGidByRow(int row)
+{
+	return datarows.at(row).gid;
+}
+
+int GameListTableModel::findRowByGid(int gid)
+{
+	for (int i = 0; i < rowCount(); ++i)
+	{
+		if (datarows.at(i).gid == gid)
+			return i;
+	}
+	return -1;
 }
 
 #ifdef DEBUG
 void GameListTableModel::dump()
 {
 	for (int i = 0; i < rowCount(); ++i)
-		qDebug() << "row(" << i << ") " << lstRows.at(i);
+		qDebug() << "row(" << i << "gid" << datarows.at(i).gid << ") " << datarows.at(i).cols;
 }
 #endif
-
-
-

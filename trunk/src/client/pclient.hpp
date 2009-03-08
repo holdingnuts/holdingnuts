@@ -98,6 +98,8 @@ typedef struct {
 	tables_type		tables;
 } gameinfo;
 
+// vector<gid>
+typedef std::vector<int>		gamelist_type;
 // map<gid, gameinfo>
 typedef std::map<int,gameinfo>		games_type;
 // map<cid, playerinfo>
@@ -129,6 +131,7 @@ public:
 	
 	void doRegister(int gid, bool bRegister=true);
 	
+	const gamelist_type& getGameList();
 	gameinfo* getGameInfo(int gid);
 	tableinfo* getTableInfo(int gid, int tid);
 	playerinfo* getPlayerInfo(int cid);
@@ -168,14 +171,15 @@ private:
 	
 	bool addTable(int gid, int tid);
 
+public slots:
+	//! \brief query gamelist from Server
+	void requestGamelist();
+	
 private slots:
 	void netRead();
 	void netError(QAbstractSocket::SocketError socketError);
 	void netConnected();
 	void netDisconnected();
-
-	//! \brief query gamelist from Server
-	void requestGamelist();
 	
 #ifdef DEBUG
 	void slotDbgRegister();

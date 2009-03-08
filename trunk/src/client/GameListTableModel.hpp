@@ -60,7 +60,7 @@ public:
 
 	//! \brief 
 	//! \param value
-	void updateRow(int gid, const QStringList& value);
+	//void updateRow(int gid, const QStringList& value);
 
 	void updateValue(int gid, int column, const QString& value);
 
@@ -72,6 +72,10 @@ public:
 	//! \brief clear's the list
 	void clear();
 
+	//! \brief translation methods (gid<->row)
+	int findGidByRow(int row);
+	int findRowByGid(int gid);
+	
 #ifdef DEBUG
 	void dump();
 #endif
@@ -79,7 +83,12 @@ public:
 private:
 	QStringList				strlstHeaderLabels;
 	
-	QList<QStringList>		lstRows; // QStringList == row[n,0], row[n,1],... 
+	struct dataitem{
+		int gid;
+		QStringList cols;	// QStringList == row[n,0], row[n,1],... 
+	};
+	
+	QList<dataitem>		datarows;
 };
 
 #endif	/* _HOLDING_NUTS_GAME_LIST_TABLE_MODEL_H */

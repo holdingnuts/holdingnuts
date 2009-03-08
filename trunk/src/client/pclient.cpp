@@ -48,6 +48,7 @@ ConfigParser config;
 static servercon		srv;
 static players_type		players;
 static games_type		games;
+static gamelist_type		gamelist;
 
 //////////////
 
@@ -427,7 +428,7 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 		netSendMsg(msg);
 	}
 	
-	wMain->notifyPlayerList(gid);
+	wMain->notifyPlayerlist(gid);
 }
 
 // server command CLIENTINFO <client-id> <type>:<value> [...]
@@ -458,7 +459,7 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 	
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
 	
-	wMain->notifyPlayerInfo(cid);
+	wMain->notifyPlayerinfo(cid);
 }
 
 // server command GAMEINFO <gid> <type>:<value> [...]
@@ -500,17 +501,28 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	// notify WMain there's an updated gameinfo available
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
 
-	wMain->notifyGameinfoUpdate(gid);
+	wMain->notifyGameinfo(gid);
 }
 
 // server command GAMELIST <gid> [...]
 void PClient::serverCmdGamelist(Tokenizer &t)
 {
 	// game-list
-	std::string sreq = t.getTillEnd();
+	std::string sreq;
+	
+	gamelist.clear();
+	
+	std::string sgid;
+	while (t.getNext(sgid))
+	{
+		gamelist.push_back(Tokenizer::string2int(sgid));
+		sreq += sgid + " ";
+	}
 	
 	// get game info
 	requestGameinfo(sreq.c_str());
+	
+	wMain->notifyGamelist();
 }
 
 int PClient::serverExecute(const char *cmd)
@@ -796,6 +808,11 @@ bool PClient::createGame(const QString& name, unsigned int max_players, float st
 	return true;
 }
 
+const gamelist_type& PClient::getGameList()
+{
+	return gamelist;
+}
+
 gameinfo* PClient::getGameInfo(int gid)
 {
 	if (games.find(gid) != games.end())
@@ -939,6 +956,7 @@ void PClient::netDisconnected()
 	
 	players.clear();
 	games.clear();
+	gamelist.clear();
 }
 
 void PClient::requestPlayerlist(int gid)
