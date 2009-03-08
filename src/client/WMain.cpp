@@ -390,7 +390,8 @@ void WMain::updatePlayerList(int gid)
 		if (pinfo)
 			modelPlayerList->updatePlayerName(i, pinfo->name);
 		else
-			modelPlayerList->updatePlayerName(i, "???");
+			modelPlayerList->updatePlayerName(i,
+				QString("??? (%1)").arg(ginfo->players[i]));
 	}
 	
 	// viewPlayerList->resizeColumnsToContents(); // TODO: enable if required 

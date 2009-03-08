@@ -214,8 +214,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			
 			if (!tinfo)
 			{
-				addTable(gid, tid);
-				tinfo = getTableInfo(gid, tid);
+				return;
 			}
 			
 			table_snapshot &table = tinfo->snap;
@@ -357,12 +356,15 @@ void PClient::serverCmdSnap(Tokenizer &t)
 	
 	case SnapHoleCards:
 		{
+			bool bUpdateView = true;
 			tableinfo *tinfo = getTableInfo(gid, tid);
 			
 			if (!tinfo)
 			{
 				addTable(gid, tid);
 				tinfo = getTableInfo(gid, tid);
+				
+				bUpdateView = false;
 			}
 			
 			HoleCards &h = tinfo->holecards;
@@ -377,7 +379,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			
 			h.setCards(ch1, ch2);
 			
-			if (tinfo->window)
+			if (bUpdateView && tinfo->window)
 				tinfo->window->updateView();
 		}
 		break;
