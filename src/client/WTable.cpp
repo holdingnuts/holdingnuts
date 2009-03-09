@@ -596,12 +596,12 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	
 	// minimum bet
 	if (snap->minimum_bet > s->stake)
-		m_pSliderAmount->setMinimum((int) s->stake + (int) s->bet);
+		m_pSliderAmount->setMinimum(s->stake + s->bet);
 	else
-		m_pSliderAmount->setMinimum((int) snap->minimum_bet);
+		m_pSliderAmount->setMinimum(snap->minimum_bet);
 	
 	// maximum bet is stake size
-	m_pSliderAmount->setMaximum((int) s->stake + (int) s->bet);
+	m_pSliderAmount->setMaximum(s->stake + s->bet);
 	
 	
 	// evaluate available actions
@@ -1053,10 +1053,7 @@ void WTable::actionBetRaise()
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Allin);
 	}
 	else
-	{
-		const qreal amount = static_cast<qreal>(m_pSliderAmount->value());
-		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, amount);
-	}
+		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, m_pSliderAmount->value());
 	
 	stlayActions->setCurrentIndex(m_nNoAction);
 }
