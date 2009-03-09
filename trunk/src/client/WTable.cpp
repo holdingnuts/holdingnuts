@@ -945,7 +945,49 @@ void WTable::updateView()
 			{
 				HandStrength strength;
 				GameLogic::getStrength(&(tinfo->holecards), &(snap->communitycards), &strength);
-				const char *sstrength = HandStrength::getRankingName(strength.getRanking());
+				//const char *sstrength = HandStrength::getRankingName(strength.getRanking());
+				
+				// provide translation for hand strength
+				QString sstrength = "unknown hand strength";
+				switch (strength.getRanking())
+				{
+				case HandStrength::HighCard:
+					sstrength = tr("High Card");
+					break;
+				case HandStrength::OnePair:
+					sstrength = tr("One Pair");
+					break;
+				case HandStrength::TwoPair:
+					sstrength = tr("Two Pair");
+					break;
+				case HandStrength::ThreeOfAKind:
+					sstrength = tr("Three Of A Kind");
+					break;
+				case HandStrength::Straight:
+					sstrength = tr("Straight");
+					break;
+				case HandStrength::Flush:
+					sstrength = tr("Flush");
+					break;
+				case HandStrength::FullHouse:
+					sstrength = tr("Full House");
+					break;
+				case HandStrength::FourOfAKind:
+					sstrength = tr("Four Of A Kind");
+					break;
+				case HandStrength::StraightFlush:
+					{
+						vector<Card> rank;
+						strength.copyRankCards(&rank);
+						
+						// handle RoyalFlush as special case
+						if (strength.getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
+							sstrength = tr("Royal Flush");
+						else
+							sstrength = tr("Straight Flush");
+						break;
+					}
+				}
 				
 				m_pTxtHandStrength->setText(sstrength);
 				m_pTxtHandStrength->setPos(calcHandStrengthPos());
