@@ -9,9 +9,19 @@ ELSE (MINGW)
 ENDIF (MINGW)
 ENDIF (WIN32)
 
+
 add_subdirectory (libpoker)
-add_subdirectory (server)
-add_subdirectory (client)
-add_subdirectory (test)
 add_subdirectory (system)
 
+
+IF (NOT WITHOUT_SERVER)
+	add_subdirectory (server)
+ENDIF (NOT WITHOUT_SERVER)
+
+IF (NOT WITHOUT_CLIENT)
+	add_subdirectory (client)
+ENDIF (NOT WITHOUT_CLIENT)
+
+IF (NOT WITHOUT_TEST)
+	add_subdirectory (test)
+ENDIF (NOT WITHOUT_TEST)

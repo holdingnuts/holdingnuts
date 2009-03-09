@@ -2,6 +2,11 @@ cmake_minimum_required (VERSION 2.6)
 
 project (HOLDINGNUTS)
 
+# switch features on/off
+option (WITHOUT_CLIENT "do not build the client" Off)
+option (WITHOUT_SERVER "do not build the server" Off)
+option (WITHOUT_TEST "do not build the test-utils" Off)
+
 # check for inner-source-build
 STRING (COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" in_source)
 IF (in_source)
