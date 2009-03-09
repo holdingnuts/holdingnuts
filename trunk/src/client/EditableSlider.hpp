@@ -29,7 +29,7 @@
 
 class QSlider;
 class QLineEdit;
-class QIntValidator;
+class QDoubleValidator;
 
 class EditableSlider : public QWidget
 {
@@ -40,21 +40,21 @@ public:
 
 	virtual ~EditableSlider();
 		
-	void setMinimum(int value);
-	void setMaximum(int value);
+	void setMinimum(float value);
+	void setMaximum(float value);
 
-	int value() const;
+	float value() const;
 
-public slots:
+private slots:
 	void setValue(int value);
 
 protected:
 	QSlider		*m_pSlider;
 	QLineEdit	*m_pEdit;
-	QIntValidator	*m_pValidator;
+	QDoubleValidator	*m_pValidator;
 			
-	int			m_nMin;
-	int			m_nMax;
+	float		m_nMin;
+	float		m_nMax;
 };
 
 #endif /* _HOLDING_NUTS_EDITABLE_SLIDER_H */
