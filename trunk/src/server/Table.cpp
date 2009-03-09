@@ -128,11 +128,11 @@ bool Table::isAllin()
 	return (count >= active_players - 1);
 }
 
-bool Table::isPlayerInvolvedInPot(Pot *pot, Player *p)
+bool Table::isSeatInvolvedInPot(Pot *pot, unsigned int s)
 {
-	for (unsigned int i=0; i < pot->players.size(); i++)
+	for (unsigned int i=0; i < pot->vseats.size(); i++)
 	{
-		if (pot->players[i] == p)
+		if (pot->vseats[i] == s)
 			return true;
 	}
 	
@@ -143,13 +143,13 @@ unsigned int Table::getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &w
 {
 	unsigned int involved_count = 0;
 	
-	for (unsigned int i=0; i < pot->players.size(); i++)
+	for (unsigned int i=0; i < pot->vseats.size(); i++)
 	{
-		int cid = pot->players[i]->getClientId();
+		const unsigned int s = pot->vseats[i];
 		
 		for (unsigned int j=0; j < wl.size(); j++)
 		{
-			if (wl[j].getId() == cid)
+			if ((unsigned int) wl[j].getId() == s)
 				involved_count++;
 		}
 	}
@@ -243,8 +243,8 @@ void Table::collectBets()
 				cur_pot->final = true;
 			
 			// set player 'involved in pot'
-			if (!isPlayerInvolvedInPot(cur_pot, p))
-				cur_pot->players.push_back(p);
+			if (!isSeatInvolvedInPot(cur_pot, i))
+				cur_pot->vseats.push_back(i);
 		}
 		
 		

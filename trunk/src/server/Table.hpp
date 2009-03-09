@@ -65,7 +65,7 @@ public:
 	
 	typedef struct {
 		float amount;
-		std::vector<Player*> players;
+		std::vector<unsigned int> vseats;
 		bool final;
 	} Pot;
 	
@@ -82,7 +82,7 @@ public:
 	void resetLastPlayerActions();
 	
 	void collectBets();
-	bool isPlayerInvolvedInPot(Pot *pot, Player *p);
+	bool isSeatInvolvedInPot(Pot *pot, unsigned int s);
 	unsigned int getInvolvedInPotCount(Pot *pot, std::vector<HandStrength> &wl);
 	
 	void scheduleState(State sched_state, unsigned int delay_sec);
