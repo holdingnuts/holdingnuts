@@ -210,7 +210,7 @@ bool GameController::createWinlist(Table *t, vector< vector<HandStrength> > &win
 		
 		HandStrength strength;
 		GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
-		strength.setId(/*p->client_id*/ showdown_player);
+		strength.setId(showdown_player);
 		
 		wl.push_back(strength);
 		
@@ -1068,15 +1068,16 @@ void GameController::stateShowdown(Table *t)
 			// for each winning-player
 			for (unsigned int pi=0; pi < winner_count; pi++)
 			{
-				Table::Seat *seat = &(t->seats[tw[pi].getId()]);
+				const unsigned int seat_num = tw[pi].getId();
+				Table::Seat *seat = &(t->seats[seat_num]);
 				Player *p = seat->player;
 				
 				// skip pot if player not involved in it
-				if (!t->isPlayerInvolvedInPot(pot, p))
+				if (!t->isSeatInvolvedInPot(pot, seat_num))
 					continue;
 #if 0
-				log_msg("winlist", "wl #%d: player #%d: pot #%d: involved-count=%d",
-					i+1, pi+1, poti+1, involved_count);
+				dbg_msg("winlist", "wl #%d: player #%d (seat:%d): pot #%d: involved-count=%d",
+					i+1, pi+1, seat_num, poti+1, involved_count);
 #endif
 				// pot is divided by number of players involved in
 				float win_amount = pot->amount / involved_count;
@@ -1103,6 +1104,16 @@ void GameController::stateShowdown(Table *t)
 			pot->amount -= cashout_amount;
 		}
 	}
+	
+#if 1
+	// check for fatal error: not all pots were distributed
+	for (unsigned int i=0; i < t->pots.size(); i++)
+	{
+		if (t->pots[i].amount > .0f)
+			dbg_msg("winlist", "fatal error: pot %d after distribution: %.2f",
+				i, t->pots[i].amount);
+	}
+#endif
 	
 	// reset all pots
 	t->pots.clear();
