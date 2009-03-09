@@ -1017,29 +1017,37 @@ void GameController::stateShowdown(Table *t)
 			HandStrength strength;
 			GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
 			
-			vector<Card> cards;
+			vector<Card> rank, kicker;
 			string hsstr = "rank: ";
 			
-			cards.clear();
-			strength.copyRankCards(&cards);
-			for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
+			rank.clear();
+			strength.copyRankCards(&rank);
+			for (vector<Card>::const_iterator e = rank.begin(); e != rank.end(); e++)
 			{
 				sprintf(msg, "%s ", e->getName());
 				hsstr += msg;
 			}
 			
 			hsstr += "kicker: ";
-			cards.clear();
-			strength.copyKickerCards(&cards);
-			for (vector<Card>::iterator e = cards.begin(); e != cards.end(); e++)
+			kicker.clear();
+			strength.copyKickerCards(&kicker);
+			for (vector<Card>::const_iterator e = kicker.begin(); e != kicker.end(); e++)
 			{
 				sprintf(msg, "%s ", e->getName());
 				hsstr += msg;
 			}
 			
+			const char *sranking; 
+			
+			// handle RoyalFlush as special case
+			if (strength.getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
+				sranking = "Royal Flush";
+			else
+				sranking = HandStrength::getRankingName(strength.getRanking());
+			
 			snprintf(msg, sizeof(msg), "[%d] has %s (%s)",
 				p->client_id,
-				HandStrength::getRankingName(strength.getRanking()),
+				sranking,
 				hsstr.c_str());
 			chat(t->table_id, msg);
 		}

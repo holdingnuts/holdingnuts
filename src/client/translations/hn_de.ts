@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS><TS version="1.1" language="de">
-<defaultcodec></defaultcodec>
 <context>
     <name>AboutDialog</name>
     <message>
@@ -453,12 +452,12 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1175"/>
+        <location filename="../WTable.cpp" line="1217"/>
         <source>Saved screenshot: %1.</source>
         <translation>Screenshot gespeichert: %1.</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1177"/>
+        <location filename="../WTable.cpp" line="1219"/>
         <source>Unable to save screenshot in %1.</source>
         <translation>Screenshot konnte nicht in %1 gespeichert werden.</translation>
     </message>
@@ -565,6 +564,56 @@
     <message>
         <location filename="../WTable.cpp" line="861"/>
         <source>Side pot %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="955"/>
+        <source>High Card</source>
+        <translation>Höchste Karte</translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="958"/>
+        <source>One Pair</source>
+        <translation>Ein Paar</translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="961"/>
+        <source>Two Pair</source>
+        <translation>Zwei Paare</translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="964"/>
+        <source>Three Of A Kind</source>
+        <translation>Drilling</translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="967"/>
+        <source>Straight</source>
+        <translation>Straße</translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="970"/>
+        <source>Flush</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="973"/>
+        <source>Full House</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="976"/>
+        <source>Four Of A Kind</source>
+        <translation>Vierling</translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="987"/>
+        <source>Straight Flush</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../WTable.cpp" line="985"/>
+        <source>Royal Flush</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
