@@ -32,6 +32,7 @@
 #include "Config.h"
 #include "Debug.h"
 #include "SysAccess.h"
+#include "Logger.h"
 #include "ConfigParser.hpp"
 
 #include "pclient.hpp"
@@ -268,17 +269,25 @@ void WMain::addLog(const QString &line)
 void WMain::addChat(const QString &from, const QString &text)
 {
 	m_pChat->addMessage(text, from);
+	
+	if (config.getBool("log_chat"))
+		log_msg("chat", "(%s) %s",
+			 from.toStdString().c_str(), text.toStdString().c_str());
 }
 
 void WMain::addServerMessage(const QString &text)
 {
 	m_pChat->addMessage(text, Qt::blue);
+	
+	log_msg("infomsg", "%s", text.toStdString().c_str());
 }
 
 void WMain::addServerErrorMessage(int code, const QString &text)
 {
 	QString qmsg = tr("Error") + ": " + text + " (Code: " + QString::number(code) + ")";
 	m_pChat->addMessage(qmsg, Qt::red);
+	
+	log_msg("errmsg", "Error: %s (Code: %d)", text.toStdString().c_str(), code);
 }
 
 void WMain::updateGamelist(

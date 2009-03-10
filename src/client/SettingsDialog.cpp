@@ -53,24 +53,23 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 	setLayout(mainLayout);
 	
 	
-	// tabGeneral
+	// --- tabGeneral ---
 	QLabel *labelPlayerName = new QLabel(tr("Player name"), tabGeneral);
 	editPlayerName = new QLineEdit(QString::fromStdString(cfg->get("player_name")), tabGeneral);
 	
-	QLabel *labelUUID = new QLabel(tr("UUID"), tabGeneral);
-	editUUID = new QLineEdit(QString::fromStdString(cfg->get("uuid")), tabGeneral);
-	editUUID->setReadOnly(true);
-	
-	QPushButton *btnUUIDGen = new QPushButton("*", tabGeneral);
-	connect(btnUUIDGen, SIGNAL(clicked()), this, SLOT(actionGenUUID()));
-	
-	QHBoxLayout *layoutUUID = new QHBoxLayout;
-	layoutUUID->addWidget(editUUID);
-	layoutUUID->addWidget(btnUUIDGen);
-	
+	// logging options
 	QLabel *labelLog = new QLabel(tr("Log to file"), tabGeneral);
-	checkLog = new QCheckBox("", tabGeneral);
+	checkLog = new QCheckBox(tr("enabled"), tabGeneral);
 	checkLog->setCheckState(cfg->getBool("log") ? Qt::Checked : Qt::Unchecked);
+	checkLogChat = new QCheckBox(tr("log chat"), tabGeneral);
+	checkLogChat->setCheckState(cfg->getBool("log_chat") ? Qt::Checked : Qt::Unchecked);
+	
+	actionCheckStateLog(checkLog->checkState());
+	connect(checkLog, SIGNAL(stateChanged(int)), this, SLOT(actionCheckStateLog(int)));
+	
+	QHBoxLayout *layoutLog = new QHBoxLayout;
+	layoutLog->addWidget(checkLog);
+	layoutLog->addWidget(checkLogChat);
 	
 	QLabel *labelLocale = new QLabel(tr("Locale"), tabGeneral);
 	comboLocale = new QComboBox(tabGeneral);
@@ -107,23 +106,37 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 	layoutSound->addWidget(checkSound);
 	layoutSound->addWidget(checkSoundFocus);
 	
+	// UUID
+	QLabel *labelUUID = new QLabel(tr("UUID"), tabGeneral);
+	labelUUIDdisplay = new QLabel(QString::fromStdString(cfg->get("uuid")), tabGeneral);
+	labelUUIDdisplay->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	
+	QPushButton *btnUUIDGen = new QPushButton(tr("generate"), tabGeneral);
+	connect(btnUUIDGen, SIGNAL(clicked()), this, SLOT(actionGenUUID()));
+	
+	QVBoxLayout *layoutUUID = new QVBoxLayout;
+	layoutUUID->addWidget(labelUUIDdisplay);
+	layoutUUID->addWidget(btnUUIDGen);
+	
 	
 	// basic layout
 	QGridLayout *gridGeneral = new QGridLayout;
-	gridGeneral->addWidget(labelPlayerName, 0, 0);
-	gridGeneral->addWidget(editPlayerName, 0, 1);
-	gridGeneral->addWidget(labelUUID, 1, 0);
-	gridGeneral->addLayout(layoutUUID, 1, 1);
-	gridGeneral->addWidget(labelLog, 2, 0);
-	gridGeneral->addWidget(checkLog, 2, 1);
-	gridGeneral->addWidget(labelLocale, 3, 0);
-	gridGeneral->addWidget(comboLocale, 3, 1);
-	gridGeneral->addWidget(labelSound, 4, 0);
-	gridGeneral->addLayout(layoutSound, 4, 1);
+	gridGeneral->setHorizontalSpacing(15);
+	gridGeneral->addWidget(labelPlayerName, 0, 0, Qt::AlignRight | Qt::AlignTop);
+	gridGeneral->addWidget(editPlayerName, 0, 1, Qt::AlignTop);
+	gridGeneral->addWidget(labelLog, 1, 0, Qt::AlignRight | Qt::AlignTop);
+	gridGeneral->addLayout(layoutLog, 1, 1, Qt::AlignTop);
+	gridGeneral->addWidget(labelLocale, 2, 0, Qt::AlignRight | Qt::AlignTop);
+	gridGeneral->addWidget(comboLocale, 2, 1, Qt::AlignTop);
+	gridGeneral->addWidget(labelSound, 3, 0, Qt::AlignRight | Qt::AlignTop);
+	gridGeneral->addLayout(layoutSound, 3, 1, Qt::AlignTop);
+	gridGeneral->addWidget(labelUUID, 4, 0, Qt::AlignRight | Qt::AlignTop);
+	gridGeneral->addLayout(layoutUUID, 4, 1, Qt::AlignTop);
 	tabGeneral->setLayout(gridGeneral);
 	
 	
-	// tabAppearance
+	
+	// --- tabAppearance ---
 	QLabel *labelHandStrength = new QLabel(tr("Show strength of hand"), tabAppearance);
 	checkHandStrength = new QCheckBox("", tabAppearance);
 	checkHandStrength->setCheckState(cfg->getBool("ui_show_handstrength") ? Qt::Checked : Qt::Unchecked);
@@ -150,10 +163,11 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 	
 	
 	QGridLayout *gridAppearance = new QGridLayout;
-	gridAppearance->addWidget(labelHandStrength, 0, 0);
-	gridAppearance->addWidget(checkHandStrength, 0, 1);
-	gridAppearance->addWidget(labelCarddeck, 1, 0);
-	gridAppearance->addWidget(comboCarddeck, 1, 1);
+	gridAppearance->setHorizontalSpacing(15);
+	gridAppearance->addWidget(labelHandStrength, 0, 0, Qt::AlignRight | Qt::AlignTop);
+	gridAppearance->addWidget(checkHandStrength, 0, 1, Qt::AlignTop);
+	gridAppearance->addWidget(labelCarddeck, 1, 0, Qt::AlignRight | Qt::AlignTop);
+	gridAppearance->addWidget(comboCarddeck, 1, 1, Qt::AlignTop);
 	tabAppearance->setLayout(gridAppearance);
 }
 
@@ -164,7 +178,7 @@ void SettingsDialog::actionGenUUID()
 	QString suuid = uuid.toString();
 	suuid.chop(1);
 	
-	editUUID->setText(suuid.remove(0, 1));
+	labelUUIDdisplay->setText(suuid.remove(0, 1));
 }
 
 void SettingsDialog::actionOk()
@@ -175,8 +189,9 @@ void SettingsDialog::actionOk()
 	{
 		// tabGeneral
 		cfg->set("player_name", editPlayerName->text().toStdString());
-		cfg->set("uuid", editUUID->text().toStdString());
+		cfg->set("uuid", labelUUIDdisplay->text().toStdString());
 		cfg->set("log", (checkLog->checkState() == Qt::Checked) ? true : false);
+		cfg->set("log_chat", (checkLogChat->checkState() == Qt::Checked) ? true : false);
 		cfg->set("locale", comboLocale->itemData(comboLocale->currentIndex()).toString().toStdString());
 		cfg->set("sound", (checkSound->checkState() == Qt::Checked) ? true : false);
 		cfg->set("sound_focus", (checkSoundFocus->checkState() == Qt::Checked) ? true : false);
@@ -194,5 +209,11 @@ void SettingsDialog::actionOk()
 void SettingsDialog::actionCheckStateSound(int new_state)
 {
 	checkSoundFocus->setEnabled(
+		((Qt::CheckState)new_state == Qt::Checked) ? true : false);
+}
+
+void SettingsDialog::actionCheckStateLog(int new_state)
+{
+	checkLogChat->setEnabled(
 		((Qt::CheckState)new_state == Qt::Checked) ? true : false);
 }
