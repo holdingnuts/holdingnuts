@@ -420,7 +420,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	this->setMinimumSize(640, 480);
 	this->setWindowTitle(tr("HoldingNuts table"));
-	this->setWindowIcon(QIcon(":/res/pclient.ico"));
+	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
 	this->resize(800, 630);
 }
 

@@ -34,7 +34,7 @@ extern ConfigParser config;
 CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 {
 	setWindowTitle(tr("Create game"));
-	setWindowIcon(QIcon(":/res/pclient.ico"));
+	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setMinimumWidth(300);
 	
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,

@@ -32,7 +32,7 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 	configfile = filename;
 	
 	setWindowTitle(tr("Settings"));
-	setWindowIcon(QIcon(":/res/pclient.ico"));
+	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setMinimumWidth(300);
 	
 	tabWidget = new QTabWidget;

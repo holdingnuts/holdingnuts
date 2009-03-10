@@ -58,7 +58,7 @@ extern ConfigParser config;
 WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 {
 	this->setWindowTitle(tr("HoldingNuts Foyer"));
-	this->setWindowIcon(QIcon(":/res/pclient.ico"));
+	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
 	
 	
 	// header

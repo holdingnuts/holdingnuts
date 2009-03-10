@@ -34,7 +34,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
 {
 	setWindowTitle(tr("About"));
-	setWindowIcon(QIcon(":/res/pclient.ico"));
+	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setFixedSize(350, 230);
 	
 	
