@@ -14,14 +14,14 @@ add_subdirectory (libpoker)
 add_subdirectory (system)
 
 
-IF (NOT WITHOUT_SERVER)
+IF (ENABLE_SERVER)
 	add_subdirectory (server)
-ENDIF (NOT WITHOUT_SERVER)
+ENDIF (ENABLE_SERVER)
 
-IF (NOT WITHOUT_CLIENT)
+IF (ENABLE_CLIENT)
 	add_subdirectory (client)
-ENDIF (NOT WITHOUT_CLIENT)
+ENDIF (ENABLE_CLIENT)
 
-IF (NOT WITHOUT_TEST)
+IF (ENABLE_TEST)
 	add_subdirectory (test)
-ENDIF (NOT WITHOUT_TEST)
+ENDIF (ENABLE_TEST)
