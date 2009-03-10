@@ -54,8 +54,9 @@ AboutDialog::AboutDialog(QWidget *parent)
 					tr("Version %1.%2.%3")
 						.arg(VERSION_MAJOR)
 						.arg(VERSION_MINOR)
-						.arg(VERSION_REVISION) +
-					"</b></qt>",
+						.arg(VERSION_REVISION) + "</b> <i>(" +
+						QString("SVN %1").arg(VERSIONSTR_SVN) + 
+					")</i></qt>",
 					 this);
 	
 	

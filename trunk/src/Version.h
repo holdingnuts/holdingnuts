@@ -43,4 +43,12 @@
 #define VERSION_GETREVISION(version) \
 	((version - VERSION_GETMAJOR(version)*100000) - VERSION_GETMINOR(version)*1000)
 
+
+/* provided SVN revision */
+#ifdef SVN_REV
+# define VERSIONSTR_SVN	"r" SVN_REV
+#else
+# define VERSIONSTR_SVN	"-"
+#endif
+
 #endif /* _VERSION_H */

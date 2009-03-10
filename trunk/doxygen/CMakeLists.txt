@@ -15,6 +15,7 @@ set (DOXYGEN_INPUT
 	\"${HOLDINGNUTS_SOURCE_DIR}/src/client\""
 )
 
+# fill placeholders in Doxyfile
 configure_file (
     ${CMAKE_CURRENT_SOURCE_DIR}/${DOXYFILE}.in
     ${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE} @ONLY IMMEDIATE

@@ -1160,8 +1160,9 @@ int main(int argc, char **argv)
 {
 	log_set(stdout, 0);
 	
-	log_msg("main", "HoldingNuts pclient (version %d.%d.%d; Qt version %s)",
+	log_msg("main", "HoldingNuts pclient (version %d.%d.%d; svn %s; Qt version %s)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
+		VERSIONSTR_SVN,
 		qVersion());
 	
 	
