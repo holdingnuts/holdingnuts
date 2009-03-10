@@ -852,6 +852,11 @@ void PClient::slotDbgRegister()
 }
 #endif
 
+void PClient::sendDebugMsg(const QString& msg)
+{
+	netSendMsg(msg.toStdString().c_str());
+}
+
 int PClient::netSendMsg(const char *msg)
 {
 	char buf[1024];
