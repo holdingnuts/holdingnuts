@@ -32,6 +32,7 @@ class QTabWidget;
 class QLineEdit;
 class QCheckBox;
 class QComboBox;
+class QLabel;
 
 class SettingsDialog : public QDialog
 {
@@ -50,8 +51,8 @@ private:
 	
 	// tabGeneral
 	QLineEdit *editPlayerName;
-	QLineEdit *editUUID;
-	QCheckBox *checkLog;
+	QLabel *labelUUIDdisplay;
+	QCheckBox *checkLog, *checkLogChat;
 	QComboBox *comboLocale;
 	QCheckBox *checkSound, *checkSoundFocus;
 	
@@ -63,6 +64,7 @@ private slots:
 	void actionOk();
 	void actionGenUUID();
 	void actionCheckStateSound(int new_state);
+	void actionCheckStateLog(int new_state);
 };
 
 #endif /* _SETTINGS_DIALOG_H */
