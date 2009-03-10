@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 

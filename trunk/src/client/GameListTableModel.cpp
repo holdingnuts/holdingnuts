@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
@@ -169,11 +170,15 @@ void GameListTableModel::updateGameState(int gid, const QString& value)
 
 void GameListTableModel::clear()
 {
-	for (int i = 0; i < rowCount(); ++i)
-		datarows[i].cols.clear();
+	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
+	
+	//for (int i = 0; i < rowCount(); ++i)
+	//	datarows[i].cols.clear();
 		
 	datarows.clear();
-
+	
+	endRemoveRows();
+	
 	reset();
 }
 
