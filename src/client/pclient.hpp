@@ -146,6 +146,8 @@ public:
 	void requestGameinfo(const char *glist);
 	void requestGameinfo(int gid);
 	
+	void sendDebugMsg(const QString& msg);
+	
 private:
 	WMain *wMain;
 		
