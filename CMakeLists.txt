@@ -3,9 +3,10 @@ cmake_minimum_required (VERSION 2.6)
 project (HOLDINGNUTS)
 
 # switch features on/off
-option (WITHOUT_CLIENT "do not build the client" Off)
-option (WITHOUT_SERVER "do not build the server" Off)
-option (WITHOUT_TEST "do not build the test-utils" Off)
+option (ENABLE_CLIENT	"build the client"		On)
+option (ENABLE_SERVER	"build the server"		On)
+option (ENABLE_TEST	"build the test-utils"		Off)
+
 
 # check for inner-source-build
 STRING (COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" in_source)
@@ -40,7 +41,7 @@ ENDIF (NOT PLATFORM_STR)
 
 #MESSAGE("Target platform is ${PLATFORM_STR}")
 
-option (UPDATE_TRANSLATIONS "Update source translations")
+option (UPDATE_TRANSLATIONS "Update source translations" Off)
 
 
 # Doxygen documentation
