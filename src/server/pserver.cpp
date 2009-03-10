@@ -220,8 +220,9 @@ int main(int argc, char **argv)
 {
 	log_set(stdout, 0);
 	
-	log_msg("main", "HoldingNuts pserver (version %d.%d.%d)",
-		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
+	log_msg("main", "HoldingNuts pserver (version %d.%d.%d; svn %s)",
+		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
+		VERSIONSTR_SVN);
 	
 #if !defined(PLATFORM_WINDOWS)
 	// ignore broken-pipe signal eventually caused by sockets
