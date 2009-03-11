@@ -48,6 +48,8 @@
 #include <QHeaderView>
 #include <QListView>
 #include <QCloseEvent>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include "Audio.h"
 #include "data.h"
@@ -215,37 +217,47 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	// menus
 	QAction *action;
-	QMenu *game = new QMenu(this);
+	QMenu *menuGame = new QMenu(this);
 
 	action = new QAction(tr("&Settings"), this);
 	action->setShortcut(tr("CTRL+S"));
 	connect(action, SIGNAL(triggered()), this, SLOT(actionSettings()));
-	game->addAction(action);
-	
-	game->addSeparator();
-	
-	action = new QAction(tr("&About"), this);
-	action->setShortcut(tr("CTRL+A"));
-	connect(action, SIGNAL(triggered()), this, SLOT(actionAbout()));
-	game->addAction(action);
+	menuGame->addAction(action);
 	
 #ifdef DEBUG
-	game->addSeparator();
+	menuGame->addSeparator();
 	
 	action = new QAction(tr("&Test"), this);
 	action->setShortcut(tr("CTRL+T"));
 	connect(action, SIGNAL(triggered()), this, SLOT(actionTest()));
-	game->addAction(action);
+	menuGame->addAction(action);
 #endif
 	
-	game->addSeparator();
+	menuGame->addSeparator();
 	
 	action = new QAction(tr("&Quit"), this);
 	action->setShortcut(tr("CTRL+Q"));
 	connect(action, SIGNAL(triggered()), qApp, SLOT(quit()));
-	game->addAction(action);
+	menuGame->addAction(action);
 	
-	menuBar()->addMenu(game)->setText(tr("&Game"));
+	// help menu
+	QMenu *menuHelp = new QMenu(this);
+	
+	action = new QAction(tr("&Handbook"), this);
+	action->setShortcut(tr("CTRL+H"));
+	connect(action, SIGNAL(triggered()), this, SLOT(actionHelp()));
+	menuHelp->addAction(action);
+	
+	menuHelp->addSeparator();
+	
+	action = new QAction(tr("&About"), this);
+	action->setShortcut(tr("CTRL+A"));
+	connect(action, SIGNAL(triggered()), this, SLOT(actionAbout()));
+	menuHelp->addAction(action);
+	
+	// add menus to main-window menu-bar
+	menuBar()->addMenu(menuGame)->setText(tr("&Game"));
+	menuBar()->addMenu(menuHelp)->setText(tr("&Help"));
 	
 	
 	// gamelist update timer
@@ -483,6 +495,11 @@ void WMain::actionSettings()
 	
 	SettingsDialog dialogSettings(cfgfile, config);
 	dialogSettings.exec();
+}
+
+void WMain::actionHelp()
+{
+	QDesktopServices::openUrl(QUrl(CLIENT_WEBSITE_HELP));
 }
 
 void WMain::actionAbout()
