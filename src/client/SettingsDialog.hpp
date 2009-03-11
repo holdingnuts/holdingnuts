@@ -39,14 +39,13 @@ class SettingsDialog : public QDialog
 Q_OBJECT
 
 public:
-	SettingsDialog(const char *filename, ConfigParser &cp, QWidget *parent = 0);
+	SettingsDialog(ConfigParser &cp, QWidget *parent = 0);
 
 private:
 	QTabWidget *tabWidget;
 	QWidget *tabGeneral;
 	QWidget *tabAppearance;
 	
-	const char *configfile;
 	ConfigParser *cfg;
 	
 	// tabGeneral

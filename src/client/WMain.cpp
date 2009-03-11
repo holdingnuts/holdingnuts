@@ -74,8 +74,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	p.setColor(QPalette::WindowText, Qt::black);
 	lblBanner->setPalette(p);
 	
-	QLabel *lblWelcome = new QLabel("<qt>" + tr("Welcome") +
-		" <b>" + QString::fromStdString(config.get("player_name")) + "</b></qt>", this);
+	lblWelcome = new QLabel(this);
+	this->updateWelcomeLabel();
 	
 	QDateTime datetime = QDateTime::currentDateTime();
 //	QLabel *lblDateTime = new QLabel(datetime.toString("dddd, yyyy-MM-dd, hh:mm"), this);
@@ -493,8 +493,17 @@ void WMain::actionSettings()
 	char cfgfile[1024];
 	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
 	
-	SettingsDialog dialogSettings(cfgfile, config);
-	dialogSettings.exec();
+	SettingsDialog dialogSettings(config);
+	if (dialogSettings.exec() != QDialog::Accepted)
+		return;
+	
+	// save the settings
+	config.save(cfgfile);
+	
+	// updates
+	this->updateWelcomeLabel();
+	
+	addLog(tr("You may need to restart the client for all settings to take effect."));
 }
 
 void WMain::actionHelp()
@@ -641,4 +650,10 @@ void WMain::actionSelectedGameUpdate()
 	((PClient*)qApp)->requestPlayerlist(gid);
 	
 	updatePlayerList(gid);
+}
+
+void WMain::updateWelcomeLabel()
+{
+	lblWelcome->setText("<qt>" + tr("Welcome") +
+		" <b>" + QString::fromStdString(config.get("player_name")) + "</b></qt>");
 }

@@ -26,11 +26,10 @@
 #include "Debug.h"
 #include "SettingsDialog.hpp"
 
-SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *parent) : QDialog(parent)
+SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
+:	QDialog(parent),
+	cfg(&cp)
 {
-	cfg = &cp;
-	configfile = filename;
-	
 	setWindowTitle(tr("Settings"));
 	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setMinimumWidth(300);
@@ -198,8 +197,6 @@ void SettingsDialog::actionOk()
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_card_deck", comboCarddeck->itemData(comboCarddeck->currentIndex()).toString().toStdString());
-		
-		cfg->save(configfile);
 		
 		accept();
 	}
