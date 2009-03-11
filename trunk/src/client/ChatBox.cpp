@@ -34,7 +34,7 @@ ChatBox::ChatBox(
 	const QString& title,
 	InputLineAlignment align,
 	int nTextLogHeight,
-	QWidget *parent) : QGroupBox(title, parent)
+	QWidget *parent) : QWidget(parent)
 {
 	m_pEditChat = new QLineEdit(this);
 
@@ -57,8 +57,9 @@ ChatBox::ChatBox(
 	lInputLine->addWidget(m_pEditChat);
 	lInputLine->addWidget(m_pSendMsg);
 
-	QVBoxLayout *lchat = new QVBoxLayout;
+	QVBoxLayout *lchat = new QVBoxLayout(this);
 
+	
 	if (align == INPUTLINE_TOP)
 		lchat->addLayout(lInputLine);
 
@@ -67,8 +68,11 @@ ChatBox::ChatBox(
 	if (align == INPUTLINE_BOTTOM)
 		lchat->addLayout(lInputLine);
 
-	this->setLayout(lchat);
-	
+	// qwidget has already margins
+	lchat->setContentsMargins(0, 0, 0, 0);
+
+	setLayout(lchat);
+
 	m_nFontPointSize = this->fontPointSize();
 }
 
@@ -135,6 +139,12 @@ int ChatBox::fontPointSize() const
 void ChatBox::showChatBtn(bool bShow)
 {
 	m_pSendMsg->setVisible(bShow);
+}
+
+void ChatBox::setEnabled(bool enable)
+{
+	m_pEditChat->setEnabled(enable);
+	m_pSendMsg->setEnabled(enable);
 }
 
 void ChatBox::actionChat()

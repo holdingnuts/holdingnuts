@@ -200,11 +200,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lMain->setContentsMargins(0,0,0,0);
 	
 	// widget decoration
-	QPalette mp(this->palette());
-	mp.setColor(QPalette::Window, Qt::black);
-	mp.setColor(QPalette::WindowText, Qt::gray);
+//	QPalette mp(this->palette());
+//	mp.setColor(QPalette::Window, Qt::black);
+//	mp.setColor(QPalette::WindowText, Qt::gray);
 	//mp.setColor(QPalette::Text, Qt::gray);
-	this->setPalette(mp);
+//	this->setPalette(mp);
 	
 	
 	
@@ -348,7 +348,7 @@ void WMain::updateConnectionStatus()
 		timerSelectedGameUpdate->stop();
 	}
 	
-	//m_pChat->setEnabled(is_connected);
+	m_pChat->setEnabled(is_connected);
 	btnCreateGame->setEnabled(is_connected);
 	btnRegister->setEnabled(is_connected);
 	btnUnregister->setEnabled(is_connected);

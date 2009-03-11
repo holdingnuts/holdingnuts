@@ -49,6 +49,8 @@ EditableSlider::EditableSlider(QWidget *parent)
 	connect(m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
 	
 	QVBoxLayout *layout = new QVBoxLayout(this);
+		// qwidget has already margins
+		layout->setContentsMargins(0, 0, 0, 0);
 		layout->setSizeConstraint(QLayout::SetMinimumSize); 
 		layout->addWidget(m_pEdit);
 		layout->addWidget(m_pSlider);
