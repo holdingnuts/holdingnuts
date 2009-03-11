@@ -1143,6 +1143,13 @@ bool config_load()
 		log_msg("config", "Loaded configuration from %s", cfgfile);
 	else
 	{
+		// override defaults
+		
+		// determine system username and use it as default playername
+		const char *name = sys_username();
+		if (name)
+			config.set("player_name", std::string(name));
+		
 		// generate an UUID
 		QString suuid = QUuid::createUuid().toString();
 		suuid = suuid.mid(1, suuid.length() - 2);

@@ -69,6 +69,7 @@ int sys_chdir(const char *path);
 
 const char* sys_config_path();
 const char* sys_data_path();
+const char* sys_username();
 
 #if defined __cplusplus
     }
