@@ -120,7 +120,8 @@ public:
 	bool doConnect(QString strServer, unsigned int port);
 	void doClose();
 	
-	bool isConnected() const { return connected || connecting; };
+	bool isConnected() const { return connected; };
+	bool isConnecting() const { return connecting; };
 	
 	void chatAll(const QString& text);
 	void chat(const QString& text, int gid, int tid);

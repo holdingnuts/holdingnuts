@@ -133,8 +133,11 @@ private:
 	
 	//! \brief MVC Model
 	PlayerListTableModel	*modelPlayerList;
-	//! \brief Playerliste from game
+	//! \brief Playerlist of game
 	QTableView 	 	*viewPlayerList;
+	
+	//! \brief Container widget for gameinfo widgets
+	QWidget			*wGameInfo;
 	
 	//! \brief create new game
 	QPushButton		*btnCreateGame;
