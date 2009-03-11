@@ -135,6 +135,8 @@ void PlayerListTableModel::updatePlayerName(int row, const QString& value)
 
 void PlayerListTableModel::clear()
 {
+	if (!this->rowCount()) return;
+	
 	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
 	
 	//for (int i = 0; i < rowCount(); ++i)
