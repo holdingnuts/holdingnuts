@@ -25,8 +25,10 @@
 #include <errno.h>
 
 #if defined(PLATFORM_WINDOWS)
+# include <windows.h>
 # include <dirent.h>
 # include <io.h>
+# include <tchar.h>
 #else
 # include <unistd.h>
 #endif
@@ -248,4 +250,21 @@ const char* sys_data_path()
 	}
 	
 	return 0;
+}
+
+const char* sys_username()
+{
+	static char username[128];
+	
+	*username = '\0';
+	
+#if defined(PLATFORM_WINDOWS)
+	TCHAR userBuf[128];
+	DWORD bufCount = sizeof(userBuf);
+	if (GetUserName(userBuf, &bufCount))
+		snprintf(username, sizeof(username), "%s", (char*) userBuf);  // FIXME: assuming (TCHAR == char)
+#else
+	snprintf(username, sizeof(username), "%s", getenv("USER"));
+#endif
+	return username;
 }
