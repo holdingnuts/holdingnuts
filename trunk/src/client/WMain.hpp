@@ -33,6 +33,7 @@ class ChatBox;
 class GameListTableModel;
 class PlayerListTableModel;
 
+class QLabel;
 class QLineEdit;
 class QPushButton;
 class QTextEdit;
@@ -82,6 +83,7 @@ public:
 	
 protected:
 	void doRegister(bool bRegister);
+	void updateWelcomeLabel();
 	
 private slots:
 	void closeEvent(QCloseEvent *event);
@@ -111,40 +113,43 @@ private slots:
 	void actionSelectedGameUpdate();
 
 private:
+	//! \brief Label in header displaying a welcome message
+	QLabel			*lblWelcome;
+	
 	//! \brief Editbox server adress
-	QLineEdit				*editSrvAddr;
+	QLineEdit		*editSrvAddr;
 	//! \brief Connect Button
-	QPushButton				*btnConnect;
+	QPushButton		*btnConnect;
 	//! \brief Close connection Button
-	QPushButton				*btnClose;
+	QPushButton		*btnClose;
 	
 	//! \Brief Chatbox
-	ChatBox					*m_pChat;
+	ChatBox			*m_pChat;
 	
 	//! \brief MVC Model
-	GameListTableModel		*modelGameList;
+	GameListTableModel	*modelGameList;
 	//! \brief MVC View
-	QTableView				*viewGameList;
+	QTableView		*viewGameList;
 	
 	//! \brief MVC Model
 	PlayerListTableModel	*modelPlayerList;
 	//! \brief Playerliste from game
-	QTableView 	 			*viewPlayerList;
+	QTableView 	 	*viewPlayerList;
 	
 	//! \brief create new game
-	QPushButton				*btnCreateGame;
+	QPushButton		*btnCreateGame;
 	
 	//! \brief register to a gamelist
-	QPushButton				*btnRegister;
+	QPushButton		*btnRegister;
 	
 	//! \brief un-register a gamelist
-	QPushButton				*btnUnregister;
+	QPushButton		*btnUnregister;
 	
 	//! \brief timer updates the gamelist
-	QTimer		*timerGamelistUpdate;
+	QTimer			*timerGamelistUpdate;
 	
 	//! \brief timer updates the selected game
-	QTimer		*timerSelectedGameUpdate;
+	QTimer			*timerSelectedGameUpdate;
 };
 
 #endif	/* _WMAIN_H */
