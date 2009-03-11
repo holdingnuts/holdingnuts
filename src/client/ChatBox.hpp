@@ -25,13 +25,13 @@
 #ifndef _HOLDINGNUTS_CHATBOX_H
 #define _HOLDINGNUTS_CHATBOX_H
 
-#include <QGroupBox>
+#include <QWidget>
 
 class QLineEdit;
 class QTextEdit;
 class QPushButton;
 
-class ChatBox : public QGroupBox
+class ChatBox : public QWidget
 {
 	Q_OBJECT
 
@@ -55,6 +55,8 @@ public:
 	int fontPointSize() const;	
 
 	void showChatBtn(bool bShow);
+
+	void setEnabled(bool enable);
 
 protected:
 	ChatBox();
