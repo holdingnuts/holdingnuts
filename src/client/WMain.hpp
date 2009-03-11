@@ -96,6 +96,8 @@ private slots:
 	void actionCreateGame();
 	
 	void actionSettings();
+	
+	void actionHelp();
 	void actionAbout();
 	
 	void actionChat(QString msg);

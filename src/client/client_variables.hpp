@@ -20,7 +20,7 @@
 
 // Client defaults
 
-config.set("default_host",	"localhost");		// default host to connect to
+config.set("default_host",	"holdingnuts.dnsalias.net");	// default host to connect to
 config.set("default_port",	DEFAULT_SERVER_PORT);	// default port to connect to
 config.set("player_name",	"Unnamed");		// the player name
 config.set("uuid",		"");			// unique ID for re-connect

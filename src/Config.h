@@ -44,6 +44,9 @@
 #undef SERVER_TESTING
 
 
+/* client manual website; menu Help->Handbook */
+#define CLIENT_WEBSITE_HELP  "http://wiki.holdingnuts.net/handbook"
+
 
 #if defined(PLATFORM_WINDOWS)
 # define CONFIG_APPNAME "HoldingNuts"
