@@ -170,6 +170,8 @@ void GameListTableModel::updateGameState(int gid, const QString& value)
 
 void GameListTableModel::clear()
 {
+	if (!this->rowCount()) return;
+	
 	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
 	
 	//for (int i = 0; i < rowCount(); ++i)
