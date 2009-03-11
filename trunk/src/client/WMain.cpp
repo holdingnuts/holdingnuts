@@ -75,7 +75,6 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lblBanner->setPalette(p);
 	
 	lblWelcome = new QLabel(this);
-	this->updateWelcomeLabel();
 	
 	QDateTime datetime = QDateTime::currentDateTime();
 //	QLabel *lblDateTime = new QLabel(datetime.toString("dddd, yyyy-MM-dd, hh:mm"), this);
@@ -145,9 +144,13 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lGameInfo->addWidget(viewPlayerList);
 	lGameInfo->addLayout(lRegister);
 
+	wGameInfo = new QWidget(this);
+	wGameInfo->setLayout(lGameInfo);
 	
 	// connection
 	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")), this);
+	editSrvAddr->setToolTip(
+		tr("The desired server (domain-name or IP) to connect with.\nYou can optionally specify a port number.\nFormat: <host>[:<port>]"));
 	connect(editSrvAddr, SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
 	connect(editSrvAddr, SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
@@ -183,7 +186,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	layout->addLayout(lConnect, 0, 0, 1, 2);
 	// row 2
 	layout->addWidget(viewGameList, 1, 0, 1, 1);
-	layout->addLayout(lGameInfo, 1, 1, 1, 1);
+	layout->addWidget(wGameInfo, 1, 1, 1, 1);
 	// row 3
 	layout->addWidget(m_pChat, 2, 0, 1, 1);
 	layout->addWidget(btnCreateGame, 2, 1, 1, 1, Qt::AlignBottom | Qt::AlignRight);
@@ -321,11 +324,19 @@ void WMain::updateGamelist(
 void WMain::updateConnectionStatus()
 {
 	bool is_connected = ((PClient*)qApp)->isConnected();
+	bool is_connecting = ((PClient*)qApp)->isConnecting();
 	
-	if (is_connected)
+	if (is_connecting)
 	{
 		btnConnect->setEnabled(false);
 		btnClose->setEnabled(true);
+		editSrvAddr->setEnabled(false);
+	}
+	else if (is_connected)
+	{
+		btnConnect->setEnabled(false);
+		btnClose->setEnabled(true);
+		editSrvAddr->setEnabled(false);
 		
 		// update gamelist periodically
 		timerGamelistUpdate->start(60*1000);
@@ -340,6 +351,7 @@ void WMain::updateConnectionStatus()
 		else
 			btnConnect->setEnabled(false);
 		btnClose->setEnabled(false);
+		editSrvAddr->setEnabled(true);
 		
 		modelGameList->clear();
 		modelPlayerList->clear();
@@ -352,6 +364,11 @@ void WMain::updateConnectionStatus()
 	btnCreateGame->setEnabled(is_connected);
 	btnRegister->setEnabled(is_connected);
 	btnUnregister->setEnabled(is_connected);
+	viewGameList->setEnabled(is_connected);
+	viewPlayerList->setEnabled(is_connected);
+	wGameInfo->setEnabled(is_connected);
+	
+	updateWelcomeLabel();
 }
 
 void WMain::notifyPlayerinfo(int cid)
@@ -437,7 +454,12 @@ void WMain::actionConnect()
 	if (!((PClient*)qApp)->doConnect(srvlist.at(0), port))
 		addLog(tr("Error connecting."));
 	else
-		btnConnect->setEnabled(false);
+	{
+		updateConnectionStatus();
+		
+		// FIXME: set focus on chat input line
+		//m_pChat->setFocus(Qt::OtherFocusReason);
+	}
 }
 
 void WMain::actionClose()
@@ -654,6 +676,10 @@ void WMain::actionSelectedGameUpdate()
 
 void WMain::updateWelcomeLabel()
 {
+	const bool is_connected = ((PClient*)qApp)->isConnected();
+	
 	lblWelcome->setText("<qt>" + tr("Welcome") +
-		" <b>" + QString::fromStdString(config.get("player_name")) + "</b></qt>");
+		" <strong>" + QString::fromStdString(config.get("player_name")) + "</strong>" +
+		(is_connected ? "" : "&nbsp; <em>(" + tr("offline") + ")</em>") +
+		"</qt>");
 }
