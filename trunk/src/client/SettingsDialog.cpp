@@ -174,11 +174,10 @@ SettingsDialog::SettingsDialog(const char *filename, ConfigParser &cp, QWidget *
 void SettingsDialog::actionGenUUID()
 {
 	// generate an UUID
-	QUuid uuid = QUuid::createUuid();
-	QString suuid = uuid.toString();
-	suuid.chop(1);
+	QString suuid = QUuid::createUuid().toString();
+	suuid = suuid.mid(1, suuid.length() - 2);
 	
-	labelUUIDdisplay->setText(suuid.remove(0, 1));
+	labelUUIDdisplay->setText(suuid);
 }
 
 void SettingsDialog::actionOk()

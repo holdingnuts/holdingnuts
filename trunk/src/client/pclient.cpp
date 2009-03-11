@@ -1144,10 +1144,9 @@ bool config_load()
 	else
 	{
 		// generate an UUID
-		QUuid uuid = QUuid::createUuid();
-		QString suuid = uuid.toString();
-		suuid.chop(1);
-		config.set("uuid", suuid.remove(0, 1).toStdString());
+		QString suuid = QUuid::createUuid().toString();
+		suuid = suuid.mid(1, suuid.length() - 2);
+		config.set("uuid", suuid.toStdString());
 		
 		if (config.save(cfgfile))
 			log_msg("config", "Saved initial configuration to %s", cfgfile);
