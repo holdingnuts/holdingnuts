@@ -38,6 +38,9 @@ GameListTableModel::GameListTableModel(QObject *parent)
 
 int GameListTableModel::rowCount(const QModelIndex& parent) const
 {
+	if (parent.isValid())	// see qt-tip in doc
+		return 0;
+	
 	return datarows.count();
 }
 
@@ -95,18 +98,13 @@ bool GameListTableModel::setData(
 
 bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& parent)
 {
-	// FIXME:
-	position = this->rowCount();
-	rows = 1;
-	
-	
-	beginInsertRows(QModelIndex(), position, position + rows);
+	beginInsertRows(parent, position, position + rows - 1);
 
 	dataitem di;
 	di.gid = -1;
 	
 	for (int j = 0; j < this->columnCount(); ++j)
-		di.cols.insert(j, "");
+		di.cols.insert(j, "NA");
 
 	for (int i = position; i < (position + rows); ++i)
 		datarows.insert(i, di);
@@ -116,34 +114,18 @@ bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& p
 	return true;
 }
 
-bool GameListTableModel::appendRows(int rows, const QModelIndex& parent)
-{
-	return this->insertRows(this->rowCount(), rows, parent);
-}
-
-#if 0
-void GameListTableModel::updateRow(int gid, const QStringList& value)
-{
-	if (gid /*row*/ >= this->rowCount())
-		appendRows(this->rowCount() - gid + 1);
-
-	for (int j = 0; j < value.count(); ++j)
-		this->setData(createIndex(gid, j), value.at(j));
-}
-#endif
-
 void GameListTableModel::updateValue(int gid, int column, const QString& value)
 {
 	if (findRowByGid(gid) == -1)
 	{
-		appendRows(1);
+		insertRow(this->rowCount());
+
 		datarows[this->rowCount() -1].gid = gid;
 		
 		dump();
 	}
 	
-	int row = findRowByGid(gid);
-	
+	const int row = findRowByGid(gid);
 	
 	this->setData(createIndex(row, column), value);
 }
@@ -184,12 +166,12 @@ void GameListTableModel::clear()
 	reset();
 }
 
-int GameListTableModel::findGidByRow(int row)
+int GameListTableModel::findGidByRow(int row) const
 {
 	return datarows.at(row).gid;
 }
 
-int GameListTableModel::findRowByGid(int gid)
+int GameListTableModel::findRowByGid(int gid) const
 {
 	for (int i = 0; i < rowCount(); ++i)
 	{
@@ -199,7 +181,7 @@ int GameListTableModel::findRowByGid(int gid)
 	return -1;
 }
 
-void GameListTableModel::dump()
+void GameListTableModel::dump() const
 {
 #ifdef DEBUG
 	for (int i = 0; i < rowCount(); ++i)
