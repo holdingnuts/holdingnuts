@@ -365,7 +365,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblActions->setFixedSize(400, 70);
 	lblActions->setLayout(stlayActions);
 
-	m_pChat	= new ChatBox("", ChatBox::INPUTLINE_BOTTOM, 0, this);
+	m_pChat	= new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->setFixedHeight(150);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
