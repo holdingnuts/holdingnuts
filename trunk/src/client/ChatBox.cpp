@@ -31,7 +31,6 @@
 #include <QPushButton>
 
 ChatBox::ChatBox(
-	const QString& title,
 	InputLineAlignment align,
 	int nTextLogHeight,
 	QWidget *parent) : QWidget(parent)

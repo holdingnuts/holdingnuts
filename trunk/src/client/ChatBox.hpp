@@ -43,7 +43,6 @@ public:
 	};
 
 	ChatBox(
-		const QString& title,
 		InputLineAlignment align = INPUTLINE_TOP,
 		int nTextLogHeight = 0,
 		QWidget *parent = 0);

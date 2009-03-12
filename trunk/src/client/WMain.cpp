@@ -170,7 +170,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	
 	// the foyer chat box
-	m_pChat = new ChatBox("", ChatBox::INPUTLINE_BOTTOM, 0, this);
+	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
@@ -203,12 +203,13 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lMain->setContentsMargins(0,0,0,0);
 	
 	// widget decoration
-//	QPalette mp(this->palette());
-//	mp.setColor(QPalette::Window, Qt::black);
-//	mp.setColor(QPalette::WindowText, Qt::gray);
+#if 0	
+	QPalette mp(this->palette());
+	mp.setColor(QPalette::Window, Qt::black);
+	mp.setColor(QPalette::WindowText, Qt::gray);
 	//mp.setColor(QPalette::Text, Qt::gray);
-//	this->setPalette(mp);
-	
+	this->setPalette(mp);
+#endif	
 	
 	
 	// create a main widget containing the layout
