@@ -48,7 +48,8 @@ QT4_ADD_RESOURCES(QtApp_RCC_SRCS ${QtApp_RCCS})
 # Warning: older CMake versions (2.6-patch-0) do not provide moc-qt4 with preprocessor definitions
 QT4_WRAP_CPP (
 	sources_MOC
-	pclient.hpp WMain.hpp SettingsDialog.hpp CreateGameDialog.hpp AboutDialog.hpp GameListTableModel.hpp PlayerListTableModel.hpp
+	pclient.hpp WMain.hpp SettingsDialog.hpp CreateGameDialog.hpp
+	AboutDialog.hpp GameListTableModel.hpp PlayerListTableModel.hpp GameListSortFilterProxyModel.hpp
 	WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp
 )
 
@@ -56,7 +57,8 @@ add_executable (
 	pclient
 	WIN32    # when building for windows: do not show the console window
 	pclient.cpp ${aux_obj}
-	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp GameListTableModel.cpp PlayerListTableModel.cpp
+	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp
+	GameListTableModel.cpp PlayerListTableModel.cpp GameListSortFilterProxyModel.cpp
 	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
 	Audio.c
 	${sources_MOC} ${QtApp_RCC_SRCS}
