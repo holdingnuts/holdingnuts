@@ -40,6 +40,7 @@ public:
 	int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+	
 	QVariant headerData(
 		int section,
 		Qt::Orientation orientation,
@@ -55,14 +56,6 @@ public:
 		int rows,
 		const QModelIndex &index = QModelIndex());
 		
-	bool appendRows(
-		int rows,
-		const QModelIndex &index = QModelIndex());
-
-	//! \brief 
-	//! \param value
-	//void updateRow(int gid, const QStringList& value);
-
 	void updateValue(int gid, int column, const QString& value);
 
 	void updateGameName(int gid, const QString& value);
@@ -74,10 +67,10 @@ public:
 	void clear();
 
 	//! \brief translation methods (gid<->row)
-	int findGidByRow(int row);
-	int findRowByGid(int gid);
+	int findGidByRow(int row) const;
+	int findRowByGid(int gid) const;
 	
-	void dump();
+	void dump() const;
 
 private:
 	QStringList				strlstHeaderLabels;
