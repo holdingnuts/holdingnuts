@@ -28,6 +28,7 @@
 #include "AboutDialog.hpp"
 #include "GameListTableModel.hpp"
 #include "PlayerListTableModel.hpp"
+#include "GameListSortFilterProxyModel.hpp"
 
 #include "Config.h"
 #include "Debug.h"
@@ -91,6 +92,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// model game
 	modelGameList = new GameListTableModel(this);
 
+	// sort and filter proxy model
+	proxyModelGameList = new GameListSortFilterProxyModel(this);
+	proxyModelGameList->setSourceModel(modelGameList);
+
 	// view game
 	viewGameList = new QTableView(this);
 	viewGameList->setShowGrid(false);
@@ -99,13 +104,27 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewGameList->setModel(modelGameList);
+	viewGameList->setModel(proxyModelGameList);
+	viewGameList->setSortingEnabled(true);
 	
 	connect(
 		viewGameList->selectionModel(),
 		SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
 		this,
 		SLOT(gameListSelectionChanged(const QItemSelection&, const QItemSelection&)));
+		
+	// view game filter
+	filterPatternGame = new QLineEdit(this);
+
+	QHBoxLayout *lFilter = new QHBoxLayout();
+	lFilter->addWidget(new QLabel(tr("Game filter pattern:"), this));
+	lFilter->addWidget(filterPatternGame);	
+
+	connect(
+		filterPatternGame,
+		SIGNAL(textChanged(const QString&)),
+		this,
+		SLOT(gameFilterChanged()));
 
 	// model player
 	modelPlayerList = new PlayerListTableModel(this);
@@ -184,12 +203,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	QGridLayout *layout = new QGridLayout;
 	// row 0
 	layout->addLayout(lConnect, 0, 0, 1, 2);
-	// row 2
+	// row 1
 	layout->addWidget(viewGameList, 1, 0, 1, 1);
 	layout->addWidget(wGameInfo, 1, 1, 1, 1);
+	// row 2
+	layout->addLayout(lFilter, 2, 0, 1, 1);
 	// row 3
-	layout->addWidget(m_pChat, 2, 0, 1, 1);
-	layout->addWidget(btnCreateGame, 2, 1, 1, 1, Qt::AlignBottom | Qt::AlignRight);
+	layout->addWidget(m_pChat, 3, 0, 1, 1);
+	layout->addWidget(btnCreateGame, 3, 1, 1, 1, Qt::AlignBottom | Qt::AlignRight);
 	
 	layout->setColumnStretch(0, 2);
 	layout->setColumnMinimumWidth(0, 300);
@@ -581,6 +602,12 @@ void WMain::gameListSelectionChanged(
 		
 		updatePlayerList(selected_row);
 	}
+}
+
+void WMain::gameFilterChanged()
+{
+	proxyModelGameList->setFilterRegExp(
+		QRegExp(filterPatternGame->text(), Qt::CaseInsensitive));
 }
 
 void WMain::closeEvent(QCloseEvent *event)

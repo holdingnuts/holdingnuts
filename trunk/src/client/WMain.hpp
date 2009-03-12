@@ -32,6 +32,7 @@
 class ChatBox;
 class GameListTableModel;
 class PlayerListTableModel;
+class GameListSortFilterProxyModel;
 
 class QLabel;
 class QLineEdit;
@@ -111,6 +112,8 @@ private slots:
 		const QItemSelection& deselected);
 	
 	void actionSelectedGameUpdate();
+	
+	void gameFilterChanged();
 
 private:
 	//! \brief Label in header displaying a welcome message
@@ -130,6 +133,10 @@ private:
 	GameListTableModel	*modelGameList;
 	//! \brief MVC View
 	QTableView		*viewGameList;
+	//! \brief Sort- and Filter Proxy Model
+	GameListSortFilterProxyModel	*proxyModelGameList;
+	
+	QLineEdit		*filterPatternGame;
 	
 	//! \brief MVC Model
 	PlayerListTableModel	*modelPlayerList;
