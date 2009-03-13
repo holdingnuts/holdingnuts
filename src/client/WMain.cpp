@@ -104,11 +104,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
-#if 0   // deactivated till it works with modelGameList
 	viewGameList->setModel(proxyModelGameList);
-#else
-	viewGameList->setModel(modelGameList);
-#endif
 	viewGameList->setSortingEnabled(true);
 	
 	connect(
@@ -416,7 +412,7 @@ void WMain::notifyPlayerinfo(int cid)
 	
 	if (pSelect->hasSelection())
 	{
-		const int gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
+		const int gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 		dbg_msg("DEBUG", "select row-id: %d", gid);
 		updatePlayerList(gid);
 	}
@@ -431,7 +427,7 @@ void WMain::notifyPlayerlist(int gid)
 	
 	if (pSelect->hasSelection())
 	{
-		const int sel_gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
+		const int sel_gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 		
 		if (sel_gid == gid)
 			updatePlayerList(gid);
@@ -519,7 +515,8 @@ void WMain::doRegister(bool bRegister)
 	
 	if (pSelect->hasSelection())
 	{
-		const int gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
+		const int gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		
 		((PClient*)qApp)->doRegister(gid, bRegister);
 		
 		updatePlayerList(gid);
@@ -599,12 +596,13 @@ void WMain::gameListSelectionChanged(
 {
 	if (!selected.isEmpty())
 	{
-		const int selected_row = modelGameList->findGidByRow((*selected.begin()).topLeft().row());
+		//const int selected_row = modelGameList->findGidByRow((*selected.begin()).topLeft().row());
+		const int selected_gid = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
+
+		((PClient*)qApp)->requestGameinfo(selected_gid);
+		((PClient*)qApp)->requestPlayerlist(selected_gid);
 		
-		((PClient*)qApp)->requestGameinfo(selected_row);
-		((PClient*)qApp)->requestPlayerlist(selected_row);
-		
-		updatePlayerList(selected_row);
+		updatePlayerList(selected_gid);
 	}
 }
 
@@ -697,7 +695,7 @@ void WMain::actionSelectedGameUpdate()
 	if (!pSelect->hasSelection())
 		return;
 	
-	const int gid = modelGameList->findGidByRow(pSelect->selectedRows().at(0).row());
+	const int gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 	dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
 	
 	((PClient*)qApp)->requestGameinfo(gid);

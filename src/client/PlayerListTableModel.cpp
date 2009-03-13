@@ -34,6 +34,9 @@ PlayerListTableModel::PlayerListTableModel(QObject *parent)
 
 int PlayerListTableModel::rowCount(const QModelIndex& parent) const
 {
+	if (parent.isValid())	// see qt-tip in doc
+		return 0;
+
 	return lstRows.count();
 }
 
@@ -91,7 +94,7 @@ bool PlayerListTableModel::setData(
 
 bool PlayerListTableModel::insertRows(int position, int rows, const QModelIndex& parent)
 {
-	beginInsertRows(QModelIndex(), position, position + rows);
+	beginInsertRows(parent, position, position + rows - 1);
 
 	QStringList lstTemp;
 

@@ -38,14 +38,15 @@ GameListTableModel::GameListTableModel(QObject *parent)
 
 int GameListTableModel::rowCount(const QModelIndex& parent) const
 {
-	if (parent.isValid())	// see qt-tip in doc
-		return 0;
-	
+	Q_UNUSED(parent);
+
 	return datarows.count();
 }
 
 int GameListTableModel::columnCount(const QModelIndex& parent) const
 {
+	Q_UNUSED(parent);
+
 	return strlstHeaderLabels.count();
 }
 
@@ -54,7 +55,7 @@ QVariant GameListTableModel::data(const QModelIndex& index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	if (index.row() > datarows.size())
+	if (index.row() > datarows.size() || index.column() > this->columnCount())
 		return QVariant();
 
 	if (role != Qt::DisplayRole)
@@ -96,15 +97,17 @@ bool GameListTableModel::setData(
 	return false;
 }
 
-bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& parent)
+bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& index)
 {
-	beginInsertRows(parent, position, position + rows - 1);
+	Q_UNUSED(index);
+	
+	beginInsertRows(QModelIndex(), position, position + rows - 1);
 
 	dataitem di;
 	di.gid = -1;
 	
 	for (int j = 0; j < this->columnCount(); ++j)
-		di.cols.insert(j, "NA");
+		di.cols.insert(j, QString());
 
 	for (int i = position; i < (position + rows); ++i)
 		datarows.insert(i, di);
@@ -114,11 +117,25 @@ bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& p
 	return true;
 }
 
+bool GameListTableModel::removeRows(int position, int rows, const QModelIndex& index)
+{
+	Q_UNUSED(index);
+
+	beginRemoveRows(QModelIndex(), position, position + rows - 1);
+
+	for (int row = 0; row < rows; ++row)
+		datarows.removeAt(position);
+
+	endRemoveRows();
+
+	return true;
+}
+
 void GameListTableModel::updateValue(int gid, int column, const QString& value)
 {
 	if (findRowByGid(gid) == -1)
 	{
-		insertRow(this->rowCount());
+		insertRow(this->rowCount()); // 0
 
 		datarows[this->rowCount() -1].gid = gid;
 		
@@ -126,8 +143,8 @@ void GameListTableModel::updateValue(int gid, int column, const QString& value)
 	}
 	
 	const int row = findRowByGid(gid);
-	
-	this->setData(createIndex(row, column), value);
+
+	this->setData(createIndex(row, column, static_cast<quint32>(gid)), value);
 }
 
 void GameListTableModel::updateGameName(int gid, const QString& value)
@@ -155,29 +172,25 @@ void GameListTableModel::clear()
 	if (!this->rowCount()) return;
 	
 	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
-	
-	//for (int i = 0; i < rowCount(); ++i)
-	//	datarows[i].cols.clear();
-		
-	datarows.clear();
-	
+		datarows.clear();
 	endRemoveRows();
 	
 	reset();
 }
 
+#if 0
 int GameListTableModel::findGidByRow(int row) const
 {
 	return datarows.at(row).gid;
 }
+#endif
 
 int GameListTableModel::findRowByGid(int gid) const
 {
 	for (int i = 0; i < rowCount(); ++i)
-	{
 		if (datarows.at(i).gid == gid)
 			return i;
-	}
+
 	return -1;
 }
 
