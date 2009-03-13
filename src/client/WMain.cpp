@@ -104,7 +104,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
+#if 0   // deactivated till it works with modelGameList
 	viewGameList->setModel(proxyModelGameList);
+#else
+	viewGameList->setModel(modelGameList);
+#endif
 	viewGameList->setSortingEnabled(true);
 	
 	connect(
