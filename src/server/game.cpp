@@ -140,7 +140,7 @@ bool client_chat(int from, int to, const char *message)
 		
 		snprintf(msg, sizeof(msg), "MSG %d \"%s\" %s",
 			from,
-			(fromclient) ? fromclient->name : "???",
+			(fromclient) ? fromclient->info.name : "???",
 			message);
 	}
 	
@@ -199,7 +199,7 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 	{
 		snprintf(msg, sizeof(msg), "MSG %d:%d:%d \"%s\" %s",
 			to_gid, to_tid, from_cid,
-			(fromclient) ? fromclient->name : "???",
+			(fromclient) ? fromclient->info.name : "???",
 			message);
 		
 		clientcon* toclient = get_client_by_id(client_list[i]);
@@ -292,7 +292,7 @@ bool client_remove(socktype sock)
 				
 				snprintf(msg, sizeof(msg),
 					"%s (%d) left foyer",
-					client->name, client->id);
+					client->info.name, client->id);
 				
 				send_msg = true;
 				
@@ -375,9 +375,9 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 			client->id = cid_counter++;
 		
 		
-		// set temporary client name
-		snprintf(client->name, sizeof(client->name), "client_%d", client->id);
-		
+		// set initial client info
+		snprintf(client->info.name, sizeof(client->info.name), "client_%d", client->id);
+		*(client->info.location) = '\0';
 		
 		// send 'introduced response'
 		snprintf(msg, sizeof(msg), "PSERVER %d %d",
@@ -406,8 +406,12 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 		
 		if (infotype == "name" && havearg)
 		{
-			snprintf(client->name, sizeof(client->name), "%s", infoarg.c_str());
+			// allow name-change only once per session
+			if (!(client->state & SentInfo))
+				snprintf(client->info.name, sizeof(client->info.name), "%s", infoarg.c_str());
 		}
+		else if (infotype == "location" && havearg)
+			snprintf(client->info.location, sizeof(client->info.location), "%s", infoarg.c_str());
 	}
 	
 	send_ok(client);
@@ -426,7 +430,7 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 		// send broadcast message to foyer
 		snprintf(msg, sizeof(msg),
 			"%s (%d) joined foyer",
-			client->name, client->id);
+			client->info.name, client->id);
 		
 		client_chat(-1, -1, msg);
 	}
@@ -563,9 +567,9 @@ bool client_cmd_request_clientinfo(clientcon *client, Tokenizer &t)
 		if ((c = get_client_by_id(cid)))
 		{
 			snprintf(msg, sizeof(msg),
-				"CLIENTINFO %d \"name:%s\"",
+				"CLIENTINFO %d \"name:%s\" \"location:%s\"",
 				cid,
-				c->name);
+				c->info.name, c->info.location);
 			
 			send_msg(client->sock, msg);
 		}
@@ -716,7 +720,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	
 	snprintf(msg, sizeof(msg),
 		"%s (%d) joined game %d (%d/%d)",
-		client->name, client->id, gid,
+		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
 	log_msg("game", "%s", msg);
@@ -766,7 +770,7 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 	
 	snprintf(msg, sizeof(msg),
 		"%s (%d) parted game %d (%d/%d)",
-		client->name, client->id, gid,
+		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
 	log_msg("game", "%s", msg);

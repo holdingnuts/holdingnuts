@@ -78,7 +78,9 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	// send user info
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "INFO \"name:%s\"", config.get("player_name").c_str());
+	snprintf(msg, sizeof(msg), "INFO \"name:%s\" \"location:%s\"",
+		  config.get("player_name").c_str(),
+		  config.get("info_location").c_str());
 		
 	netSendMsg(msg);
 	
@@ -439,7 +441,6 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 	int cid = t.getNextInt();
 	
 	playerinfo pi;
-	memset(&pi, 0, sizeof(pi));
 	
 	std::string sinfo;
 	while (t.getNext(sinfo))
@@ -451,9 +452,9 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 		std::string ivalue = it.getNext();
 		
 		if (itype == "name")
-		{
-			snprintf(pi.name, sizeof(pi.name), "%s", ivalue.c_str());
-		}
+			pi.name = QString::fromStdString(ivalue);
+		else if (itype == "location")
+			pi.location = QString::fromStdString(ivalue);
 	}
 	
 	//update_player_info(&pi);

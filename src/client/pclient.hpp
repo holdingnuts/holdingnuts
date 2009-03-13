@@ -61,7 +61,8 @@ typedef struct {
 } servercon;
 
 typedef struct {
-	char name[255];
+	QString name;
+	QString location;
 } playerinfo;
 
 

@@ -37,7 +37,7 @@ Q_OBJECT
 public:
 	Seat(unsigned int id, QWidget *parent);
 
-	void setName(const QString& name);
+	void setInfo(const QString& name, const QString& location);
 	void setStake(qreal amount);
 	void setCurrent(bool cur);
 	void setSitout(bool sitout);

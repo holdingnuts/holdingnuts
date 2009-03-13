@@ -42,14 +42,9 @@ public:
 	SettingsDialog(ConfigParser &cp, QWidget *parent = 0);
 
 private:
-	QTabWidget *tabWidget;
-	QWidget *tabGeneral;
-	QWidget *tabAppearance;
-	
 	ConfigParser *cfg;
 	
 	// tabGeneral
-	QLineEdit *editPlayerName;
 	QLabel *labelUUIDdisplay;
 	QCheckBox *checkLog, *checkLogChat;
 	QComboBox *comboLocale;
@@ -58,6 +53,10 @@ private:
 	// tabAppearance
 	QCheckBox *checkHandStrength;
 	QComboBox *comboCarddeck;
+	
+	// tabPlayerinfo
+	QLineEdit *editPlayerName;
+	QLineEdit *editPlayerLocation;
 	
 private slots:
 	void actionOk();

@@ -37,6 +37,7 @@
 #include "GameController.hpp"
 
 
+//! \brief Client connection states
 typedef enum {
 	Connected = 0x01,
 	Introduced = 0x02,
@@ -44,38 +45,59 @@ typedef enum {
 	Authed = 0x08
 } clientstate;
 
+//! \brief Client-connection information
 typedef struct {
-	socktype sock;
-	int id;
-	//time_t lastdata;
+	//! \brief Unique client identifier
+	int		id;
 	
-	sockaddr_in saddr;
+	//! \brief Network socket descriptor
+	socktype	sock;
+	//! \brief Saved address info
+	sockaddr_in	saddr;
+	//! \brief Client version
+	unsigned int	version;
+	//! \brief Unique connection-identifier chosen by client
+	char uuid[37];  // 16*2 + 4 sep + \0 = 37
 	
-	char msgbuf[1024];
-	int buflen;
-	int last_msgid;
+	//! \brief Receive-buffer for client messages
+	char	msgbuf[1024];
+	//! \brief Length of current buffer
+	int	buflen;
 	
-	unsigned int state;
-	unsigned int version;
-	char uuid[40];  // 16*2 + 4 sep + \0 = 37
-	char name[64];
+	//! \brief Id of last received message
+	int	last_msgid;
 	
-	// flood-protection
+	//! \brief Current state of client (combination of type clientstate)
+	unsigned int	state;
+	
+	//! \brief Client info sent by client
+	struct {
+		char name[64];
+		char location[32];
+	} info;
+	
+	//! \brief Flood-protection: time client sent last chat-message
 	time_t last_chat;
+	//! \brief Flood-protection: count of sent messages per interval
 	unsigned int chat_count;
 } clientcon;
 
+//! \brief Archived client connection information
 typedef struct {
 	int id;
 	//sockaddr_in saddr;
 	time_t logout_time;
 } clientcon_archive;
 
-
+//! \brief Type for list of games
 typedef std::map<int,GameController*>	games_type;
 
+//! \brief Type for list of client connection information
 typedef std::vector<clientcon>	clients_type;
+
+//! \brief Type for list of archived client connection information
 typedef std::map<std::string,clientcon_archive>	clientconar_type;
+
 
 // used by pserver.cpp
 int gameloop();

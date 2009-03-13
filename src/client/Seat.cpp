@@ -55,9 +55,10 @@ void Seat::setValid(bool valid)
 	m_bValid = valid;
 }
 
-void Seat::setName(const QString& name)
+void Seat::setInfo(const QString& name, const QString& location)
 {
 	m_strName = name;
+	this->setToolTip(tr("Location: %1").arg(location));
 }
 
 void Seat::setStake(qreal amount)
