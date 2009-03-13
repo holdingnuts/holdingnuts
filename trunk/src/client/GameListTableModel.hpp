@@ -56,6 +56,11 @@ public:
 		int rows,
 		const QModelIndex &index = QModelIndex());
 		
+	bool removeRows(
+		int position,
+		int rows,
+		const QModelIndex &index = QModelIndex());
+		
 	void updateValue(int gid, int column, const QString& value);
 
 	void updateGameName(int gid, const QString& value);
@@ -67,7 +72,9 @@ public:
 	void clear();
 
 	//! \brief translation methods (gid<->row)
+#if 0
 	int findGidByRow(int row) const;
+#endif
 	int findRowByGid(int gid) const;
 	
 	void dump() const;
