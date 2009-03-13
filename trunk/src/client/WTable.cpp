@@ -747,9 +747,9 @@ void WTable::updateView()
 			playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
 			
 			if (pinfo)
-				wseats[i]->setName(pinfo->name);
+				wseats[i]->setInfo(pinfo->name, pinfo->location);
 			else
-				wseats[i]->setName(QString("??? (%1)").arg(cid));
+				wseats[i]->setInfo(QString("??? (%1)").arg(cid), "");
 			
 			wseats[i]->setStake(seat->stake);
 			wseats[i]->setValid(true);

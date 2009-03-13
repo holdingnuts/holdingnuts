@@ -34,11 +34,15 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setMinimumWidth(300);
 	
-	tabWidget = new QTabWidget;
-	tabGeneral = new QWidget;
-	tabAppearance = new QWidget;
+	
+	QTabWidget *tabWidget = new QTabWidget(this);
+	QWidget *tabGeneral = new QWidget;
+	QWidget *tabPlayerinfo = new QWidget;
+	QWidget *tabAppearance = new QWidget;
 	tabWidget->addTab(tabGeneral, tr("General"));
+	tabWidget->addTab(tabPlayerinfo, tr("Player info"));
 	tabWidget->addTab(tabAppearance, tr("Appearance"));
+	
 	
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
 					  Qt::Horizontal, this);
@@ -53,8 +57,6 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	
 	
 	// --- tabGeneral ---
-	QLabel *labelPlayerName = new QLabel(tr("Player name"), tabGeneral);
-	editPlayerName = new QLineEdit(QString::fromStdString(cfg->get("player_name")), tabGeneral);
 	
 	// logging options
 	QLabel *labelLog = new QLabel(tr("Log to file"), tabGeneral);
@@ -121,8 +123,6 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	// basic layout
 	QGridLayout *gridGeneral = new QGridLayout;
 	gridGeneral->setHorizontalSpacing(15);
-	gridGeneral->addWidget(labelPlayerName, 0, 0, Qt::AlignRight | Qt::AlignTop);
-	gridGeneral->addWidget(editPlayerName, 0, 1, Qt::AlignTop);
 	gridGeneral->addWidget(labelLog, 1, 0, Qt::AlignRight | Qt::AlignTop);
 	gridGeneral->addLayout(layoutLog, 1, 1, Qt::AlignTop);
 	gridGeneral->addWidget(labelLocale, 2, 0, Qt::AlignRight | Qt::AlignTop);
@@ -132,6 +132,23 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	gridGeneral->addWidget(labelUUID, 4, 0, Qt::AlignRight | Qt::AlignTop);
 	gridGeneral->addLayout(layoutUUID, 4, 1, Qt::AlignTop);
 	tabGeneral->setLayout(gridGeneral);
+	
+	
+	
+	// --- tabPlayerinfo ---
+	QLabel *labelPlayerName = new QLabel(tr("Player name"), tabPlayerinfo);
+	editPlayerName = new QLineEdit(QString::fromStdString(cfg->get("player_name")), tabPlayerinfo);
+	
+	QLabel *labelPlayerLocation = new QLabel(tr("Location"), tabPlayerinfo);
+	editPlayerLocation = new QLineEdit(QString::fromStdString(cfg->get("info_location")), tabPlayerinfo);
+	
+	QGridLayout *gridPlayerinfo = new QGridLayout;
+	gridPlayerinfo->setHorizontalSpacing(15);
+	gridPlayerinfo->addWidget(labelPlayerName, 0, 0, Qt::AlignRight | Qt::AlignTop);
+	gridPlayerinfo->addWidget(editPlayerName, 0, 1, Qt::AlignTop);
+	gridPlayerinfo->addWidget(labelPlayerLocation, 1, 0, Qt::AlignRight | Qt::AlignTop);
+	gridPlayerinfo->addWidget(editPlayerLocation, 1, 1, Qt::AlignTop);
+	tabPlayerinfo->setLayout(gridPlayerinfo);
 	
 	
 	
@@ -186,13 +203,16 @@ void SettingsDialog::actionOk()
 	if (!bError)
 	{
 		// tabGeneral
-		cfg->set("player_name", editPlayerName->text().toStdString());
 		cfg->set("uuid", labelUUIDdisplay->text().toStdString());
 		cfg->set("log", (checkLog->checkState() == Qt::Checked) ? true : false);
 		cfg->set("log_chat", (checkLogChat->checkState() == Qt::Checked) ? true : false);
 		cfg->set("locale", comboLocale->itemData(comboLocale->currentIndex()).toString().toStdString());
 		cfg->set("sound", (checkSound->checkState() == Qt::Checked) ? true : false);
 		cfg->set("sound_focus", (checkSoundFocus->checkState() == Qt::Checked) ? true : false);
+		
+		// tabPlayerinfo
+		cfg->set("player_name", editPlayerName->text().toStdString());
+		cfg->set("info_location", editPlayerLocation->text().toStdString());
 		
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
