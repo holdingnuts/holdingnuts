@@ -59,6 +59,8 @@ public:
 
 protected:
 	ChatBox();
+	
+	void resizeEvent(QResizeEvent *event);
 
 private slots:
 	void actionChat();
