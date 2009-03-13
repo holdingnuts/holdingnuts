@@ -146,6 +146,13 @@ void ChatBox::setEnabled(bool enable)
 	m_pSendMsg->setEnabled(enable);
 }
 
+void ChatBox::resizeEvent(QResizeEvent *event)
+{
+	// scroll the chatlog to bottom
+	QScrollBar *sb = m_pEditChatLog->verticalScrollBar();
+	sb->setValue(sb->maximum());
+}
+
 void ChatBox::actionChat()
 {
 	if (m_pEditChat->text().length())
