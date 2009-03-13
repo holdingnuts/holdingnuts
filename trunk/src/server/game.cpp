@@ -1170,7 +1170,7 @@ int gameloop()
 			GameController *g = new GameController();
 			const int gid = i;
 			g->setGameId(gid);
-			g->setName("HoldingNuts test game");
+			g->setName("test game");
 			g->setRestart(true);
 			g->setOwner(-1);
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));

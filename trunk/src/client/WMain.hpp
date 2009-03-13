@@ -59,15 +59,6 @@ public:
 
 	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();
-
-	//! \brief Updates or add a Game to the Gamelist
-	//! \param name Gamename
-	void updateGamelist(
-		int gid,
-		const QString& name,
-		const QString& type,
-		const QString& players,
-		const QString& state);
 	
 	void notifyGameinfo(int gid);
 	void notifyGamelist();

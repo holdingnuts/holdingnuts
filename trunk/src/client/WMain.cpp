@@ -327,22 +327,6 @@ void WMain::addServerErrorMessage(int code, const QString &text)
 	log_msg("errmsg", "Error: %s (Code: %d)", text.toStdString().c_str(), code);
 }
 
-void WMain::updateGamelist(
-	int gid,
-	const QString& name,
-	const QString& type,
-	const QString& players,
-	const QString& state)
-{
-	modelGameList->updateGameName(gid, name);
-	modelGameList->updateGameType(gid, type);
-	modelGameList->updatePlayers(gid, players);
-	modelGameList->updateGameState(gid, state);
-	
-	viewGameList->resizeColumnsToContents(); 
-	viewGameList->resizeRowsToContents(); 
-}
-
 void WMain::updateConnectionStatus()
 {
 	bool is_connected = ((PClient*)qApp)->isConnected();
@@ -596,9 +580,15 @@ void WMain::gameListSelectionChanged(
 {
 	if (!selected.isEmpty())
 	{
-		//const int selected_row = modelGameList->findGidByRow((*selected.begin()).topLeft().row());
 		const int selected_gid = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
-
+		
+#if 1
+		const int selected_row = (*selected.begin()).topLeft().row();
+		dbg_msg("gameListSelectionChanged", "row:%d gid:%d",
+			selected_row,
+			selected_gid);
+#endif
+		
 		((PClient*)qApp)->requestGameinfo(selected_gid);
 		((PClient*)qApp)->requestPlayerlist(selected_gid);
 		
@@ -669,17 +659,18 @@ void WMain::notifyGameinfo(int gid)
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
 	
-	updateGamelist(
-		gid,
-		QString("%1 (%2)").arg(gi->name).arg(gid),
-		getGametypeString(gi->type) + " " + getGamemodeString(gi->mode),
-		QString("%1 / %2").arg(gi->players_count).arg(gi->players_max),
-		getGamestateString(gi->state));
+	//viewGameList->resizeColumnsToContents(); 
+	viewGameList->resizeRowsToContents(); 
+	
+	modelGameList->updateGameName(gid, QString("%1 (%2)").arg(gi->name).arg(gid));
+	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
+	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
+	modelGameList->updateGameState(gid, getGamestateString(gi->state));
 }
 
 void WMain::notifyGamelist()
 {
-	// FIXME: delete obsolete rows instead of clearing hole list
+	// FIXME: delete obsolete rows instead of clearing whole list
 	modelGameList->clear();
 	
 	//const gamelist_type &glist = ((PClient*)qApp)->getGameList();
