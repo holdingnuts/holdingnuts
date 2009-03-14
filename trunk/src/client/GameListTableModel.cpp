@@ -145,6 +145,11 @@ void GameListTableModel::updateValue(int gid, int column, const QString& value)
 	const int row = findRowByGid(gid);
 
 	this->setData(createIndex(row, column, static_cast<quint32>(gid)), value);
+	
+#if 0
+	// why doesn't this work?
+	qDebug() << "id after set:" << this->index(row, column).internalId();
+#endif
 }
 
 void GameListTableModel::updateGameName(int gid, const QString& value)
@@ -178,7 +183,7 @@ void GameListTableModel::clear()
 	reset();
 }
 
-#if 0
+#if 1
 int GameListTableModel::findGidByRow(int row) const
 {
 	return datarows.at(row).gid;

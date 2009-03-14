@@ -99,13 +99,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// view game
 	viewGameList = new QTableView(this);
 	viewGameList->setShowGrid(false);
+	viewGameList->setAlternatingRowColors(true);
 	viewGameList->horizontalHeader()->setHighlightSections(false);
 	viewGameList->verticalHeader()->hide();
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewGameList->setModel(proxyModelGameList);
 	viewGameList->setSortingEnabled(true);
+	viewGameList->setModel(proxyModelGameList);
 	
 	connect(
 		viewGameList->selectionModel(),
@@ -116,9 +117,9 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// view game filter
 	filterPatternGame = new QLineEdit(this);
 
-	QHBoxLayout *lFilter = new QHBoxLayout();
-	lFilter->addWidget(new QLabel(tr("Game filter pattern:"), this));
-	lFilter->addWidget(filterPatternGame);	
+	QHBoxLayout *lGameFilter = new QHBoxLayout();
+	lGameFilter->addWidget(new QLabel(tr("Game filter pattern:"), this));
+	lGameFilter->addWidget(filterPatternGame);	
 
 	connect(
 		filterPatternGame,
@@ -139,7 +140,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewPlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewPlayerList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	viewPlayerList->setModel(modelPlayerList);
-
+	
+	
+	wGameFilter = new QWidget(this);
+	wGameFilter->setLayout(lGameFilter);
+	
 	// game
 	btnRegister = new QPushButton(tr("&Register"), this);
 	btnRegister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -207,7 +212,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	layout->addWidget(viewGameList, 1, 0, 1, 1);
 	layout->addWidget(wGameInfo, 1, 1, 1, 1);
 	// row 2
-	layout->addLayout(lFilter, 2, 0, 1, 1);
+	layout->addWidget(wGameFilter, 2, 0, 1, 1);
 	// row 3
 	layout->addWidget(m_pChat, 3, 0, 1, 1);
 	layout->addWidget(btnCreateGame, 3, 1, 1, 1, Qt::AlignBottom | Qt::AlignRight);
@@ -372,6 +377,7 @@ void WMain::updateConnectionStatus()
 	btnUnregister->setEnabled(is_connected);
 	viewGameList->setEnabled(is_connected);
 	viewPlayerList->setEnabled(is_connected);
+	wGameFilter->setEnabled(is_connected);
 	wGameInfo->setEnabled(is_connected);
 	
 	updateWelcomeLabel();
@@ -396,8 +402,9 @@ void WMain::notifyPlayerinfo(int cid)
 	
 	if (pSelect->hasSelection())
 	{
-		const int gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
-		dbg_msg("DEBUG", "select row-id: %d", gid);
+		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int gid = modelGameList->findGidByRow(selected_row);
+		dbg_msg("DEBUG", "select-row:%d gid:%d", selected_row, gid);
 		updatePlayerList(gid);
 	}
 }
@@ -411,7 +418,8 @@ void WMain::notifyPlayerlist(int gid)
 	
 	if (pSelect->hasSelection())
 	{
-		const int sel_gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int sel_gid = modelGameList->findGidByRow(selected_row);
 		
 		if (sel_gid == gid)
 			updatePlayerList(gid);
@@ -499,7 +507,8 @@ void WMain::doRegister(bool bRegister)
 	
 	if (pSelect->hasSelection())
 	{
-		const int gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int gid = modelGameList->findGidByRow(selected_row);
 		
 		((PClient*)qApp)->doRegister(gid, bRegister);
 		
@@ -580,19 +589,16 @@ void WMain::gameListSelectionChanged(
 {
 	if (!selected.isEmpty())
 	{
-		const int selected_gid = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
-		
-#if 1
-		const int selected_row = (*selected.begin()).topLeft().row();
-		dbg_msg("gameListSelectionChanged", "row:%d gid:%d",
+		const int selected_row = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
+		const int gid = modelGameList->findGidByRow(selected_row);
+		dbg_msg("gameListSelectionChanged", "selected-row:%d gid:%d",
 			selected_row,
-			selected_gid);
-#endif
+			gid);
 		
-		((PClient*)qApp)->requestGameinfo(selected_gid);
-		((PClient*)qApp)->requestPlayerlist(selected_gid);
+		((PClient*)qApp)->requestGameinfo(gid);
+		((PClient*)qApp)->requestPlayerlist(gid);
 		
-		updatePlayerList(selected_gid);
+		updatePlayerList(gid);
 	}
 }
 
@@ -659,8 +665,9 @@ void WMain::notifyGameinfo(int gid)
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
 	
-	//viewGameList->resizeColumnsToContents(); 
-	viewGameList->resizeRowsToContents(); 
+	// doesn't work correctly here: would resize every time new game info arrives
+	viewGameList->resizeColumnsToContents();
+	viewGameList->resizeRowsToContents();
 	
 	modelGameList->updateGameName(gid, QString("%1 (%2)").arg(gi->name).arg(gid));
 	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
@@ -686,7 +693,9 @@ void WMain::actionSelectedGameUpdate()
 	if (!pSelect->hasSelection())
 		return;
 	
-	const int gid = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+	const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+	const int gid = modelGameList->findGidByRow(selected_row);
+	
 	dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
 	
 	((PClient*)qApp)->requestGameinfo(gid);
