@@ -20,7 +20,8 @@
 
 // Client defaults
 
-config.set("default_host",	"holdingnuts.dnsalias.net");	// default host to connect to
+config.set("version",		VERSION);		// config file version
+config.set("default_host",	"game.holdingnuts.net");	// default host to connect to
 config.set("default_port",	DEFAULT_SERVER_PORT);	// default port to connect to
 config.set("player_name",	"Unnamed");		// the player name
 config.set("info_location",	"");			// info: geographical location of the player
