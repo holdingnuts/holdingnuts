@@ -134,6 +134,8 @@ private:
 	//! \brief Playerlist of game
 	QTableView 	 	*viewPlayerList;
 	
+	//! \brief Container widget for gamelist filter widgets
+	QWidget			*wGameFilter;
 	//! \brief Container widget for gameinfo widgets
 	QWidget			*wGameInfo;
 	

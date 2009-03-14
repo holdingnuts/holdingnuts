@@ -72,7 +72,7 @@ public:
 	void clear();
 
 	//! \brief translation methods (gid<->row)
-#if 0
+#if 1
 	int findGidByRow(int row) const;
 #endif
 	int findRowByGid(int gid) const;
