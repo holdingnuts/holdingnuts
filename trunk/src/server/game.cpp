@@ -381,7 +381,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		
 		// send 'introduced response'
 		snprintf(msg, sizeof(msg), "PSERVER %d %d",
-			VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
+			VERSION,
 			client->id);
 			
 		send_msg(client->sock, msg);

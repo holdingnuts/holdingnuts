@@ -20,6 +20,7 @@
 
 // Server defaults
 
+config.set("version",			VERSION);		// config file version
 config.set("port",			DEFAULT_SERVER_PORT);	// port the server is listening on
 config.set("max_clients",		200);			// limit for client connections
 config.set("max_connections_per_ip",	3);			// limit for connections per IP

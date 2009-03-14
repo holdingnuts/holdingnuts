@@ -44,6 +44,8 @@
 	((version - VERSION_GETMAJOR(version)*100000) - VERSION_GETMINOR(version)*1000)
 
 
+#define VERSION VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION)
+
 /* provided SVN revision */
 #ifdef SVN_REV
 # define VERSIONSTR_SVN	"r" SVN_REV

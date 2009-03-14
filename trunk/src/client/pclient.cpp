@@ -65,7 +65,7 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	
 	// there is a newer version available
-	if (version > VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION))
+	if (version > VERSION)
 	{
 		const QString sversion =
 			tr("There is a newer version of HoldingNuts available (at least %1.%2.%3)")
@@ -929,7 +929,7 @@ void PClient::netConnected()
 	// send protocol introduction
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "PCLIENT %d %s",
-		VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION),
+		VERSION,
 		config.get("uuid").c_str());
 	
 	netSendMsg(msg);
