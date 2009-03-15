@@ -8,8 +8,8 @@ if [[ $# < 4 ]] ; then
 	exit 0
 fi
 
-BUILD=$1
-TRUNK=$2
+TRUNK=$1
+BUILD=$2
 PLATFORM=$3
 RELVER=$4
 
