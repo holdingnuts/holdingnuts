@@ -177,7 +177,7 @@ void GameListTableModel::clear()
 	if (!this->rowCount()) return;
 	
 	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
-		datarows.clear();
+	datarows.clear();
 	endRemoveRows();
 	
 	reset();

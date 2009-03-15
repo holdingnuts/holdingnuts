@@ -58,7 +58,6 @@ typedef struct {
 	
 	bool introduced;   // PCLIENT->PSERVER sequence success
 	
-	uint time_remote;
 	uint time_remote_delta;
 } servercon;
 
@@ -137,7 +136,9 @@ public:
 	
 	void doRegister(int gid, bool bRegister=true);
 	
+#if 0
 	const gamelist_type& getGameList();
+#endif
 	gameinfo* getGameInfo(int gid);
 	tableinfo* getTableInfo(int gid, int tid);
 	playerinfo* getPlayerInfo(int cid);
