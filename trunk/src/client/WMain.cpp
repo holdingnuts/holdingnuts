@@ -76,17 +76,19 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lblBanner->setPalette(p);
 	
 	lblWelcome = new QLabel(this);
+	lblServerTime = new QLabel(this);
 	
-	QDateTime datetime = QDateTime::currentDateTime();
-//	QLabel *lblDateTime = new QLabel(datetime.toString("dddd, yyyy-MM-dd, hh:mm"), this);
-
+	QVBoxLayout *lHeaderLabels = new QVBoxLayout;
+	lHeaderLabels->addWidget(lblWelcome, 99, Qt::AlignVCenter);
+	lHeaderLabels->addWidget(lblServerTime, 1, Qt::AlignBottom);
+	
 	QLabel *lblLogo = new QLabel(this);
 	lblLogo->setPixmap(QPixmap(":res/hn_logo.png"));
-
-
-	QHBoxLayout *lHeader = new QHBoxLayout();
-	lHeader->addWidget(lblWelcome, Qt::AlignVCenter);
-	lHeader->addWidget(lblLogo);
+	
+	
+	QHBoxLayout *lHeader = new QHBoxLayout;
+	lHeader->addLayout(lHeaderLabels);
+	lHeader->addWidget(lblLogo, 0, Qt::AlignRight);
 	lblBanner->setLayout(lHeader);
 
 	// model game
@@ -106,6 +108,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	viewGameList->setSortingEnabled(true);
+	
+	QFont font = viewGameList->font();
+	font.setPointSize(font.pointSize() - 2);
+	viewGameList->setFont(font);
+	
 	viewGameList->setModel(proxyModelGameList);
 	
 	connect(
@@ -298,6 +305,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	timerSelectedGameUpdate = new QTimer(this);
 	connect(timerSelectedGameUpdate, SIGNAL(timeout()), this, SLOT(actionSelectedGameUpdate()));
 	
+	// current selected game update timer
+	timerServerTimeUpdate= new QTimer(this);
+	connect(timerServerTimeUpdate, SIGNAL(timeout()), this, SLOT(updateServerTimeLabel()));
+	
 	
 	// initially enable/disabled widgets
 	updateConnectionStatus();
@@ -334,8 +345,8 @@ void WMain::addServerErrorMessage(int code, const QString &text)
 
 void WMain::updateConnectionStatus()
 {
-	bool is_connected = ((PClient*)qApp)->isConnected();
-	bool is_connecting = ((PClient*)qApp)->isConnecting();
+	const bool is_connected = ((PClient*)qApp)->isConnected();
+	const bool is_connecting = ((PClient*)qApp)->isConnecting();
 	
 	if (is_connecting)
 	{
@@ -349,13 +360,12 @@ void WMain::updateConnectionStatus()
 		btnClose->setEnabled(true);
 		editSrvAddr->setEnabled(false);
 		
-		// update gamelist periodically
+		// setup timers for gamelist update, select-game update, server-time update
 		timerGamelistUpdate->start(60*1000);
-		
-		// update selected game periodically
 		timerSelectedGameUpdate->start(15*1000);
+		timerServerTimeUpdate->start(1000);
 	}
-	else
+	else  // disconnected
 	{
 		if (editSrvAddr->text().length())
 			btnConnect->setEnabled(true);
@@ -369,6 +379,7 @@ void WMain::updateConnectionStatus()
 		
 		timerGamelistUpdate->stop();
 		timerSelectedGameUpdate->stop();
+		timerServerTimeUpdate->stop();
 	}
 	
 	m_pChat->setEnabled(is_connected);
@@ -381,6 +392,7 @@ void WMain::updateConnectionStatus()
 	wGameInfo->setEnabled(is_connected);
 	
 	updateWelcomeLabel();
+	updateServerTimeLabel();
 }
 
 void WMain::notifyPlayerinfo(int cid)
@@ -712,4 +724,17 @@ void WMain::updateWelcomeLabel()
 		" <strong>" + QString::fromStdString(config.get("player_name")) + "</strong>" +
 		(is_connected ? "" : "&nbsp; <em>(" + tr("offline") + ")</em>") +
 		"</qt>");
+}
+
+void WMain::updateServerTimeLabel()
+{
+	const bool is_connected = ((PClient*)qApp)->isConnected();
+	
+	if (is_connected)
+	{
+		const QDateTime timeServer = ((PClient*)qApp)->getServerTime();
+		lblServerTime->setText(timeServer.toString("dddd, yyyy-MM-dd, hh:mm:ss"));
+	}
+	else
+		lblServerTime->clear();
 }

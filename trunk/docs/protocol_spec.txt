@@ -5,7 +5,7 @@ Protocol specification (client<->server)
 ################################################################################
 
 * protocol-init response:
-PSERVER <version> <client-id>
+PSERVER <version> <client-id> <timestamp>
 
 * client-command responses:
 [<id>] OK [<code>] [<text>]

@@ -37,6 +37,7 @@
 
 #include <QUuid>
 #include <QMessageBox>
+#include <QDateTime>
 
 #include "Audio.h"
 #include "data.h"
@@ -55,8 +56,12 @@ static gamelist_type		gamelist;
 // server command PSERVER <version> <client-id>
 void PClient::serverCmdPserver(Tokenizer &t)
 {
-	unsigned int version = t.getNextInt();
+	const unsigned int version = t.getNextInt();
 	srv.cid = t.getNextInt();
+	
+	srv.time_remote = t.getNextInt();
+	srv.time_remote_delta = srv.time_remote - QDateTime::currentDateTime().toTime_t();
+	
 	srv.introduced = true;
 		
 	log_msg("server", "Server running version %d.%d.%d. Your client ID is %d",
@@ -856,6 +861,16 @@ void PClient::slotDbgRegister()
 void PClient::sendDebugMsg(const QString& msg)
 {
 	netSendMsg(msg.toStdString().c_str());
+}
+
+QDateTime PClient::getServerTime()
+{
+	if (!connected)
+		return QDateTime();
+	
+	QDateTime timeServer;
+	timeServer.setTime_t(QDateTime::currentDateTime().toTime_t() + srv.time_remote_delta);
+	return timeServer;
 }
 
 int PClient::netSendMsg(const char *msg)

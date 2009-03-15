@@ -49,7 +49,6 @@
 #include "WMain.hpp"
 #include "WTable.hpp"
 
-
 typedef struct {
 	char msgbuf[1024*256];
 	int buflen;
@@ -58,6 +57,9 @@ typedef struct {
 	int cid;   // our client-id assigned by server
 	
 	bool introduced;   // PCLIENT->PSERVER sequence success
+	
+	uint time_remote;
+	uint time_remote_delta;
 } servercon;
 
 typedef struct {
@@ -108,6 +110,8 @@ typedef std::map<int,playerinfo>	players_type;
 
 
 
+class QDateTime;
+
 class PClient : public QApplication
 {
 Q_OBJECT
@@ -149,6 +153,8 @@ public:
 	void requestGameinfo(int gid);
 	
 	void sendDebugMsg(const QString& msg);
+	
+	QDateTime getServerTime();
 	
 private:
 	WMain *wMain;
