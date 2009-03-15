@@ -380,9 +380,10 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		*(client->info.location) = '\0';
 		
 		// send 'introduced response'
-		snprintf(msg, sizeof(msg), "PSERVER %d %d",
+		snprintf(msg, sizeof(msg), "PSERVER %d %d %d",
 			VERSION,
-			client->id);
+			client->id,
+			(unsigned int) time(NULL));
 			
 		send_msg(client->sock, msg);
 	}

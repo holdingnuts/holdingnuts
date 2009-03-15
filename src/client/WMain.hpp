@@ -105,10 +105,14 @@ private slots:
 	void actionSelectedGameUpdate();
 	
 	void gameFilterChanged();
-
+	
+	void updateServerTimeLabel();
+	
 private:
 	//! \brief Label in header displaying a welcome message
 	QLabel			*lblWelcome;
+	//! \brief Label in header displaying the server time
+	QLabel 			*lblServerTime;
 	
 	//! \brief Editbox server adress
 	QLineEdit		*editSrvAddr;
@@ -139,20 +143,23 @@ private:
 	//! \brief Container widget for gameinfo widgets
 	QWidget			*wGameInfo;
 	
-	//! \brief create new game
+	//! \brief Create new game
 	QPushButton		*btnCreateGame;
 	
-	//! \brief register to a gamelist
+	//! \brief Register to a gamelist
 	QPushButton		*btnRegister;
 	
-	//! \brief un-register a gamelist
+	//! \brief Un-register a gamelist
 	QPushButton		*btnUnregister;
 	
-	//! \brief timer updates the gamelist
+	//! \brief Timer for updating the gamelist
 	QTimer			*timerGamelistUpdate;
 	
-	//! \brief timer updates the selected game
+	//! \brief Timer for updating the selected game
 	QTimer			*timerSelectedGameUpdate;
+	
+	//! \brief Timer for updating the server timerGamelistUpdate
+	QTimer			*timerServerTimeUpdate;
 };
 
 #endif	/* _WMAIN_H */
