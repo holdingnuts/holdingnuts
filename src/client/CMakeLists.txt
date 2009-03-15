@@ -54,7 +54,7 @@ QT4_WRAP_CPP (
 )
 
 add_executable (
-	pclient
+	holdingnuts
 	WIN32    # when building for windows: do not show the console window
 	pclient.cpp ${aux_obj}
 	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp
@@ -65,7 +65,7 @@ add_executable (
 )
 
 target_link_libraries (
-   pclient
+   holdingnuts
    Poker SysAccess System
    ${QT_LIBRARIES} ${SDL_LIBRARY}
    ${aux_lib}
