@@ -637,7 +637,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 			{
 				if (bGreaterBet)
 				{
-					btnCheckCall->setText(tr("&Call"));
+					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet));
 					btnBetRaise->setText(tr("&Raise"));
 					
 					shortcutBet->setEnabled(false);
@@ -668,7 +668,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(false);
 					m_pSliderAmount->setVisible(false);
-					btnBetRaise->setText(tr("&Allin"));
+					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(false);
@@ -677,7 +677,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(false);
-					btnBetRaise->setText(tr("&Allin"));
+					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(false);
@@ -705,9 +705,9 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					chkAutoFoldCheck->setText(tr("Fold"));
 					
 					if (greatest_bet >= s->stake + s->bet)
-						chkAutoCheckCall->setText(tr("Allin"));
+						chkAutoCheckCall->setText(tr("Allin %1").arg(s->stake));
 					else
-						chkAutoCheckCall->setText(tr("Call") + QString(" %1").arg(greatest_bet - s->bet));
+						chkAutoCheckCall->setText(tr("Call %1").arg(greatest_bet - s->bet));
 				}
 				else
 				{
@@ -773,7 +773,7 @@ void WTable::updateView()
 					m_pTimeout->hide();
 					m_pTimeout->stop();
 				}
-			}			
+			}
 			
 			if (seat->in_round)
 			{
