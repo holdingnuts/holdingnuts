@@ -28,12 +28,12 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
-add_executable (pserver
+add_executable (holdingnuts-server
 	pserver.cpp ${aux_obj}
 	game.cpp GameController.cpp Table.cpp
 )
 
-target_link_libraries(pserver
+target_link_libraries(holdingnuts-server
 	Poker Network SysAccess System
 	${aux_lib}
 )
