@@ -109,10 +109,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	viewGameList->setSortingEnabled(true);
 	
+#if 0
 	QFont font = viewGameList->font();
 	font.setPointSize(font.pointSize() - 2);
 	viewGameList->setFont(font);
-	
+#endif
 	viewGameList->setModel(proxyModelGameList);
 	
 	connect(
