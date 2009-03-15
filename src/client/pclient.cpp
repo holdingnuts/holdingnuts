@@ -59,8 +59,8 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	const unsigned int version = t.getNextInt();
 	srv.cid = t.getNextInt();
 	
-	srv.time_remote = t.getNextInt();
-	srv.time_remote_delta = srv.time_remote - QDateTime::currentDateTime().toTime_t();
+	const uint time_remote = t.getNextInt();
+	srv.time_remote_delta = time_remote - QDateTime::currentDateTime().toTime_t();
 	
 	srv.introduced = true;
 		
@@ -723,10 +723,6 @@ void PClient::doRegister(int gid, bool bRegister)
 		snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
 		
 	netSendMsg(msg);
-	
-	// update gameinfo
-	requestGameinfo(gid);
-	requestPlayerlist(gid);
 }
 
 bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
@@ -816,13 +812,25 @@ bool PClient::createGame(const QString& name, unsigned int max_players, float st
 	return true;
 }
 
+#if 0
 const gamelist_type& PClient::getGameList()
 {
 	return gamelist;
 }
+#endif
 
 gameinfo* PClient::getGameInfo(int gid)
 {
+	// return early if game isn't in game list
+	bool found = false;
+	for (gamelist_type::const_iterator e = gamelist.begin(); e != gamelist.end(); e++)
+		if (*e == gid)
+			found = true;
+	
+	if (!found)
+		return 0;
+	
+	
 	if (games.find(gid) != games.end())
 		return &(games[gid]);
 	else

@@ -523,8 +523,8 @@ void WMain::doRegister(bool bRegister)
 		const int gid = modelGameList->findGidByRow(selected_row);
 		
 		((PClient*)qApp)->doRegister(gid, bRegister);
-		
-		updatePlayerList(gid);
+		((PClient*)qApp)->requestGameinfo(gid);
+		((PClient*)qApp)->requestPlayerlist(gid);
 	}
 }
 
@@ -676,23 +676,27 @@ void WMain::notifyGameinfo(int gid)
 {
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
-	
-	// doesn't work correctly here: would resize every time new game info arrives
-	viewGameList->resizeColumnsToContents();
-	viewGameList->resizeRowsToContents();
-	
+		
 	modelGameList->updateGameName(gid, QString("%1 (%2)").arg(gi->name).arg(gid));
 	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
 	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	modelGameList->updateGameState(gid, getGamestateString(gi->state));
+	
+	viewGameList->resizeColumnsToContents();
+	viewGameList->resizeRowsToContents();
 }
 
 void WMain::notifyGamelist()
 {
-	// FIXME: delete obsolete rows instead of clearing whole list
-	modelGameList->clear();
-	
-	//const gamelist_type &glist = ((PClient*)qApp)->getGameList();
+	// remove all vanished items from modelGameList
+	for (int i=0; i < modelGameList->rowCount(); i++)
+	{
+		const int gid = modelGameList->findGidByRow(i);
+		const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
+		
+		if (!gi)
+			modelGameList->removeRow(i);
+	}
 }
 
 void WMain::actionSelectedGameUpdate()
