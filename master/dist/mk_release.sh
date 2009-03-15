@@ -60,14 +60,14 @@ cp -r -t ${TMPDIR} ${TRUNK}/data
 
 echo "Copying binaries..."
 if [[ -n $is_windows ]] ; then
-	cp -t ${TMPDIR} ${BUILD}/src/client/pclient.exe
-	cp -t ${TMPDIR} ${BUILD}/src/server/pserver.exe
+	cp -t ${TMPDIR} ${BUILD}/src/client/holdingnuts.exe
+	cp -t ${TMPDIR} ${BUILD}/src/server/holdingnuts-server.exe
 else
-	cp -t ${TMPDIR} ${BUILD}/src/client/pclient
-	cp -t ${TMPDIR} ${BUILD}/src/server/pserver
+	cp -t ${TMPDIR} ${BUILD}/src/client/holdingnuts
+	cp -t ${TMPDIR} ${BUILD}/src/server/holdingnuts-server
 	
 	# wrapper script
-	cp -t ${TMPDIR} files/pclient.sh
+	cp -t ${TMPDIR} files/holdingnuts.sh
 fi
 
 echo "Copying translations..."
