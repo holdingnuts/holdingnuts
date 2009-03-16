@@ -708,6 +708,7 @@ void PClient::doClose()
 		netSendMsg("QUIT");
 	
 	tcpSocket->abort();
+	tcpSocket->close();
 }
 
 void PClient::doRegister(int gid, bool bRegister)
