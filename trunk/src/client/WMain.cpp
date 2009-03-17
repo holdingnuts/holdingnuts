@@ -126,8 +126,9 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	filterPatternGame = new QLineEdit(this);
 
 	QHBoxLayout *lGameFilter = new QHBoxLayout();
+	lGameFilter->setContentsMargins(0, 0, 0, 0);
 	lGameFilter->addWidget(new QLabel(tr("Game filter pattern:"), this));
-	lGameFilter->addWidget(filterPatternGame);	
+	lGameFilter->addWidget(filterPatternGame);
 
 	connect(
 		filterPatternGame,
@@ -167,14 +168,25 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lRegister->addWidget(btnUnregister);
 
 	// gameinfo
-	QVBoxLayout *lGameInfo = new QVBoxLayout();
-	lGameInfo->addWidget(new QLabel(tr("Game Name"), this));
-	lGameInfo->addWidget(new QLabel(tr("Blinds"), this));
-	lGameInfo->addWidget(new QLabel(tr("Starting Blinds"), this));
-	lGameInfo->addWidget(new QLabel(tr("Stake"), this));
-	lGameInfo->addWidget(new QLabel(tr("Stake"), this));
-	lGameInfo->addWidget(viewPlayerList);
-	lGameInfo->addLayout(lRegister);
+	lblGameInfoName = new QLabel(tr("Game Name"), this);
+	lblGameInfoPlayers = new QLabel(this);
+	
+	QFont fntGameInfoTitle = lblGameInfoName->font();
+
+	fntGameInfoTitle.setPointSize(fntGameInfoTitle.pointSize() + 4);
+	fntGameInfoTitle.setBold(true); 
+
+	lblGameInfoName->setFont(fntGameInfoTitle);
+	lblGameInfoPlayers->setFont(fntGameInfoTitle);
+	
+	QGridLayout *lGameInfo = new QGridLayout;
+	lGameInfo->addWidget(lblGameInfoName, 0, 0, 1, 1);
+	lGameInfo->addWidget(lblGameInfoPlayers, 0, 1, 1, 1, Qt::AlignRight);
+//	lGameInfo->addWidget(new QLabel(tr("Blinds change"), this), 1, 0, 1, 1);
+//	lGameInfo->addWidget(new QLabel(tr("Starting Blinds"), this), 2, 0, 1, 1);
+//	lGameInfo->addWidget(new QLabel(tr("Stake"), this), 3, 0, 1, 1);
+	lGameInfo->addWidget(viewPlayerList, 4, 0, 1, 2);
+	lGameInfo->addLayout(lRegister, 5, 0, 1, 2);
 
 	wGameInfo = new QWidget(this);
 	wGameInfo->setLayout(lGameInfo);
@@ -612,6 +624,7 @@ void WMain::gameListSelectionChanged(
 		((PClient*)qApp)->requestPlayerlist(gid);
 		
 		updatePlayerList(gid);
+		updateGameinfo(gid);
 	}
 }
 
@@ -731,6 +744,21 @@ void WMain::updateWelcomeLabel()
 		"</qt>");
 }
 
+void WMain::updateGameinfo(int gid)
+{
+	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
+	
+	if (!gi)
+		return;
+
+#ifdef DEBUG
+	lblGameInfoName->setText(QString("%1 (%2)").arg(gi->name).arg(gid));
+#else
+	lblGameInfoName->setText(gi->name);
+#endif
+	lblGameInfoPlayers->setText(QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
+}
+
 void WMain::updateServerTimeLabel()
 {
 	const bool is_connected = ((PClient*)qApp)->isConnected();
@@ -743,3 +771,4 @@ void WMain::updateServerTimeLabel()
 	else
 		lblServerTime->clear();
 }
+
