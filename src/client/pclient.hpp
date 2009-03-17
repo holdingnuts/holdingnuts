@@ -96,7 +96,9 @@ typedef struct {
 	unsigned int	players_max;
 	//! \brief registered players
 	std::vector<int>	players;
-	//
+	//! \brief initial player stakes
+	float		initial_stakes;
+	//! \brief known tables
 	tables_type		tables;
 } gameinfo;
 

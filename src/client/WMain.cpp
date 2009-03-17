@@ -127,7 +127,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	QHBoxLayout *lGameFilter = new QHBoxLayout();
 	lGameFilter->setContentsMargins(0, 0, 0, 0);
-	lGameFilter->addWidget(new QLabel(tr("Game filter pattern:"), this));
+	lGameFilter->addWidget(new QLabel(tr("Game name filter:"), this));
 	lGameFilter->addWidget(filterPatternGame);
 
 	connect(
@@ -168,12 +168,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lRegister->addWidget(btnUnregister);
 
 	// gameinfo
-	lblGameInfoName = new QLabel(tr("Game Name"), this);
+	lblGameInfoName = new QLabel(this);
 	lblGameInfoPlayers = new QLabel(this);
+	lblGameInfoId = new QLabel(this);
+	lblGameInfoStakes = new QLabel(this);
 	
 	QFont fntGameInfoTitle = lblGameInfoName->font();
 
-	fntGameInfoTitle.setPointSize(fntGameInfoTitle.pointSize() + 4);
+	fntGameInfoTitle.setPointSize(fntGameInfoTitle.pointSize() + 2);
 	fntGameInfoTitle.setBold(true); 
 
 	lblGameInfoName->setFont(fntGameInfoTitle);
@@ -182,9 +184,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	QGridLayout *lGameInfo = new QGridLayout;
 	lGameInfo->addWidget(lblGameInfoName, 0, 0, 1, 1);
 	lGameInfo->addWidget(lblGameInfoPlayers, 0, 1, 1, 1, Qt::AlignRight);
-//	lGameInfo->addWidget(new QLabel(tr("Blinds change"), this), 1, 0, 1, 1);
-//	lGameInfo->addWidget(new QLabel(tr("Starting Blinds"), this), 2, 0, 1, 1);
-//	lGameInfo->addWidget(new QLabel(tr("Stake"), this), 3, 0, 1, 1);
+	//lGameInfo->addWidget(new QLabel(tr("Blinds rule"), this), 1, 0, 1, 1);
+	lGameInfo->addWidget(new QLabel(tr("Game ID"), this), 2, 0, 1, 1);
+	lGameInfo->addWidget(lblGameInfoId, 2, 1, 1, 1);
+	lGameInfo->addWidget(new QLabel(tr("Initial stakes"), this), 3, 0, 1, 1);
+	lGameInfo->addWidget(lblGameInfoStakes, 3, 1, 1, 1);
 	lGameInfo->addWidget(viewPlayerList, 4, 0, 1, 2);
 	lGameInfo->addLayout(lRegister, 5, 0, 1, 2);
 
@@ -393,6 +397,9 @@ void WMain::updateConnectionStatus()
 		timerGamelistUpdate->stop();
 		timerSelectedGameUpdate->stop();
 		timerServerTimeUpdate->stop();
+		
+		// clear gameinfo panel
+		updateGameinfo(-1);
 	}
 	
 	m_pChat->setEnabled(is_connected);
@@ -650,7 +657,7 @@ QString WMain::getGametypeString(gametype type)
 	switch (type)
 	{
 		case GameTypeHoldem:
-			return QString(tr("Texas Hold'em"));
+			return QString(tr("THNL"));
 		default:
 			return QString(tr("unkown gametype"));
 	};
@@ -691,13 +698,28 @@ void WMain::notifyGameinfo(int gid)
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
 		
-	modelGameList->updateGameName(gid, QString("%1 (%2)").arg(gi->name).arg(gid));
+	modelGameList->updateGameName(gid, QString("%1 [%2]").arg(gi->name).arg(gid));
 	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
 	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	modelGameList->updateGameState(gid, getGamestateString(gi->state));
 	
 	viewGameList->resizeColumnsToContents();
 	viewGameList->resizeRowsToContents();
+	
+	// update gameinfo panel
+	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
+	
+	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
+	
+	if (pSelect->hasSelection())
+	{
+		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int sel_gid = modelGameList->findGidByRow(selected_row);
+		
+		if (gid == sel_gid)
+			updateGameinfo(gid);
+	}
 }
 
 void WMain::notifyGamelist()
@@ -732,6 +754,7 @@ void WMain::actionSelectedGameUpdate()
 	((PClient*)qApp)->requestPlayerlist(gid);
 	
 	updatePlayerList(gid);
+	updateGameinfo(gid);
 }
 
 void WMain::updateWelcomeLabel()
@@ -746,17 +769,24 @@ void WMain::updateWelcomeLabel()
 
 void WMain::updateGameinfo(int gid)
 {
+	if (gid == -1)
+	{
+		lblGameInfoName->clear();
+		lblGameInfoPlayers->clear();
+		lblGameInfoId->clear();
+		lblGameInfoStakes->clear();
+		return;
+	}
+	
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	
 	if (!gi)
 		return;
-
-#ifdef DEBUG
-	lblGameInfoName->setText(QString("%1 (%2)").arg(gi->name).arg(gid));
-#else
+	
 	lblGameInfoName->setText(gi->name);
-#endif
 	lblGameInfoPlayers->setText(QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
+	lblGameInfoId->setText(QString("%1").arg(gid));
+	lblGameInfoStakes->setText(QString("%1").arg(gi->initial_stakes));
 }
 
 void WMain::updateServerTimeLabel()

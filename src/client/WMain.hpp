@@ -143,6 +143,10 @@ private:
 	QLabel			*lblGameInfoName;
 	//! \brief Label for the number of Players in selected Game
 	QLabel			*lblGameInfoPlayers;
+	//! \brief Label for Game Id
+	QLabel			*lblGameInfoId;
+	//! \brief Label for initial player stakes
+	QLabel			*lblGameInfoStakes;
 	
 	//! \brief Container widget for gamelist filter widgets
 	QWidget			*wGameFilter;
