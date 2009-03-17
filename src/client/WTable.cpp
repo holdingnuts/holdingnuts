@@ -322,6 +322,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
 	
 	m_pSliderAmount = new EditableSlider(this);
+	connect(m_pSliderAmount, SIGNAL(dataChanged()), this, SLOT(slotBetRaiseAmountChanged()));
+	connect(m_pSliderAmount, SIGNAL(returnPressed()), this, SLOT(actionBetRaise()));
 
 	QHBoxLayout *lActions = new QHBoxLayout();
 	lActions->addWidget(btnFold);
@@ -638,7 +640,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				if (bGreaterBet)
 				{
 					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet));
-					btnBetRaise->setText(tr("&Raise"));
+					btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
 					
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(true);
@@ -649,14 +651,14 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					
 					if (greaterBet(snap, 0))
 					{
-						btnBetRaise->setText(tr("&Raise"));
+						btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
 						
 						shortcutBet->setEnabled(false);
 						shortcutRaise->setEnabled(true);
 					}
 					else
 					{
-						btnBetRaise->setText(tr("&Bet"));
+						btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value()));
 						
 						shortcutBet->setEnabled(true);
 						shortcutRaise->setEnabled(false);
@@ -1123,6 +1125,16 @@ void WTable::actionAutoCheckCall(int state)
 	greaterBet(snap, 0, &greatest_bet);
 	
 	m_autocall_amount = greatest_bet;
+}
+
+void WTable::slotBetRaiseAmountChanged()
+{
+	const QString str = btnBetRaise->text();
+	
+	if (str.contains("bet", Qt::CaseInsensitive))
+		btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value()));
+	else
+		btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
 }
 
 void WTable::slotShow()

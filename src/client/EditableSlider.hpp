@@ -45,8 +45,15 @@ public:
 
 	float value() const;
 
+signals:
+     void dataChanged();
+     
+     void returnPressed();
+
 private slots:
 	void setValue(int value);
+	
+	void textChanged(const QString& text);
 
 protected:
 	QSlider		*m_pSlider;

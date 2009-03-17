@@ -141,6 +141,8 @@ private slots:
 	void actionScreenshot();
 	
 	void actionChat(QString msg);
+	
+	void slotBetRaiseAmountChanged();
 
 public slots:
 	void slotShow();

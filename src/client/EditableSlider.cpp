@@ -39,6 +39,9 @@ EditableSlider::EditableSlider(QWidget *parent)
 	m_pValidator = new QDoubleValidator(m_pEdit);
 	
 	m_pEdit->setValidator(m_pValidator);
+	
+	connect(m_pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged(const QString&)));
+	connect(m_pEdit, SIGNAL(returnPressed()), this, SIGNAL(returnPressed()));
 			
 	m_pSlider = new QSlider(Qt::Horizontal, this);
 	m_pSlider->setTickInterval(10);
@@ -118,4 +121,13 @@ void EditableSlider::setValue(int value)
 		str.setNum(amount);
 
 	m_pEdit->setText(str);
+	
+	emit dataChanged();
+}
+
+void EditableSlider::textChanged(const QString& text)
+{
+	Q_UNUSED(text);
+
+	emit dataChanged();
 }
