@@ -68,15 +68,16 @@ public:
 	
 	void updatePlayerList(int gid);
 
-
 	static QString getGametypeString(gametype type);
 	static QString getGamemodeString(gamemode mode);
 	static QString getGamestateString(gamestate state);
 	
 protected:
 	void doRegister(bool bRegister);
-	void updateWelcomeLabel();
 	
+	void updateWelcomeLabel();
+	void updateGameinfo(int gid);
+
 private slots:
 	void closeEvent(QCloseEvent *event);
 	
@@ -137,6 +138,11 @@ private:
 	PlayerListTableModel	*modelPlayerList;
 	//! \brief Playerlist of game
 	QTableView 	 	*viewPlayerList;
+	
+	//! \brief Label for Gamename
+	QLabel			*lblGameInfoName;
+	//! \brief Label for the number of Players in selected Game
+	QLabel			*lblGameInfoPlayers;
 	
 	//! \brief Container widget for gamelist filter widgets
 	QWidget			*wGameFilter;
