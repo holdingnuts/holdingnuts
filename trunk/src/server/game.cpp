@@ -541,7 +541,7 @@ bool client_cmd_request_gameinfo(clientcon *client, Tokenizer &t)
 				state = GameStateWaiting;
 			
 			snprintf(msg, sizeof(msg),
-				"GAMEINFO %d %d:%d:%d:%d:%d:%d \"%s\"",
+				"GAMEINFO %d %d:%d:%d:%d:%d:%d:%.2f %d:%d \"%s\"",
 				gid,
 				(int) GameTypeHoldem,
 				game_mode,
@@ -549,6 +549,8 @@ bool client_cmd_request_gameinfo(clientcon *client, Tokenizer &t)
 				g->getPlayerMax(),
 				g->getPlayerCount(),
 				g->getPlayerTimeout(),
+				g->getPlayerStakes(),
+				0xDEAD, 0xBEAF,
 				g->getName().c_str());
 			
 			send_msg(client->sock, msg);

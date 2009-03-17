@@ -500,7 +500,12 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
 	gi->player_timeout = it.getNextInt();
+	gi->initial_stakes = it.getNextFloat();
 	
+	
+	// unpack blinds-rule
+	const std::string sblinds = t.getNext();
+	// TODO:
 	
 	// game name
 	gi->name = QString::fromStdString(t.getNext());
