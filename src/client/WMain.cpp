@@ -52,7 +52,9 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "Audio.h"
+#ifndef NOAUDIO
+# include "Audio.h"
+#endif
 #include "data.h"
 
 extern ConfigParser config;
@@ -519,8 +521,10 @@ void WMain::actionTest()
 	WTable *table = new WTable(0, 0);
 	table->slotShow();
 	
+#ifndef NOAUDIO
 	dbg_msg("DEBUG", "playing test sound");
 	audio_play(SOUND_TEST_1);
+#endif /* NOAUDIO */
 #endif
 }
 

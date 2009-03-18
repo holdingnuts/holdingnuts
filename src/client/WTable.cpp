@@ -56,7 +56,9 @@
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
 
-#include "Audio.h"
+#ifndef NOAUDIO
+# include "Audio.h"
+#endif
 #include "data.h"
 
 
@@ -1239,8 +1241,10 @@ void WTable::actionChat(QString msg)
 
 void WTable::playSound(unsigned int id)
 {
+#ifndef NOAUDIO
 	if (!config.getBool("sound") || (config.getBool("sound_focus") && !isActiveWindow()))
 		return;
 	
 	audio_play(id);
+#endif
 }
