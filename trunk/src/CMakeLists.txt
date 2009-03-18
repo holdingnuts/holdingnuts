@@ -50,11 +50,19 @@ IF (USE_SVNREV)
 	ENDIF (SVNVERSION)
 ENDIF (USE_SVNREV)
 
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DDEBUG=1)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
-add_definitions(-Wall)  #-pedantic -fstack-protector -fstack-protector-all
+# compiled in data-dir path
+if (DATA_DIR)
+	add_definitions(-DDATA_DIR=\"${DATA_DIR}\")
+endif (DATA_DIR)
+
+
+# additional definitions
+add_definitions(-Wall)
 
 ################################################################################
 
