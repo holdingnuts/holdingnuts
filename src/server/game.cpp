@@ -1148,6 +1148,10 @@ void remove_expired_conar_entries()
 	time_t curtime = time(NULL);
 	unsigned int expire = config.getInt("conarchive_expire");
 	
+#if 0
+	dbg_msg("clientar", "scanning for expired entries");
+#endif
+	
 	for (clientconar_type::iterator e = con_archive.begin(); e != con_archive.end();)
 	{
 		clientcon_archive *conar = &(e->second);
@@ -1232,7 +1236,6 @@ int gameloop()
 	// delete all expired archived connection-data (con_archive)
 	if ((unsigned int)difftime(time(NULL), last_conarchive_cleanup) > 5 * 60)
 	{
-		dbg_msg("clientar", "scanning for expired entries");
 		remove_expired_conar_entries();
 		
 		last_conarchive_cleanup = time(NULL);
