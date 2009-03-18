@@ -2,7 +2,9 @@
 # release script
 
 if [[ $# != 2 && $# != 4 ]] ; then
-	echo "mk_release.sh <trunk-dir> <version>" >&2
+	echo "source package:" >&2
+	echo "  mk_release.sh <trunk-dir> <version>" >&2
+	echo "binary package:" >&2
 	echo "mk_release.sh <trunk-dir> <build-dir> <platform> <version>" >&2
 	exit 0
 elif [[ $# == 2 ]] ; then
@@ -45,7 +47,8 @@ if [[ ! ${src_release} ]] ; then
 	
 	PKGSTR="holdingnuts-${RELVER}-${PLATFORM}"
 else
-	PKGSTR="holdingnuts-${RELVER}-src"
+	# source release filename convention
+	PKGSTR="holdingnuts-${RELVER}"
 fi
 
 
@@ -54,6 +57,8 @@ TMPDIR=$PKGSTR
 
 echo "--- mk_release.sh running for ${PKGSTR} ---"
 
+err_wait=
+
 if [[ ! ${src_release} ]] ; then
 	echo
 	echo "IMPORTANT:"
@@ -61,18 +66,46 @@ if [[ ! ${src_release} ]] ; then
 	echo "  cmake -DCMAKE_BUILD_TYPE=Release -DUSE_SVNREV=On"
 	echo "and build the translations with"
 	echo "  make translations"
-	echo "If this wasn't done, the release package will be incomplete!"
+	echo
+	
+	cmake_cachefile=${BUILD}/CMakeCache.txt
+	
+	cmake_build_type=$(grep CMAKE_BUILD_TYPE ${cmake_cachefile} | cut -d'=' -f2)
+	if [[ ${cmake_build_type} != "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]" ]] ; then
+		echo "Warning: CMAKE_BUILD_TYPE is not 'RELEASE' (value: ${cmake_build_type})"
+		err_wait=1
+	fi
+	
+	cmake_usesvnrev=$(grep USE_SVNREV ${cmake_cachefile} | cut -d'=' -f2)
+	if [[ ${cmake_usesvnrev} != "[Oo][Nn]" ]] ; then
+		echo "Warning: USE_SVNREV is not 'ON' (value: ${cmake_usesvnrev})"
+		err_wait=1
+	fi
 fi
 
 echo
 echo "Checking for unmodified trunk..."
 SVNREV=$(svnversion ${TRUNK})
 echo "SVN revision: ${SVNREV}"
-svn st --no-ignore ${TRUNK}
+SVNSTATUS=$(svn st --no-ignore ${TRUNK})
+
+# check svn status and throw warning if modified
+if [[ -n ${SVNSTATUS} ]] ; then
+	echo "${SVNSTATUS}"
+	echo
+	err_wait=1
+fi
+
+
+if [[ ${err_wait} ]] ; then
+	echo -n "There were warnings/errors. Continue anyway? (N/y) "
+	read input
+	
+	[[ ${input} != y && ${input} != Y ]] && exit 1
+fi
+
 
 echo
-echo "--- Verify and press ENTER to continue ---"
-read
 
 if [[ -d ${TMPDIR} ]] ; then
 	echo "Deleting old temporary working directory..."
@@ -100,18 +133,23 @@ if [[ ! ${src_release} ]] ; then
 
 	echo "Copying binaries..."
 	if [[ $is_windows ]] ; then
-		cp -t ${TMPDIR} ${BUILD}/src/client/holdingnuts.exe
-		cp -t ${TMPDIR} ${BUILD}/src/server/holdingnuts-server.exe
+		BINS="${BUILD}/src/client/holdingnuts.exe ${BUILD}/src/server/holdingnuts-server.exe"
+		cp -t ${TMPDIR} ${BINS}
 	else
-		cp -t ${TMPDIR} ${BUILD}/src/client/holdingnuts
-		cp -t ${TMPDIR} ${BUILD}/src/server/holdingnuts-server
+		BINS="${BUILD}/src/client/holdingnuts ${BUILD}/src/server/holdingnuts-server"
+		cp -t ${TMPDIR} ${BINS}
 		
 		# wrapper script
 		cp -t ${TMPDIR} files/holdingnuts.sh
 	fi
+	
+	
+	echo "Stripping binaries..."
+	strip --strip-unneeded -R .comment ${BINS}
+	
 
 	echo "Copying translations..."
-	cp -r -t  ${TMPDIR}/data/i18n ${BUILD}/src/client/*.qm
+	cp -t  ${TMPDIR}/data/i18n ${BUILD}/src/client/*.qm
 
 	if [[ ! $is_windows ]] ; then
 		echo "Creating empty lib directory"
@@ -144,4 +182,23 @@ fi
 echo "Removing svn entries..."
 rm -rf $(find ${TMPDIR} -type d -name '.svn')
 
-echo "Finished."
+
+echo
+echo "-> Now copy all additional files (libs, Qt-translations) into ${TMPDIR}."
+echo "Press -ENTER- to start creating archives."
+read
+
+
+echo "Creating archives..."
+
+PKG_TARGZ="tar --gzip -cf ${TMPDIR}.tar.gz ${TMPDIR}"
+PKG_TARBZ2="tar --bzip2 -cf ${TMPDIR}.tar.bz2 ${TMPDIR}"
+PKG_TARLZMA="tar --lzma -cf ${TMPDIR}.tar.lzma ${TMPDIR}"
+PKG_ZIP="zip -r -9 -q ${TMPDIR}.zip ${TMPDIR}"
+
+echo ${PKG_TARGZ} ; ${PKG_TARGZ}
+echo ${PKG_TARBZ2} ; ${PKG_TARBZ2}
+echo ${PKG_TARLZMA} ; ${PKG_TARLZMA}
+echo ${PKG_ZIP} ; ${PKG_ZIP}
+
+echo "--- mk_release.sh finished with ${PKGSTR} ---"
