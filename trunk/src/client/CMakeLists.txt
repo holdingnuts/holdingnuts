@@ -27,10 +27,16 @@ ENDIF (WIN32)
 
 
 # use SDL only for audio
-Find_Package ( SDL REQUIRED )
+if (ENABLE_AUDIO)
+	Find_Package ( SDL REQUIRED )
 
-include_directories ( ${SDL_INCLUDE_DIR} )
-
+	include_directories ( ${SDL_INCLUDE_DIR} )
+	
+	LIST (APPEND aux_src Audio.c)
+	LIST (APPEND aux_lib ${SDL_LIBRARY})
+else (ENABLE_AUDIO)
+	add_definitions (-DNOAUDIO=1)
+endif (ENABLE_AUDIO)
 
 SET( QT_USE_QTNETWORK true )
 
@@ -60,14 +66,14 @@ add_executable (
 	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp
 	GameListTableModel.cpp PlayerListTableModel.cpp GameListSortFilterProxyModel.cpp
 	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
-	Audio.c
+	${aux_src}
 	${sources_MOC} ${QtApp_RCC_SRCS}
 )
 
 target_link_libraries (
    holdingnuts
    Poker SysAccess System
-   ${QT_LIBRARIES} ${SDL_LIBRARY}
+   ${QT_LIBRARIES}
    ${aux_lib}
 )
 

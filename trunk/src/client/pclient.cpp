@@ -39,7 +39,9 @@
 #include <QMessageBox>
 #include <QDateTime>
 
-#include "Audio.h"
+#ifndef NOAUDIO
+# include "Audio.h"
+#endif
 #include "data.h"
 
 //////////////
@@ -1123,6 +1125,7 @@ int PClient::init()
 	}
 	
 	
+#ifndef NOAUDIO
 	// load sounds
 	struct sound {
 		unsigned int id;
@@ -1139,6 +1142,7 @@ int PClient::init()
 		log_msg("audio", "Loading sound '%s' (%d)", sounds[i].file, sounds[i].id);
 		audio_load(sounds[i].id, sounds[i].file);
 	}
+#endif /* NOAUDIO */
 	
 	
 	// main window
@@ -1224,7 +1228,9 @@ int main(int argc, char **argv)
 #endif
 	
 	// initialize SDL for audio
+#ifndef NOAUDIO
 	audio_init();
+#endif
 	
 	PClient app(argc, argv);
 	if (app.init())
@@ -1237,8 +1243,10 @@ int main(int argc, char **argv)
 	if (fplog)
 		file_close(fplog);
 	
+#ifndef NOAUDIO
 	// cleanup SDL
 	audio_deinit();
+#endif
 	
 	return retval;
 }
