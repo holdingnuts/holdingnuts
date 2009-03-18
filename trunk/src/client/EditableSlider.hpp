@@ -45,6 +45,8 @@ public:
 
 	float value() const;
 
+	bool valided() const;
+
 signals:
      void dataChanged();
      

@@ -26,6 +26,7 @@
 #include <QLineEdit>
 #include <QDoubleValidator>
 #include <QVBoxLayout>
+#include <QToolTip>
 
 EditableSlider::EditableSlider(QWidget *parent)
 :	QWidget(parent),
@@ -88,6 +89,16 @@ float EditableSlider::value() const
 	return value;
 }
 
+bool EditableSlider::valided() const
+{
+	float value = m_pEdit->text().toFloat();
+	
+	if (value < m_nMin)
+		return false;
+		
+	return true;
+}
+
 void EditableSlider::setValue(int value)
 {
 	int amount = 0;
@@ -127,7 +138,20 @@ void EditableSlider::setValue(int value)
 
 void EditableSlider::textChanged(const QString& text)
 {
-	Q_UNUSED(text);
+	QString temp(text);
+	int pos = 0;
+	
+	const QValidator::State state = m_pValidator->validate(temp, pos);
 
-	emit dataChanged();
+	if (state == QValidator::Intermediate)
+		QToolTip::showText(
+			mapToGlobal(m_pEdit->pos()),
+			QString("minimum is %1").arg(m_nMin),
+			m_pEdit); 
+	else if (state == QValidator::Acceptable)
+	{
+		QToolTip::hideText();
+
+		emit dataChanged();
+	}
 }

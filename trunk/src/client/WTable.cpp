@@ -1035,6 +1035,10 @@ void WTable::actionCheckCall()
 
 void WTable::actionBetRaise()
 {
+	// check for invalid bet
+	if (!m_pSliderAmount->valided())
+		return;
+	
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
 	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
