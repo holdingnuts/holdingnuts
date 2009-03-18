@@ -54,4 +54,7 @@
 # define CONFIG_APPNAME "holdingnuts"
 #endif
 
+/* hard-coded path to data-dir */
+//#define DATA_DIR  "/my/data/dir/path/data"
+
 #endif /* _CONFIG_H */
