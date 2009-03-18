@@ -91,10 +91,22 @@ float EditableSlider::value() const
 
 bool EditableSlider::valided() const
 {
-	float value = m_pEdit->text().toFloat();
-	
-	if (value < m_nMin)
+	QString temp(m_pEdit->text());
+	int pos = 0;
+		
+	const QValidator::State state = m_pValidator->validate(temp, pos);
+
+	if (state == QValidator::Intermediate)
+	{
+		QToolTip::showText(
+			mapToGlobal(m_pEdit->pos()),
+			QString("minimum is %1").arg(m_nMin),
+			m_pEdit);
+
 		return false;
+	}
+
+	QToolTip::hideText();
 		
 	return true;
 }
@@ -143,12 +155,7 @@ void EditableSlider::textChanged(const QString& text)
 	
 	const QValidator::State state = m_pValidator->validate(temp, pos);
 
-	if (state == QValidator::Intermediate)
-		QToolTip::showText(
-			mapToGlobal(m_pEdit->pos()),
-			QString("minimum is %1").arg(m_nMin),
-			m_pEdit); 
-	else if (state == QValidator::Acceptable)
+	if (state == QValidator::Acceptable)
 	{
 		QToolTip::hideText();
 
