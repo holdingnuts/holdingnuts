@@ -71,13 +71,13 @@ if [[ ! ${src_release} ]] ; then
 	cmake_cachefile=${BUILD}/CMakeCache.txt
 	
 	cmake_build_type=$(grep CMAKE_BUILD_TYPE ${cmake_cachefile} | cut -d'=' -f2)
-	if [[ ${cmake_build_type} != "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]" ]] ; then
+	if [[ ${cmake_build_type} != [Rr][Ee][Ll][Ee][Aa][Ss][Ee] ]] ; then
 		echo "Warning: CMAKE_BUILD_TYPE is not 'RELEASE' (value: ${cmake_build_type})"
 		err_wait=1
 	fi
 	
 	cmake_usesvnrev=$(grep USE_SVNREV ${cmake_cachefile} | cut -d'=' -f2)
-	if [[ ${cmake_usesvnrev} != "[Oo][Nn]" ]] ; then
+	if [[ ${cmake_usesvnrev} != [Oo][Nn] ]] ; then
 		echo "Warning: USE_SVNREV is not 'ON' (value: ${cmake_usesvnrev})"
 		err_wait=1
 	fi
