@@ -857,7 +857,7 @@ void WTable::updateView()
 	QString strPots;
 	if (snap->pots.at(0) > .0f)
 	{
-		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
+		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0), 0, 'f', 2));
 		for (unsigned int t = 1; t < snap->pots.size(); ++t)
 		{
 			strPots.append(
