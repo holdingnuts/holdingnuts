@@ -138,8 +138,6 @@ void GameListTableModel::updateValue(int gid, int column, const QString& value)
 		insertRow(this->rowCount()); // 0
 
 		datarows[this->rowCount() -1].gid = gid;
-		
-		dump();
 	}
 	
 	const int row = findRowByGid(gid);

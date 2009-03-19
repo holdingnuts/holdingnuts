@@ -419,7 +419,7 @@ void WMain::updateConnectionStatus()
 
 void WMain::notifyPlayerinfo(int cid)
 {
-	dbg_msg("DEBUG", "notify playerinfo <%d>", cid);
+	//dbg_msg("DEBUG", "notify playerinfo <%d>", cid);
 
 #if 0
 	const playerinfo *player = ((PClient*)qApp)->getPlayerInfo(cid);
@@ -438,14 +438,14 @@ void WMain::notifyPlayerinfo(int cid)
 	{
 		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
-		dbg_msg("DEBUG", "select-row:%d gid:%d", selected_row, gid);
+		//dbg_msg("DEBUG", "select-row:%d gid:%d", selected_row, gid);
 		updatePlayerList(gid);
 	}
 }
 
 void WMain::notifyPlayerlist(int gid)
 {
-	dbg_msg("DEBUG", "notify playerlist <%d>", gid);
+	//dbg_msg("DEBUG", "notify playerlist <%d>", gid);
 	
 	QItemSelectionModel *pSelect = viewGameList->selectionModel();
 	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");

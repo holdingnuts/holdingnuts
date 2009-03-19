@@ -1159,6 +1159,17 @@ int PClient::init()
 	}
 #endif
 	
+	
+#if 1
+	// FIXME: this is a temporary fix for the C-locale (sprintf-float/strtod) issue
+	
+	// set libc (and libstdc++) locale to "C"
+	std::setlocale(LC_ALL, "C");
+	
+	//std::locale::global(std::locale("C"));
+	//std::cout.imbue(std::locale());
+#endif
+	
 	return 0;
 }
 
