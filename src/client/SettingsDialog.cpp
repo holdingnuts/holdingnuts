@@ -82,7 +82,8 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	} locales[] = {
 		{ "",	tr("Auto-Detect") },
 		{ "en",	"English" },
-		{ "de",	"Deutsch" }
+		{ "de",	"Deutsch" },		// German
+		{ "nl", "Nederlands" },		// Dutch
 	};
 	const unsigned int locales_count = sizeof(locales) / sizeof(locales[0]);
 	
