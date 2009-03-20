@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
   
 #include "EditableSlider.hpp"
@@ -26,7 +27,6 @@
 #include <QLineEdit>
 #include <QDoubleValidator>
 #include <QVBoxLayout>
-#include <QToolTip>
 
 EditableSlider::EditableSlider(QWidget *parent)
 :	QWidget(parent),
@@ -42,6 +42,7 @@ EditableSlider::EditableSlider(QWidget *parent)
 	m_pEdit->setValidator(m_pValidator);
 	
 	connect(m_pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged(const QString&)));
+	connect(m_pEdit, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
 	connect(m_pEdit, SIGNAL(returnPressed()), this, SIGNAL(returnPressed()));
 			
 	m_pSlider = new QSlider(Qt::Horizontal, this);
@@ -50,7 +51,7 @@ EditableSlider::EditableSlider(QWidget *parent)
 	m_pSlider->setRange(0, 100);
 	m_pSlider->setValue(0);
 	
-	connect(m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(setValue(int)));
+	connect(m_pSlider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
 	
 	QVBoxLayout *layout = new QVBoxLayout(this);
 		// qwidget has already margins
@@ -65,13 +66,14 @@ EditableSlider::~EditableSlider() { }
 
 void EditableSlider::setMinimum(float value)
 {
-	QString str;
-
-	m_pEdit->setText(str.setNum(value));
-	m_pSlider->setSliderPosition(0);
-	m_pValidator->setBottom(value);
-	
 	m_nMin = value;
+	
+	m_pEdit->setText(QString::number(value));
+	m_pEdit->selectAll();
+	m_pEdit->setFocus();
+	
+	m_pSlider->setValue(0);
+	m_pValidator->setBottom(value);
 }
 
 void EditableSlider::setMaximum(float value)
@@ -89,39 +91,22 @@ float EditableSlider::value() const
 	return value;
 }
 
-bool EditableSlider::valided() const
+bool EditableSlider::validValue() const
 {
 	QString temp(m_pEdit->text());
 	int pos = 0;
-		
+	
 	const QValidator::State state = m_pValidator->validate(temp, pos);
 
-	if (state == QValidator::Intermediate)
-	{
-		QToolTip::showText(
-			mapToGlobal(m_pEdit->pos()),
-			QString("minimum is %1").arg(m_nMin),
-			m_pEdit);
-
-		return false;
-	}
-
-	QToolTip::hideText();
-		
-	return true;
+	return (state == QValidator::Acceptable);
 }
 
-void EditableSlider::setValue(int value)
+void EditableSlider::sliderMoved(int value)
 {
-	int amount = 0;
+	float amount = .0f;
 	
-	if (!value)
-		amount = 0;
-	else if (value == 100)	// 100% == allin
-	{
-		m_pEdit->setText(QString::number(m_nMax));
-			return;
-	}
+	if (value == 100)	// 100% == allin
+		amount = m_nMax;
 	else
 	{
 		if (value <= 40)
@@ -132,33 +117,39 @@ void EditableSlider::setValue(int value)
 			amount = (int)((m_nMax * .45f) * value * .02f);
 		else
 			amount = (int)(m_nMax * value / 100);
+		
+		amount += (int)m_nMin;
 	}
-
-	amount += (int)m_nMin;
-
+	
 	QString str;
 	
-	if (amount > (int)m_nMax)
+	if (amount > m_nMax)
 		str.setNum(m_nMax);
 	else
 		str.setNum(amount);
 
 	m_pEdit->setText(str);
+	m_pEdit->selectAll();
+	m_pEdit->setFocus();
 	
 	emit dataChanged();
 }
 
 void EditableSlider::textChanged(const QString& text)
 {
+	emit dataChanged();
+}
+
+void EditableSlider::textEdited(const QString& text)
+{
 	QString temp(text);
 	int pos = 0;
-	
+		
 	const QValidator::State state = m_pValidator->validate(temp, pos);
 
 	if (state == QValidator::Acceptable)
 	{
-		QToolTip::hideText();
-
-		emit dataChanged();
+		const float value = text.toFloat();
+		m_pSlider->setSliderPosition((int)(100 * value / m_nMax));
 	}
 }

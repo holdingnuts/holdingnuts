@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
@@ -45,7 +46,7 @@ public:
 
 	float value() const;
 
-	bool valided() const;
+	bool validValue() const;
 
 signals:
      void dataChanged();
@@ -53,9 +54,9 @@ signals:
      void returnPressed();
 
 private slots:
-	void setValue(int value);
-	
+	void sliderMoved(int value);
 	void textChanged(const QString& text);
+	void textEdited(const QString& text);
 
 protected:
 	QSlider		*m_pSlider;

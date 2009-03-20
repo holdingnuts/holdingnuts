@@ -33,7 +33,6 @@
 #include <QGraphicsPixmapItem>
 #include <QResizeEvent>
 #include <QStackedLayout>
-#include <QSlider>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QTimeLine>
@@ -443,12 +442,11 @@ WTable::~WTable()
 		delete wseats[i];
 		
 	delete stlayActions;
-	delete m_pSliderAmount;
 }
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 {
-	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalided Seat Number");
+	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalid Seat Number");
 	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
 	Q_ASSERT_X(m_pImgTable, Q_FUNC_INFO, "bad table image pointer");
 
@@ -489,7 +487,7 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 
 QPointF WTable::calcCCardsPos(unsigned int nCard) const
 {
-	Q_ASSERT_X(nCard < 5, Q_FUNC_INFO, "invalided Card Number");
+	Q_ASSERT_X(nCard < 5, Q_FUNC_INFO, "invalid Card Number");
 	Q_ASSERT_X(m_pScene, Q_FUNC_INFO, "bad scene pointer");
 	Q_ASSERT_X(m_CommunityCards[nCard], Q_FUNC_INFO, "bad community card pointer");
 
@@ -508,7 +506,7 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 
 QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
 {
-	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalided Seat Number");
+	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalid Seat Number");
 	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
 	Q_ASSERT_X(m_pTimeout, Q_FUNC_INFO, "bad timeout pointer");
 	
@@ -549,7 +547,7 @@ QPointF WTable::calcDealerBtnPos(
 	unsigned int nSeatID, 
 	int offset) const
 {
-	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalided Seat Number");
+	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalid Seat Number");
 	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
 	Q_ASSERT_X(m_pDealerButton, Q_FUNC_INFO, "bad table image pointer");
 	
@@ -600,9 +598,15 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	
 	// minimum bet
 	if (snap->minimum_bet > s->stake)
+	{
 		m_pSliderAmount->setMinimum(s->stake + s->bet);
+		m_pSliderAmount->setEnabled(false);
+	}
 	else
+	{
 		m_pSliderAmount->setMinimum(snap->minimum_bet);
+		m_pSliderAmount->setEnabled(true);
+	}
 	
 	// maximum bet is stake size
 	m_pSliderAmount->setMaximum(s->stake + s->bet);
@@ -630,6 +634,11 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	}
 	else
 	{
+		// re-enable if actions were disabled by something else
+		btnCheckCall->setEnabled(true);
+		btnBetRaise->setEnabled(true);
+		
+		
 		qreal greatest_bet = 0;
 		bool bGreaterBet = greaterBet(snap, s->bet, &greatest_bet);
 		
@@ -641,8 +650,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 			{
 				if (bGreaterBet)
 				{
-					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet));
-					btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
+					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet, 0, 'f', 2));
+					btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value(), 0, 'f', 2));
 					
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(true);
@@ -653,14 +662,14 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					
 					if (greaterBet(snap, 0))
 					{
-						btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
+						btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value(), 0, 'f', 2));
 						
 						shortcutBet->setEnabled(false);
 						shortcutRaise->setEnabled(true);
 					}
 					else
 					{
-						btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value()));
+						btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value(), 0, 'f', 2));
 						
 						shortcutBet->setEnabled(true);
 						shortcutRaise->setEnabled(false);
@@ -672,7 +681,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(false);
 					m_pSliderAmount->setVisible(false);
-					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
+					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(false);
@@ -681,7 +690,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(false);
-					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
+					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(false);
@@ -709,9 +718,9 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					chkAutoFoldCheck->setText(tr("Fold"));
 					
 					if (greatest_bet >= s->stake + s->bet)
-						chkAutoCheckCall->setText(tr("Allin %1").arg(s->stake));
+						chkAutoCheckCall->setText(tr("Allin %1").arg(s->stake, 0, 'f', 2));
 					else
-						chkAutoCheckCall->setText(tr("Call %1").arg(greatest_bet - s->bet));
+						chkAutoCheckCall->setText(tr("Call %1").arg(greatest_bet - s->bet, 0, 'f', 2));
 				}
 				else
 				{
@@ -1037,10 +1046,6 @@ void WTable::actionCheckCall()
 
 void WTable::actionBetRaise()
 {
-	// check for invalid bet
-	if (!m_pSliderAmount->valided())
-		return;
-	
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
 	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
@@ -1135,12 +1140,16 @@ void WTable::actionAutoCheckCall(int state)
 
 void WTable::slotBetRaiseAmountChanged()
 {
+	const bool is_valid = m_pSliderAmount->validValue();
+	btnBetRaise->setEnabled(is_valid);
+	shortcutRaise->setEnabled(is_valid);
+	shortcutBet->setEnabled(is_valid);
+	
 	const QString str = btnBetRaise->text();
 	
-	if (str.contains("bet", Qt::CaseInsensitive))
-		btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value()));
-	else
-		btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
+	btnBetRaise->setText(QString("%1 %2")
+				.arg(str.left(str.lastIndexOf(' ')))
+				.arg(m_pSliderAmount->value(), 0, 'f', 2));
 }
 
 void WTable::slotShow()
