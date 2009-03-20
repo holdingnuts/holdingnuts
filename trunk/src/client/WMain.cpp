@@ -741,6 +741,11 @@ void WMain::notifyGamelist()
 
 void WMain::actionSelectedGameUpdate()
 {
+	// do not update if window hasn't the focus
+	if (!isActiveWindow())
+		return;
+	
+	
 	QItemSelectionModel *pSelect = viewGameList->selectionModel();
 
 	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
