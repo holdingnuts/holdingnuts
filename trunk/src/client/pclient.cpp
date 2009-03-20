@@ -584,9 +584,9 @@ int PClient::serverExecute(const char *cmd)
 			// protocol error: maybe this isn't a pserver
 			log_msg("introduce", "protocol error");
 			wMain->addServerErrorMessage(
-				ErrProtocol, "Protocol error. The remote station doesn't seem to be a pserver.");
+				ErrProtocol, tr("Protocol error. The remote station seems not to be a HoldingNuts server."));
 			
-			// FIXME: don't do a regular/clean close (no QUIT sequence)
+			// FIXME: don't do a regular/clean close (avoid the QUIT sequence)
 			doClose();
 		}
 	}

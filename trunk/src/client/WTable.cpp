@@ -296,14 +296,21 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pView->setFrameStyle(QFrame::Plain);
 	m_pView->setStyleSheet("background: transparent");
 	
+	
+	// fixed width for action buttons which have an amount in their caption
+	const unsigned int actionbtn_width = 100;
+	
 	// ui - widgets
 	QPushButton *btnFold = new QPushButton(tr("&Fold"), this);
+	btnFold->setFixedWidth(actionbtn_width);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
 	
 	btnCheckCall = new QPushButton("Check/Call", this);
+	btnCheckCall->setFixedWidth(actionbtn_width);
 	connect(btnCheckCall, SIGNAL(clicked()), this, SLOT(actionCheckCall()));
 	
 	btnBetRaise = new QPushButton("Bet/Raise", this);
+	btnBetRaise->setFixedWidth(actionbtn_width);
 	connect(btnBetRaise, SIGNAL(clicked()), this, SLOT(actionBetRaise()));
 	
 	QPushButton *btnShow = new QPushButton(tr("&Show"), this);
