@@ -1,0 +1,17 @@
+[Desktop Entry]
+Comment[en_US]=An open source poker client and server
+Comment=An open source poker client and server
+Exec=holdingnuts
+GenericName[en_US]=Poker client
+GenericName=Poker client
+Icon=holdingnuts
+MimeType=
+Name[en_US]=HoldingNuts
+Name=HoldingNuts
+Path=
+StartupNotify=true
+Terminal=false
+Type=Application
+X-KDE-SubstituteUID=false
+Categories=Qt;Game;CardGame;
+X-DCOP-ServiceType=Multi
