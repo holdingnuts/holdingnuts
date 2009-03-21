@@ -158,14 +158,15 @@ if [[ ! ${src_release} ]] ; then
 
 	echo "Copying shortcuts..."
 	if [[ $is_windows ]] ; then
-		cp -t ${TMPDIR} files/HoldingNuts.net.url
+		cp -t ${TMPDIR} files/holdingnuts.net.url
 		cp -t ${TMPDIR} files/config_directory.lnk
 	else
-		cp -t ${TMPDIR} files/HoldingNuts.net.desktop
+		cp -t ${TMPDIR} files/holdingnuts.net.desktop
+		cp -t ${TMPDIR} files/holdingnuts.desktop
 	fi
 
-	echo "Copying logo..."
-	cp ${TRUNK}/src/client/res/hn_logo.png ${TMPDIR}/holdingnuts.png
+	echo "Copying icon..."
+	cp -t ${TMPDIR} files/holdingnuts.png
 	
 	echo "!!! Do not forget to"
 	echo " * copy the qt_translations (e.g. qt_de.qm) into ${TMPDIR}/data/i18n as well"
@@ -176,7 +177,13 @@ else
 	
 	echo "Touching svn revision info file..."
 	touch ${TMPDIR}/svn_r${SVNREV}
+	
+	echo "Copying misc..."
+	cp -t ${TMPDIR} files/holdingnuts.png
+	cp -t ${TMPDIR} files/holdingnuts.desktop
 fi
+
+
 
 
 echo "Removing svn entries..."
@@ -184,9 +191,9 @@ rm -rf $(find ${TMPDIR} -type d -name '.svn')
 
 
 echo
-echo "-> Now copy all additional files (libs, Qt-translations) into ${TMPDIR}."
-echo "Press -ENTER- to start creating archives."
-read
+echo "-> Now copy/remove all additional/unneeded files into/from ${TMPDIR}."
+echo "Starting shell... (press ^d or type 'exit' to continue)"
+PS1='\[\033[01;31m\]mk_release\[\033[01;34m\] \w \$\[\033[00m\] ' bash --norc
 
 
 echo "Creating archives..."
