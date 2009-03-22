@@ -597,10 +597,16 @@ void WMain::actionCreateGame()
 	if (dialogCreateGame.exec() != QDialog::Accepted)
 		return;
 	
-	QString name = dialogCreateGame.getName();
-	unsigned int max_players = dialogCreateGame.getPlayers();
-	float stake = dialogCreateGame.getStake();
-	((PClient*)qApp)->createGame(name, max_players, stake);
+	gamecreate gc;
+	
+	gc.name = dialogCreateGame.getName();
+	gc.max_players = dialogCreateGame.getPlayers();
+	gc.stake = dialogCreateGame.getStake();
+	gc.timeout = dialogCreateGame.getTimeout();
+	gc.blinds_start = dialogCreateGame.getBlindsStart();
+	gc.blinds_factor = dialogCreateGame.getBlindsFactor();
+	gc.blinds_time = dialogCreateGame.getBlindsTime();
+	((PClient*)qApp)->createGame(&gc);
 	
 	((PClient*)qApp)->requestGamelist();
 }

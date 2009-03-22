@@ -74,6 +74,10 @@ public:
 	void setPlayerTimeout(unsigned int respite) { timeout = respite; };
 	unsigned int getPlayerTimeout() const { return timeout; };
 	
+	void setBlindsStart(float blinds_start) { blind.amount = blinds_start; };
+	void setBlindsFactor(float blinds_factor) { blind.blinds_factor = blinds_factor; };
+	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
+	
 	bool setPlayerStakes(float stake);
 	float getPlayerStakes() const { return player_stakes; };
 	

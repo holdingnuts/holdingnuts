@@ -23,6 +23,7 @@
 config.set("version",			VERSION);		// config file version
 config.set("port",			DEFAULT_SERVER_PORT);	// port the server is listening on
 config.set("max_clients",		200);			// limit for client connections
+config.set("max_games",			100);			// limit for games
 config.set("max_connections_per_ip",	3);			// limit for connections per IP
 config.set("max_register_per_player",	2);			// limit for register per player
 config.set("max_create_per_player",	2);			// limit for create per player

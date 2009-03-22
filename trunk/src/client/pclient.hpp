@@ -110,6 +110,16 @@ typedef std::map<int,gameinfo>		games_type;
 typedef std::map<int,playerinfo>	players_type;
 
 
+typedef struct {
+	QString name;
+	unsigned int max_players;
+	float stake;
+	unsigned int timeout;
+	unsigned int blinds_time;
+	float blinds_start;
+	float blinds_factor;
+} gamecreate;
+
 
 class QDateTime;
 
@@ -132,7 +142,7 @@ public:
 	void chatAll(const QString& text);
 	void chat(const QString& text, int gid, int tid);
 	
-	bool createGame(const QString& name, unsigned int max_players, float stake);
+	bool createGame(gamecreate *createinfo);
 	
 	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
 	

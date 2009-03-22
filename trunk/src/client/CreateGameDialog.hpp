@@ -46,11 +46,19 @@ public:
 	QString getName();
 	float getStake();
 	unsigned int getPlayers();
+	unsigned int getTimeout();
+	float getBlindsStart();
+	float getBlindsFactor();
+	unsigned int getBlindsTime();
 
 private:
 	QLineEdit	*editName;
 	QDoubleSpinBox  *spinStake;
 	QSpinBox	*spinPlayers;
+	QSpinBox	*spinTimeout;
+	QDoubleSpinBox  *spinBlindsStart;
+	QDoubleSpinBox  *spinBlindsFactor;
+	QSpinBox        *spinBlindsTime;
 	
 private slots:
 	void actionOk();
