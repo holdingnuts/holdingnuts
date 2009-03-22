@@ -808,13 +808,19 @@ void PClient::chat(const QString& text, int gid, int tid)
 	netSendMsg(msg);
 }
 
-bool PClient::createGame(const QString& name, unsigned int max_players, float stake)
+bool PClient::createGame(gamecreate *createinfo)
 {
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%.2f \"name:%s\"",
-		max_players,
-		stake,
-		name.simplified().toStdString().c_str());
+	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%.2f timeout:%d"
+		"blinds_start:%.2f blinds_factor:%.2f blinds_time:%d"
+		"\"name:%s\"",
+		createinfo->max_players,
+		createinfo->stake,
+		createinfo->timeout,
+		createinfo->blinds_start,
+		createinfo->blinds_factor,
+		createinfo->blinds_time,
+		createinfo->name.simplified().toStdString().c_str());
 	netSendMsg(msg);
 	
 	return true;

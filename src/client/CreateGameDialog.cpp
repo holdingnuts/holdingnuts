@@ -64,6 +64,36 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinPlayers->setSingleStep(1);
 	spinPlayers->setValue(10);
 	
+	QLabel *labelTimeout = new QLabel(tr("Timeout"), this);
+	spinTimeout = new QSpinBox(this);
+	spinTimeout->setMinimum(5);
+	spinTimeout->setMaximum(3*60);
+	spinTimeout->setSingleStep(10);
+	spinTimeout->setValue(30);
+	
+	QLabel *labelBlindsStart = new QLabel(tr("Starting blinds"), this);
+	spinBlindsStart = new QDoubleSpinBox(this);
+	spinBlindsStart->setDecimals(2);
+	spinBlindsStart->setMinimum(5.0);
+	spinBlindsStart->setMaximum(200.0);
+	spinBlindsStart->setSingleStep(10.0);
+	spinBlindsStart->setValue(20.0);
+	
+	QLabel *labelBlindsFactor = new QLabel(tr("Blinds factor"), this);
+	spinBlindsFactor = new QDoubleSpinBox(this);
+	spinBlindsFactor->setDecimals(2);
+	spinBlindsFactor->setMinimum(1.0);
+	spinBlindsFactor->setMaximum(3.5);
+	spinBlindsFactor->setSingleStep(0.1);
+	spinBlindsFactor->setValue(2.0);
+	
+	QLabel *labelBlindsTime = new QLabel(tr("Blinds time"), this);
+	spinBlindsTime = new QSpinBox(this);
+	spinBlindsTime->setMinimum(60);
+	spinBlindsTime->setMaximum(10*60);
+	spinBlindsTime->setSingleStep(60);
+	spinBlindsTime->setValue(3*60);
+	
 	QGridLayout *layoutGeneral = new QGridLayout;
 	layoutGeneral->addWidget(labelName, 0, 0);
 	layoutGeneral->addWidget(editName, 0, 1);
@@ -71,6 +101,14 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	layoutGeneral->addWidget(spinStake, 1, 1);
 	layoutGeneral->addWidget(labelPlayers, 2, 0);
 	layoutGeneral->addWidget(spinPlayers, 2, 1);
+	layoutGeneral->addWidget(labelTimeout, 3, 0);
+	layoutGeneral->addWidget(spinTimeout, 3, 1);
+	layoutGeneral->addWidget(labelBlindsStart, 4, 0);
+	layoutGeneral->addWidget(spinBlindsStart, 4, 1);
+	layoutGeneral->addWidget(labelBlindsFactor, 5, 0);
+	layoutGeneral->addWidget(spinBlindsFactor, 5, 1);
+	layoutGeneral->addWidget(labelBlindsTime, 6, 0);
+	layoutGeneral->addWidget(spinBlindsTime, 6, 1);
 	groupGeneral->setLayout(layoutGeneral);
 	
 	QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -104,4 +142,24 @@ float CreateGameDialog::getStake()
 unsigned int CreateGameDialog::getPlayers()
 { 
 	return spinPlayers->value();
+}
+
+unsigned int CreateGameDialog::getTimeout()
+{ 
+	return spinTimeout->value();
+}
+
+float CreateGameDialog::getBlindsStart()
+{
+	return spinBlindsStart->value();
+}
+
+float CreateGameDialog::getBlindsFactor()
+{
+	return spinBlindsFactor->value();
+}
+
+unsigned int CreateGameDialog::getBlindsTime()
+{ 
+	return spinBlindsTime->value();
 }

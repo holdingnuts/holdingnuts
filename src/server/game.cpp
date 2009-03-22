@@ -852,6 +852,15 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		return 1;
 	}
 	
+	
+	// check for server games count limit
+	if (games.size() >= (unsigned int) config.getInt("max_games"))
+	{
+		send_err(client, 0 /*FIXME*/, "server games count reached");
+		return 1;
+	}
+	
+	
 	// check for max-games-create limit
 	unsigned int create_limit = config.getInt("max_create_per_player");
 	unsigned int count = 0;
@@ -869,8 +878,6 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		}
 	}
 	
-	// FIXME: check user-create limit
-	// FIXME: check game-count limit
 	
 	bool cmderr = false;
 	
@@ -878,14 +885,20 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		string name;
 		int type;
 		unsigned int max_players;
-		unsigned int stake;
+		float stake;
 		unsigned int timeout;
+		float blinds_start;
+		float blinds_factor;
+		unsigned int blinds_time;
 	} ginfo = {
 		"user_game",
 		10,
 		GameController::SNG,
-		1500,
-		30
+		1500.0f,
+		30,
+		20.0f,
+		2.0f,
+		180
 	};
 	
 	
@@ -918,7 +931,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		}
 		else if (infotype == "stake" && havearg)
 		{
-			ginfo.stake = Tokenizer::string2int(infoarg);
+			ginfo.stake = Tokenizer::string2float(infoarg);
 			
 			if (ginfo.stake < 10)
 				cmderr = true;
@@ -937,6 +950,27 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 			
 			ginfo.name = infoarg;
 		}
+		else if (infotype == "blinds_start" && havearg)
+		{
+			ginfo.blinds_start = Tokenizer::string2float(infoarg);
+			
+			if (ginfo.blinds_start < 5.0f || ginfo.blinds_start > 200.0f)
+				cmderr = true;
+		}
+		else if (infotype == "blinds_factor" && havearg)
+		{
+			ginfo.blinds_factor = Tokenizer::string2float(infoarg);
+			
+			if (ginfo.blinds_factor < 1.0f || ginfo.blinds_factor > 4.0f)
+				cmderr = true;
+		}
+		else if (infotype == "blinds_time" && havearg)
+		{
+			ginfo.blinds_time = Tokenizer::string2int(infoarg);
+			
+			if (ginfo.blinds_time < 30 || ginfo.blinds_time > 20*60)
+				cmderr = true;
+		}
 	}
 	
 	if (!cmderr)
@@ -950,6 +984,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		g->addPlayer(client->id);
 		g->setOwner(client->id);
 		g->setName(ginfo.name);
+		g->setBlindsStart(ginfo.blinds_start);
+		g->setBlindsFactor(ginfo.blinds_factor);
+		g->setBlindsTime(ginfo.blinds_time);
 		games[gid] = g;
 		
 		send_ok(client);
