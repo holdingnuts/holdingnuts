@@ -811,8 +811,8 @@ void PClient::chat(const QString& text, int gid, int tid)
 bool PClient::createGame(gamecreate *createinfo)
 {
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%.2f timeout:%d"
-		"blinds_start:%.2f blinds_factor:%.2f blinds_time:%d"
+	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%.2f timeout:%d "
+		"blinds_start:%.2f blinds_factor:%.2f blinds_time:%d "
 		"\"name:%s\"",
 		createinfo->max_players,
 		createinfo->stake,
