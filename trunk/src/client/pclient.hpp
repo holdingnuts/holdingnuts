@@ -98,6 +98,12 @@ typedef struct {
 	std::vector<int>	players;
 	//! \brief initial player stakes
 	float		initial_stakes;
+	//! \brief starting blinds
+	float		blinds_start;
+	//! \brief blinds raise factor
+	float		blinds_factor;
+	//! \brief blinds raise time
+	unsigned int	blinds_time;
 	//! \brief known tables
 	tables_type		tables;
 } gameinfo;

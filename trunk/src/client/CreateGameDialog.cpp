@@ -22,8 +22,6 @@
 
 
 #include <QtGui>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
 
 #include "Debug.h"
 #include "ConfigParser.hpp"
@@ -49,13 +47,28 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	QLabel *labelName = new QLabel(tr("Game name"), this);
 	editName = new QLineEdit(QString::fromStdString(config.get("player_name")) + "'s game", this);
 	
-	QLabel *labelStake = new QLabel(tr("Initial stake"), this);
-	spinStake = new QDoubleSpinBox(this);
-	spinStake->setDecimals(2);
-	spinStake->setMinimum(500.0);
-	spinStake->setMaximum(1000000.0);
-	spinStake->setSingleStep(100.0);
-	spinStake->setValue(5000.0);
+	// FIXME:
+	QLabel *labelGametype = new QLabel(tr("Game type"), this);
+	QComboBox *comboGametype = new QComboBox(this);
+	comboGametype->addItem("THNL");
+	comboGametype->setEnabled(false);
+	
+	// FIXME:
+	QLabel *labelGamemode = new QLabel(tr("Game mode"), this);
+	QComboBox *comboGamemode = new QComboBox(this);
+	comboGamemode->addItem("Sit'n'Go");
+	comboGamemode->setEnabled(false);
+	
+	QGridLayout *layoutGeneral = new QGridLayout;
+	layoutGeneral->addWidget(labelName, 0, 0);
+	layoutGeneral->addWidget(editName, 0, 1);
+	layoutGeneral->addWidget(labelGametype, 1, 0);
+	layoutGeneral->addWidget(comboGametype, 1, 1);
+	layoutGeneral->addWidget(labelGamemode, 2, 0);
+	layoutGeneral->addWidget(comboGamemode, 2, 1);
+	groupGeneral->setLayout(layoutGeneral);
+	
+	QGroupBox *groupPlayers = new QGroupBox(tr("Players"), this);
 	
 	QLabel *labelPlayers = new QLabel(tr("Max. Players"), this);
 	spinPlayers = new QSpinBox(this);
@@ -71,6 +84,26 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinTimeout->setSingleStep(10);
 	spinTimeout->setValue(30);
 	
+	QLabel *labelStake = new QLabel(tr("Initial stake"), this);
+	spinStake = new QDoubleSpinBox(this);
+	spinStake->setDecimals(2);
+	spinStake->setMinimum(500.0);
+	spinStake->setMaximum(1000000.0);
+	spinStake->setSingleStep(100.0);
+	spinStake->setValue(5000.0);
+	
+	QGridLayout *layoutPlayers = new QGridLayout;
+	layoutPlayers->addWidget(labelPlayers, 0, 0);
+	layoutPlayers->addWidget(spinPlayers, 0, 1);
+	layoutPlayers->addWidget(labelTimeout, 1, 0);
+	layoutPlayers->addWidget(spinTimeout, 1, 1);
+	layoutPlayers->addWidget(labelStake, 2, 0);
+	layoutPlayers->addWidget(spinStake, 2, 1);
+	groupPlayers->setLayout(layoutPlayers);
+	
+	
+	QGroupBox *groupBlinds = new QGroupBox(tr("Blinds"), this);
+	
 	QLabel *labelBlindsStart = new QLabel(tr("Starting blinds"), this);
 	spinBlindsStart = new QDoubleSpinBox(this);
 	spinBlindsStart->setDecimals(2);
@@ -79,7 +112,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinBlindsStart->setSingleStep(10.0);
 	spinBlindsStart->setValue(20.0);
 	
-	QLabel *labelBlindsFactor = new QLabel(tr("Blinds factor"), this);
+	QLabel *labelBlindsFactor = new QLabel(tr("Raise factor"), this);
 	spinBlindsFactor = new QDoubleSpinBox(this);
 	spinBlindsFactor->setDecimals(2);
 	spinBlindsFactor->setMinimum(1.0);
@@ -87,32 +120,27 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinBlindsFactor->setSingleStep(0.1);
 	spinBlindsFactor->setValue(2.0);
 	
-	QLabel *labelBlindsTime = new QLabel(tr("Blinds time"), this);
+	QLabel *labelBlindsTime = new QLabel(tr("Raise time"), this);
 	spinBlindsTime = new QSpinBox(this);
 	spinBlindsTime->setMinimum(60);
 	spinBlindsTime->setMaximum(10*60);
 	spinBlindsTime->setSingleStep(60);
 	spinBlindsTime->setValue(3*60);
 	
-	QGridLayout *layoutGeneral = new QGridLayout;
-	layoutGeneral->addWidget(labelName, 0, 0);
-	layoutGeneral->addWidget(editName, 0, 1);
-	layoutGeneral->addWidget(labelStake, 1, 0);
-	layoutGeneral->addWidget(spinStake, 1, 1);
-	layoutGeneral->addWidget(labelPlayers, 2, 0);
-	layoutGeneral->addWidget(spinPlayers, 2, 1);
-	layoutGeneral->addWidget(labelTimeout, 3, 0);
-	layoutGeneral->addWidget(spinTimeout, 3, 1);
-	layoutGeneral->addWidget(labelBlindsStart, 4, 0);
-	layoutGeneral->addWidget(spinBlindsStart, 4, 1);
-	layoutGeneral->addWidget(labelBlindsFactor, 5, 0);
-	layoutGeneral->addWidget(spinBlindsFactor, 5, 1);
-	layoutGeneral->addWidget(labelBlindsTime, 6, 0);
-	layoutGeneral->addWidget(spinBlindsTime, 6, 1);
-	groupGeneral->setLayout(layoutGeneral);
+	QGridLayout *layoutBlinds = new QGridLayout;
+	layoutBlinds->addWidget(labelBlindsStart, 0, 0);
+	layoutBlinds->addWidget(spinBlindsStart, 0, 1);
+	layoutBlinds->addWidget(labelBlindsFactor, 1, 0);
+	layoutBlinds->addWidget(spinBlindsFactor, 1, 1);
+	layoutBlinds->addWidget(labelBlindsTime, 2, 0);
+	layoutBlinds->addWidget(spinBlindsTime, 2, 1);
+	groupBlinds->setLayout(layoutBlinds);
+	
 	
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	mainLayout->addWidget(groupGeneral);
+	mainLayout->addWidget(groupPlayers);
+	mainLayout->addWidget(groupBlinds);
 	mainLayout->addWidget(buttonBox);
 	setLayout(mainLayout);
 }

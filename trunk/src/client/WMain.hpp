@@ -147,6 +147,10 @@ private:
 	QLabel			*lblGameInfoId;
 	//! \brief Label for initial player stakes
 	QLabel			*lblGameInfoStakes;
+	//! \brief Label for player timeout
+	QLabel			*lblGameInfoTimeout;
+	//! \brief Label for blinds settings
+	QLabel			*lblGameInfoBlinds;
 	
 	//! \brief Container widget for gamelist filter widgets
 	QWidget			*wGameFilter;
