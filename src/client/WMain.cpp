@@ -20,6 +20,7 @@
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
+
 #include "WMain.hpp"
 #include "ChatBox.hpp"
 #include "WTable.hpp"
@@ -674,7 +675,7 @@ QString WMain::getGametypeString(gametype type)
 			return QString(tr("THNL"));
 		default:
 			return QString(tr("unkown gametype"));
-	};
+	}
 }
 
 QString WMain::getGamemodeString(gamemode mode)
@@ -689,7 +690,7 @@ QString WMain::getGamemodeString(gamemode mode)
 			return QString(tr("Sit'n'Go"));
 		default:
 			return QString(tr("unkown gamemode"));
-	};
+	}
 }
 
 QString WMain::getGamestateString(gamestate state)
@@ -704,7 +705,7 @@ QString WMain::getGamestateString(gamestate state)
 			return QString(tr("Ended"));
 		default:
 			return QString(tr("unkown gamestate"));
-	};
+	}
 }
 
 void WMain::notifyGameinfo(int gid)
