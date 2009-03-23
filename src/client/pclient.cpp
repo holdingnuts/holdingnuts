@@ -507,7 +507,12 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	// unpack blinds-rule
 	const std::string sblinds = t.getNext();
-	// TODO:
+	it.parse(sblinds);
+	
+	gi->blinds_start = it.getNextFloat();
+	gi->blinds_factor = it.getNextFloat();
+	gi->blinds_time = it.getNextInt();
+	
 	
 	// game name
 	gi->name = QString::fromStdString(t.getNext());

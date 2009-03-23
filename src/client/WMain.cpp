@@ -132,8 +132,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lGameFilter->addWidget(new QLabel(tr("Game name filter:"), this));
 	lGameFilter->addWidget(filterPatternGame);
 
-	connect(
-		filterPatternGame,
+	connect(filterPatternGame,
 		SIGNAL(textChanged(const QString&)),
 		this,
 		SLOT(gameFilterChanged()));
@@ -152,7 +151,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewPlayerList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	viewPlayerList->setModel(modelPlayerList);
 	
-	
+	// container widget
 	wGameFilter = new QWidget(this);
 	wGameFilter->setLayout(lGameFilter);
 	
@@ -174,6 +173,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lblGameInfoPlayers = new QLabel(this);
 	lblGameInfoId = new QLabel(this);
 	lblGameInfoStakes = new QLabel(this);
+	lblGameInfoTimeout = new QLabel(this);
+	lblGameInfoBlinds = new QLabel(this);
 	
 	QFont fntGameInfoTitle = lblGameInfoName->font();
 
@@ -186,13 +187,16 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	QGridLayout *lGameInfo = new QGridLayout;
 	lGameInfo->addWidget(lblGameInfoName, 0, 0, 1, 1);
 	lGameInfo->addWidget(lblGameInfoPlayers, 0, 1, 1, 1, Qt::AlignRight);
-	//lGameInfo->addWidget(new QLabel(tr("Blinds rule"), this), 1, 0, 1, 1);
 	lGameInfo->addWidget(new QLabel(tr("Game ID"), this), 2, 0, 1, 1);
 	lGameInfo->addWidget(lblGameInfoId, 2, 1, 1, 1);
 	lGameInfo->addWidget(new QLabel(tr("Initial stakes"), this), 3, 0, 1, 1);
 	lGameInfo->addWidget(lblGameInfoStakes, 3, 1, 1, 1);
-	lGameInfo->addWidget(viewPlayerList, 4, 0, 1, 2);
-	lGameInfo->addLayout(lRegister, 5, 0, 1, 2);
+	lGameInfo->addWidget(new QLabel(tr("Player timeout"), this), 4, 0, 1, 1);
+	lGameInfo->addWidget(lblGameInfoTimeout, 4, 1, 1, 1);
+	lGameInfo->addWidget(new QLabel(tr("Blinds"), this), 5, 0, 1, 1);
+	lGameInfo->addWidget(lblGameInfoBlinds, 5, 1, 1, 1);
+	lGameInfo->addWidget(viewPlayerList, 6, 0, 1, 2);
+	lGameInfo->addLayout(lRegister, 7, 0, 1, 2);
 
 	wGameInfo = new QWidget(this);
 	wGameInfo->setLayout(lGameInfo);
@@ -236,7 +240,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	layout->addLayout(lConnect, 0, 0, 1, 2);
 	// row 1
 	layout->addWidget(viewGameList, 1, 0, 1, 1);
-	layout->addWidget(wGameInfo, 1, 1, 1, 1);
+	layout->addWidget(wGameInfo, 1, 1, 2, 1, Qt::AlignCenter | Qt::AlignTop);
 	// row 2
 	layout->addWidget(wGameFilter, 2, 0, 1, 1);
 	// row 3
@@ -790,6 +794,8 @@ void WMain::updateGameinfo(int gid)
 		lblGameInfoPlayers->clear();
 		lblGameInfoId->clear();
 		lblGameInfoStakes->clear();
+		lblGameInfoTimeout->clear();
+		lblGameInfoBlinds->clear();
 		return;
 	}
 	
@@ -802,6 +808,11 @@ void WMain::updateGameinfo(int gid)
 	lblGameInfoPlayers->setText(QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	lblGameInfoId->setText(QString("%1").arg(gid));
 	lblGameInfoStakes->setText(QString("%1").arg(gi->initial_stakes));
+	lblGameInfoTimeout->setText(QString("%1").arg(gi->player_timeout));
+	lblGameInfoBlinds->setText(QString("%1 / x%2 / %3s")
+		.arg(gi->blinds_start, 0, 'f', 2)
+		.arg(gi->blinds_factor, 0, 'f', 2)
+		.arg(gi->blinds_time));
 }
 
 void WMain::updateServerTimeLabel()
