@@ -140,6 +140,21 @@ void EditableSlider::textChanged(const QString& text)
 	emit dataChanged();
 }
 
+int EditableSlider::valueToSliderPosition(float value) const
+{
+	// FIXME: use exactly one mapping for fromValue and toValue
+	if (value >= m_nMax)
+		return 100;
+	else if (value <= m_nMax * .4f)
+		return (int)(value / (m_nMax * .02f * .25f));
+	else if (value > m_nMax * .4f && value <= m_nMax * .5f)
+		return (int)(value / (m_nMax * .02f * .35f));
+	else if (value > m_nMax * .5f && value <= m_nMax * .6f)
+		return (int)(value / (m_nMax * .02f * .45f));
+
+	return (int)(value / m_nMax * 100);
+}
+
 void EditableSlider::textEdited(const QString& text)
 {
 	QString temp(text);
@@ -150,6 +165,7 @@ void EditableSlider::textEdited(const QString& text)
 	if (state == QValidator::Acceptable)
 	{
 		const float value = text.toFloat();
-		m_pSlider->setSliderPosition((int)(100 * value / m_nMax));
+		
+		m_pSlider->setSliderPosition(valueToSliderPosition(value));
 	}
 }

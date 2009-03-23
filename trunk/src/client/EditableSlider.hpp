@@ -47,6 +47,9 @@ public:
 	float value() const;
 
 	bool validValue() const;
+	
+protected:
+	int valueToSliderPosition(float value) const;
 
 signals:
      void dataChanged();
@@ -57,8 +60,8 @@ private slots:
 	void sliderMoved(int value);
 	void textChanged(const QString& text);
 	void textEdited(const QString& text);
-
-protected:
+	
+private:
 	QSlider		*m_pSlider;
 	QLineEdit	*m_pEdit;
 	QDoubleValidator	*m_pValidator;
