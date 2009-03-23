@@ -372,7 +372,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QLabel *lblActions = new QLabel(this);
 	lblActions->setPixmap(QPixmap("gfx/table/actions.png"));
 	lblActions->setScaledContents(true);
-	lblActions->setFixedSize(400, 70);
+	lblActions->setFixedSize(450, 70);
 	lblActions->setLayout(stlayActions);
 
 	m_pChat	= new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
