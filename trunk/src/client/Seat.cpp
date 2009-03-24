@@ -176,7 +176,7 @@ QRectF Seat::boundingRect() const
 				height += sy_mini_card + 15;
 			break;
 		case 6: case 7:
-				width += sx_mini_card * 1.4;
+				width += sx_mini_card * 1.5;
 			break;
 	}
 	
@@ -384,7 +384,7 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 				y = SeatImages::Instance().imgBack.height() - 30;
 			break;
 		case 3: case 4: case 5:
-				x = sx_mini_card * 1.7;
+				x = 0;
 				y = -(SeatImages::Instance().imgBack.height() + 10);
 			break;
 		case 8: case 9: case 0:
@@ -392,8 +392,8 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 				y = SeatImages::Instance().imgBack.height() + 20;
 			break;
 		case 6: case 7:
-				x = SeatImages::Instance().imgBack.width();
-				y = 0;
+				x = SeatImages::Instance().imgBack.width() + sx_mini_card + 10;
+				y = SeatImages::Instance().imgBack.height() - 30;
 			break;
 	}
 }
