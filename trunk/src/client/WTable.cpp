@@ -290,7 +290,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pView->setCacheMode(QGraphicsView::CacheNone);
 	m_pView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_pView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//	m_pView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);	// TODO: find a better updatemode
 	m_pView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	m_pView->setOptimizationFlag(QGraphicsView::DontClipPainter, true);
 	m_pView->setFrameStyle(QFrame::Plain);
@@ -324,7 +323,35 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
+/*	
+	QPushButton *btnQuarterPot = new QPushButton(tr("1/4"), this);
+	QPushButton *btnHalfPot = new QPushButton(tr("1/2"), this);
+	QPushButton *btnThreeQuarterPot = new QPushButton(tr("1/4"), this);
+	QPushButton *btnPotsize = new QPushButton(tr("3/4"), this);
+	QPushButton *btnAllin = new QPushButton(tr("Allin"), this);
+
+	TODO: btns as small as possible
+
+	btnQuarterPot->resize(btnQuarterPot->minimumSize());
+	btnHalfPot->resize(btnQuarterPot->minimumSize());
+	btnThreeQuarterPot->resize(btnQuarterPot->minimumSize());
+	btnPotsize->resize(btnQuarterPot->minimumSize());
+	btnAllin->resize(btnQuarterPot->minimumSize());
+
+//	btnQuarterPot->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+//	btnHalfPot->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+//	btnThreeQuarterPot->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+//	btnPotsize->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+//	btnAllin->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	
+	QHBoxLayout *lPots = new QHBoxLayout();
+//	lPots->setSizeConstraint(QLayout::SetMinAndMaxSize);
+	lPots->addWidget(btnQuarterPot);
+	lPots->addWidget(btnHalfPot);
+	lPots->addWidget(btnThreeQuarterPot);
+	lPots->addWidget(btnPotsize);
+	lPots->addWidget(btnAllin);
+*/	
 	chkAutoFoldCheck = new QCheckBox("Fold/Check", this);
 	chkAutoCheckCall = new QCheckBox("Check/Call", this);
 	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
@@ -333,11 +360,15 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	connect(m_pSliderAmount, SIGNAL(dataChanged()), this, SLOT(slotBetRaiseAmountChanged()));
 	connect(m_pSliderAmount, SIGNAL(returnPressed()), this, SLOT(actionBetRaise()));
 
-	QHBoxLayout *lActions = new QHBoxLayout();
-	lActions->addWidget(btnFold);
-	lActions->addWidget(btnCheckCall);
-	lActions->addWidget(btnBetRaise);
-	lActions->addWidget(m_pSliderAmount);
+	QHBoxLayout *lActionsBtns = new QHBoxLayout();
+	lActionsBtns->addWidget(btnFold);
+	lActionsBtns->addWidget(btnCheckCall);
+	lActionsBtns->addWidget(btnBetRaise);
+	lActionsBtns->addWidget(m_pSliderAmount);
+
+	QVBoxLayout *lActions = new QVBoxLayout();
+//	lActions->addLayout(lPots);
+	lActions->addLayout(lActionsBtns);
 	
 	QHBoxLayout *lPreActions = new QHBoxLayout();
 	lPreActions->addWidget(chkAutoFoldCheck);
@@ -851,7 +882,13 @@ void WTable::updateView()
 			wseats[i]->update(wseats[i]->boundingRect());
 		}
 		else
+		{
+			// if seat was valid force schedule redraw
+			if (wseats[i]->isValid())
+				wseats[i]->update(wseats[i]->boundingRect());
+
 			wseats[i]->setValid(false);
+		}
 	}
 	
 	
