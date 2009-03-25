@@ -7,8 +7,7 @@ inherit eutils games
 
 DESCRIPTION="An open source poker client and server"
 HOMEPAGE="http://www.holdingnuts.net/"
-#SRC_URI="http://download.holdingnuts.net/testing/${P}.tar.bz2"
-SRC_URI="http://dominik.is-a-geek.org/tmp/${PN}/download/${P}.tar.bz2"
+SRC_URI="http://downloads.sourceforge.net/${PN}/${P}.tar.bz2"
 
 LICENSE="GPL-3"
 SLOT="0"
