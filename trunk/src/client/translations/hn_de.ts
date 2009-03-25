@@ -31,27 +31,67 @@
 <context>
     <name>CreateGameDialog</name>
     <message>
-        <location filename="../CreateGameDialog.cpp" line="36"/>
+        <location filename="../CreateGameDialog.cpp" line="34"/>
         <source>Create game</source>
         <translation>Spiel erstellen</translation>
     </message>
     <message>
-        <location filename="../CreateGameDialog.cpp" line="47"/>
+        <location filename="../CreateGameDialog.cpp" line="45"/>
         <source>General</source>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../CreateGameDialog.cpp" line="49"/>
+        <location filename="../CreateGameDialog.cpp" line="47"/>
         <source>Game name</source>
         <translation>Spielname</translation>
     </message>
     <message>
-        <location filename="../CreateGameDialog.cpp" line="52"/>
+        <location filename="../CreateGameDialog.cpp" line="51"/>
+        <source>Game type</source>
+        <translation>Spieltyp</translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="57"/>
+        <source>Game mode</source>
+        <translation>Spielmodus</translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="71"/>
+        <source>Players</source>
+        <translation>Spieler</translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="80"/>
+        <source>Timeout</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="87"/>
         <source>Initial stake</source>
         <translation>Anfänglicher Stake</translation>
     </message>
     <message>
-        <location filename="../CreateGameDialog.cpp" line="60"/>
+        <location filename="../CreateGameDialog.cpp" line="105"/>
+        <source>Blinds</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="107"/>
+        <source>Starting blinds</source>
+        <translation>Anfängliche blinds</translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="115"/>
+        <source>Raise factor</source>
+        <translation>Erhöhungsfaktor</translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="123"/>
+        <source>Raise time</source>
+        <translation>Erhöhungszeit</translation>
+    </message>
+    <message>
+        <location filename="../CreateGameDialog.cpp" line="73"/>
         <source>Max. Players</source>
         <translation>Max. Spieler</translation>
     </message>
@@ -82,17 +122,17 @@
 <context>
     <name>PClient</name>
     <message>
-        <location filename="../pclient.cpp" line="701"/>
+        <location filename="../pclient.cpp" line="706"/>
         <source>Connecting...</source>
         <translation>Verbinde...</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="972"/>
+        <location filename="../pclient.cpp" line="983"/>
         <source>Connection closed.</source>
         <translation>Verbindung geschlossen.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="951"/>
+        <location filename="../pclient.cpp" line="962"/>
         <source>Connected.</source>
         <translation>Verbunden.</translation>
     </message>
@@ -107,12 +147,12 @@
         <translation>Spiel (%1) wurde beendet.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="587"/>
+        <location filename="../pclient.cpp" line="592"/>
         <source>Protocol error. The remote host does not seem to be a HoldingNuts server.</source>
         <translation>Protokollfehler. Die Gegenstelle scheint kein HoldingNuts Server zu sein.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="940"/>
+        <location filename="../pclient.cpp" line="951"/>
         <source>Connection error: %1.</source>
         <translation>Verbindungsfehler: %1.</translation>
     </message>
@@ -245,27 +285,27 @@
 <context>
     <name>WMain</name>
     <message>
-        <location filename="../WMain.cpp" line="503"/>
+        <location filename="../WMain.cpp" line="508"/>
         <source>Error connecting.</source>
         <translation>Fehler beim Verbinden.</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="65"/>
+        <location filename="../WMain.cpp" line="66"/>
         <source>HoldingNuts Foyer</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="359"/>
+        <location filename="../WMain.cpp" line="364"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="207"/>
+        <location filename="../WMain.cpp" line="212"/>
         <source>&amp;Connect</source>
         <translation>&amp;Verbinden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="211"/>
+        <location filename="../WMain.cpp" line="216"/>
         <source>Cl&amp;ose</source>
         <translation>&amp;Trennen</translation>
     </message>
@@ -275,7 +315,7 @@
         <translation>&amp;Anmelden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="132"/>
+        <location filename="../WMain.cpp" line="133"/>
         <source>Game name filter:</source>
         <translation>Spielname Filter:</translation>
     </message>
@@ -285,37 +325,37 @@
         <translation>A&amp;bmelden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="190"/>
+        <location filename="../WMain.cpp" line="191"/>
         <source>Game ID</source>
         <translation>Spiel ID</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="192"/>
+        <location filename="../WMain.cpp" line="193"/>
         <source>Initial stakes</source>
         <translation>Anfänglicher Einsatz</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="278"/>
+        <location filename="../WMain.cpp" line="283"/>
         <source>&amp;Settings</source>
         <translation>&amp;Einstellungen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="309"/>
+        <location filename="../WMain.cpp" line="314"/>
         <source>&amp;About</source>
         <translation>&amp;Über</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="315"/>
+        <location filename="../WMain.cpp" line="320"/>
         <source>&amp;Game</source>
         <translation>&amp;Spiel</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="664"/>
+        <location filename="../WMain.cpp" line="675"/>
         <source>THNL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="773"/>
+        <location filename="../WMain.cpp" line="784"/>
         <source>Welcome</source>
         <translation>Willkommen</translation>
     </message>
@@ -328,92 +368,102 @@
         <translation type="obsolete">Anfängliche Blinds</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="279"/>
+        <location filename="../WMain.cpp" line="284"/>
         <source>CTRL+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="310"/>
+        <location filename="../WMain.cpp" line="315"/>
         <source>CTRL+A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="286"/>
+        <location filename="../WMain.cpp" line="291"/>
         <source>&amp;Test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="287"/>
+        <location filename="../WMain.cpp" line="292"/>
         <source>CTRL+T</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="216"/>
+        <location filename="../WMain.cpp" line="221"/>
         <source>Server:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="229"/>
+        <location filename="../WMain.cpp" line="195"/>
+        <source>Player timeout</source>
+        <translation>Spieler timeout</translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="197"/>
+        <source>Blinds</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="234"/>
         <source>Create own game</source>
         <translation>Eigenes Spiel erstellen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="294"/>
+        <location filename="../WMain.cpp" line="299"/>
         <source>&amp;Quit</source>
         <translation>&amp;Beenden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="295"/>
+        <location filename="../WMain.cpp" line="300"/>
         <source>CTRL+Q</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="666"/>
+        <location filename="../WMain.cpp" line="677"/>
         <source>unkown gametype</source>
         <translation>unbekannter Spieltyp</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="675"/>
+        <location filename="../WMain.cpp" line="686"/>
         <source>Cash game</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="677"/>
+        <location filename="../WMain.cpp" line="688"/>
         <source>Tournament</source>
         <translation>Tunier</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="679"/>
+        <location filename="../WMain.cpp" line="690"/>
         <source>Sit&apos;n&apos;Go</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="681"/>
+        <location filename="../WMain.cpp" line="692"/>
         <source>unkown gamemode</source>
         <translation>unbekannter Spielmodus</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="690"/>
+        <location filename="../WMain.cpp" line="701"/>
         <source>Waiting</source>
         <translation>Wartend</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="692"/>
+        <location filename="../WMain.cpp" line="703"/>
         <source>Started</source>
         <translation>Gestartet</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="694"/>
+        <location filename="../WMain.cpp" line="705"/>
         <source>Ended</source>
         <translation>Beendet</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="696"/>
+        <location filename="../WMain.cpp" line="707"/>
         <source>unkown gamestate</source>
         <translation>unbekannter Spielstatus</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="203"/>
+        <location filename="../WMain.cpp" line="208"/>
         <source>The desired server (domain-name or IP) to connect with.
 You can optionally specify a port number.
 Format: &lt;host&gt;[:&lt;port&gt;]</source>
@@ -422,29 +472,29 @@ Du kannst optional eine Port-Nummer angeben.
 Format: &lt;host&gt;[:&lt;port&gt;]</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="302"/>
+        <location filename="../WMain.cpp" line="307"/>
         <source>&amp;Handbook</source>
         <translation>&amp;Handbuch</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="303"/>
+        <location filename="../WMain.cpp" line="308"/>
         <source>CTRL+H</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="316"/>
+        <location filename="../WMain.cpp" line="321"/>
         <source>&amp;Help</source>
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="580"/>
+        <location filename="../WMain.cpp" line="585"/>
         <source>You may need to restart the client for all settings to take effect.</source>
         <translation>Du musst den Client eventuell neustarten, damit alle Einstellungen übernommen werden.</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="775"/>
+        <location filename="../WMain.cpp" line="786"/>
         <source>offline</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
