@@ -56,6 +56,8 @@ public:
 		QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
+		
+	bool isValid() const { return m_bValid; }
 
 private:
 	void calcSCardPos(qreal& x, qreal& y) const;

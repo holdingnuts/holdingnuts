@@ -147,6 +147,8 @@ void Seat::setCards(const char *c1, const char *c2)
 
 QRectF Seat::boundingRect() const
 {
+	Q_ASSERT_X(m_pCurrentActionImg, Q_FUNC_INFO, "bad action image pointer");
+
 	qreal x = 0;
 	qreal y = 0;
 	qreal width = SeatImages::Instance().imgBack.width() + m_pCurrentActionImg->width();
