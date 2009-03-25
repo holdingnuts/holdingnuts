@@ -46,19 +46,21 @@ EditableSlider::EditableSlider(QWidget *parent)
 	connect(m_pEdit, SIGNAL(returnPressed()), this, SIGNAL(returnPressed()));
 			
 	m_pSlider = new QSlider(Qt::Horizontal, this);
+	m_pSlider->setTracking(false);
 	m_pSlider->setTickInterval(10);
 	m_pSlider->setSingleStep(1);
 	m_pSlider->setRange(0, 100);
 	m_pSlider->setValue(0);
 	
 	connect(m_pSlider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
+	connect(m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
 	
 	QVBoxLayout *layout = new QVBoxLayout(this);
-		// qwidget has already margins
-		layout->setContentsMargins(0, 0, 0, 0);
-		layout->setSizeConstraint(QLayout::SetMinimumSize); 
-		layout->addWidget(m_pEdit);
-		layout->addWidget(m_pSlider);
+	// qwidget has already margins
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setSizeConstraint(QLayout::SetMinimumSize); 
+	layout->addWidget(m_pEdit);
+	layout->addWidget(m_pSlider);
 	setLayout(layout);
 }
 
@@ -101,7 +103,7 @@ bool EditableSlider::validValue() const
 	return (state == QValidator::Acceptable);
 }
 
-void EditableSlider::sliderMoved(int value)
+void EditableSlider::sliderValueChanged(int value)
 {
 	float amount = .0f;
 	
@@ -133,6 +135,11 @@ void EditableSlider::sliderMoved(int value)
 	m_pEdit->setFocus();
 	
 	emit dataChanged();
+}
+
+void EditableSlider::sliderMoved(int value)
+{
+	sliderValueChanged(value);
 }
 
 void EditableSlider::textChanged(const QString& text)
