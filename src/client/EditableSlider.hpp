@@ -52,18 +52,19 @@ protected:
 	int valueToSliderPosition(float value) const;
 
 signals:
-     void dataChanged();
-     
-     void returnPressed();
+	void dataChanged();
+
+	void returnPressed();
 
 private slots:
+	void sliderValueChanged(int value);
 	void sliderMoved(int value);
 	void textChanged(const QString& text);
 	void textEdited(const QString& text);
 	
 private:
-	QSlider		*m_pSlider;
-	QLineEdit	*m_pEdit;
+	QSlider			*m_pSlider;
+	QLineEdit		*m_pEdit;
 	QDoubleValidator	*m_pValidator;
 			
 	float		m_nMin;
