@@ -77,7 +77,18 @@ target_link_libraries (
    ${aux_lib}
 )
 
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/holdingnuts DESTINATION
+	${CMAKE_INSTALL_PREFIX}/bin)
+
 ############################################################
+
+# data-directory
+INSTALL(DIRECTORY ${HOLDINGNUTS_SOURCE_DIR}/data DESTINATION
+	${CMAKE_INSTALL_PREFIX}/share/holdingnuts/)
+
+############################################################
+
+# translations
 
 #http://www.cmake.org/Wiki/CMake:How_To_Build_Qt4_Software
 #http://doc.trolltech.com/4.3/i18n.html
@@ -85,7 +96,6 @@ target_link_libraries (
 file (GLOB TRANSLATIONS_FILES translations/*.ts)
 
 file (GLOB SRC_FILES *.cpp *.hpp)
-
 set (FILES_TO_TRANSLATE ${SRC_FILES})
 
 if (UPDATE_TRANSLATIONS)
@@ -94,6 +104,7 @@ else (UPDATE_TRANSLATIONS)
   qt4_add_translation(QM_FILES ${TRANSLATIONS_FILES})
 endif (UPDATE_TRANSLATIONS) 
 
-add_custom_target (translations DEPENDS ${QM_FILES})
+add_custom_target (translations ALL DEPENDS ${QM_FILES})
 
-install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/data/i18n)
+install(FILES ${QM_FILES} DESTINATION	
+	${CMAKE_INSTALL_PREFIX}/share/holdingnuts/data/i18n)

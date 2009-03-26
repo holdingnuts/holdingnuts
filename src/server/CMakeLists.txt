@@ -37,3 +37,6 @@ target_link_libraries(holdingnuts-server
 	Poker Network SysAccess System
 	${aux_lib}
 )
+
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/holdingnuts-server DESTINATION
+	        ${CMAKE_INSTALL_PREFIX}/bin)
