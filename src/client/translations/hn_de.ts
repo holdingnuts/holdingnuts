@@ -68,7 +68,7 @@
     <message>
         <location filename="../CreateGameDialog.cpp" line="87"/>
         <source>Initial stake</source>
-        <translation>Anfänglicher Stake</translation>
+        <translation>Anfänglicher Einsatz</translation>
     </message>
     <message>
         <location filename="../CreateGameDialog.cpp" line="105"/>
@@ -352,7 +352,7 @@
     <message>
         <location filename="../WMain.cpp" line="675"/>
         <source>THNL</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../WMain.cpp" line="784"/>
@@ -390,7 +390,7 @@
     <message>
         <location filename="../WMain.cpp" line="221"/>
         <source>Server:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../WMain.cpp" line="195"/>
