@@ -625,6 +625,18 @@ bool client_cmd_request_playerlist(clientcon *client, Tokenizer &t)
 	return true;
 }
 
+bool client_cmd_request_serverinfo(clientcon *client, Tokenizer &t)
+{
+	snprintf(msg, sizeof(msg), "SERVERINFO %d:%d:%d",
+		(int) clients.size(),
+		(int) con_archive.size(),
+		(int) games.size());
+	
+	send_msg(client->sock, msg);
+	
+	return true;
+}
+
 int client_cmd_request(clientcon *client, Tokenizer &t)
 {
 	if (!t.count())
@@ -647,14 +659,7 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 	else if (request == "playerlist")
 		cmderr = !client_cmd_request_playerlist(client, t);
 	else if (request == "serverinfo")
-	{
-		snprintf(msg, sizeof(msg), "games=%d clients=%d con_archive=%d",
-			(int) games.size(),
-			(int) clients.size(),
-			(int) con_archive.size());
-		
-		client_chat(-1, client->id, msg);
-	}
+		cmderr = !client_cmd_request_serverinfo(client, t);
 	else
 		cmderr = true;
 
