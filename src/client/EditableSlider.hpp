@@ -47,6 +47,7 @@ public:
 	float value() const;
 
 	bool validValue() const;
+	void setFocus();
 	
 protected:
 	int valueToSliderPosition(float value) const;

@@ -1057,6 +1057,11 @@ void WTable::updateView()
 	}
 	else
 		m_pTxtHandStrength->setText(QString());
+	
+	
+	// set focus on EditableSlider if focus isn't on ChatBox
+	if (focusWidget() != m_pChat->getInputWidget())
+		m_pSliderAmount->setFocus();
 }
 
 void WTable::addChat(const QString& from, const QString& text)

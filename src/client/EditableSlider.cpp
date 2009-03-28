@@ -20,7 +20,8 @@
  *     Michael Miller <michael.miller@holdingnuts.net>
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
-  
+
+
 #include "EditableSlider.hpp"
 
 #include <QSlider>
@@ -72,7 +73,6 @@ void EditableSlider::setMinimum(float value)
 	
 	m_pEdit->setText(QString::number(value));
 	m_pEdit->selectAll();
-	m_pEdit->setFocus();
 	
 	m_pSlider->setValue(0);
 	m_pValidator->setBottom(value);
@@ -132,7 +132,6 @@ void EditableSlider::sliderValueChanged(int value)
 
 	m_pEdit->setText(str);
 	m_pEdit->selectAll();
-	m_pEdit->setFocus();
 	
 	emit dataChanged();
 }
@@ -175,4 +174,9 @@ void EditableSlider::textEdited(const QString& text)
 		
 		m_pSlider->setSliderPosition(valueToSliderPosition(value));
 	}
+}
+
+void EditableSlider::setFocus()
+{
+	m_pEdit->setFocus();
 }
