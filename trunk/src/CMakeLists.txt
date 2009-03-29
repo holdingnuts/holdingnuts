@@ -51,14 +51,18 @@ IF (USE_SVNREV)
 ENDIF (USE_SVNREV)
 
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (ENABLE_DEBUG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DDEBUG=1)
-endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+endif (ENABLE_DEBUG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 
 # compiled in data-dir path
-if (DATA_DIR)
-	add_definitions(-DDATA_DIR=\"${DATA_DIR}\")
-endif (DATA_DIR)
+if (CMAKE_DATA_PATH)
+	add_definitions(-DDATA_DIR=\"${CMAKE_DATA_PATH}/holdingnuts/data\")
+	message ("Using data-dir ${CMAKE_DATA_PATH}/holdingnuts/data")
+else (CMAKE_DATA_PATH)
+	SET (CMAKE_DATA_PATH "${CMAKE_INSTALL_PREFIX}/share")
+endif (CMAKE_DATA_PATH)
 
 
 # additional definitions
