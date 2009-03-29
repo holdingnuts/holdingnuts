@@ -68,6 +68,11 @@ endif (CMAKE_DATA_PATH)
 # additional definitions
 add_definitions(-Wall)
 
+# do not include RPATHs to our static libs in binaries
+#set (CMAKE_BUILD_WITH_INSTALL_RPATH false)
+set (CMAKE_SKIP_BUILD_RPATH true)
+
+
 ################################################################################
 
 # libraries
