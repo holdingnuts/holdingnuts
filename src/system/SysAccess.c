@@ -231,10 +231,10 @@ const char* sys_data_path()
 {
 	unsigned int i;
 	static char *search_dirs[] = {
-		"data",
 #if defined(DATA_DIR)
 		DATA_DIR,
-#endif
+#else
+		"data",
 #if !defined(PLATFORM_WINDOWS)
 		"/usr/share/" CONFIG_APPNAME "/data",
 		"/usr/share/games/" CONFIG_APPNAME "/data",
@@ -243,6 +243,7 @@ const char* sys_data_path()
 		"/usr/local/share/games/" CONFIG_APPNAME "/data",
 		"/opt/" CONFIG_APPNAME "/data",
 #endif
+#endif /* defined(DATA_DIR) */
 	};
 	
 	const unsigned int count = sizeof(search_dirs) / sizeof(search_dirs[0]);

@@ -84,7 +84,7 @@ INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/holdingnuts DESTINATION
 
 # data-directory
 INSTALL(DIRECTORY ${HOLDINGNUTS_SOURCE_DIR}/data DESTINATION
-	${CMAKE_INSTALL_PREFIX}/share/holdingnuts/)
+	${CMAKE_DATA_PATH}/holdingnuts)
 
 ############################################################
 
@@ -107,4 +107,4 @@ endif (UPDATE_TRANSLATIONS)
 add_custom_target (translations ALL DEPENDS ${QM_FILES})
 
 install(FILES ${QM_FILES} DESTINATION	
-	${CMAKE_INSTALL_PREFIX}/share/holdingnuts/data/i18n)
+	${CMAKE_DATA_PATH}/holdingnuts/data/i18n)
