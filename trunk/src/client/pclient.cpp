@@ -1014,6 +1014,15 @@ void PClient::requestGamelist()
 	netSendMsg("REQUEST gamelist");
 }
 
+bool PClient::isGameInList(int gid)
+{
+	for (gamelist_type::const_iterator e = gamelist.begin(); e != gamelist.end(); e++) 
+		if (*e == gid) 
+			return true;
+	
+	return false;
+}
+
 void PClient::requestGameinfo(const char *glist)
 {
 	char msg[1024];

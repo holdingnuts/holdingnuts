@@ -743,9 +743,9 @@ void WMain::notifyGamelist()
 	for (int i=0; i < modelGameList->rowCount(); i++)
 	{
 		const int gid = modelGameList->findGidByRow(i);
-		const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 		
-		if (!gi)
+		// remove abaondoned games from list
+		if (!((PClient*)qApp)->isGameInList(gid))
 			modelGameList->removeRow(i);
 	}
 }
