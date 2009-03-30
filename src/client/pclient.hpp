@@ -157,6 +157,7 @@ public:
 #if 0
 	const gamelist_type& getGameList();
 #endif
+	bool isGameInList(int gid);
 	gameinfo* getGameInfo(int gid);
 	tableinfo* getTableInfo(int gid, int tid);
 	playerinfo* getPlayerInfo(int cid);
