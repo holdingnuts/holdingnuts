@@ -509,52 +509,60 @@ int client_cmd_chat(clientcon *client, Tokenizer &t)
 	return 0;
 }
 
+
+bool send_gameinfo(clientcon *client, int gid)
+{
+	const GameController *g;
+	if (!(g = get_game_by_id(gid)))
+		return false;
+	
+	int game_mode = 0;
+	switch ((int)g->getGameType())
+	{
+	case GameController::SNG:
+		game_mode = GameModeSNG;
+		break;
+	case GameController::FreezeOut:
+		game_mode = GameModeFreezeOut;
+		break;
+	case GameController::RingGame:
+		game_mode = GameModeRingGame;
+		break;
+	}
+	
+	int state = 0;
+	if (g->isEnded())
+		state = GameStateEnded;
+	else if (g->isStarted())
+		state = GameStateStarted;
+	else
+		state = GameStateWaiting;
+	
+	snprintf(msg, sizeof(msg),
+		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%.2f %.2f:%.2f:%d \"%s\"",
+		gid,
+		(int) GameTypeHoldem,
+		game_mode,
+		state,
+		g->getPlayerMax(),
+		g->getPlayerCount(),
+		g->getPlayerTimeout(),
+		g->getPlayerStakes(),
+		g->getBlindsStart(), g->getBlindsFactor(), g->getBlindsTime(),
+		g->getName().c_str());
+	
+	send_msg(client->sock, msg);
+	
+	return true;
+}
+
 bool client_cmd_request_gameinfo(clientcon *client, Tokenizer &t)
 {
 	string sgid;
 	while (t.getNext(sgid))   // FIXME: have maximum for count of requests
 	{
 		const int gid = Tokenizer::string2int(sgid);
-		const GameController *g;
-		if ((g = get_game_by_id(gid)))
-		{
-			int game_mode = 0;
-			switch ((int)g->getGameType())
-			{
-			case GameController::SNG:
-				game_mode = GameModeSNG;
-				break;
-			case GameController::FreezeOut:
-				game_mode = GameModeFreezeOut;
-				break;
-			case GameController::RingGame:
-				game_mode = GameModeRingGame;
-				break;
-			}
-			
-			int state = 0;
-			if (g->isEnded())
-				state = GameStateEnded;
-			else if (g->isStarted())
-				state = GameStateStarted;
-			else
-				state = GameStateWaiting;
-			
-			snprintf(msg, sizeof(msg),
-				"GAMEINFO %d %d:%d:%d:%d:%d:%d:%.2f %.2f:%.2f:%d \"%s\"",
-				gid,
-				(int) GameTypeHoldem,
-				game_mode,
-				state,
-				g->getPlayerMax(),
-				g->getPlayerCount(),
-				g->getPlayerTimeout(),
-				g->getPlayerStakes(),
-				g->getBlindsStart(), g->getBlindsFactor(), g->getBlindsTime(),
-				g->getName().c_str());
-			
-			send_msg(client->sock, msg);
-		}
+		send_gameinfo(client, gid);
 	}
 	
 	return true;
@@ -998,6 +1006,15 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		
 		snprintf(msg, sizeof(msg), "Your game '%d' has been created.", gid);
 		client_chat(-1, client->id, msg);
+		
+		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
+		{
+			clientcon *client = &(*e);
+			if (!(client->state & Introduced))  // do not send broadcast to non-introduced clients
+				continue;
+			
+			send_gameinfo(client, gid);
+		}
 	}
 	else
 		send_err(client);

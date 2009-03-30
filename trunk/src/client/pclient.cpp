@@ -840,16 +840,6 @@ const gamelist_type& PClient::getGameList()
 
 gameinfo* PClient::getGameInfo(int gid)
 {
-	// return early if game isn't in game list
-	bool found = false;
-	for (gamelist_type::const_iterator e = gamelist.begin(); e != gamelist.end(); e++)
-		if (*e == gid)
-			found = true;
-	
-	if (!found)
-		return 0;
-	
-	
 	if (games.find(gid) != games.end())
 		return &(games[gid]);
 	else
