@@ -27,7 +27,7 @@
 /* version(major,minor,revision) */
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     0
-#define VERSION_REVISION  2
+#define VERSION_REVISION  3
 
 
 /* Example: Version 2.12.123 = 2*100000 + 12*1000 + 123 = 212123 */
@@ -45,6 +45,9 @@
 
 
 #define VERSION VERSION_CREATE(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION)
+
+/* Last compatible version */
+#define VERSION_COMPAT VERSION_CREATE(0, 0, 3)
 
 /* provided SVN revision */
 #ifdef SVN_REV
