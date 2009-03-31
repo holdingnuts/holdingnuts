@@ -326,11 +326,11 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 	unsigned int version = t.getNextInt();
 	string uuid = t.getNext();
 	
-	if (VERSION_GETMAJOR(version) != VERSION_MAJOR ||
-		VERSION_GETMINOR(version) != VERSION_MINOR)
+	if (version < VERSION_COMPAT)
 	{
-		log_msg("client", "client %d version (%d) doesn't match", client->sock, version);
-		send_err(client, ErrWrongVersion, "wrong version");
+		log_msg("client", "client %d version (%d) too old", client->sock, version);
+		send_err(client, ErrWrongVersion, "The client version is too old."
+			"Please update your HoldingNuts client to a more recent version.");
 		client_remove(client->sock);
 	}
 	else
