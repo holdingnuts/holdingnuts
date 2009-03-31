@@ -61,6 +61,7 @@ private:
 private slots:
 	void actionOk();
 	void actionGenUUID();
+	void actionClearUUID();
 	void actionCheckStateSound(int new_state);
 	void actionCheckStateLog(int new_state);
 };

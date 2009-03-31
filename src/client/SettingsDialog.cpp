@@ -116,9 +116,17 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	QPushButton *btnUUIDGen = new QPushButton(tr("generate"), tabGeneral);
 	connect(btnUUIDGen, SIGNAL(clicked()), this, SLOT(actionGenUUID()));
 	
+	QPushButton *btnUUIDClear = new QPushButton(tr("clear"), tabGeneral);
+	connect(btnUUIDClear, SIGNAL(clicked()), this, SLOT(actionClearUUID()));
+	
+	
+	QHBoxLayout *layoutUUIDButtons = new QHBoxLayout;
+	layoutUUIDButtons->addWidget(btnUUIDGen);
+	layoutUUIDButtons->addWidget(btnUUIDClear);
+	
 	QVBoxLayout *layoutUUID = new QVBoxLayout;
 	layoutUUID->addWidget(labelUUIDdisplay);
-	layoutUUID->addWidget(btnUUIDGen);
+	layoutUUID->addLayout(layoutUUIDButtons);
 	
 	
 	// basic layout
@@ -195,6 +203,12 @@ void SettingsDialog::actionGenUUID()
 	suuid = suuid.mid(1, suuid.length() - 2);
 	
 	labelUUIDdisplay->setText(suuid);
+}
+
+void SettingsDialog::actionClearUUID()
+{
+	// unset UUID
+	labelUUIDdisplay->clear();
 }
 
 void SettingsDialog::actionOk()
