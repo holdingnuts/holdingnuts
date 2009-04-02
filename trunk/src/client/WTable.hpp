@@ -126,6 +126,11 @@ protected:
 	
 	void playSound(unsigned int id);
 
+	//! \brief returns current Potsize including all Bets on Table
+	float currentPot() const;
+	
+//	void doRaise(float factor);
+
 private slots:
 	void actionFold();
 	void actionCheckCall();
@@ -143,6 +148,16 @@ private slots:
 	void actionChat(QString msg);
 	
 	void slotBetRaiseAmountChanged();
+	
+	void actionRaiseQuarterPot();
+	void actionRaiseHalfPot();
+	void actionRaiseThreeQuarterPot();
+	void actionRaisePotsize();
+	void actionAllin();
+	
+#ifdef RAISE_MNU
+	void showMenuRaise();
+#endif
 
 public slots:
 	void slotShow();
@@ -171,6 +186,16 @@ private:
 	EditableSlider	*m_pSliderAmount;
 	QPushButton		*btnCheckCall;
 	QPushButton		*btnBetRaise;
+#ifdef RAISE_MNU
+	QPushButton 	*btnRaisePot;
+#else
+	QPushButton		*btnQuarterPot;
+	QPushButton		*btnHalfPot;
+	QPushButton		*btnThreeQuarterPot;
+	QPushButton		*btnPotsize;
+	QPushButton		*btnAllin;
+	QWidget			*wRaiseBtns;
+#endif
 	QCheckBox 		*chkAutoFoldCheck;
 	QCheckBox		*chkAutoCheckCall;
 	
@@ -196,6 +221,15 @@ private:
 	QShortcut		*shortcutShow;
 	QShortcut		*shortcutSitout;
 	QShortcut		*shortcutBack;
+
+#ifdef RAISE_MNU
+	// raise menu actions
+	QAction			*actRaiseQuarterPot;
+	QAction			*actRaiseHalfPot;
+	QAction			*actRaiseThreeQuarterPot;
+	QAction			*actRaisePotsize;
+	QAction			*actAllin;
+#endif	
 };
 
 #endif /* _WTABLE_H */
