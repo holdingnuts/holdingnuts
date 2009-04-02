@@ -43,6 +43,7 @@ public:
 		
 	void setMinimum(float value);
 	void setMaximum(float value);
+	void setValue(float value);
 
 	float value() const;
 

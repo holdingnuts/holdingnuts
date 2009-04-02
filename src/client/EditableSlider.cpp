@@ -83,6 +83,12 @@ void EditableSlider::setMaximum(float value)
 	m_nMax = value;
 }
 
+void EditableSlider::setValue(float value)
+{
+	m_pEdit->setText(QString::number(value));
+	m_pSlider->setSliderPosition(valueToSliderPosition(value));
+}
+
 float EditableSlider::value() const
 {
 	float value = m_pEdit->text().toFloat();
@@ -151,6 +157,8 @@ int EditableSlider::valueToSliderPosition(float value) const
 	// FIXME: use exactly one mapping for fromValue and toValue
 	if (value >= m_nMax)
 		return 100;
+	else if (value == m_nMin)
+		return 0;
 	else if (value <= m_nMax * .4f)
 		return (int)(value / (m_nMax * .02f * .25f));
 	else if (value > m_nMax * .4f && value <= m_nMax * .5f)

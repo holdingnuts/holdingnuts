@@ -190,6 +190,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lblGameInfoPlayers->setFont(fntGameInfoTitle);
 	
 	QGridLayout *lGameInfo = new QGridLayout;
+	lGameInfo->setContentsMargins(11,11,0,11);
 	lGameInfo->addWidget(lblGameInfoName, 0, 0, 1, 1);
 	lGameInfo->addWidget(lblGameInfoPlayers, 0, 1, 1, 1, Qt::AlignRight);
 	lGameInfo->addWidget(new QLabel(tr("Game ID"), this), 2, 0, 1, 1);
@@ -205,6 +206,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	wGameInfo = new QWidget(this);
 	wGameInfo->setLayout(lGameInfo);
+	wGameInfo->setFixedWidth(210);
 	
 	// connection
 	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")), this);
@@ -340,6 +342,16 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	// initially enable/disabled widgets
 	updateConnectionStatus();
+
+/*
+	// load gui settings
+	QSettings settings("xyz", CONFIG_APPNAME);
+
+	settings.beginGroup("MainWindow");
+		this->resize(settings.value("size", QSize(700, 600)).toSize());
+		this->move(settings.value("pos", QPoint(50, 50)).toPoint());
+	settings.endGroup();
+*/	
 }
 
 void WMain::addLog(const QString &line)
