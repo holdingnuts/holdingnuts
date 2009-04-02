@@ -118,7 +118,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setFont(font);
 #endif
 	viewGameList->setModel(proxyModelGameList);
-	
+	// width colomn 0 is default
+	viewGameList->setColumnWidth(1, 90);	// type
+	viewGameList->setColumnWidth(2, 50);	// players
+	viewGameList->setColumnWidth(3, 50);	// state
+
 	connect(
 		viewGameList->selectionModel(),
 		SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
@@ -485,7 +489,6 @@ void WMain::updatePlayerList(int gid)
 				QString("??? (%1)").arg(ginfo->players[i]));
 	}
 	
-	// viewPlayerList->resizeColumnsToContents(); // TODO: enable if required 
 	viewPlayerList->resizeRowsToContents(); 
 }
 
@@ -718,7 +721,6 @@ void WMain::notifyGameinfo(int gid)
 	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	modelGameList->updateGameState(gid, getGamestateString(gi->state));
 	
-	viewGameList->resizeColumnsToContents();
 	viewGameList->resizeRowsToContents();
 	
 	// update gameinfo panel
