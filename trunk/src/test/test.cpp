@@ -314,6 +314,37 @@ int test_gamecontroller1()
 	
 	return 0;
 }
+
+// split pot odd chip test
+int test_gamecontroller2()
+{
+	GameController game;
+	
+	game.setPlayerMax(3);
+	game.addPlayer(0);
+	game.debugSetPlayerStake(0, 111111);
+	game.addPlayer(1);
+	game.debugSetPlayerStake(1, 111111);
+	game.addPlayer(2);
+	game.debugSetPlayerStake(2, 111111);
+	
+	do_ticks(&game);  // New round started // 0: You're under the gun!
+	
+	// [Pre-Flop]
+	game.setPlayerAction(2, Player::Allin, 0.0f);
+	do_ticks(&game);  // 1: It's your turn!
+	
+	game.setPlayerAction(0, Player::Allin, 0.0f);
+	do_ticks(&game);  // 1: It's your turn!
+	
+	game.setPlayerAction(1, Player::Allin, 0.0f);
+	do_ticks(&game);  // 2: It's your turn!
+	
+	
+	do_ticks(&game);  // p3 is allin, no action
+	
+	return 0;
+}
 #endif
 
 int main(void)
@@ -353,6 +384,7 @@ int main(void)
 #if 0
 #ifdef DEBUG
 	test_gamecontroller1();
+	test_gamecontroller2();
 #endif
 #endif
 

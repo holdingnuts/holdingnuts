@@ -51,12 +51,12 @@ GameController::GameController()
 	max_players = 10;
 	restart = false;
 	
-	player_stakes = 1500.0f;
+	player_stakes = 1500*100;
 	
 	blind.blindrule = BlindByTime;
 	blind.blinds_time = 60 * 4;
 	blind.blinds_factor = 2.0f;
-	blind.amount = 10.0f;
+	blind.amount = 10*100;
 	
 	hand_no = 0;
 	
@@ -127,9 +127,9 @@ bool GameController::setPlayerMax(unsigned int max)
 	return true;
 }
 
-bool GameController::setPlayerStakes(float stake)
+bool GameController::setPlayerStakes(chips_type stake)
 {
-	if (!(int) stake)
+	if (!stake)
 		return false;
 	
 	player_stakes = stake;
@@ -169,7 +169,7 @@ void GameController::snap(int cid, int tid, int sid, const char* msg)
 	client_snapshot(game_id, tid, cid, sid, msg);
 }
 
-bool GameController::setPlayerAction(int cid, Player::PlayerAction action, float amount)
+bool GameController::setPlayerAction(int cid, Player::PlayerAction action, chips_type amount)
 {
 	Player *p = findPlayer(cid);
 	
@@ -270,7 +270,7 @@ void GameController::sendTableSnapshot(Table *t)
 		
 		char tmp[1024];
 		snprintf(tmp, sizeof(tmp),
-			"s%d:%d:%d:%.2f:%.2f:%d:%s",
+			"s%d:%d:%d:%d:%d:%d:%s",
 			s->seat_no,
 			p->client_id,
 			pstate,
@@ -294,7 +294,7 @@ void GameController::sendTableSnapshot(Table *t)
 		char tmp[1024];
 		
 		snprintf(tmp, sizeof(tmp),
-			"p%d:%.2f",
+			"p%d:%d",
 			i, pot->amount);
 		
 		spots += tmp;
@@ -324,11 +324,11 @@ void GameController::sendTableSnapshot(Table *t)
 	}
 	
 	
-	float minimum_bet;
+	chips_type minimum_bet;
 	if (t->state == Table::Betting)
 		minimum_bet = determineMinimumBet(t);
 	else
-		minimum_bet = 0.0f;
+		minimum_bet = 0;
 	
 	
 	snprintf(msg, sizeof(msg),
@@ -337,7 +337,7 @@ void GameController::sendTableSnapshot(Table *t)
 		"cc:%s "           // <community-cards>
 		"%s "              // seats
 		"%s "              // pots
-		"%.2f",            // minimum bet
+		"%d",              // minimum bet
 		t->state, (t->state == Table::Betting) ? t->betround : -1,
 		sturn.c_str(),
 		scards.c_str(),
@@ -348,9 +348,9 @@ void GameController::sendTableSnapshot(Table *t)
 	snap(t->table_id, SnapTable, msg);
 }
 
-float GameController::determineMinimumBet(Table *t) const
+chips_type GameController::determineMinimumBet(Table *t) const
 {
-	if ((int) t->bet_amount == 0)
+	if (t->bet_amount == 0)
 		return blind.amount;
 	else
 		return t->bet_amount + (t->bet_amount - t->last_bet_amount);
@@ -469,14 +469,14 @@ void GameController::stateNewRound(Table *t)
 	// reset round-related
 	t->communitycards.clear();
 	
-	t->bet_amount = 0.0f;
-	t->last_bet_amount = 0.0f;
+	t->bet_amount = 0;
+	t->last_bet_amount = 0;
 	t->nomoreaction = false;
 	
 	// clear old pots and create initial main pot
 	t->pots.clear();
 	Table::Pot pot;
-	pot.amount = 0.0f;
+	pot.amount = 0;
 	pot.final = false;
 	t->pots.push_back(pot);
 	
@@ -489,7 +489,7 @@ void GameController::stateNewRound(Table *t)
 		
 		t->seats[i].in_round = true;
 		t->seats[i].showcards = false;
-		t->seats[i].bet = 0.0f;
+		t->seats[i].bet = 0;
 		
 		
 		Player *p = t->seats[i].player;
@@ -540,7 +540,7 @@ void GameController::stateBlinds(Table *t)
 	
 	// FIXME: handle non-SNG correctly (ask each player for blinds ...)
 	
-	t->bet_amount = (float)blind.amount;
+	t->bet_amount = blind.amount;
 	
 	
 	Player *pSmall = t->seats[t->sb].player;
@@ -548,7 +548,7 @@ void GameController::stateBlinds(Table *t)
 	
 	
 	// set the player's SB
-	float amount = blind.amount / 2;
+	chips_type amount = blind.amount / 2;
 	
 	if (amount > pSmall->stake)
 		amount = pSmall->stake;
@@ -595,12 +595,12 @@ void GameController::stateBetting(Table *t)
 	bool auto_action = false;
 	
 	Player::PlayerAction action;
-	float amount = 0.0f;
+	chips_type amount = 0;
 	
-	float minimum_bet = determineMinimumBet(t);
+	chips_type minimum_bet = determineMinimumBet(t);
 	
 	if (t->nomoreaction ||		// early showdown, no more action at table possible, or
-		(int)p->stake == 0)	// player is allin and has no more options
+		p->stake == 0)		// player is allin and has no more options
 	{
 		action = Player::None;
 		allowed_action = true;
@@ -615,15 +615,15 @@ void GameController::stateBetting(Table *t)
 		{
 			// allowed to check?
 			if (t->seats[t->cur_player].bet < t->bet_amount)
-				chat(p->client_id, t->table_id, "Error: You cannot check! Try call.");
+				chat(p->client_id, t->table_id, "You cannot check! Try call.");
 			else
 				allowed_action = true;
 		}
 		else if (action == Player::Call)
 		{
-			if ((int)t->bet_amount == 0 || (int)t->bet_amount == t->seats[t->cur_player].bet)
+			if (t->bet_amount == 0 || t->bet_amount == t->seats[t->cur_player].bet)
 			{
-				//chat(p->client_id, t->table_id, "Err: You cannot call, nothing was bet! Try check.");
+				//chat(p->client_id, t->table_id, "You cannot call, nothing was bet! Try check.");
 				
 				// retry with this action
 				p->next_action.action = Player::Check;
@@ -643,12 +643,12 @@ void GameController::stateBetting(Table *t)
 		}
 		else if (action == Player::Bet)
 		{
-			if ((unsigned int)t->bet_amount > 0)
-				chat(p->client_id, t->table_id, "Error: You cannot bet, there was already a bet! Try raise.");
+			if (t->bet_amount > 0)
+				chat(p->client_id, t->table_id, "You cannot bet, there was already a bet! Try raise.");
 			else if (p->next_action.amount < minimum_bet)
 			{
-				snprintf(msg, sizeof(msg), "Error: You cannot bet this amount. Minimum bet is %.2f.",
-					minimum_bet);
+				snprintf(msg, sizeof(msg), "You cannot bet this amount. Minimum bet is %.2f.",
+					minimum_bet / 100.0f);
 				chat(p->client_id, t->table_id, msg);
 			}
 			else
@@ -659,7 +659,7 @@ void GameController::stateBetting(Table *t)
 		}
 		else if (action == Player::Raise)
 		{
-			if ((unsigned int)t->bet_amount == 0)
+			if (t->bet_amount == 0)
 			{
 				//chat(p->client_id, t->table_id, "Err: You cannot raise, nothing was bet! Try bet.");
 				
@@ -669,8 +669,8 @@ void GameController::stateBetting(Table *t)
 			}
 			else if (p->next_action.amount < minimum_bet)
 			{
-				snprintf(msg, sizeof(msg), "Error: You cannot raise this amount. Minimum bet is %.2f.",
-					minimum_bet);
+				snprintf(msg, sizeof(msg), "You cannot raise this amount. Minimum bet is %.2f.",
+					minimum_bet / 100.0f);
 				chat(p->client_id, t->table_id, msg);
 			}
 			else
@@ -758,14 +758,14 @@ void GameController::stateBetting(Table *t)
 			}
 			
 			if (action == Player::Bet)
-				snprintf(msg, sizeof(msg), "[%d] bet %.2f.", p->client_id, t->bet_amount);
+				snprintf(msg, sizeof(msg), "[%d] bet %.2f.", p->client_id, t->bet_amount / 100.0f);
 			else if (action == Player::Raise)
-				snprintf(msg, sizeof(msg), "[%d] raised to %.2f.", p->client_id, t->bet_amount);
+				snprintf(msg, sizeof(msg), "[%d] raised to %.2f.", p->client_id, t->bet_amount / 100.0f);
 			else // allin
-				snprintf(msg, sizeof(msg), "[%d] is allin with %.2f.", p->client_id, t->seats[t->cur_player].bet);
+				snprintf(msg, sizeof(msg), "[%d] is allin with %.2f.", p->client_id, t->seats[t->cur_player].bet / 100.0f);
 		}
 		else
-			snprintf(msg, sizeof(msg), "[%d] called %.2f.", p->client_id, amount);
+			snprintf(msg, sizeof(msg), "[%d] called %.2f.", p->client_id, amount / 100.0f);
 		
 		
 		chat(t->table_id, msg);
@@ -849,8 +849,8 @@ void GameController::stateBetting(Table *t)
 		
 		
 		// reset the highest bet-amount
-		t->bet_amount = 0.0f;
-		t->last_bet_amount = 0.0f;
+		t->bet_amount = 0;
+		t->last_bet_amount = 0;
 		
 		// set current player to SB (or next active behind SB)
 		t->cur_player = t->getNextActivePlayer(t->dealer);
@@ -886,7 +886,7 @@ void GameController::stateBetting(Table *t)
 	
 	// tell player it's his turn
 	p = t->seats[t->cur_player].player;
-	if (!t->nomoreaction && (int)p->stake != 0)
+	if (!t->nomoreaction && p->stake > 0)
 	{
 		snprintf(msg, sizeof(msg), "[%d], it's your turn!", p->client_id);
 		chat(p->client_id, t->table_id, msg);
@@ -988,7 +988,7 @@ void GameController::stateAllFolded(Table *t)
 	// get last remaining player
 	Player *p = t->seats[t->cur_player].player;
 	
-	snprintf(msg, sizeof(msg), "[%d] wins %.2f", p->client_id, t->pots[0].amount);
+	snprintf(msg, sizeof(msg), "[%d] wins %.2f", p->client_id, t->pots[0].amount / 100.0f);
 	chat(t->table_id, msg);
 	
 	p->stake += t->pots[0].amount;
@@ -1041,7 +1041,7 @@ void GameController::stateShowdown(Table *t)
 			else
 				sranking = HandStrength::getRankingName(strength.getRanking());
 			
-			snprintf(msg, sizeof(msg), "[%d] has %s (%s)",
+			snprintf(msg, sizeof(msg), "[%d] shows %s (%s)",
 				p->client_id,
 				sranking,
 				hsstr.c_str());
@@ -1056,6 +1056,7 @@ void GameController::stateShowdown(Table *t)
 	vector< vector<HandStrength> > winlist;
 	createWinlist(t, winlist);
 	
+	// for each winner-list
 	for (unsigned int i=0; i < winlist.size(); i++)
 	{
 		vector<HandStrength> &tw = winlist[i];
@@ -1067,7 +1068,7 @@ void GameController::stateShowdown(Table *t)
 			Table::Pot *pot = &(t->pots[poti]);
 			unsigned int involved_count = t->getInvolvedInPotCount(pot, tw);
 			
-			float cashout_amount = 0.0f;
+			chips_type cashout_amount = 0;
 			
 			// for each winning-player
 			for (unsigned int pi=0; pi < winner_count; pi++)
@@ -1084,9 +1085,9 @@ void GameController::stateShowdown(Table *t)
 					i+1, pi+1, seat_num, poti+1, involved_count);
 #endif
 				// pot is divided by number of players involved in
-				float win_amount = pot->amount / involved_count;
+				chips_type win_amount = pot->amount / involved_count;
 				
-				if ((int) win_amount > 0)
+				if (win_amount > 0)
 				{
 					// transfer winning amount to player
 					p->stake += win_amount;
@@ -1099,14 +1100,64 @@ void GameController::stateShowdown(Table *t)
 					
 					snprintf(msg, sizeof(msg),
 						"[%d] wins pot #%d with %.2f",
-						p->client_id, poti+1, win_amount);
+						p->client_id, poti+1, win_amount / 100.0f);
 					chat(t->table_id, msg);
 				}
 			}
 			
 			// reduce pot about the overall cashed-out
 			pot->amount -= cashout_amount;
+			
+			
+			// are there odd chips left in the pot?
+			if (pot->amount)
+			{
+				dbg_msg("win-dist", "odd pot: %.2f", pot->amount / 100.0f);
+				
+				// find next involved player behind button
+				unsigned int oddchips_player = t->getNextActivePlayer(t->dealer);
+				
+				bool claim;
+				do
+				{
+					claim = false;
+					
+					// is this player in the winning-list?
+					for (unsigned int pi=0; pi < winner_count; pi++)
+					{
+						const unsigned int seat_num = tw[pi].getId();
+						if (oddchips_player == seat_num)
+						{
+							claim = true;
+							break;
+						}
+					}
+					
+					// skip if the player is not involved in this pot
+					if (!t->isSeatInvolvedInPot(pot, oddchips_player))
+						claim = false;
+					
+					if (!claim)
+						oddchips_player = t->getNextActivePlayer(oddchips_player);
+				} while (!claim);
+				
+				
+				Table::Seat *seat = &(t->seats[oddchips_player]);
+				Player *p = seat->player;
+				
+				p->stake += pot->amount;
+				seat->bet += pot->amount;
+				
+				snprintf(msg, sizeof(msg),
+						"[%d] receives odd chips of split pot #%d with %.2f",
+						p->client_id, poti+1, pot->amount / 100.0f);
+					chat(t->table_id, msg);
+				
+				pot->amount = 0;
+			}
 		}
+		
+
 	}
 	
 #if 1
@@ -1115,7 +1166,7 @@ void GameController::stateShowdown(Table *t)
 	{
 		if (t->pots[i].amount > .0f)
 			dbg_msg("winlist", "fatal error: pot %d after distribution: %.2f",
-				i, t->pots[i].amount);
+				i, t->pots[i].amount / 100.0f);
 	}
 #endif
 	

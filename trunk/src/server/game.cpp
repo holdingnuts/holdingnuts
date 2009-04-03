@@ -539,7 +539,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		state = GameStateWaiting;
 	
 	snprintf(msg, sizeof(msg),
-		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%.2f %.2f:%.2f:%d \"%s\"",
+		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d %d:%.2f:%d \"%s\"",
 		gid,
 		(int) GameTypeHoldem,
 		game_mode,
@@ -548,7 +548,8 @@ bool send_gameinfo(clientcon *client, int gid)
 		g->getPlayerCount(),
 		g->getPlayerTimeout(),
 		g->getPlayerStakes(),
-		g->getBlindsStart(), g->getBlindsFactor(), g->getBlindsTime(),
+		g->getBlindsStart(),
+		g->getBlindsFactor(), g->getBlindsTime(),
 		g->getName().c_str());
 	
 	send_msg(client->sock, msg);
@@ -807,10 +808,10 @@ int client_cmd_action(clientcon *client, Tokenizer &t)
 	
 	int gid;
 	string action;
-	float amount;
+	chips_type amount;
 	
-	t >> gid >> action >> amount;
-	
+	t >> gid >> action;
+	amount = t.getNextInt();
 	
 	GameController *g = get_game_by_id(gid);
 	if (!g)
@@ -896,20 +897,20 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 	
 	struct {
 		string name;
-		int type;
 		unsigned int max_players;
-		float stake;
+		int type;
+		chips_type stake;
 		unsigned int timeout;
-		float blinds_start;
+		chips_type blinds_start;
 		float blinds_factor;
 		unsigned int blinds_time;
 	} ginfo = {
 		"user_game",
 		10,
 		GameController::SNG,
-		1500.0f,
+		1500*100,
 		30,
-		20.0f,
+		20*100,
 		2.0f,
 		180
 	};
@@ -944,9 +945,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		}
 		else if (infotype == "stake" && havearg)
 		{
-			ginfo.stake = Tokenizer::string2float(infoarg);
+			ginfo.stake = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.stake < 10)
+			if (ginfo.stake < 10*100 || ginfo.stake > 1000000*100)
 				cmderr = true;
 		}
 		else if (infotype == "timeout" && havearg)
@@ -965,9 +966,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		}
 		else if (infotype == "blinds_start" && havearg)
 		{
-			ginfo.blinds_start = Tokenizer::string2float(infoarg);
+			ginfo.blinds_start = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.blinds_start < 5.0f || ginfo.blinds_start > 200.0f)
+			if (ginfo.blinds_start < 5*100 || ginfo.blinds_start > 200*100)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_factor" && havearg)
