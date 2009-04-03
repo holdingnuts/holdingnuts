@@ -853,11 +853,7 @@ void GameController::stateBetting(Table *t)
 		t->last_bet_amount = 0.0f;
 		
 		// set current player to SB (or next active behind SB)
-		bool headsup_rule = (t->countPlayers() == 2);
-		if (headsup_rule)
-			t->cur_player = t->getNextActivePlayer(t->getNextActivePlayer(t->dealer));
-		else
-			t->cur_player = t->getNextActivePlayer(t->dealer);
+		t->cur_player = t->getNextActivePlayer(t->dealer);
 		
 		// re-initialize the player's timeout
 		t->timeout_start = time(NULL);
