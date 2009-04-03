@@ -58,16 +58,17 @@ public:
 		bool occupied;
 		unsigned int seat_no;
 		Player *player;
-		float bet;
+		chips_type bet;
 		bool in_round;   // is player involved in current hand?
 		bool showcards;  // does the player want to show cards?
 	} Seat;
 	
 	typedef struct {
-		float amount;
+		chips_type amount;
 		std::vector<unsigned int> vseats;
 		bool final;
 	} Pot;
+	
 	
 	Table();
 	
@@ -112,8 +113,8 @@ private:
 	unsigned int cur_player;
 	unsigned int last_bet_player;
 	
-	float bet_amount;
-	float last_bet_amount;
+	chips_type bet_amount;
+	chips_type last_bet_amount;
 	std::vector<Pot> pots;
 };
 

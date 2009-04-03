@@ -74,15 +74,15 @@ public:
 	void setPlayerTimeout(unsigned int respite) { timeout = respite; };
 	unsigned int getPlayerTimeout() const { return timeout; };
 	
-	void setBlindsStart(float blinds_start) { blind.amount = blinds_start; };
-	float getBlindsStart() const { return blind.amount; };
-	void setBlindsFactor(float blinds_factor) { blind.blinds_factor = blinds_factor; };
+	void setBlindsStart(chips_type blinds_start) { blind.amount = blinds_start; };
+	chips_type getBlindsStart() const { return blind.amount; };
+	void setBlindsFactor(chips_type blinds_factor) { blind.blinds_factor = blinds_factor; };
 	float getBlindsFactor() const { return blind.blinds_factor; };
 	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
 	unsigned int getBlindsTime() const { return blind.blinds_time; };
 	
-	bool setPlayerStakes(float stake);
-	float getPlayerStakes() const { return player_stakes; };
+	bool setPlayerStakes(chips_type stake);
+	chips_type getPlayerStakes() const { return player_stakes; };
 	
 	std::string getName() const { return name; };
 	bool setName(const std::string &str) { name = str; return true; }; // FIXME: validate
@@ -108,12 +108,12 @@ public:
 	void chat(int tid, const char* msg);
 	void chat(int cid, int tid, const char* msg);
 	
-	bool setPlayerAction(int cid, Player::PlayerAction action, float amount);
+	bool setPlayerAction(int cid, Player::PlayerAction action, chips_type amount);
 	
 	int tick();
 	
 #ifdef DEBUG
-	void debugSetPlayerStake(int cid, float stake) { findPlayer(cid)->stake = stake; };
+	void debugSetPlayerStake(int cid, chips_type stake) { findPlayer(cid)->stake = stake; };
 #endif
 	
 protected:
@@ -125,7 +125,7 @@ protected:
 	void snap(int cid, int tid, int sid, const char* msg);
 	
 	bool createWinlist(Table *t, std::vector< std::vector<HandStrength> > &winlist);
-	float determineMinimumBet(Table *t) const;
+	chips_type determineMinimumBet(Table *t) const;
 	
 	int handleTable(Table *t);
 	void stateNewRound(Table *t);
@@ -155,14 +155,14 @@ private:
 	
 	GameType type;
 	LimitRule limit;
-	float player_stakes;
+	chips_type player_stakes;
 	unsigned int timeout;
 	
 	players_type players;
 	tables_type tables;
 	
 	struct {
-		float amount;
+		chips_type amount;
 		BlindRule blindrule;
 		unsigned int blinds_time;  // seconds
 		time_t last_blinds_time;

@@ -120,7 +120,7 @@ bool Table::isAllin()
 			
 			Player *p = seats[i].player;
 			
-			if ((int)p->getStake() == 0)
+			if (p->getStake() == 0)
 				count++;
 		}
 	}
@@ -162,16 +162,16 @@ void Table::collectBets()
 	do
 	{
 		// find smallest bet
-		float smallest_bet = 0.0f;
+		chips_type smallest_bet = 0;
 		bool need_sidepot = false;
 		
 		for (unsigned int i=0; i < 10; i++)
 		{
 			// skip folded and already handled players
-			if (!seats[i].occupied || !seats[i].in_round || (int)seats[i].bet == 0)
+			if (!seats[i].occupied || !seats[i].in_round || seats[i].bet == 0)
 				continue;
 			
-			if ((int)smallest_bet == 0)   // set an initial value
+			if (smallest_bet == 0)   // set an initial value
 				smallest_bet = seats[i].bet;
 			else if (seats[i].bet < smallest_bet)  // new smallest bet
 			{
@@ -184,10 +184,10 @@ void Table::collectBets()
 		
 		
 #if 0
-		log_msg("collectBets", "smallest_bet: %s = %.2f", need_sidepot ? "true" : "false", smallest_bet);
+		log_msg("collectBets", "smallest_bet: %s = %.2f", need_sidepot ? "true" : "false", smallest_bet / 100.0f);
 #endif
 		// there are no bets, do nothing
-		if ((int)smallest_bet == 0)
+		if (smallest_bet == 0)
 			return;
 		
 		
@@ -198,7 +198,7 @@ void Table::collectBets()
 		if (cur_pot->final)
 		{
 			Pot pot;
-			pot.amount = 0.0f;
+			pot.amount = 0;
 			pot.final = false;
 			pots.push_back(pot);
 			
@@ -214,14 +214,14 @@ void Table::collectBets()
 				continue;
 			
 			// skip already handled players
-			if ((int)seats[i].bet == 0)
+			if (seats[i].bet == 0)
 				continue;
 			
 			// collect bet of folded players and skip them
 			if (!seats[i].in_round)
 			{
 				cur_pot->amount += seats[i].bet;
-				seats[i].bet = 0.0f;
+				seats[i].bet = 0;
 				continue;
 			}
 			
@@ -229,7 +229,7 @@ void Table::collectBets()
 			if (!need_sidepot)
 			{
 				cur_pot->amount += seats[i].bet;
-				seats[i].bet = 0.0f;
+				seats[i].bet = 0;
 			}
 			else
 			{
@@ -239,7 +239,7 @@ void Table::collectBets()
 			
 			// mark pot as final if at least one player is allin
 			Player *p = seats[i].player;
-			if ((int)p->getStake() == 0)
+			if (p->getStake() == 0)
 				cur_pot->final = true;
 			
 			// set player 'involved in pot'

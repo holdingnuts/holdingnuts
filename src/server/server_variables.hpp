@@ -39,6 +39,6 @@ config.set("flood_chat_mute",		60);			// flood-protect: mute time (seconds)
 config.set("dbg_testgame_players",	3);		// testgames with X players
 config.set("dbg_testgame_games",	2);		// start X testgames
 config.set("dbg_testgame_timeout",	30);		// player timeout in seconds
-config.set("dbg_testgame_stakes",	1500);		// initial player stake
+config.set("dbg_testgame_stakes",	1500*100);	// initial player stake
 config.set("dbg_stresstest",		false);		// stress-testing the server
 #endif

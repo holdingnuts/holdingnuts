@@ -26,6 +26,10 @@
 
 #include "HoleCards.hpp"
 
+
+typedef unsigned int chips_type;
+
+
 class Player
 {
 friend class GameController;
@@ -52,12 +56,12 @@ public:
 	typedef struct {
 		bool valid;
 		PlayerAction action;
-		float amount;
+		chips_type amount;
 	} SchedAction;
 	
 	Player();
 	
-	float getStake() const { return stake; };
+	chips_type getStake() const { return stake; };
 	int getClientId() const { return client_id; };
 	
 	void resetLastAction() { last_action = Player::None; }
@@ -65,7 +69,7 @@ public:
 private:
 	int client_id;
 	
-	float stake;
+	chips_type stake;
 	
 	HoleCards holecards;
 	

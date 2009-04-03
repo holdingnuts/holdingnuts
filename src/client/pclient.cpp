@@ -313,8 +313,8 @@ void PClient::serverCmdSnap(Tokenizer &t)
 				if (pstate & PlayerSitout)
 					si.sitout = true;
 				
-				si.stake = st.getNextFloat();
-				si.bet = st.getNextFloat();
+				si.stake = st.getNextInt() / 100.0f;
+				si.bet = st.getNextInt() / 100.0f;
 				si.action = (Player::PlayerAction) st.getNextInt();
 				
 				std::string shole = st.getNext();
@@ -343,14 +343,14 @@ void PClient::serverCmdSnap(Tokenizer &t)
 				pt.parse(tmp);
 				
 				pt.getNext();   // pot-no; unused
-				float potsize = pt.getNextFloat();
+				float potsize = pt.getNextInt() / 100.0f;
 				table.pots.push_back(potsize);
 				
 				tmp = t.getNext();
 			} while (tmp[0] == 'p');
 			
 			
-			table.minimum_bet = Tokenizer::string2float(tmp);
+			table.minimum_bet = Tokenizer::string2float(tmp) / 100.0f;
 			
 			
 			if (table.state == Table::Blinds)
@@ -502,14 +502,14 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
 	gi->player_timeout = it.getNextInt();
-	gi->initial_stakes = it.getNextFloat();
+	gi->initial_stakes = it.getNextInt() / 100.0f;
 	
 	
 	// unpack blinds-rule
 	const std::string sblinds = t.getNext();
 	it.parse(sblinds);
 	
-	gi->blinds_start = it.getNextFloat();
+	gi->blinds_start = it.getNextInt() / 100.0f;
 	gi->blinds_factor = it.getNextFloat();
 	gi->blinds_time = it.getNextInt();
 	
@@ -781,8 +781,8 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 	
 	char msg[1024];
 	if (bAmount)
-		snprintf(msg, sizeof(msg), "ACTION %d %s %0.2f",
-			gid, saction, amount);
+		snprintf(msg, sizeof(msg), "ACTION %d %s %d",
+			gid, saction, (int)(amount * 100));
 	else
 		snprintf(msg, sizeof(msg), "ACTION %d %s",
 			gid, saction);
@@ -816,13 +816,13 @@ void PClient::chat(const QString& text, int gid, int tid)
 bool PClient::createGame(gamecreate *createinfo)
 {
 	char msg[1024];
-	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%.2f timeout:%d "
-		"blinds_start:%.2f blinds_factor:%.2f blinds_time:%d "
+	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%d timeout:%d "
+		"blinds_start:%d blinds_factor:%.2f blinds_time:%d "
 		"\"name:%s\"",
 		createinfo->max_players,
-		createinfo->stake,
+		(int)(createinfo->stake*100),
 		createinfo->timeout,
-		createinfo->blinds_start,
+		(int)(createinfo->blinds_start*100),
 		createinfo->blinds_factor,
 		createinfo->blinds_time,
 		createinfo->name.simplified().toStdString().c_str());
@@ -894,6 +894,12 @@ int PClient::netSendMsg(const char *msg)
 {
 	char buf[1024];
 	const int len = snprintf(buf, sizeof(buf), "%s\n", msg);
+	
+#ifdef DEBUG
+	if (config.getBool("dbg_srv_cmd"))
+		dbg_msg("netSendMsg", "req= %s", msg);
+#endif
+	
 	const int bytes = tcpSocket->write(buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
