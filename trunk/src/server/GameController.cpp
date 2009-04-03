@@ -532,7 +532,7 @@ void GameController::stateBlinds(Table *t)
 		if (difftime(time(NULL), blind.last_blinds_time) > blind.blinds_time)
 		{
 			blind.last_blinds_time = time(NULL);
-			blind.amount *= blind.blinds_factor;
+			blind.amount = (int)(blind.blinds_factor * blind.amount);
 		}
 		break;
 	}

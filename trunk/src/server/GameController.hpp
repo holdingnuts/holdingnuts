@@ -76,7 +76,7 @@ public:
 	
 	void setBlindsStart(chips_type blinds_start) { blind.amount = blinds_start; };
 	chips_type getBlindsStart() const { return blind.amount; };
-	void setBlindsFactor(chips_type blinds_factor) { blind.blinds_factor = blinds_factor; };
+	void setBlindsFactor(float blinds_factor) { blind.blinds_factor = blinds_factor; };
 	float getBlindsFactor() const { return blind.blinds_factor; };
 	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
 	unsigned int getBlindsTime() const { return blind.blinds_time; };
