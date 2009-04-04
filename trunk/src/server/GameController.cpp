@@ -1265,10 +1265,14 @@ void GameController::start()
 	
 	// place players randomly at table
 	vector<Player*> rndseats;
+	players_type::const_iterator e = players.begin();
 	for (unsigned int i=0; i < 10; i++)
 	{
-		if (i < players.size())
-			rndseats.push_back(players[i]);
+		if (e != players.end())
+		{
+			rndseats.push_back(e->second);
+			e++;
+		}
 		else
 			rndseats.push_back(0);
 	}

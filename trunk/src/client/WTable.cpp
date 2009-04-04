@@ -861,23 +861,41 @@ void WTable::updateView()
 	{
 		const seatinfo *seat = &(snap->seats[i]);
 		
+		// centralized view
+		int mapped_seat;
+		if (snap->my_seat != -1 && config.getBool("ui_centralized_view"))
+		{
+			mapped_seat = (i - snap->my_seat) + 4;
+			if (mapped_seat > 9)
+				mapped_seat -= 10;
+			else if (mapped_seat < 0)
+				mapped_seat += 10;
+			
+			dbg_msg("DEBUG", "centralized view:  i=%d my=%d mapped=%d", i, snap->my_seat, mapped_seat);
+		}
+		else
+			mapped_seat = i;
+		
+		
+		Seat *ui_seat = wseats[mapped_seat];
+		
 		if (seat->valid)
 		{
 			int cid = seat->client_id;
 			playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
 			
 			if (pinfo)
-				wseats[i]->setInfo(pinfo->name, pinfo->location);
+				ui_seat->setInfo(pinfo->name, pinfo->location);
 			else
-				wseats[i]->setInfo(QString("??? (%1)").arg(cid), "");
+				ui_seat->setInfo(QString("??? (%1)").arg(cid), "");
 			
-			wseats[i]->setStake(seat->stake);
-			wseats[i]->setValid(true);
-			wseats[i]->setSitout(seat->sitout);
+			ui_seat->setStake(seat->stake);
+			ui_seat->setValid(true);
+			ui_seat->setSitout(seat->sitout);
 			
 			if (snap->state > Table::ElectDealer)
 			{
-				wseats[i]->setCurrent(snap->s_cur == i);
+				ui_seat->setCurrent(snap->s_cur == i);
 				
 				if ((snap->state == Table::Blinds || 
 					snap->state == Table::Betting) &&
@@ -899,17 +917,17 @@ void WTable::updateView()
 			{
 				if (snap->state == Table::EndRound)
 				{
-					wseats[i]->setWin(seat->bet);
+					ui_seat->setWin(seat->bet);
 				}
 				else
 				{
 					if (seat->stake == 0)
-						wseats[i]->setAction(Player::Allin, seat->bet);
+						ui_seat->setAction(Player::Allin, seat->bet);
 					else
-						wseats[i]->setAction(seat->action, seat->bet);
+						ui_seat->setAction(seat->action, seat->bet);
 				}
 				
-				wseats[i]->setMySeat(my_cid == cid);
+				ui_seat->setMySeat(my_cid == cid);
 				
 				std::vector<Card> allcards;
 				
@@ -923,40 +941,40 @@ void WTable::updateView()
 					char card1[3], card2[3];
 					strcpy(card1, allcards[0].getName());
 					strcpy(card2, allcards[1].getName());
-					wseats[i]->setCards(card1, card2);
+					ui_seat->setCards(card1, card2);
 					
-					wseats[i]->showBigCards(true);
+					ui_seat->showBigCards(true);
 				}
 				else
 				{
 					if (my_cid == cid)
-						wseats[i]->setCards("blank", "blank");
+						ui_seat->setCards("blank", "blank");
 					else
-						wseats[i]->setCards("back", "back");
+						ui_seat->setCards("back", "back");
 					
-					wseats[i]->showBigCards(false);
+					ui_seat->showBigCards(false);
 				}
 				
-				wseats[i]->showSmallCards(true);
+				ui_seat->showSmallCards(true);
 			}
 			else   // player isn't anymore involved in current hand
 			{
-				wseats[i]->setAction(seat->action);
-				wseats[i]->setCards("blank", "blank");
-				wseats[i]->showBigCards(false);
-				wseats[i]->showSmallCards(false);
+				ui_seat->setAction(seat->action);
+				ui_seat->setCards("blank", "blank");
+				ui_seat->showBigCards(false);
+				ui_seat->showSmallCards(false);
 			}
 
 			// schedule scene update
-			wseats[i]->update(wseats[i]->boundingRect());
+			ui_seat->update(ui_seat->boundingRect());
 		}
 		else
 		{
 			// if seat was valid force schedule redraw
-			if (wseats[i]->isValid())
-				wseats[i]->update(wseats[i]->boundingRect());
+			if (ui_seat->isValid())
+				ui_seat->update(ui_seat->boundingRect());
 
-			wseats[i]->setValid(false);
+			ui_seat->setValid(false);
 		}
 	}
 	
