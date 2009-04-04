@@ -1263,19 +1263,38 @@ void GameController::start()
 	
 	memset(t->seats, 0, sizeof(Table::Seat) * 10);
 	
-	players_type::const_iterator e = players.begin();
-	for (unsigned int i=0; i < players.size() && i < 10; i++)
+	// place players randomly at table
+	vector<Player*> rndseats;
+	for (unsigned int i=0; i < 10; i++)
+	{
+		if (i < players.size())
+			rndseats.push_back(players[i]);
+		else
+			rndseats.push_back(0);
+	}
+	
+	random_shuffle(rndseats.begin(), rndseats.end());
+	
+	for (unsigned int i=0; i < rndseats.size(); i++)
 	{
 		Table::Seat seat;
 		
 		memset(&seat, 0, sizeof(Table::Seat));
-		seat.occupied = true;
-		seat.seat_no = i;
-		seat.player = e->second;
-		t->seats[i] = seat;
 		
-		e++;
+		seat.seat_no = i;
+		
+		if (rndseats[i])
+		{
+			seat.occupied = true;
+			seat.player = rndseats[i];
+		}
+		else
+			seat.occupied = false;
+		
+		t->seats[i] = seat;
 	}
+	
+	
 	t->dealer = 0;
 	t->state = Table::GameStart;
 	tables[tid] = t;
