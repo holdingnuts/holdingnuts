@@ -816,6 +816,9 @@ void PClient::chat(const QString& text, int gid, int tid)
 bool PClient::createGame(gamecreate *createinfo)
 {
 	char msg[1024];
+	
+	dbg_msg("DEBUG", "float %.2f  int %d", createinfo->stake, (int)(createinfo->stake*100.0f));
+	
 	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%d timeout:%d "
 		"blinds_start:%d blinds_factor:%.2f blinds_time:%d "
 		"\"name:%s\"",
