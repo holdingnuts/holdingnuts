@@ -96,6 +96,8 @@ public:
 	void addChat(const QString& from, const QString& text);
 	void addServerMessage(const QString& text);
 	
+	unsigned int seatToCentralView(int my, unsigned int seat) const;
+	
 	static const unsigned int	nMaxSeats;
 
 protected:
