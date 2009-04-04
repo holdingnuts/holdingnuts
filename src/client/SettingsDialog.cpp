@@ -167,6 +167,10 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	checkHandStrength = new QCheckBox("", tabAppearance);
 	checkHandStrength->setCheckState(cfg->getBool("ui_show_handstrength") ? Qt::Checked : Qt::Unchecked);
 	
+	QLabel *labelCentralView = new QLabel(tr("Centralized table view"), tabAppearance);
+	checkCentralView = new QCheckBox("", tabAppearance);
+	checkCentralView->setCheckState(cfg->getBool("ui_centralized_view") ? Qt::Checked : Qt::Unchecked);
+	
 	QLabel *labelCarddeck = new QLabel(tr("Card deck"), tabAppearance);
 	comboCarddeck = new QComboBox(tabAppearance);
 	
@@ -192,8 +196,10 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	gridAppearance->setHorizontalSpacing(15);
 	gridAppearance->addWidget(labelHandStrength, 0, 0, Qt::AlignRight | Qt::AlignTop);
 	gridAppearance->addWidget(checkHandStrength, 0, 1, Qt::AlignTop);
-	gridAppearance->addWidget(labelCarddeck, 1, 0, Qt::AlignRight | Qt::AlignTop);
-	gridAppearance->addWidget(comboCarddeck, 1, 1, Qt::AlignTop);
+	gridAppearance->addWidget(labelCentralView, 1, 0, Qt::AlignRight | Qt::AlignTop);
+	gridAppearance->addWidget(checkCentralView, 1, 1, Qt::AlignTop);
+	gridAppearance->addWidget(labelCarddeck, 2, 0, Qt::AlignRight | Qt::AlignTop);
+	gridAppearance->addWidget(comboCarddeck, 2, 1, Qt::AlignTop);
 	tabAppearance->setLayout(gridAppearance);
 }
 
@@ -232,6 +238,7 @@ void SettingsDialog::actionOk()
 		
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
+		cfg->set("ui_centralized_view", (checkCentralView->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_card_deck", comboCarddeck->itemData(comboCarddeck->currentIndex()).toString().toStdString());
 		
 		accept();

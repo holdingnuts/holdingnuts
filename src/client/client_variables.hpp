@@ -30,6 +30,7 @@ config.set("locale",		"");			// language/locale to use
 config.set("log",		true);			// log to file
 config.set("log_chat",		false);			// include player chat in log
 config.set("ui_show_handstrength", 	true);		// display hand strength on table
+config.set("ui_centralized_view",	true);		// enable centralized table view
 config.set("ui_card_deck",	"default");		// card deck to use
 config.set("sound",		true);			// play sounds
 config.set("sound_focus",	true);			// only play sound if window has focus
