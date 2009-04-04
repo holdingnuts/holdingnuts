@@ -162,7 +162,7 @@ QString CreateGameDialog::getName()
 	return editName->text();
 }
 
-float CreateGameDialog::getStake()
+double CreateGameDialog::getStake()
 {
 	return spinStake->value();
 }
@@ -177,12 +177,12 @@ unsigned int CreateGameDialog::getTimeout()
 	return spinTimeout->value();
 }
 
-float CreateGameDialog::getBlindsStart()
+double CreateGameDialog::getBlindsStart()
 {
 	return spinBlindsStart->value();
 }
 
-float CreateGameDialog::getBlindsFactor()
+double CreateGameDialog::getBlindsFactor()
 {
 	return spinBlindsFactor->value();
 }

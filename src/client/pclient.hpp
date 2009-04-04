@@ -119,11 +119,11 @@ typedef std::map<int,playerinfo>	players_type;
 typedef struct {
 	QString name;
 	unsigned int max_players;
-	float stake;
+	double stake;
 	unsigned int timeout;
 	unsigned int blinds_time;
-	float blinds_start;
-	float blinds_factor;
+	double blinds_start;
+	double blinds_factor;
 } gamecreate;
 
 

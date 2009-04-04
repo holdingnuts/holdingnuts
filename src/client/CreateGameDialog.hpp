@@ -44,11 +44,11 @@ public:
 	CreateGameDialog(QWidget *parent = 0);
 	
 	QString getName();
-	float getStake();
+	double getStake();
 	unsigned int getPlayers();
 	unsigned int getTimeout();
-	float getBlindsStart();
-	float getBlindsFactor();
+	double getBlindsStart();
+	double getBlindsFactor();
 	unsigned int getBlindsTime();
 
 private:
