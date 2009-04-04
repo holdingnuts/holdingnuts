@@ -1275,10 +1275,10 @@ void GameController::start()
 	
 	random_shuffle(rndseats.begin(), rndseats.end());
 	
+	bool chose_dealer = false;
 	for (unsigned int i=0; i < rndseats.size(); i++)
 	{
 		Table::Seat seat;
-		
 		memset(&seat, 0, sizeof(Table::Seat));
 		
 		seat.seat_no = i;
@@ -1287,6 +1287,12 @@ void GameController::start()
 		{
 			seat.occupied = true;
 			seat.player = rndseats[i];
+			
+			if (!chose_dealer)
+			{
+				t->dealer = i;
+				chose_dealer = true;
+			}
 		}
 		else
 			seat.occupied = false;
@@ -1295,7 +1301,6 @@ void GameController::start()
 	}
 	
 	
-	t->dealer = 0;
 	t->state = Table::GameStart;
 	tables[tid] = t;
 	
