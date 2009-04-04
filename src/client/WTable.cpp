@@ -841,6 +841,23 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	}
 }
 
+unsigned int WTable::seatToCentralView(int my, unsigned int seat) const
+{
+	int mapped_seat;
+	if (my != -1 && config.getBool("ui_centralized_view"))
+	{
+		mapped_seat = (seat - my) + 4;
+		if (mapped_seat > 9)
+			mapped_seat -= 10;
+		else if (mapped_seat < 0)
+			mapped_seat += 10;
+	}
+	else
+		mapped_seat = seat;
+	
+	return mapped_seat;
+}
+
 void WTable::updateView()
 {
 	int my_cid = ((PClient*)qApp)->getMyCId();
@@ -862,19 +879,7 @@ void WTable::updateView()
 		const seatinfo *seat = &(snap->seats[i]);
 		
 		// centralized view
-		int mapped_seat;
-		if (snap->my_seat != -1 && config.getBool("ui_centralized_view"))
-		{
-			mapped_seat = (i - snap->my_seat) + 4;
-			if (mapped_seat > 9)
-				mapped_seat -= 10;
-			else if (mapped_seat < 0)
-				mapped_seat += 10;
-			
-			dbg_msg("DEBUG", "centralized view:  i=%d my=%d mapped=%d", i, snap->my_seat, mapped_seat);
-		}
-		else
-			mapped_seat = i;
+		const unsigned int mapped_seat = seatToCentralView(snap->my_seat, i);
 		
 		
 		Seat *ui_seat = wseats[mapped_seat];
@@ -902,8 +907,9 @@ void WTable::updateView()
 					snap->seats[snap->s_cur].stake > 0 &&
 					snap->seats[snap->s_cur].sitout == false)
 				{
-					m_pTimeout->setPos(calcTimeoutPos(snap->s_cur));
-					m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
+					const unsigned int curseat_mapped = seatToCentralView(snap->my_seat, snap->s_cur);
+					m_pTimeout->setPos(calcTimeoutPos(curseat_mapped));
+					m_pTimeout->start(curseat_mapped, ginfo->player_timeout);
 					m_pTimeout->show();
 				}
 				else
@@ -985,7 +991,8 @@ void WTable::updateView()
 	if (snap->state == Table::NewRound && last_state != snap->state)
 	{
 		// dealerbutton
-		m_pDealerButton->startAnimation(m_ptDealerBtn[snap->s_dealer]);
+		const unsigned int dealerseat_mapped = seatToCentralView(snap->my_seat, snap->s_dealer);
+		m_pDealerButton->startAnimation(m_ptDealerBtn[dealerseat_mapped]);
 		
 		playSound(SOUND_DEAL_1);
 	}
