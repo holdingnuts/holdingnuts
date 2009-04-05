@@ -129,7 +129,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 		this,
 		SLOT(gameListSelectionChanged(const QItemSelection&, const QItemSelection&)));
 	
-	connect(viewGameList, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(actionOpenTable()));
+	connect(viewGameList, SIGNAL(activated(const QModelIndex &)), this, SLOT(actionOpenTable()));
 	
 	// view game filter
 	filterPatternGame = new QLineEdit(this);
