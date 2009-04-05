@@ -354,11 +354,11 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	btnBetsizeThreeQuarterPot->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizeThreeQuarterPot, SIGNAL(clicked()), this, SLOT(actionBetsizeThreeQuarterPot()));
 
-	btnBetsizePotsize = new QPushButton(tr("Potsize"), this);
+	btnBetsizePotsize = new QPushButton(tr("Pot"), this);
 	btnBetsizePotsize->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizePotsize, SIGNAL(clicked()), this, SLOT(actionBetsizePotsize()));
 
-	btnBetsizeAllin = new QPushButton(tr("Allin"), this);
+	btnBetsizeAllin = new QPushButton(tr("Max"), this);
 	btnBetsizeAllin->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizeAllin, SIGNAL(clicked()), this, SLOT(actionBetsizeAllin()));
 
@@ -1436,7 +1436,7 @@ void WTable::actionChat(QString msg)
 	((PClient*)qApp)->chat(msg, m_nGid, m_nTid);
 }
 
-void WTable::playSound(unsigned int id)
+void WTable::playSound(unsigned int id) const
 {
 #ifndef NOAUDIO
 	if (!config.getBool("sound") || (config.getBool("sound_focus") && !isActiveWindow()))

@@ -96,6 +96,8 @@ public:
 	void addChat(const QString& from, const QString& text);
 	void addServerMessage(const QString& text);
 	
+	void playSound(unsigned int id) const;
+	
 	unsigned int seatToCentralView(int my, unsigned int seat) const;
 	
 	static const unsigned int	nMaxSeats;
@@ -126,7 +128,6 @@ protected:
 		const qreal& bet,
 		qreal *pbet = 0) const;
 	
-	void playSound(unsigned int id);
 
 	//! \brief returns current Potsize including all Bets on Table
 	float currentPot() const;

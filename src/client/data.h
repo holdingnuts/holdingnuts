@@ -21,3 +21,7 @@
 /* Sounds */
 #define SOUND_TEST_1		0x1
 #define SOUND_DEAL_1		0x2
+#define SOUND_CHIP_1		0x3
+#define SOUND_CHIP_2		0x4
+#define SOUND_CHECK_1		0x5
+#define SOUND_FOLD_1		0x6
