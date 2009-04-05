@@ -98,7 +98,7 @@ bool GameController::removePlayer(int cid)
 	return true;
 }
 
-bool GameController::isPlayer(int cid)
+bool GameController::isPlayer(int cid) const
 {
 	players_type::const_iterator it = players.find(cid);
 	
