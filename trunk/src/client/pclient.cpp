@@ -326,9 +326,7 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	
 	if (table.state == Table::Blinds)
-	{
 		holecards.clear();
-	}
 	
 	if (tinfo->window)
 		tinfo->window->updateView();
@@ -388,18 +386,21 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		
 		h.setCards(ch1, ch2);
 		
-		tinfo->window->addServerMessage(
-			QString(tr("Your hole cards: [%1 %2].")
-				.arg(QString::fromStdString(card1))
-				.arg(QString::fromStdString(card2))));
-		
 		if (bUpdateView && tinfo->window)
+		{
+			tinfo->window->addServerMessage(
+				QString(tr("Your hole cards: [%1 %2].")
+					.arg(QString::fromStdString(card1))
+					.arg(QString::fromStdString(card2))));
+				
 			tinfo->window->updateView();
+			((WTable*)tinfo->window)->playSound(SOUND_DEAL_1);
+		}
 	}
 	else if (type == SnapCardsFlop || type == SnapCardsTurn || type == SnapCardsRiver)
 	{
 		// silently drop message if there is no table-info
-		if (!tinfo)
+		if (!tinfo || !tinfo->window)
 			return;
 		
 		std::string card1, card2, card3;
@@ -425,6 +426,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 					.arg(QString::fromStdString(card1)));
 				break;
 		}
+		
 		tinfo->window->addServerMessage(smsg);
 	}
 }
@@ -432,7 +434,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
 {
 	// silently drop message if there is no table-info
-	if (!tinfo)
+	if (!tinfo || !tinfo->window)
 		return;
 	
 	snap_playeraction_type type = (snap_playeraction_type) t.getNextInt();
@@ -465,7 +467,8 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 			sound = SOUND_CHECK_1;
 		}
 		
-		((WTable*)tinfo->window)->playSound(sound);
+		if (tinfo->window)
+			((WTable*)tinfo->window)->playSound(sound);
 	}
 	else
 	{
@@ -499,7 +502,8 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 				.arg(amount / 100.f));
 		}
 		
-		((WTable*)tinfo->window)->playSound(sound);
+		if (tinfo->window)
+			((WTable*)tinfo->window)->playSound(sound);
 	}
 	
 	tinfo->window->addServerMessage(smsg);
@@ -508,7 +512,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
 {
 	// silently drop message if there is no table-info
-	if (!tinfo)
+	if (!tinfo || !tinfo->window)
 		return;
 	
 	unsigned int cid = t.getNextInt();
@@ -528,10 +532,7 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 	
 	HandStrength strength;
 	GameLogic::getStrength(&allcards, &strength);
-	const char *sstrength = HandStrength::getRankingName(strength.getRanking());
-	
-	// FIXME: use translated strength names
-	// FIXME: display rank & kicker
+	QString sstrength = WTable::buildHandStrengthString(&strength, 1);
 	
 	tinfo->window->addServerMessage(
 		QString(tr("%1 shows %2.")
@@ -566,7 +567,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 	
 	case SnapPlayerCurrent:
 		// silently drop message if there is no table-info
-		if (!tinfo)
+		if (!tinfo || !tinfo->window)
 			return;
 		
 		tinfo->window->addServerMessage(
@@ -580,7 +581,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 	case SnapOddChips:
 		{
 			// silently drop message if there is no table-info
-			if (!tinfo)
+			if (!tinfo || !tinfo->window)
 				return;
 			
 			const int cid = t.getNextInt();

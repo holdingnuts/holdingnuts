@@ -963,8 +963,6 @@ void WTable::updateView()
 		// dealerbutton
 		const unsigned int dealerseat_mapped = seatToCentralView(snap->my_seat, snap->s_dealer);
 		m_pDealerButton->startAnimation(m_ptDealerBtn[dealerseat_mapped]);
-		
-		playSound(SOUND_DEAL_1);
 	}
 	
 	last_state = snap->state;
@@ -1068,49 +1066,7 @@ void WTable::updateView()
 				GameLogic::getStrength(&(tinfo->holecards), &(snap->communitycards), &strength);
 				//const char *sstrength = HandStrength::getRankingName(strength.getRanking());
 				
-				// provide translation for hand strength
-				QString sstrength = "unknown hand strength";
-				switch (strength.getRanking())
-				{
-				case HandStrength::HighCard:
-					sstrength = tr("High Card");
-					break;
-				case HandStrength::OnePair:
-					sstrength = tr("One Pair");
-					break;
-				case HandStrength::TwoPair:
-					sstrength = tr("Two Pair");
-					break;
-				case HandStrength::ThreeOfAKind:
-					sstrength = tr("Three Of A Kind");
-					break;
-				case HandStrength::Straight:
-					sstrength = tr("Straight");
-					break;
-				case HandStrength::Flush:
-					sstrength = tr("Flush");
-					break;
-				case HandStrength::FullHouse:
-					sstrength = tr("Full House");
-					break;
-				case HandStrength::FourOfAKind:
-					sstrength = tr("Four Of A Kind");
-					break;
-				case HandStrength::StraightFlush:
-					{
-						vector<Card> rank;
-						strength.copyRankCards(&rank);
-						
-						// handle RoyalFlush as special case
-						if (strength.getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
-							sstrength = tr("Royal Flush");
-						else
-							sstrength = tr("Straight Flush");
-						break;
-					}
-				}
-				
-				m_pTxtHandStrength->setText(sstrength);
+				m_pTxtHandStrength->setText(WTable::buildHandStrengthString(&strength, 0));
 				m_pTxtHandStrength->setPos(calcHandStrengthPos());
 			}
 			else
@@ -1446,3 +1402,107 @@ void WTable::playSound(unsigned int id) const
 #endif
 }
 
+QString WTable::buildSuitString(const Card& card)
+{
+	QString scard;
+	
+	switch (card.getSuit())
+	{
+		case Card::Spades:	scard = tr("Spades");	break;
+		case Card::Hearts:	scard = tr("Hearts");	break;
+		case Card::Diamonds:	scard = tr("Diamonds");	break;
+		case Card::Clubs:	scard = tr("Clubs");	break;
+	}
+	
+	return scard;
+}
+
+QString WTable::buildFaceString(const Card& card, bool plural)
+{
+	QString scard;
+	
+	switch (card.getFace())
+	{
+		case Card::Two:		scard = !plural ? tr("Deuce") :	tr("Deuces");	break;
+		case Card::Three:	scard = !plural ? tr("Three") :	tr("Threes");	break;
+		case Card::Four:	scard = !plural ? tr("Four") :	tr("Fours");	break;
+		case Card::Five:	scard = !plural ? tr("Five") :	tr("Fives");	break;
+		case Card::Six:		scard = !plural ? tr("Six") :	tr("Sixes");	break;
+		case Card::Seven:	scard = !plural ? tr("Seven") :	tr("Sevens");	break;
+		case Card::Eight:	scard = !plural ? tr("Eight") :	tr("Eights");	break;
+		case Card::Nine:	scard = !plural ? tr("Nine") :	tr("Nines");	break;
+		case Card::Ten:		scard = !plural ? tr("Ten") :	tr("Tens");	break;
+		case Card::Jack:	scard = !plural ? tr("Jack") :	tr("Jacks");	break;
+		case Card::Queen:	scard = !plural ? tr("Queen") :	tr("Queens");	break;
+		case Card::King:	scard = !plural ? tr("King") :	tr("Kings");	break;
+		case Card::Ace:		scard = !plural ? tr("Ace") :	tr("Aces");	break;
+	}
+	
+	return scard;
+}
+
+QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
+{
+	vector<Card> rank, kicker;
+	strength->copyRankCards(&rank);
+	strength->copyKickerCards(&kicker);
+	
+	// provide translation for hand strength
+	QString sstrength = "unknown hand strength";
+	QString srank;
+	QStringList slkicker;
+	
+	for (unsigned int i=0; i < kicker.size(); i++)
+		slkicker += QString(kicker[i].getName());
+	
+	switch (strength->getRanking())
+	{
+	case HandStrength::HighCard:
+		sstrength = tr("High Card");
+		srank = tr("%1 high").arg(buildFaceString(rank[0]));
+		break;
+	case HandStrength::OnePair:
+		sstrength = tr("One Pair");
+		srank = QString("%1").arg(buildFaceString(rank[0], true));
+		break;
+	case HandStrength::TwoPair:
+		sstrength = tr("Two Pair");
+		srank = tr("%1 and %2").arg(buildFaceString(rank[0], true)).arg(buildFaceString(rank[1], true));
+		break;
+	case HandStrength::ThreeOfAKind:
+		sstrength = tr("Three Of A Kind");
+		srank = QString("%1").arg(buildFaceString(rank[0], true));
+		break;
+	case HandStrength::Straight:
+		sstrength = tr("Straight");
+		srank = tr("%1 high").arg(buildFaceString(rank[0]));
+		break;
+	case HandStrength::Flush:
+		sstrength = tr("Flush");
+		srank = QString("%1").arg(buildSuitString(rank[0]));
+		break;
+	case HandStrength::FullHouse:
+		sstrength = tr("Full House");
+		srank = tr("%1 and %2").arg(buildFaceString(rank[0], true)).arg(buildFaceString(rank[1], true));
+		break;
+	case HandStrength::FourOfAKind:
+		sstrength = tr("Four Of A Kind");
+		srank = QString("%1").arg(buildFaceString(rank[0], true));
+		break;
+	case HandStrength::StraightFlush:
+		// handle RoyalFlush as special case
+		if (strength->getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
+			sstrength = tr("Royal Flush");
+		else
+			sstrength = tr("Straight Flush");
+		srank = tr("%1 high").arg(buildFaceString(rank[0]));
+		break;
+	}
+	
+	QString retstr = sstrength + ", " + srank;
+	
+	if (verbosity && kicker.size())
+		retstr += " (" + slkicker.join(" ") + ")";
+	
+	return retstr;
+}
