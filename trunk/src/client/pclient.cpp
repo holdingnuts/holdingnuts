@@ -61,9 +61,11 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	srv.introduced = true;
 		
-	log_msg("server", "Server running version %d.%d.%d. Your client ID is %d",
-			  VERSION_GETMAJOR(version), VERSION_GETMINOR(version), VERSION_GETREVISION(version),
-							   srv.cid);
+	wMain->addLog(tr("Server running version %1.%2.%3. Your client ID is %4.")
+			  .arg(VERSION_GETMAJOR(version))
+			  .arg(VERSION_GETMINOR(version))
+			  .arg(VERSION_GETREVISION(version))
+			  .arg(srv.cid));
 	
 	
 	// there is a newer version available
@@ -75,6 +77,16 @@ void PClient::serverCmdPserver(Tokenizer &t)
 				.arg(VERSION_GETMINOR(version))
 				.arg(VERSION_GETREVISION(version));
 		wMain->addServerMessage(sversion);
+	}
+	else if (version < VERSION_COMPAT)
+	{
+		QMessageBox::critical(wMain, tr("Error"),
+			tr("The version of the server isn't compatible anymore "
+				"with this client version. Please either use "
+				"an older client version or request the server "
+				"admin to update the server version."));
+		doClose();
+		return;
 	}
 	
 	
@@ -103,7 +115,7 @@ void PClient::serverCmdErr(Tokenizer &t)
 	
 	// check for version mismatch
 	if (err_code == ErrWrongVersion)
-		QMessageBox::critical(wMain, "Error",
+		QMessageBox::critical(wMain, tr("Error"),
 			tr("The version of this client isn't compatible anymore "
 				"with the server. Please download a recent version."));
 }
