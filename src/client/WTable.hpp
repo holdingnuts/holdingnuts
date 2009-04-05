@@ -101,6 +101,10 @@ public:
 	unsigned int seatToCentralView(int my, unsigned int seat) const;
 	
 	static const unsigned int	nMaxSeats;
+	
+	static QString buildHandStrengthString(HandStrength *strength, int verbosity=0);
+	static QString buildFaceString(const Card& card, bool plural=false);
+	static QString buildSuitString(const Card& card);
 
 protected:
 	void closeEvent(QCloseEvent *event);
