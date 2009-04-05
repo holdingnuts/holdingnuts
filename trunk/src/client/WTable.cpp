@@ -286,6 +286,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pTxtPots->setPos(calcPotsPos());
 	m_pTxtPots->setZValue(3);
 	
+	font.setBold(false);
+	
 	m_pTxtHandStrength = m_pScene->addSimpleText("HandStrength", font);
 	m_pTxtHandStrength->setPos(calcHandStrengthPos());
 	m_pTxtHandStrength->setZValue(3);

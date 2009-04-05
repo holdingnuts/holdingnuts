@@ -161,6 +161,7 @@ public:
 	gameinfo* getGameInfo(int gid);
 	tableinfo* getTableInfo(int gid, int tid);
 	playerinfo* getPlayerInfo(int cid);
+	QString getPlayerName(int cid);
 	int getMyCId();
 	
 	WMain* getMainWnd() const { return wMain; };
@@ -184,6 +185,11 @@ private:
 	
 	QTcpSocket	*tcpSocket;
 	
+private:
+	servercon		srv;
+	players_type		players;
+	games_type		games;
+	gamelist_type		gamelist;
 private:	
 	int netSendMsg(const char *msg);
 	
@@ -194,6 +200,11 @@ private:
 	void serverCmdErr(Tokenizer &t);
 	void serverCmdMsg(Tokenizer &t);
 	void serverCmdSnap(Tokenizer &t);
+	void serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
+	void serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
+	void serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
+	void serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
+	void serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
 	void serverCmdPlayerlist(Tokenizer &t);
 	void serverCmdClientinfo(Tokenizer &t);
 	void serverCmdGameinfo(Tokenizer &t);

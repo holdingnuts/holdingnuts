@@ -48,11 +48,6 @@
 
 ConfigParser config;
 
-static servercon		srv;
-static players_type		players;
-static games_type		games;
-static gamelist_type		gamelist;
-
 //////////////
 
 // server command PSERVER <version> <client-id>
@@ -185,6 +180,335 @@ void PClient::serverCmdMsg(Tokenizer &t)
 	}
 }
 
+void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
+{
+	// silently drop message if there is no table-info
+	if (!tinfo)
+		return;
+	
+	table_snapshot &table = tinfo->snap;
+	HoleCards &holecards = tinfo->holecards;
+	
+	Tokenizer st(":");
+	
+	// state:betting_round
+	std::string tmp = t.getNext();
+	st.parse(tmp);
+	
+	table.state = st.getNextInt();
+	table.betting_round = st.getNextInt();
+	
+	// dealer:sb:bb:current
+	tmp = t.getNext();
+	st.parse(tmp);
+	table.s_dealer = st.getNextInt();
+	table.s_sb = st.getNextInt();
+	table.s_bb = st.getNextInt();
+	table.s_cur = st.getNextInt();
+	table.s_lastbet = st.getNextInt();
+	
+	// community-cards
+	{
+		//table.communitycards = t.getNext().substr(3);
+		std::string board = t.getNext().substr(3);
+		CommunityCards &cc = table.communitycards;
+		
+		Tokenizer ct(":");
+		ct.parse(board);
+		
+		if (ct.count() == 0)
+			cc.clear();
+		
+		if (ct.count() >= 3)
+		{
+			Card cf1(ct.getNext().c_str());
+			Card cf2(ct.getNext().c_str());
+			Card cf3(ct.getNext().c_str());
+			
+			cc.setFlop(cf1, cf2, cf3);
+		}
+		
+		if (ct.count() >= 4)
+		{
+			Card ct1(ct.getNext().c_str());
+			
+			cc.setTurn(ct1);
+		}
+		
+		if (ct.count() == 5)
+		{
+			Card cr1(ct.getNext().c_str());
+			
+			cc.setRiver(cr1);
+		}
+	}
+	
+	// table.seats
+	table.my_seat = -1;
+	
+	const unsigned int seat_max = 10;
+	memset(table.seats, 0, seat_max*sizeof(seatinfo));
+	
+	tmp = t.getNext();
+	do {
+		//log_msg("seat", "%s", tmp.c_str());
+		
+		Tokenizer st(":");
+		st.parse(tmp);
+		
+		unsigned int seat_no = Tokenizer::string2int(st.getNext().substr(1));
+		
+		seatinfo si;
+		memset(&si, 0, sizeof(si));
+		
+		si.valid = true;
+		si.client_id = st.getNextInt();
+		
+		if (si.client_id == srv.cid)
+			table.my_seat = seat_no;
+		
+		int pstate = st.getNextInt();
+		if (pstate & PlayerInRound)
+			si.in_round = true;
+		if (pstate & PlayerSitout)
+			si.sitout = true;
+		
+		si.stake = st.getNextInt() / 100.0f;
+		si.bet = st.getNextInt() / 100.0f;
+		si.action = (Player::PlayerAction) st.getNextInt();
+		
+		std::string shole = st.getNext();
+		if (shole.length() == 4)
+		{
+			Card h1(shole.substr(0, 2).c_str());
+			Card h2(shole.substr(2, 2).c_str());
+			si.holecards.setCards(h1, h2);
+		}
+		else
+			si.holecards.clear();
+		
+		if (seat_no < seat_max)
+			table.seats[seat_no] = si;
+		
+		tmp = t.getNext();
+	} while (tmp[0] == 's');
+	
+	
+	table.pots.clear();
+	
+	// pots
+	do {
+		//log_msg("pot", "%s", tmp.c_str());
+		Tokenizer pt(":");
+		pt.parse(tmp);
+		
+		pt.getNext();   // pot-no; unused
+		float potsize = pt.getNextInt() / 100.0f;
+		table.pots.push_back(potsize);
+		
+		tmp = t.getNext();
+	} while (tmp[0] == 'p');
+	
+	
+	table.minimum_bet = Tokenizer::string2float(tmp) / 100.0f;
+	
+	
+	if (table.state == Table::Blinds)
+	{
+		holecards.clear();
+	}
+	
+	if (tinfo->window)
+		tinfo->window->updateView();
+}
+
+void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
+{
+	snap_gamestate_type type = (snap_gamestate_type) t.getNextInt();
+	
+	if (type == SnapGameStateStart)
+	{
+		wMain->addServerMessage(
+			QString(tr("Game (%1) has been started.").arg(gid)));
+		
+		addTable(gid, tid);
+	}
+	else if (type == SnapGameStateEnd)
+	{
+		wMain->addServerMessage(
+			QString(tr("Game (%1) has been ended.").arg(gid)));
+	}
+	else if (type == SnapGameStateNewHand)
+	{
+		const unsigned int hand_no = t.getNextInt();
+		
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		tinfo->window->addServerMessage(
+			QString(tr("A new hand (#%1) begins.").arg(hand_no)));
+	}
+	// TODO: else if (type == "your_seat")
+}
+
+void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
+{
+	snap_cards_type type = (snap_cards_type) t.getNextInt();
+	
+	if (type == SnapCardsHole)
+	{
+		bool bUpdateView = true;
+		
+		if (!tinfo)
+		{
+			addTable(gid, tid);
+			tinfo = getTableInfo(gid, tid);
+			
+			bUpdateView = false;
+		}
+		
+		HoleCards &h = tinfo->holecards;
+		std::string card1 = t.getNext();
+		std::string card2 = t.getNext();
+		Card ch1(card1.c_str());
+		Card ch2(card2.c_str());
+		
+		h.setCards(ch1, ch2);
+		
+		tinfo->window->addServerMessage(
+			QString(tr("Your hole cards: [%1 %2].")
+				.arg(QString::fromStdString(card1))
+				.arg(QString::fromStdString(card2))));
+		
+		if (bUpdateView && tinfo->window)
+			tinfo->window->updateView();
+	}
+	else if (type == SnapCardsFlop || type == SnapCardsTurn || type == SnapCardsRiver)
+	{
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		std::string card1, card2, card3;
+		t >> card1;
+		if (type == SnapCardsFlop)
+			t >> card2 >> card3;
+		
+		QString smsg;
+		switch ((int) type)
+		{
+			case SnapCardsFlop:
+				smsg = QString(tr("The flop: [%1 %2 %3].")
+					.arg(QString::fromStdString(card1))
+					.arg(QString::fromStdString(card2))
+					.arg(QString::fromStdString(card3)));
+				break;
+			case SnapCardsTurn:
+				smsg = QString(tr("The turn: [%1].")
+					.arg(QString::fromStdString(card1)));
+				break;
+			case SnapCardsRiver:
+				smsg = QString(tr("The river: [%1].")
+					.arg(QString::fromStdString(card1)));
+				break;
+		}
+		tinfo->window->addServerMessage(smsg);
+	}
+}
+
+void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
+{
+	// silently drop message if there is no table-info
+	if (!tinfo)
+		return;
+	
+	snap_playeraction_type type = (snap_playeraction_type) t.getNextInt();
+	unsigned int cid = t.getNextInt();
+	
+	QString player_name = getPlayerName(cid);
+	
+	QString smsg;
+	if (type == SnapPlayerActionFolded || type == SnapPlayerActionChecked)
+	{
+		const unsigned int auto_action = t.getNextInt();
+		
+		if (type == SnapPlayerActionFolded && auto_action)
+			smsg = QString(tr("%1 was folded.").arg(player_name));
+		else if (type == SnapPlayerActionFolded)
+			smsg = QString(tr("%1 folded.").arg(player_name));
+		else if (type == SnapPlayerActionChecked && auto_action)
+			smsg = QString(tr("%1 was checked.").arg(player_name));
+		else if (type == SnapPlayerActionChecked)
+			smsg = QString(tr("%1 checked.").arg(player_name));
+	}
+	else
+	{
+		const chips_type amount = t.getNextInt();
+		
+		if (type == SnapPlayerActionCalled)
+		{
+			smsg = QString(tr("%1 called %2.")
+				.arg(player_name)
+				.arg(amount / 100.f));
+		}
+		else if (type == SnapPlayerActionBet)
+		{
+			smsg = QString(tr("%1 bet to %2.")
+				.arg(player_name)
+				.arg(amount / 100.f));
+		}
+		else if (type == SnapPlayerActionRaised)
+		{
+			smsg = QString(tr("%1 raised to %2.")
+				.arg(player_name)
+				.arg(amount / 100.f));
+		}
+		else if (type == SnapPlayerActionAllin)
+		{
+			smsg = QString(tr("%1 is allin with %2.")
+				.arg(player_name)
+				.arg(amount / 100.f));
+		}
+	}
+	
+	tinfo->window->addServerMessage(smsg);
+}
+
+void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
+{
+	// silently drop message if there is no table-info
+	if (!tinfo)
+		return;
+	
+	unsigned int cid = t.getNextInt();
+	
+	QString player_name = getPlayerName(cid);
+	
+	std::vector<Card> allcards;
+	
+	for (unsigned int i=0; i < 5; i++)
+	{
+		std::string scard = t.getNext();
+		Card c(scard.c_str());
+		
+		allcards.push_back(c);
+	}
+	
+	
+	HandStrength strength;
+	GameLogic::getStrength(&allcards, &strength);
+	const char *sstrength = HandStrength::getRankingName(strength.getRanking());
+	
+	// FIXME: use translated strength names
+	// FIXME: display rank & kicker
+	
+	tinfo->window->addServerMessage(
+		QString(tr("%1 shows %2.")
+			.arg(player_name)
+			.arg(sstrength)));
+}
+
 void PClient::serverCmdSnap(Tokenizer &t)
 {
 	std::string from = t.getNext();
@@ -192,205 +516,64 @@ void PClient::serverCmdSnap(Tokenizer &t)
 	ft.parse(from);
 	int gid = ft.getNextInt();
 	int tid = ft.getNextInt();
+	tableinfo* tinfo = getTableInfo(gid, tid);
 	
 	snaptype snap = (snaptype)t.getNextInt();
 	
 	switch ((int)snap)
 	{
 	case SnapGameState:
-		{
-			std::string sstate = t.getNext();
-			
-			if (sstate == "start")
-			{
-				wMain->addServerMessage(
-					QString(tr("Game (%1) has been started.").arg(gid)));
-				
-				addTable(gid, tid);
-			}
-			else if (sstate == "end")
-			{
-				wMain->addServerMessage(
-					QString(tr("Game (%1) has been ended.").arg(gid)));
-				
-				// FIXME: remove game
-			}
-		}
-		break;
-	case SnapTable:
-		{
-			tableinfo *tinfo = getTableInfo(gid, tid);
-			
-			if (!tinfo)
-			{
-				return;
-			}
-			
-			table_snapshot &table = tinfo->snap;
-			HoleCards &holecards = tinfo->holecards;
-			
-			Tokenizer st(":");
-			
-			// state:betting_round
-			std::string tmp = t.getNext();
-			st.parse(tmp);
-			
-			table.state = st.getNextInt();
-			table.betting_round = st.getNextInt();
-			
-			// dealer:sb:bb:current
-			tmp = t.getNext();
-			st.parse(tmp);
-			table.s_dealer = st.getNextInt();
-			table.s_sb = st.getNextInt();
-			table.s_bb = st.getNextInt();
-			table.s_cur = st.getNextInt();
-			table.s_lastbet = st.getNextInt();
-			
-			// community-cards
-			{
-				//table.communitycards = t.getNext().substr(3);
-				std::string board = t.getNext().substr(3);
-				CommunityCards &cc = table.communitycards;
-				
-				Tokenizer ct(":");
-				ct.parse(board);
-				
-				if (ct.count() == 0)
-					cc.clear();
-				
-				if (ct.count() >= 3)
-				{
-					Card cf1(ct.getNext().c_str());
-					Card cf2(ct.getNext().c_str());
-					Card cf3(ct.getNext().c_str());
-					
-					cc.setFlop(cf1, cf2, cf3);
-				}
-				
-				if (ct.count() >= 4)
-				{
-					Card ct1(ct.getNext().c_str());
-					
-					cc.setTurn(ct1);
-				}
-				
-				if (ct.count() == 5)
-				{
-					Card cr1(ct.getNext().c_str());
-					
-					cc.setRiver(cr1);
-				}
-			}
-			
-			// table.seats
-			table.my_seat = -1;
-			
-			const unsigned int seat_max = 10;
-			memset(table.seats, 0, seat_max*sizeof(seatinfo));
-			
-			tmp = t.getNext();
-			do {
-				//log_msg("seat", "%s", tmp.c_str());
-				
-				Tokenizer st(":");
-				st.parse(tmp);
-				
-				unsigned int seat_no = Tokenizer::string2int(st.getNext().substr(1));
-				
-				seatinfo si;
-				memset(&si, 0, sizeof(si));
-				
-				si.valid = true;
-				si.client_id = st.getNextInt();
-				
-				if (si.client_id == srv.cid)
-					table.my_seat = seat_no;
-				
-				int pstate = st.getNextInt();
-				if (pstate & PlayerInRound)
-					si.in_round = true;
-				if (pstate & PlayerSitout)
-					si.sitout = true;
-				
-				si.stake = st.getNextInt() / 100.0f;
-				si.bet = st.getNextInt() / 100.0f;
-				si.action = (Player::PlayerAction) st.getNextInt();
-				
-				std::string shole = st.getNext();
-				if (shole.length() == 4)
-				{
-					Card h1(shole.substr(0, 2).c_str());
-					Card h2(shole.substr(2, 2).c_str());
-					si.holecards.setCards(h1, h2);
-				}
-				else
-					si.holecards.clear();
-				
-				if (seat_no < seat_max)
-					table.seats[seat_no] = si;
-				
-				tmp = t.getNext();
-			} while (tmp[0] == 's');
-			
-			
-			table.pots.clear();
-			
-			// pots
-			do {
-				//log_msg("pot", "%s", tmp.c_str());
-				Tokenizer pt(":");
-				pt.parse(tmp);
-				
-				pt.getNext();   // pot-no; unused
-				float potsize = pt.getNextInt() / 100.0f;
-				table.pots.push_back(potsize);
-				
-				tmp = t.getNext();
-			} while (tmp[0] == 'p');
-			
-			
-			table.minimum_bet = Tokenizer::string2float(tmp) / 100.0f;
-			
-			
-			if (table.state == Table::Blinds)
-			{
-				holecards.clear();
-			}
-			
-			if (tinfo->window)
-				tinfo->window->updateView();
-		}
+		serverCmdSnapGamestate(t, gid, tid, tinfo);
 		break;
 	
-	case SnapHoleCards:
+	case SnapTable:
+		serverCmdSnapTable(t, gid, tid, tinfo);
+		break;
+	
+	case SnapCards:
+		serverCmdSnapCards(t, gid, tid, tinfo);
+		break;
+	
+	case SnapPlayerCurrent:
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		tinfo->window->addServerMessage(
+			QString(tr("%1, it's your turn!")
+				.arg(getPlayerName(srv.cid))));
+		break;
+	case SnapPlayerAction:
+		serverCmdSnapPlayerAction(t, gid, tid, tinfo);
+		break;
+	case SnapWinPot:
+	case SnapOddChips:
 		{
-			bool bUpdateView = true;
-			tableinfo *tinfo = getTableInfo(gid, tid);
-			
+			// silently drop message if there is no table-info
 			if (!tinfo)
-			{
-				addTable(gid, tid);
-				tinfo = getTableInfo(gid, tid);
-				
-				bUpdateView = false;
-			}
+				return;
 			
-			HoleCards &h = tinfo->holecards;
+			const int cid = t.getNextInt();
+			const unsigned int poti = t.getNextInt();
+			const chips_type amount = t.getNextInt();
 			
-			std::string hole = t.getNext();
+			QString smsg;
+			if (snap == SnapWinPot)
+				smsg = QString(tr("%1 wins pot #%2 with %3.")
+					.arg(getPlayerName(cid))
+					.arg(poti+1)
+					.arg(amount / 100.0f));
+			else
+				smsg = QString(tr("%1 receives %3 odd chips of split pot #%2.")
+					.arg(getPlayerName(cid))
+					.arg(poti+1)
+					.arg(amount / 100.0f));
 			
-			Tokenizer ct(":");
-			ct.parse(hole);
-			
-			Card ch1(ct.getNext().c_str());
-			Card ch2(ct.getNext().c_str());
-			
-			h.setCards(ch1, ch2);
-			
-			if (bUpdateView && tinfo->window)
-				tinfo->window->updateView();
+			tinfo->window->addServerMessage(smsg);
 		}
+		break;
+	case SnapPlayerShow:
+		serverCmdSnapPlayerShow(t, gid, tid, tinfo);
 		break;
 	}
 }
@@ -865,6 +1048,18 @@ playerinfo* PClient::getPlayerInfo(int cid)
 		return 0;
 }
 
+QString PClient::getPlayerName(int cid)
+{
+	const playerinfo* pi = getPlayerInfo(cid);
+	QString player_name;
+	if (!pi)
+		player_name = QString("??? (%1)").arg(cid);
+	else
+		player_name = pi->name;
+	
+	return player_name;
+}
+
 int PClient::getMyCId()
 {
 	return srv.cid;
@@ -1173,6 +1368,8 @@ int PClient::init()
 
 	if (config.getBool("dbg_name"))
 	{
+		srandom(time(NULL));
+
 		char name[128];
 		snprintf(name, sizeof(name), "%s_%d",
 			config.get("player_name").c_str(),
