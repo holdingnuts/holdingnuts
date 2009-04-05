@@ -100,7 +100,7 @@ public:
 	
 	bool addPlayer(int cid);
 	bool removePlayer(int cid);
-	bool isPlayer(int cid);
+	bool isPlayer(int cid) const;
 	
 	void setOwner(int cid) { owner = cid; };
 	int getOwner() const { return owner; };

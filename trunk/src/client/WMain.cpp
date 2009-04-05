@@ -128,7 +128,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 		SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
 		this,
 		SLOT(gameListSelectionChanged(const QItemSelection&, const QItemSelection&)));
-		
+	
+	
 	// view game filter
 	filterPatternGame = new QLineEdit(this);
 
@@ -420,15 +421,10 @@ void WMain::updateConnectionStatus()
 		timerGamelistUpdate->stop();
 		timerSelectedGameUpdate->stop();
 		timerServerTimeUpdate->stop();
-		
-		// clear gameinfo panel
-		updateGameinfo(-1);
 	}
 	
 	m_pChat->setEnabled(is_connected);
 	btnCreateGame->setEnabled(is_connected);
-	btnRegister->setEnabled(is_connected);
-	btnUnregister->setEnabled(is_connected);
 	viewGameList->setEnabled(is_connected);
 	viewPlayerList->setEnabled(is_connected);
 	wGameFilter->setEnabled(is_connected);
@@ -436,6 +432,19 @@ void WMain::updateConnectionStatus()
 	
 	updateWelcomeLabel();
 	updateServerTimeLabel();
+	
+	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
+	
+	if (pSelect->hasSelection())
+	{
+		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int gid = modelGameList->findGidByRow(selected_row);
+		
+		updateGameinfo(gid);
+	}
+	else
+		updateGameinfo(-1);
 }
 
 void WMain::notifyPlayerinfo(int cid)
@@ -660,7 +669,6 @@ void WMain::gameListSelectionChanged(
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
 		
-		updatePlayerList(gid);
 		updateGameinfo(gid);
 	}
 }
@@ -786,9 +794,6 @@ void WMain::actionSelectedGameUpdate()
 	
 	((PClient*)qApp)->requestGameinfo(gid);
 	((PClient*)qApp)->requestPlayerlist(gid);
-	
-	updatePlayerList(gid);
-	updateGameinfo(gid);
 }
 
 void WMain::updateWelcomeLabel()
@@ -811,7 +816,9 @@ void WMain::updateGameinfo(int gid)
 		lblGameInfoStakes->clear();
 		lblGameInfoTimeout->clear();
 		lblGameInfoBlinds->clear();
-		return;
+		
+		btnRegister->setEnabled(false);
+		btnUnregister->setEnabled(false);
 	}
 	
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
@@ -828,6 +835,11 @@ void WMain::updateGameinfo(int gid)
 		.arg(gi->blinds_start, 0, 'f', 2)
 		.arg(gi->blinds_factor, 0, 'f', 2)
 		.arg(gi->blinds_time));
+	
+	
+	
+	btnRegister->setEnabled(!gi->registered && gi->state == GameStateWaiting);
+	btnUnregister->setEnabled(gi->registered && gi->state == GameStateWaiting);
 }
 
 void WMain::updateServerTimeLabel()
@@ -842,4 +854,3 @@ void WMain::updateServerTimeLabel()
 	else
 		lblServerTime->clear();
 }
-

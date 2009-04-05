@@ -682,6 +682,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->type = (gametype) it.getNextInt();
 	gi->mode = (gamemode) it.getNextInt();
 	gi->state = (gamestate) it.getNextInt();
+	gi->registered = it.getNextInt() ? true : false;
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
 	gi->player_timeout = it.getNextInt();
@@ -854,8 +855,6 @@ bool PClient::addTable(int gid, int tid)
 	{
 		games[gid];  // FIXME: better way of adding item
 		game = getGameInfo(gid);
-		
-		game->registered = true;
 	}
 	
 	tableinfo *table = getTableInfo(gid, tid);

@@ -539,11 +539,12 @@ bool send_gameinfo(clientcon *client, int gid)
 		state = GameStateWaiting;
 	
 	snprintf(msg, sizeof(msg),
-		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d %d:%.2f:%d \"%s\"",
+		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d:%d %d:%.2f:%d \"%s\"",
 		gid,
 		(int) GameTypeHoldem,
 		game_mode,
 		state,
+		g->isPlayer(client->id) ? 1 : 0,
 		g->getPlayerMax(),
 		g->getPlayerCount(),
 		g->getPlayerTimeout(),
