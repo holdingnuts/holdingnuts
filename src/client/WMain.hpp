@@ -88,6 +88,7 @@ private slots:
 	
 	void actionRegister();
 	void actionUnregister();
+	void actionOpenTable();
 	void actionCreateGame();
 	
 	void actionSettings();
@@ -165,6 +166,8 @@ private:
 	
 	//! \brief Un-register a gamelist
 	QPushButton		*btnUnregister;
+	
+	QPushButton		*btnOpenTable;
 	
 	//! \brief Timer for updating the gamelist
 	QTimer			*timerGamelistUpdate;

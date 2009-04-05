@@ -129,6 +129,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 		this,
 		SLOT(gameListSelectionChanged(const QItemSelection&, const QItemSelection&)));
 	
+	connect(viewGameList, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(actionOpenTable()));
 	
 	// view game filter
 	filterPatternGame = new QLineEdit(this);
@@ -161,6 +162,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	wGameFilter = new QWidget(this);
 	wGameFilter->setLayout(lGameFilter);
 	
+	
 	// game
 	btnRegister = new QPushButton(tr("&Register"), this);
 	btnRegister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -170,10 +172,16 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnUnregister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
 	
+	btnOpenTable = new QPushButton(tr("&Open table"), this);
+	btnOpenTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnOpenTable, SIGNAL(clicked()), this, SLOT(actionOpenTable()));
+	
 	QHBoxLayout *lRegister = new QHBoxLayout();
 	lRegister->addWidget(btnRegister);
 	lRegister->addWidget(btnUnregister);
-
+	lRegister->addWidget(btnOpenTable);
+	
+	
 	// gameinfo
 	lblGameInfoName = new QLabel(this);
 	lblGameInfoPlayers = new QLabel(this);
@@ -207,7 +215,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	wGameInfo = new QWidget(this);
 	wGameInfo->setLayout(lGameInfo);
-	wGameInfo->setFixedWidth(210);
+	wGameInfo->setFixedWidth(250);
 	
 	// connection
 	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")), this);
@@ -591,6 +599,29 @@ void WMain::actionUnregister()
 	doRegister(false);
 }
 
+void WMain::actionOpenTable()
+{
+	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
+	
+	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
+	
+	if (pSelect->hasSelection())
+	{
+		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int gid = modelGameList->findGidByRow(selected_row);
+		
+		tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, 0 /* FIXME */);
+		
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		tinfo->window->show();
+	}
+}
+
 void WMain::actionSettings()
 {
 	char cfgfile[1024];
@@ -819,6 +850,7 @@ void WMain::updateGameinfo(int gid)
 		
 		btnRegister->setEnabled(false);
 		btnUnregister->setEnabled(false);
+		btnOpenTable->setEnabled(false);
 	}
 	
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
@@ -840,6 +872,7 @@ void WMain::updateGameinfo(int gid)
 	
 	btnRegister->setEnabled(!gi->registered && gi->state == GameStateWaiting);
 	btnUnregister->setEnabled(gi->registered && gi->state == GameStateWaiting);
+	btnOpenTable->setEnabled(gi->registered && gi->state != GameStateWaiting);
 }
 
 void WMain::updateServerTimeLabel()
