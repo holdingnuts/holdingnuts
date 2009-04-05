@@ -31,24 +31,57 @@ typedef enum {
 typedef enum {
 	GameModeRingGame	= 0x1, // Cash game
 	GameModeFreezeOut	= 0x2, // Tournament
-	GameModeSNG		= 0x3  // Sit'n'Go
+	GameModeSNG		= 0x3,  // Sit'n'Go
 } gamemode;
 
 typedef enum {
 	GameStateWaiting	= 0x1,
 	GameStateStarted	= 0x2,
-	GameStateEnded		= 0x3
+	GameStateEnded		= 0x3,
 } gamestate;
 
+//! \brief Snapshot types
 typedef enum {
-	SnapGameState = 0x1,
-	SnapTable,
-	SnapHoleCards
+	SnapGameState		= 0x01,
+	SnapTable		= 0x02,
+	SnapCards		= 0x03,
+	SnapWinPot		= 0x07,
+	SnapOddChips		= 0x08,
+	SnapPlayerBroke		= 0x09,
+	SnapPlayerAction	= 0x0a,
+	SnapPlayerCurrent	= 0x0b,
+	SnapPlayerShow		= 0x0c,
 } snaptype;
+
+//! \brief Snapshot gamestate types
+typedef enum {
+	SnapGameStateStart	= 0x01,
+	SnapGameStateEnd	= 0x02,
+	SnapGameStateSeat	= 0x03,   // TODO
+	SnapGameStateNewHand	= 0x04,	
+} snap_gamestate_type;
+
+//! \brief Snapshot cards types
+typedef enum {
+	SnapCardsHole		= 0x1,
+	SnapCardsFlop		= 0x2,
+	SnapCardsTurn		= 0x3,
+	SnapCardsRiver		= 0x4,
+} snap_cards_type;
+
+//! \brief Snapshot player-action types
+typedef enum {
+	SnapPlayerActionFolded	= 0x01,  // cid, auto=0|1
+	SnapPlayerActionChecked	= 0x02,  // cid, auto=0|1
+	SnapPlayerActionCalled	= 0x03,  // cid, amount
+	SnapPlayerActionBet	= 0x04,  // cid, amount
+	SnapPlayerActionRaised	= 0x05,  // cid, amount
+	SnapPlayerActionAllin	= 0x06,  // cid, amount
+} snap_playeraction_type;
 
 typedef enum {
 	PlayerInRound = 0x01,
-	PlayerSitout  = 0x02
+	PlayerSitout  = 0x02,
 } playerstate;
 
 typedef enum {
@@ -58,7 +91,7 @@ typedef enum {
 	ErrParameters = 0x4,
 	ErrServerFull = 0x10,
 	ErrMaxConnectionsPerIP = 0x11,
-	ErrNoPermission = 0x100
+	ErrNoPermission = 0x100,
 } cmderror;
 
 #endif /* _PROTOCOL_H */

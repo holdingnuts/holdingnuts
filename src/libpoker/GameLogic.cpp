@@ -44,20 +44,26 @@ using namespace std;
 	StraightFlush    Top card               -
 */
 
+
 bool GameLogic::getStrength(const HoleCards *hole, const CommunityCards *community, HandStrength *strength)
 {
-	HandStrength::Ranking *r = &(strength->ranking);
-	vector<Card> *rank = &(strength->rank);
-	vector<Card> *kicker = &(strength->kicker);
-	
 	vector<Card> allcards;
 	
 	// merge hole- and community-cards
 	hole->copyCards(&allcards);
 	community->copyCards(&allcards);
 	
+	return getStrength(&allcards, strength);
+}
+
+bool GameLogic::getStrength(vector<Card> *allcards, HandStrength *strength)
+{
+	HandStrength::Ranking *r = &(strength->ranking);
+	vector<Card> *rank = &(strength->rank);
+	vector<Card> *kicker = &(strength->kicker);
+	
 	// sort them descending
-	sort(allcards.begin(), allcards.end(), greater<Card>());
+	sort(allcards->begin(), allcards->end(), greater<Card>());
 	
 #if 0
 	print_cards("AllCards", &allcards);
@@ -68,31 +74,31 @@ bool GameLogic::getStrength(const HoleCards *hole, const CommunityCards *communi
 	kicker->clear();
 	
 	// test for all combinations
-	if (isFlush(&allcards, rank) && isStraight(&allcards, rank->front().getSuit(), rank))
+	if (isFlush(allcards, rank) && isStraight(allcards, rank->front().getSuit(), rank))
 		*r = HandStrength::StraightFlush;
-	else if (isXOfAKind(&allcards, 4, rank, kicker))
+	else if (isXOfAKind(allcards, 4, rank, kicker))
 		*r = HandStrength::FourOfAKind;
-	else if (isFullHouse(&allcards, rank))
+	else if (isFullHouse(allcards, rank))
 		*r = HandStrength::FullHouse;
-	else if (isFlush(&allcards, rank))
+	else if (isFlush(allcards, rank))
 		*r = HandStrength::Flush;
-	else if (isStraight(&allcards, -1, rank))
+	else if (isStraight(allcards, -1, rank))
 		*r = HandStrength:: Straight;
-	else if (isXOfAKind(&allcards, 3, rank, kicker))
+	else if (isXOfAKind(allcards, 3, rank, kicker))
 		*r = HandStrength::ThreeOfAKind;
-	else if (isTwoPair(&allcards, rank, kicker))
+	else if (isTwoPair(allcards, rank, kicker))
 		*r = HandStrength::TwoPair;
-	else if (isXOfAKind(&allcards, 2, rank, kicker))
+	else if (isXOfAKind(allcards, 2, rank, kicker))
 		*r = HandStrength::OnePair;
 	else
 	{
 		*r = HandStrength::HighCard;
 		
 		rank->clear();
-		rank->push_back(allcards.front());
+		rank->push_back(allcards->front());
 		
 		kicker->clear();
-		for (vector<Card>::iterator e = allcards.begin() + 1; e != allcards.end() && kicker->size() < 4; e++)
+		for (vector<Card>::iterator e = allcards->begin() + 1; e != allcards->end() && kicker->size() < 4; e++)
 			kicker->push_back(*e);
 	}
 	

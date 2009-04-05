@@ -73,6 +73,7 @@ class GameLogic
 public:
 	GameLogic();
 	
+	static bool getStrength(std::vector<Card> *allcards, HandStrength *strength);
 	static bool getStrength(const HoleCards *hole, const CommunityCards *community, HandStrength *strength);
 	
 	static bool isTwoPair(std::vector<Card> *allcards, std::vector<Card> *rank, std::vector<Card> *kicker);

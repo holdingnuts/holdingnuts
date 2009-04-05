@@ -358,6 +358,7 @@ chips_type GameController::determineMinimumBet(Table *t) const
 
 void GameController::dealHole(Table *t)
 {
+	// player in small blind gets first cards
 	for (unsigned int i = t->sb, c=0; c < t->countPlayers(); i = t->getNextPlayer(i))
 	{
 		if (!t->seats[i].occupied)
@@ -374,28 +375,9 @@ void GameController::dealHole(Table *t)
 		char card1[3], card2[3];
 		strcpy(card1, c1.getName());
 		strcpy(card2, c2.getName());
-		snprintf(msg, sizeof(msg), "Your hole-cards: [%s %s]",
-			card1, card2);
-		
-		chat(p->client_id, t->table_id, msg);
-		
-		
-		// assemble holecards snapshot
-		vector<Card> cards;
-		string scards;
-		
-		p->holecards.copyCards(&cards);
-		
-		for (unsigned int i=0; i < cards.size(); i++)
-		{
-			scards += cards[i].getName();
-			
-			if (i < cards.size() -1)
-				scards += ':';
-		}
-		
-		// send the holecards snapshot to player
-		snap(p->client_id, t->table_id, SnapHoleCards, scards.c_str());
+		snprintf(msg, sizeof(msg), "%d %s %s",
+			SnapCardsHole, card1, card2);
+		snap(p->client_id, t->table_id, SnapCards, msg);
 		
 		
 		// increase the found-player counter
@@ -415,10 +397,9 @@ void GameController::dealFlop(Table *t)
 	strcpy(card1, f1.getName());
 	strcpy(card2, f2.getName());
 	strcpy(card3, f3.getName());
-	snprintf(msg, sizeof(msg), "The flop: [%s %s %s]",
-		card1, card2, card3);
-	
-	chat(t->table_id, msg);
+	snprintf(msg, sizeof(msg), "%d %s %s %s",
+		SnapCardsFlop, card1, card2, card3);
+	snap(t->table_id, SnapCards, msg);
 }
 
 void GameController::dealTurn(Table *t)
@@ -429,10 +410,9 @@ void GameController::dealTurn(Table *t)
 	
 	char card[3];
 	strcpy(card, tc.getName());
-	snprintf(msg, sizeof(msg), "The turn: [%s]",
-		card);
-	
-	chat(t->table_id, msg);
+	snprintf(msg, sizeof(msg), "%d %s",
+		SnapCardsTurn, card);
+	snap(t->table_id, SnapCards, msg);
 }
 
 void GameController::dealRiver(Table *t)
@@ -443,10 +423,9 @@ void GameController::dealRiver(Table *t)
 	
 	char card[3];
 	strcpy(card, r.getName());
-	snprintf(msg, sizeof(msg), "The river: [%s]",
-		card);
-	
-	chat(t->table_id, msg);
+	snprintf(msg, sizeof(msg), "%d %s",
+		SnapCardsRiver, card);
+	snap(t->table_id, SnapCards, msg);
 }
 
 void GameController::stateNewRound(Table *t)
@@ -454,8 +433,8 @@ void GameController::stateNewRound(Table *t)
 	// count up current hand number
 	hand_no++;
 	
-	snprintf(msg, sizeof(msg), "New hand #%d begins.", hand_no);
-	chat(t->table_id, msg);
+	snprintf(msg, sizeof(msg), "%d %d", SnapGameStateNewHand, hand_no);
+	snap(t->table_id, SnapGameState, msg);
 	
 #ifdef DEBUG
 	log_msg("Table", "Hand #%d (gid=%d tid=%d)", hand_no, game_id, t->table_id);
@@ -577,8 +556,7 @@ void GameController::stateBlinds(Table *t)
 	
 	// tell player 'under the gun' it's his turn
 	Player *p = t->seats[t->cur_player].player;
-	snprintf(msg, sizeof(msg), "[%d], it's your turn!", p->client_id);
-	chat(p->client_id, t->table_id, msg);
+	snap(p->client_id, t->table_id, SnapPlayerCurrent);
 	
 	
 	t->betround = Table::Preflop;
@@ -728,13 +706,13 @@ void GameController::stateBetting(Table *t)
 	{
 		t->seats[t->cur_player].in_round = false;
 		
-		snprintf(msg, sizeof(msg), "[%d]%s folded.", p->client_id, auto_action ? " was" : "");
-		chat(t->table_id, msg);
+		snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionFolded, p->client_id, auto_action ? 1 : 0);
+		snap(t->table_id, SnapPlayerAction, msg);
 	}
 	else if (action == Player::Check)
 	{
-		snprintf(msg, sizeof(msg), "[%d]%s checked.", p->client_id, auto_action ? " was" : "");
-		chat(t->table_id, msg);
+		snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionChecked, p->client_id, auto_action ? 1 : 0);
+		snap(t->table_id, SnapPlayerAction, msg);
 	}
 	else
 	{
@@ -757,18 +735,18 @@ void GameController::stateBetting(Table *t)
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
-			if (action == Player::Bet)
-				snprintf(msg, sizeof(msg), "[%d] bet %.2f.", p->client_id, t->bet_amount / 100.0f);
+			if (action == Player::Allin || amount == p->stake)
+				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionAllin, p->client_id, t->seats[t->cur_player].bet);
+			else if (action == Player::Bet)
+				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionBet, p->client_id, t->bet_amount);
 			else if (action == Player::Raise)
-				snprintf(msg, sizeof(msg), "[%d] raised to %.2f.", p->client_id, t->bet_amount / 100.0f);
-			else // allin
-				snprintf(msg, sizeof(msg), "[%d] is allin with %.2f.", p->client_id, t->seats[t->cur_player].bet / 100.0f);
+				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionRaised, p->client_id, t->bet_amount);
 		}
 		else
-			snprintf(msg, sizeof(msg), "[%d] called %.2f.", p->client_id, amount / 100.0f);
+			snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionCalled, p->client_id, amount);
 		
 		
-		chat(t->table_id, msg);
+		snap(t->table_id, SnapPlayerAction, msg);
 	}
 	
 	// all players except one folded, so end this hand
@@ -887,10 +865,7 @@ void GameController::stateBetting(Table *t)
 	// tell player it's his turn
 	p = t->seats[t->cur_player].player;
 	if (!t->nomoreaction && p->stake > 0)
-	{
-		snprintf(msg, sizeof(msg), "[%d], it's your turn!", p->client_id);
-		chat(p->client_id, t->table_id, msg);
-	}
+		snap(p->client_id, t->table_id, SnapPlayerCurrent);
 }
 
 void GameController::stateBettingEnd(Table *t)
@@ -988,11 +963,11 @@ void GameController::stateAllFolded(Table *t)
 	// get last remaining player
 	Player *p = t->seats[t->cur_player].player;
 	
-	snprintf(msg, sizeof(msg), "[%d] wins %.2f", p->client_id, t->pots[0].amount / 100.0f);
-	chat(t->table_id, msg);
-	
 	p->stake += t->pots[0].amount;
 	t->seats[t->cur_player].bet = t->pots[0].amount;
+	
+	snprintf(msg, sizeof(msg), "%d %d %d", p->client_id, 0, t->pots[0].amount);
+	snap(t->table_id, SnapWinPot, msg);
 	
 	sendTableSnapshot(t);
 	t->scheduleState(Table::EndRound, 2);
@@ -1010,42 +985,19 @@ void GameController::stateShowdown(Table *t)
 		{
 			Player *p = t->seats[showdown_player].player;
 			
-			HandStrength strength;
-			GameLogic::getStrength(&(p->holecards), &(t->communitycards), &strength);
+			vector<Card> allcards;
+			p->holecards.copyCards(&allcards);
+			t->communitycards.copyCards(&allcards);
 			
-			vector<Card> rank, kicker;
-			string hsstr = "rank: ";
+			string hsstr;
+			for (vector<Card>::const_iterator e = allcards.begin(); e != allcards.end(); e++)
+				hsstr += string(e->getName()) + string(" ");
 			
-			rank.clear();
-			strength.copyRankCards(&rank);
-			for (vector<Card>::const_iterator e = rank.begin(); e != rank.end(); e++)
-			{
-				sprintf(msg, "%s ", e->getName());
-				hsstr += msg;
-			}
-			
-			hsstr += "kicker: ";
-			kicker.clear();
-			strength.copyKickerCards(&kicker);
-			for (vector<Card>::const_iterator e = kicker.begin(); e != kicker.end(); e++)
-			{
-				sprintf(msg, "%s ", e->getName());
-				hsstr += msg;
-			}
-			
-			const char *sranking; 
-			
-			// handle RoyalFlush as special case
-			if (strength.getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
-				sranking = "Royal Flush";
-			else
-				sranking = HandStrength::getRankingName(strength.getRanking());
-			
-			snprintf(msg, sizeof(msg), "[%d] shows %s (%s)",
+			snprintf(msg, sizeof(msg), "%d %s",
 				p->client_id,
-				sranking,
 				hsstr.c_str());
-			chat(t->table_id, msg);
+			
+			snap(t->table_id, SnapPlayerShow, msg);
 		}
 		
 		showdown_player = t->getNextActivePlayer(showdown_player);
@@ -1068,11 +1020,18 @@ void GameController::stateShowdown(Table *t)
 			Table::Pot *pot = &(t->pots[poti]);
 			const unsigned int involved_count = t->getInvolvedInPotCount(pot, tw);
 			
-			// pot is divided by number of players involved in
-			const chips_type win_amount = pot->amount / involved_count;
 			
-			// odd chips
-			const chips_type odd_chips = pot->amount - (win_amount * involved_count);
+			chips_type win_amount = 0;
+			chips_type odd_chips = 0;
+			
+			if (involved_count)
+			{
+				// pot is divided by number of players involved in
+				win_amount = pot->amount / involved_count;
+				
+				// odd chips
+				odd_chips = pot->amount - (win_amount * involved_count);
+			}
 			
 			
 			chips_type cashout_amount = 0;
@@ -1103,10 +1062,8 @@ void GameController::stateShowdown(Table *t)
 					// count up overall cashed-out
 					cashout_amount += win_amount;
 					
-					snprintf(msg, sizeof(msg),
-						"[%d] wins pot #%d with %.2f",
-						p->client_id, poti+1, win_amount / 100.0f);
-					chat(t->table_id, msg);
+					snprintf(msg, sizeof(msg), "%d %d %d", p->client_id, poti, win_amount);
+					snap(t->table_id, SnapWinPot, msg);
 				}
 			}
 			
@@ -1126,10 +1083,8 @@ void GameController::stateShowdown(Table *t)
 				p->stake += odd_chips;
 				seat->bet += odd_chips;
 				
-				snprintf(msg, sizeof(msg),
-						"[%d] receives odd chips of split pot #%d with %.2f",
-						p->client_id, poti+1, odd_chips / 100.0f);
-				chat(t->table_id, msg);
+				snprintf(msg, sizeof(msg), "%d %d %d", p->client_id, poti, odd_chips);
+				snap(t->table_id, SnapOddChips, msg);
 				
 				cashout_amount += odd_chips;
 			}
@@ -1295,7 +1250,8 @@ void GameController::start()
 	
 	blind.last_blinds_time = time(NULL);
 	
-	snap(tid, SnapGameState, "start");
+	snprintf(msg, sizeof(msg), "%d", SnapGameStateStart);
+	snap(tid, SnapGameState, msg);
 	
 	sendTableSnapshot(t);
 	
@@ -1342,7 +1298,8 @@ int GameController::tick()
 				ended = true;
 				ended_time = time(NULL);
 				
-				snap(-1, SnapGameState, "end");
+				snprintf(msg, sizeof(msg), "%d", SnapGameStateEnd);
+				snap(-1, SnapGameState, msg);
 			}
 			
 			delete t;
