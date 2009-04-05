@@ -39,4 +39,5 @@ config.set("sound_focus",	true);			// only play sound if window has focus
 config.set("dbg_register",	-1);			// automatically connect and register to a game (value is gid)
 config.set("dbg_bbox",		false);			// show bounding boxes around scene items
 config.set("dbg_srv_cmd",	false);			// log every message from server
+config.set("dbg_name",		false);			// appends a random number to player name
 #endif

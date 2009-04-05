@@ -1163,12 +1163,6 @@ int PClient::init()
 	}
 #endif /* NOAUDIO */
 	
-	
-	// main window
-	wMain = new WMain();
-	wMain->updateConnectionStatus();
-	wMain->show();
-
 #ifdef DEBUG
 	if (config.getInt("dbg_register") != -1)
 	{
@@ -1176,8 +1170,21 @@ int PClient::init()
 			config.getInt("default_port"));
 		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 	}
+
+	if (config.getBool("dbg_name"))
+	{
+		char name[128];
+		snprintf(name, sizeof(name), "%s_%d",
+			config.get("player_name").c_str(),
+			(int)(random() % 100));
+		config.set("player_name", name);
+	}
 #endif
 	
+	// main window
+	wMain = new WMain();
+	wMain->updateConnectionStatus();
+	wMain->show();
 	
 #if 1
 	// FIXME: this is a temporary fix for the C-locale (sprintf-float/strtod) issue
