@@ -444,25 +444,41 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 	if (type == SnapPlayerActionFolded || type == SnapPlayerActionChecked)
 	{
 		const unsigned int auto_action = t.getNextInt();
+		unsigned int sound = SOUND_FOLD_1;
 		
-		if (type == SnapPlayerActionFolded && auto_action)
-			smsg = QString(tr("%1 was folded.").arg(player_name));
-		else if (type == SnapPlayerActionFolded)
-			smsg = QString(tr("%1 folded.").arg(player_name));
-		else if (type == SnapPlayerActionChecked && auto_action)
-			smsg = QString(tr("%1 was checked.").arg(player_name));
+		if (type == SnapPlayerActionFolded)
+		{
+			if (auto_action)
+				smsg = QString(tr("%1 was folded.").arg(player_name));
+			else if (type == SnapPlayerActionFolded)
+				smsg = QString(tr("%1 folded.").arg(player_name));
+			
+			sound = SOUND_FOLD_1;
+		}
 		else if (type == SnapPlayerActionChecked)
-			smsg = QString(tr("%1 checked.").arg(player_name));
+		{
+			if (auto_action)
+				smsg = QString(tr("%1 was checked.").arg(player_name));
+			else if (type == SnapPlayerActionChecked)
+				smsg = QString(tr("%1 checked.").arg(player_name));
+			
+			sound = SOUND_CHECK_1;
+		}
+		
+		((WTable*)tinfo->window)->playSound(sound);
 	}
 	else
 	{
 		const chips_type amount = t.getNextInt();
+		unsigned int sound = SOUND_CHIP_2;
 		
 		if (type == SnapPlayerActionCalled)
 		{
 			smsg = QString(tr("%1 called %2.")
 				.arg(player_name)
 				.arg(amount / 100.f));
+			
+			sound = SOUND_CHIP_1;
 		}
 		else if (type == SnapPlayerActionBet)
 		{
@@ -482,6 +498,8 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 				.arg(player_name)
 				.arg(amount / 100.f));
 		}
+		
+		((WTable*)tinfo->window)->playSound(sound);
 	}
 	
 	tinfo->window->addServerMessage(smsg);
@@ -1357,7 +1375,11 @@ int PClient::init()
 		const char *file;
 	} sounds[] = {
 		{ SOUND_TEST_1,		"audio/test.wav" },
-		{ SOUND_DEAL_1,		"audio/deal.wav" }
+		{ SOUND_DEAL_1,		"audio/deal.wav" },
+		{ SOUND_CHIP_1,		"audio/chip1.wav" },
+		{ SOUND_CHIP_2,		"audio/chip2.wav" },
+		{ SOUND_CHECK_1,	"audio/check1.wav" },
+		{ SOUND_FOLD_1,		"audio/fold1.wav" },
 	};
 	
 	const unsigned int sounds_count = sizeof(sounds) / sizeof(sounds[0]);
