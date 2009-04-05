@@ -1066,7 +1066,14 @@ void GameController::stateShowdown(Table *t)
 		for (unsigned int poti=0; poti < t->pots.size(); poti++)
 		{
 			Table::Pot *pot = &(t->pots[poti]);
-			unsigned int involved_count = t->getInvolvedInPotCount(pot, tw);
+			const unsigned int involved_count = t->getInvolvedInPotCount(pot, tw);
+			
+			// pot is divided by number of players involved in
+			const chips_type win_amount = pot->amount / involved_count;
+			
+			// odd chips
+			const chips_type odd_chips = pot->amount - (win_amount * involved_count);
+			
 			
 			chips_type cashout_amount = 0;
 			
@@ -1081,11 +1088,9 @@ void GameController::stateShowdown(Table *t)
 				if (!t->isSeatInvolvedInPot(pot, seat_num))
 					continue;
 #if 0
-				dbg_msg("winlist", "wl #%d: player #%d (seat:%d): pot #%d: involved-count=%d",
-					i+1, pi+1, seat_num, poti+1, involved_count);
+				dbg_msg("winlist", "wl #%d involved-count=%d player #%d (seat:%d) pot #%d ($%d) ",
+					i+1, involved_count, pi, seat_num, poti, pot->amount);
 #endif
-				// pot is divided by number of players involved in
-				chips_type win_amount = pot->amount / involved_count;
 				
 				if (win_amount > 0)
 				{
@@ -1105,70 +1110,50 @@ void GameController::stateShowdown(Table *t)
 				}
 			}
 			
-			// reduce pot about the overall cashed-out
-			pot->amount -= cashout_amount;
-			
-			
-			// are there odd chips left in the pot?
-			if (pot->amount)
+			// distribute odd chips
+			if (odd_chips)
 			{
-				dbg_msg("win-dist", "odd pot: %.2f", pot->amount / 100.0f);
-				
-				// find next involved player behind button
+				// find the next player behind button which is involved in pot
 				unsigned int oddchips_player = t->getNextActivePlayer(t->dealer);
 				
-				bool claim;
-				do
-				{
-					claim = false;
-					
-					// is this player in the winning-list?
-					for (unsigned int pi=0; pi < winner_count; pi++)
-					{
-						const unsigned int seat_num = tw[pi].getId();
-						if (oddchips_player == seat_num)
-						{
-							claim = true;
-							break;
-						}
-					}
-					
-					// skip if the player is not involved in this pot
-					if (!t->isSeatInvolvedInPot(pot, oddchips_player))
-						claim = false;
-					
-					if (!claim)
-						oddchips_player = t->getNextActivePlayer(oddchips_player);
-				} while (!claim);
+				while (!t->isSeatInvolvedInPot(pot, oddchips_player))
+					oddchips_player = t->getNextActivePlayer(oddchips_player);
 				
 				
 				Table::Seat *seat = &(t->seats[oddchips_player]);
 				Player *p = seat->player;
 				
-				p->stake += pot->amount;
-				seat->bet += pot->amount;
+				p->stake += odd_chips;
+				seat->bet += odd_chips;
 				
 				snprintf(msg, sizeof(msg),
 						"[%d] receives odd chips of split pot #%d with %.2f",
-						p->client_id, poti+1, pot->amount / 100.0f);
-					chat(t->table_id, msg);
+						p->client_id, poti+1, odd_chips / 100.0f);
+				chat(t->table_id, msg);
 				
-				pot->amount = 0;
+				cashout_amount += odd_chips;
 			}
+			
+			// reduce pot about the overall cashed-out
+			pot->amount -= cashout_amount;
 		}
-		
-
 	}
 	
+
 #if 1
 	// check for fatal error: not all pots were distributed
 	for (unsigned int i=0; i < t->pots.size(); i++)
 	{
-		if (t->pots[i].amount > .0f)
-			dbg_msg("winlist", "fatal error: pot %d after distribution: %.2f",
-				i, t->pots[i].amount / 100.0f);
+		Table::Pot *pot = &(t->pots[i]);
+		
+		if (pot->amount > 0)
+		{
+			log_msg("winlist", "error: remaining chips in pot %d: %.2f",
+				i, pot->amount / 100.0f);
+		}
 	}
 #endif
+
 	
 	// reset all pots
 	t->pots.clear();
