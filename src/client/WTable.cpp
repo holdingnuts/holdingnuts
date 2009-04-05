@@ -332,69 +332,50 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
-
-#ifdef RAISE_MNU
-	actRaiseQuarterPot = new QAction(tr("1/4"), this);
-	actRaiseHalfPot = new QAction(tr("1/2"), this);
-	actRaiseThreeQuarterPot = new QAction(tr("3/4"), this);
-	actRaisePotsize = new QAction(tr("Potsize"), this);
-	actAllin = new QAction(tr("Allin"), this);
-
-	connect(actRaiseQuarterPot, SIGNAL(triggered()), this, SLOT(actionRaiseQuarterPot()));
-	connect(actRaiseHalfPot, SIGNAL(triggered()), this, SLOT(actionRaiseHalfPot()));
-	connect(actRaiseThreeQuarterPot, SIGNAL(triggered()), this, SLOT(actionRaiseThreeQuarterPot()));
-	connect(actRaisePotsize, SIGNAL(triggered()), this, SLOT(actionRaisePotsize()));
-	connect(actAllin, SIGNAL(triggered()), this, SLOT(actionAllin()));
-
-	QMenu *mnuRaise = new QMenu(this);
-
-	mnuRaise->addAction(actRaiseQuarterPot);
-	mnuRaise->addAction(actRaiseHalfPot);
-	mnuRaise->addAction(actRaiseThreeQuarterPot);
-	mnuRaise->addAction(actRaisePotsize);
-	mnuRaise->addAction(actAllin);
-
-	connect(mnuRaise, SIGNAL(aboutToShow()), this, SLOT(showMenuRaise()));
-
-	btnRaisePot = new QPushButton(this);
-	btnRaisePot->setMenu(mnuRaise);
-#else
+	
+	
+	// bet shortcuts
 	const unsigned int raisebtn_width = 39;
 	const unsigned int raisebtn_height = 18;
+
+	btnBetsizeMinimum = new QPushButton(tr("Min"), this);
+	btnBetsizeMinimum->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeMinimum, SIGNAL(clicked()), this, SLOT(actionBetsizeMinimum()));
 	
-	btnQuarterPot = new QPushButton(tr("1/4"), this);
-	btnQuarterPot->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnQuarterPot, SIGNAL(clicked()), this, SLOT(actionRaiseQuarterPot()));
+	btnBetsizeQuarterPot = new QPushButton(tr("1/4"), this);
+	btnBetsizeQuarterPot->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeQuarterPot, SIGNAL(clicked()), this, SLOT(actionBetsizeQuarterPot()));
 
-	btnHalfPot = new QPushButton(tr("1/2"), this);
-	btnHalfPot->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnHalfPot, SIGNAL(clicked()), this, SLOT(actionRaiseHalfPot()));
+	btnBetsizeHalfPot = new QPushButton(tr("1/2"), this);
+	btnBetsizeHalfPot->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeHalfPot, SIGNAL(clicked()), this, SLOT(actionBetsizeHalfPot()));
 
-	btnThreeQuarterPot = new QPushButton(tr("3/4"), this);
-	btnThreeQuarterPot->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnThreeQuarterPot, SIGNAL(clicked()), this, SLOT(actionRaiseThreeQuarterPot()));
+	btnBetsizeThreeQuarterPot = new QPushButton(tr("3/4"), this);
+	btnBetsizeThreeQuarterPot->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeThreeQuarterPot, SIGNAL(clicked()), this, SLOT(actionBetsizeThreeQuarterPot()));
 
-	btnPotsize = new QPushButton(tr("Potsize"), this);
-	btnPotsize->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnPotsize, SIGNAL(clicked()), this, SLOT(actionRaisePotsize()));
+	btnBetsizePotsize = new QPushButton(tr("Potsize"), this);
+	btnBetsizePotsize->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizePotsize, SIGNAL(clicked()), this, SLOT(actionBetsizePotsize()));
 
-	btnAllin = new QPushButton(tr("Allin"), this);
-	btnAllin->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnAllin, SIGNAL(clicked()), this, SLOT(actionAllin()));
+	btnBetsizeAllin = new QPushButton(tr("Allin"), this);
+	btnBetsizeAllin->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeAllin, SIGNAL(clicked()), this, SLOT(actionBetsizeAllin()));
 
 	QHBoxLayout *lPots = new QHBoxLayout();
 	lPots->addStretch(2); 
 	lPots->setContentsMargins(0, 0, 0, 0);
-	lPots->addWidget(btnQuarterPot, Qt::AlignRight);
-	lPots->addWidget(btnHalfPot, Qt::AlignRight);
-	lPots->addWidget(btnThreeQuarterPot, Qt::AlignRight);
-	lPots->addWidget(btnPotsize, Qt::AlignRight);
-	lPots->addWidget(btnAllin, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeMinimum, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeQuarterPot, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeHalfPot, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeThreeQuarterPot, Qt::AlignRight);
+	lPots->addWidget(btnBetsizePotsize, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeAllin, Qt::AlignRight);
 	
 	wRaiseBtns = new QWidget(this);
 	wRaiseBtns->setLayout(lPots);
-#endif
-
+	
+	
 	chkAutoFoldCheck = new QCheckBox("Fold/Check", this);
 	chkAutoCheckCall = new QCheckBox("Check/Call", this);
 	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
@@ -408,14 +389,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lActionsBtns->addWidget(btnCheckCall);
 	lActionsBtns->addWidget(btnBetRaise);
 	lActionsBtns->addWidget(m_pSliderAmount);
-#ifdef RAISE_MNU
-	lActionsBtns->addWidget(btnRaisePot);
-#endif
-
-	QVBoxLayout *lActions = new QVBoxLayout();
-#ifndef RAISE_MNU	
+	
+	
+	QVBoxLayout *lActions = new QVBoxLayout();	
 	lActions->addWidget(wRaiseBtns);
-#endif	
 	lActions->addLayout(lActionsBtns);
 	
 	QHBoxLayout *lPreActions = new QHBoxLayout();
@@ -451,11 +428,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QLabel *lblActions = new QLabel(this);
 	lblActions->setPixmap(QPixmap("gfx/table/actions.png"));
 	lblActions->setScaledContents(true);
-#ifdef RAISE_MNU
-	lblActions->setFixedSize(450, 70);
-#else
 	lblActions->setFixedSize(450, 80);
-#endif
 	lblActions->setLayout(stlayActions);
 
 	m_pChat	= new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
@@ -771,11 +744,9 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(false);
 					m_pSliderAmount->setVisible(false);
-#ifdef RAISE_MNU
-					btnRaisePot->setVisible(false);
-#else
+					
 					wRaiseBtns->setVisible(false);
-#endif					
+					
 					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
@@ -785,11 +756,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(false);
-#ifdef RAISE_MNU
-					btnRaisePot->setVisible(false);
-#else
 					wRaiseBtns->setVisible(false);
-#endif					
+					
 					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
@@ -806,14 +774,14 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				
 				stlayActions->setCurrentIndex(m_nActions);
 				
-#ifndef RAISE_MNU
+				
 				const float cur_pot = currentPot();
-	
-				btnQuarterPot->setEnabled(cur_pot * 0.25f > snap->minimum_bet);
-				btnHalfPot->setEnabled(cur_pot * 0.5f > snap->minimum_bet);
-				btnThreeQuarterPot->setEnabled(cur_pot * 0.75f > snap->minimum_bet);
-				btnPotsize->setEnabled(cur_pot >= snap->minimum_bet);
-#endif				
+				
+				btnBetsizeMinimum->setEnabled(s->stake + s->bet > snap->minimum_bet);
+				btnBetsizeQuarterPot->setEnabled(cur_pot * 0.25f > snap->minimum_bet);
+				btnBetsizeHalfPot->setEnabled(cur_pot * 0.5f > snap->minimum_bet);
+				btnBetsizeThreeQuarterPot->setEnabled(cur_pot * 0.75f > snap->minimum_bet);
+				btnBetsizePotsize->setEnabled(cur_pot >= snap->minimum_bet);
 			}
 		}
 		else
@@ -1320,27 +1288,43 @@ float WTable::currentPot() const
 	return cur_pot;
 }
 
-void WTable::actionRaiseQuarterPot()
+void WTable::actionBetsizeMinimum()
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	
+	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	
+	const table_snapshot *snap = &(tinfo->snap);
+	
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	
+	if (snap->my_seat == -1)
+		return;
+	
+	m_pSliderAmount->setValue(snap->minimum_bet);
+}
+
+void WTable::actionBetsizeQuarterPot()
 {
 	m_pSliderAmount->setValue(currentPot() * 0.25f);
 }
 
-void WTable::actionRaiseHalfPot()
+void WTable::actionBetsizeHalfPot()
 {
 	m_pSliderAmount->setValue(currentPot() * 0.5f);
 }
 
-void WTable::actionRaiseThreeQuarterPot()
+void WTable::actionBetsizeThreeQuarterPot()
 {
 	m_pSliderAmount->setValue(currentPot() * 0.75f);
 }
 
-void WTable::actionRaisePotsize()
+void WTable::actionBetsizePotsize()
 {
 	m_pSliderAmount->setValue(currentPot());
 }
 
-void WTable::actionAllin()
+void WTable::actionBetsizeAllin()
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
@@ -1355,18 +1339,6 @@ void WTable::actionAllin()
 	
 	m_pSliderAmount->setValue(snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet);
 }
-
-#ifdef RAISE_MNU
-void WTable::showMenuRaise()
-{
-	const float cur_pot = currentPot();
-	
-	actRaiseQuarterPot->setEnabled(cur_pot * 0.25f > snap->minimum_bet);
-	actRaiseHalfPot->setEnabled(cur_pot * 0.5f > snap->minimum_bet);
-	actRaiseThreeQuarterPot->setEnabled(cur_pot * 0.75f > snap->minimum_bet);
-	actRaisePotsize->setEnabled(cur_pot >= snap->minimum_bet);
-}
-#endif
 
 void WTable::slotShow()
 {
