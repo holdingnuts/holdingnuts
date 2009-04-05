@@ -115,6 +115,8 @@ void EditableSlider::sliderValueChanged(int value)
 	
 	if (value == 100)	// 100% == allin
 		amount = m_nMax;
+	else if (value == 0)    // 0% == minimum bet
+		amount = m_nMin;
 	else
 	{
 		if (value <= 40)
