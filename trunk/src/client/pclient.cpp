@@ -33,6 +33,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <ctime>
 #include <string>
 
 #include <QUuid>
@@ -394,7 +395,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 					.arg(QString::fromStdString(card2))));
 				
 			tinfo->window->updateView();
-			((WTable*)tinfo->window)->playSound(SOUND_DEAL_1);
+			tinfo->window->playSound(SOUND_DEAL_1);
 		}
 	}
 	else if (type == SnapCardsFlop || type == SnapCardsTurn || type == SnapCardsRiver)
@@ -468,7 +469,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 		}
 		
 		if (tinfo->window)
-			((WTable*)tinfo->window)->playSound(sound);
+			tinfo->window->playSound(sound);
 	}
 	else
 	{
@@ -503,7 +504,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 		}
 		
 		if (tinfo->window)
-			((WTable*)tinfo->window)->playSound(sound);
+			tinfo->window->playSound(sound);
 	}
 	
 	tinfo->window->addServerMessage(smsg);
@@ -1402,12 +1403,12 @@ int PClient::init()
 
 	if (config.getBool("dbg_name"))
 	{
-		srandom(time(NULL));
+		srand(time(NULL));
 
 		char name[128];
 		snprintf(name, sizeof(name), "%s_%d",
 			config.get("player_name").c_str(),
-			(int)(random() % 100));
+			(int)(rand() % 100));
 		config.set("player_name", name);
 	}
 #endif
