@@ -46,7 +46,15 @@ public:
 	void stop();
 	
 Q_SIGNALS:
+	//! \brief signal emitted when the time is up
+	//! \param seatnumber
 	void timeup(int);
+	
+	void quarterElapsed(int);
+
+	void halfElapsed(int);
+
+	void threeQuarterElapsed(int);
 
 private Q_SLOTS:
 	void update(int frame);

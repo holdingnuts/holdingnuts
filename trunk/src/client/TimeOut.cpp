@@ -102,10 +102,51 @@ void TimeOut::update(int frame)
 {
 	m_nFrame = frame;
 	
+	// handle inaccuracy of timer
+	static bool bQuarterAlreadyEmitted = false;
+	static bool bHalfAlreadyEmitted = false;
+	static bool bThreeQuarterAlreadyEmitted = false;
+
+	// inital state	
+	if (m_nFrame < 2)
+	{
+		bQuarterAlreadyEmitted = false;
+		bHalfAlreadyEmitted = false;
+		bThreeQuarterAlreadyEmitted = false;
+	}
+
+	// pass 1/4
+	if (m_nFrame > m_Image.width() / 4)
+	{
+		if (!bQuarterAlreadyEmitted)
+		{
+			emit quarterElapsed(m_nSeat);
+			bQuarterAlreadyEmitted = true;
+		}
+	}
+	
+	// pass 2/4
+	if (m_nFrame > m_Image.width() / 2)
+	{
+		if (!bHalfAlreadyEmitted)
+		{
+			emit halfElapsed(m_nSeat);
+			bHalfAlreadyEmitted = true;
+		}
+	}
+	
+	// pass 3/4
+	if (m_nFrame > m_Image.width() / 4 * 3)
+	{
+		if (!bThreeQuarterAlreadyEmitted)
+		{
+			emit threeQuarterElapsed(m_nSeat);
+			bThreeQuarterAlreadyEmitted = true;
+		}
+	}
+
 	if (m_nFrame == m_Image.width())
 		emit timeup(m_nSeat);
-
-	Q_ASSERT_X(scene(), __func__, "bad scene pointer");
 
 	QGraphicsItem::update(this->boundingRect());
 }
