@@ -1459,7 +1459,7 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	{
 	case HandStrength::HighCard:
 		sstrength = tr("High Card");
-		srank = QString("%1").arg(buildFaceString(rank[0], true));
+		srank = QString("%1").arg(buildFaceString(rank[0]));
 		break;
 	case HandStrength::OnePair:
 		sstrength = tr("One Pair");
