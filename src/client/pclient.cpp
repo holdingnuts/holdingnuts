@@ -45,19 +45,17 @@
 #endif
 #include "data.h"
 
-//////////////
 
 ConfigParser config;
 
-//////////////
 
-// server command PSERVER <version> <client-id>
+// server command PSERVER <version> <client-id> <time>
 void PClient::serverCmdPserver(Tokenizer &t)
 {
 	const unsigned int version = t.getNextInt();
 	srv.cid = t.getNextInt();
 	
-	const uint time_remote = t.getNextInt();
+	const unsigned int time_remote = t.getNextInt();
 	srv.time_remote_delta = time_remote - QDateTime::currentDateTime().toTime_t();
 	
 	srv.introduced = true;
@@ -99,6 +97,7 @@ void PClient::serverCmdPserver(Tokenizer &t)
 		
 	netSendMsg(msg);
 	
+	
 	// request initial game-list and start update-timer
 	requestGamelist();
 }
@@ -122,7 +121,6 @@ void PClient::serverCmdErr(Tokenizer &t)
 }
 
 // server command MSG <from> <sender-name> <message>
-// from := { -1 | <game-id>:<table-id> | <client-id> | <gid>:<tid>:<cid> }   # -1 server
 void PClient::serverCmdMsg(Tokenizer &t)
 {
 	const std::string idfrom = t.getNext();
@@ -137,17 +135,22 @@ void PClient::serverCmdMsg(Tokenizer &t)
 
 	if (ft.count() == 2)
 	{
+		// message from table
 		gid = ft.getNextInt();
 		tid = ft.getNextInt();
 	}
 	else if (ft.count() == 3)
 	{
+		// client message from table
 		gid = ft.getNextInt();
 		tid = ft.getNextInt();
 		cid = ft.getNextInt();
 	}
 	else
+	{
+		// message from foyer or client
 		from = ft.getNextInt();
+	}
 
 	// playername
 	const QString qsfrom(QString::fromStdString(t.getNext()));
@@ -161,19 +164,17 @@ void PClient::serverCmdMsg(Tokenizer &t)
 			
 		while(rx.indexIn(qchatmsg) != -1)
 		{
-			QString name = "???";
-			players_type::iterator it = players.find(rx.cap(1).toInt());
-
-			if(it != players.end())
-				name = it->second.name;
+			const int mcid = rx.cap(1).toInt();
+			const QString name = getPlayerName(mcid);
 			
 			qchatmsg.replace(rx, name);
 		}
 	}
-
+	
+	
 	if (gid != -1 && tid != -1)
 	{
-		tableinfo* tinfo = getTableInfo(gid, tid);
+		const tableinfo *tinfo = getTableInfo(gid, tid);
 		
 		// silently drop message if there is no table-info
 		if (!tinfo)
@@ -193,6 +194,7 @@ void PClient::serverCmdMsg(Tokenizer &t)
 	}
 }
 
+// table snapshot
 void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
 {
 	// silently drop message if there is no table-info
@@ -211,7 +213,7 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	table.state = st.getNextInt();
 	table.betting_round = st.getNextInt();
 	
-	// dealer:sb:bb:current
+	// dealer:sb:bb:current:lastbet
 	tmp = t.getNext();
 	st.parse(tmp);
 	table.s_dealer = st.getNextInt();
@@ -333,6 +335,7 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		tinfo->window->updateView();
 }
 
+// snapshot with gamestate info
 void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
 {
 	snap_gamestate_type type = (snap_gamestate_type) t.getNextInt();
@@ -363,6 +366,7 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	// TODO: else if (type == "your_seat")
 }
 
+// cards snapshot
 void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
 {
 	snap_cards_type type = (snap_cards_type) t.getNextInt();
@@ -432,16 +436,17 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	}
 }
 
+// snapshot with player action info
 void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
 {
 	// silently drop message if there is no table-info
 	if (!tinfo || !tinfo->window)
 		return;
 	
-	snap_playeraction_type type = (snap_playeraction_type) t.getNextInt();
-	unsigned int cid = t.getNextInt();
+	const snap_playeraction_type type = (snap_playeraction_type) t.getNextInt();
+	const unsigned int cid = t.getNextInt();
 	
-	QString player_name = getPlayerName(cid);
+	const QString player_name = getPlayerName(cid);
 	
 	QString smsg;
 	if (type == SnapPlayerActionFolded || type == SnapPlayerActionChecked)
@@ -518,7 +523,7 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 	
 	unsigned int cid = t.getNextInt();
 	
-	QString player_name = getPlayerName(cid);
+	const QString player_name = getPlayerName(cid);
 	
 	std::vector<Card> allcards;
 	
@@ -533,7 +538,7 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 	
 	HandStrength strength;
 	GameLogic::getStrength(&allcards, &strength);
-	QString sstrength = WTable::buildHandStrengthString(&strength, 1);
+	const QString sstrength = WTable::buildHandStrengthString(&strength, 1);
 	
 	tinfo->window->addServerMessage(
 		QString(tr("%1 shows %2.")
@@ -541,14 +546,15 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 			.arg(sstrength)));
 }
 
+// server cmd SNAP
 void PClient::serverCmdSnap(Tokenizer &t)
 {
-	std::string from = t.getNext();
+	const std::string from = t.getNext();
 	Tokenizer ft(":");
 	ft.parse(from);
-	int gid = ft.getNextInt();
-	int tid = ft.getNextInt();
-	tableinfo* tinfo = getTableInfo(gid, tid);
+	const int gid = ft.getNextInt();
+	const int tid = ft.getNextInt();
+	tableinfo *tinfo = getTableInfo(gid, tid);
 	
 	snaptype snap = (snaptype)t.getNextInt();
 	
@@ -660,7 +666,7 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 // server command CLIENTINFO <client-id> <type>:<value> [...]
 void PClient::serverCmdClientinfo(Tokenizer &t)
 {
-	int cid = t.getNextInt();
+	const int cid = t.getNextInt();
 	
 	playerinfo pi;
 	
@@ -690,7 +696,7 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 // server command GAMEINFO <gid> <type>:<value> [...]
 void PClient::serverCmdGameinfo(Tokenizer &t)
 {
-	int gid = t.getNextInt();
+	const int gid = t.getNextInt();
 	
 	games_type::iterator git = games.find(gid);
 	
@@ -1219,7 +1225,7 @@ void PClient::netDisconnected()
 		tables_type &tables = e->second.tables;
 		for (tables_type::iterator t = tables.begin(); t != tables.end(); t++)
 		{
-			tableinfo *table = &(t->second);
+			const tableinfo *table = &(t->second);
 			
 			if (table->window)
 			{
@@ -1286,7 +1292,7 @@ bool PClient::isTableWindowRemaining()
 		tables_type &tables = e->second.tables;
 		for (tables_type::iterator t = tables.begin(); t != tables.end(); t++)
 		{
-			tableinfo *table = &(t->second);
+			const tableinfo *table = &(t->second);
 			
 			if (table->window)
 			{
@@ -1395,6 +1401,7 @@ int PClient::init()
 #endif /* NOAUDIO */
 	
 #ifdef DEBUG
+	// set a random suffix, useful for debugging with multiple clients
 	if (config.getBool("dbg_name"))
 	{
 		srand(time(NULL));
@@ -1413,6 +1420,7 @@ int PClient::init()
 	wMain->show();
 	
 #ifdef DEBUG
+	// automatically connect to default server and register to the game
 	if (config.getInt("dbg_register") != -1)
 	{
 		doConnect(config.get("default_host").c_str(),
