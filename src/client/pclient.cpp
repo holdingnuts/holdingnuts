@@ -1388,19 +1388,13 @@ int PClient::init()
 	
 	for (unsigned int i=0; i < sounds_count; i++)
 	{
-		log_msg("audio", "Loading sound '%s' (%d)", sounds[i].file, sounds[i].id);
-		audio_load(sounds[i].id, sounds[i].file);
+		dbg_msg("audio", "Loading sound '%s' (%d)", sounds[i].file, sounds[i].id);
+		if (audio_load(sounds[i].id, sounds[i].file))
+			log_msg("audio", "Failed loading sound (%d)", sounds[i].id);
 	}
 #endif /* NOAUDIO */
 	
 #ifdef DEBUG
-	if (config.getInt("dbg_register") != -1)
-	{
-		doConnect(config.get("default_host").c_str(),
-			config.getInt("default_port"));
-		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
-	}
-
 	if (config.getBool("dbg_name"))
 	{
 		srand(time(NULL));
@@ -1417,6 +1411,15 @@ int PClient::init()
 	wMain = new WMain();
 	wMain->updateConnectionStatus();
 	wMain->show();
+	
+#ifdef DEBUG
+	if (config.getInt("dbg_register") != -1)
+	{
+		doConnect(config.get("default_host").c_str(),
+			config.getInt("default_port"));
+		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
+	}
+#endif
 	
 #if 1
 	// FIXME: this is a temporary fix for the C-locale (sprintf-float/strtod) issue
