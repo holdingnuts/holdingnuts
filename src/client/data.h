@@ -25,3 +25,5 @@
 #define SOUND_CHIP_2		0x4
 #define SOUND_CHECK_1		0x5
 #define SOUND_FOLD_1		0x6
+#define SOUND_REMINDER_1	0x7
+

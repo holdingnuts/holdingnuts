@@ -135,8 +135,6 @@ protected:
 
 	//! \brief returns current Potsize including all Bets on Table
 	float currentPot() const;
-	
-//	void doRaise(float factor);
 
 private slots:
 	void actionFold();
@@ -149,7 +147,9 @@ private slots:
 	void actionAutoCheckCall(int state);
 
 	void slotTimeup(int seat);
-	
+	void slotFirstReminder(int seat);
+	void slotSecondReminder(int seat);
+
 	void actionScreenshot();
 	
 	void actionChat(QString msg);
