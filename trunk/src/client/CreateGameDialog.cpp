@@ -156,12 +156,12 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	groupPrivate->setLayout(layoutPrivate);
 	
 	
-	QVBoxLayout *mainLayout = new QVBoxLayout;
-	mainLayout->addWidget(groupGeneral);
-	mainLayout->addWidget(groupPlayers);
-	mainLayout->addWidget(groupBlinds);
-	mainLayout->addWidget(groupPrivate);
-	mainLayout->addWidget(buttonBox);
+	QGridLayout *mainLayout = new QGridLayout;
+	mainLayout->addWidget(groupGeneral, 0, 0);
+	mainLayout->addWidget(groupPlayers, 0, 1);
+	mainLayout->addWidget(groupBlinds, 1, 1);
+	mainLayout->addWidget(groupPrivate, 1, 0);
+	mainLayout->addWidget(buttonBox, 2, 0, 1, 2);
 	setLayout(mainLayout);
 }
 
