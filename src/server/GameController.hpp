@@ -87,6 +87,10 @@ public:
 	std::string getName() const { return name; };
 	bool setName(const std::string &str) { name = str; return true; }; // FIXME: validate
 	
+	bool checkPassword(const std::string &passwd) const { return (!password.length() || password == passwd); };
+	bool hasPassword() const { return password.length(); };
+	bool setPassword(const std::string &str) { password = str; return true; };
+	
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() const { return max_players; };
 	unsigned int getPlayerCount() const { return players.size(); };
@@ -178,6 +182,7 @@ private:
 	time_t ended_time;
 	
 	std::string name;
+	std::string password;
 };
 
 #endif /* _GAMECONTROLLER_H */

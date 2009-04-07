@@ -52,6 +52,7 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QInputDialog>
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -215,7 +216,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 	wGameInfo = new QWidget(this);
 	wGameInfo->setLayout(lGameInfo);
-	wGameInfo->setFixedWidth(250);
+	wGameInfo->setFixedWidth(260);
 	
 	// connection
 	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")), this);
@@ -583,7 +584,21 @@ void WMain::doRegister(bool bRegister)
 		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
 		
-		((PClient*)qApp)->doRegister(gid, bRegister);
+		const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
+		Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
+		
+		QString password;
+		if (bRegister && gi->password)
+		{
+			bool ok;
+			password = QInputDialog::getText(this, tr("Private game"),
+						tr("Please enter the game password:"), QLineEdit::Normal,
+						QString(), &ok);
+			if (!ok)
+				return;
+		}
+		
+		((PClient*)qApp)->doRegister(gid, bRegister, password);
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
 	}
@@ -666,6 +681,7 @@ void WMain::actionCreateGame()
 	gc.blinds_start = dialogCreateGame.getBlindsStart();
 	gc.blinds_factor = dialogCreateGame.getBlindsFactor();
 	gc.blinds_time = dialogCreateGame.getBlindsTime();
+	gc.password = dialogCreateGame.getPassword();
 	((PClient*)qApp)->createGame(&gc);
 	
 	((PClient*)qApp)->requestGamelist();

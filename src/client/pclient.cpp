@@ -720,7 +720,11 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->type = (gametype) it.getNextInt();
 	gi->mode = (gamemode) it.getNextInt();
 	gi->state = (gamestate) it.getNextInt();
-	gi->registered = it.getNextInt() ? true : false;
+	
+	unsigned int flags = it.getNextInt();
+	gi->registered = flags & GameInfoRegistered;
+	gi->password = flags & GameInfoPassword;
+	
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
 	gi->player_timeout = it.getNextInt();
@@ -943,7 +947,7 @@ void PClient::doClose()
 	tcpSocket->close();
 }
 
-void PClient::doRegister(int gid, bool bRegister)
+void PClient::doRegister(int gid, bool bRegister, const QString& password)
 {
 	char msg[1024];
 	
@@ -951,7 +955,7 @@ void PClient::doRegister(int gid, bool bRegister)
 		return;
 	
 	if (bRegister)
-		snprintf(msg, sizeof(msg), "REGISTER %d", gid);
+		snprintf(msg, sizeof(msg), "REGISTER %d %s", gid, password.toStdString().c_str());
 	else
 		snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
 		
@@ -1040,7 +1044,7 @@ bool PClient::createGame(gamecreate *createinfo)
 	dbg_msg("DEBUG", "float %.2f  int %d", createinfo->stake, (int)(createinfo->stake*100.0f));
 	
 	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%d timeout:%d "
-		"blinds_start:%d blinds_factor:%.2f blinds_time:%d "
+		"blinds_start:%d blinds_factor:%.2f blinds_time:%d password:%s "
 		"\"name:%s\"",
 		createinfo->max_players,
 		(int)(createinfo->stake*100),
@@ -1048,6 +1052,7 @@ bool PClient::createGame(gamecreate *createinfo)
 		(int)(createinfo->blinds_start*100),
 		createinfo->blinds_factor,
 		createinfo->blinds_time,
+		createinfo->password.simplified().toStdString().c_str(),
 		createinfo->name.simplified().toStdString().c_str());
 	netSendMsg(msg);
 	
@@ -1388,6 +1393,7 @@ int PClient::init()
 		{ SOUND_CHIP_2,		"audio/chip2.wav" },
 		{ SOUND_CHECK_1,	"audio/check1.wav" },
 		{ SOUND_FOLD_1,		"audio/fold1.wav" },
+		{ SOUND_REMINDER_1,	"audio/reminder.wav" },
 	};
 	
 	const unsigned int sounds_count = sizeof(sounds) / sizeof(sounds[0]);

@@ -544,7 +544,9 @@ bool send_gameinfo(clientcon *client, int gid)
 		(int) GameTypeHoldem,
 		game_mode,
 		state,
-		g->isPlayer(client->id) ? 1 : 0,
+		(g->isPlayer(client->id) ? GameInfoRegistered : 0) |
+			(g->hasPassword() ? GameInfoPassword : 0) |
+			(g->getRestart() ? GameInfoRestart : 0),
 		g->getPlayerMax(),
 		g->getPlayerCount(),
 		g->getPlayerTimeout(),
@@ -693,6 +695,10 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	int gid;
 	t >> gid;
 	
+	string passwd = "";
+	if (t.count() >=2)
+		t >> passwd;
+	
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 	{
@@ -727,6 +733,13 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 				return 1;
 			}
 		}
+	}
+	
+	// check the password
+	if (!g->checkPassword(passwd))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to register, wrong password");
+		return 1;
 	}
 	
 	if (!g->addPlayer(client->id))
@@ -905,6 +918,8 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		chips_type blinds_start;
 		float blinds_factor;
 		unsigned int blinds_time;
+		string password;
+		bool restart;
 	} ginfo = {
 		"user_game",
 		10,
@@ -913,7 +928,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		30,
 		20*100,
 		2.0f,
-		180
+		180,
+		"",
+		false,
 	};
 	
 	
@@ -986,6 +1003,20 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 			if (ginfo.blinds_time < 30 || ginfo.blinds_time > 20*60)
 				cmderr = true;
 		}
+		else if (infotype == "password" && havearg)
+		{
+			if (infoarg.length() > 16)
+				infoarg = string(infoarg, 0, 16);
+			
+			ginfo.password = infoarg;
+		}
+		else if (infotype == "restart" && havearg)
+		{
+			if (client->state & Authed)
+				ginfo.restart = Tokenizer::string2int(infoarg) ? 1 : 0;
+			else
+				cmderr = true;
+		}
 	}
 	
 	if (!cmderr)
@@ -1002,6 +1033,8 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		g->setBlindsStart(ginfo.blinds_start);
 		g->setBlindsFactor(ginfo.blinds_factor);
 		g->setBlindsTime(ginfo.blinds_time);
+		g->setPassword(ginfo.password);
+		g->setRestart(ginfo.restart);
 		games[gid] = g;
 		
 		send_ok(client);
@@ -1033,7 +1066,7 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 		int type = t.getNextInt();
 		string passwd = t.getNext();
 		
-		// -1 is server-auth, anything other is game-auth
+		// -1 is server-auth
 		if (type == -1)
 		{
 			if (passwd == config.get("auth_password"))
@@ -1043,14 +1076,13 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 				cmderr = false;
 			}
 		}
-		else
-		{
-			// TODO: game-auth
-		}
 	}
 	
 	if (!cmderr)
+	{
 		send_ok(client);
+		
+	}
 	else
 		send_err(client, 0, "auth failed");
 	

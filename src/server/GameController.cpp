@@ -61,6 +61,9 @@ GameController::GameController()
 	hand_no = 0;
 	
 	type = SNG;
+	
+	name = "game";
+	password = "";
 }
 
 bool GameController::addPlayer(int cid)
