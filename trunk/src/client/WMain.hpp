@@ -122,6 +122,8 @@ private:
 	QPushButton		*btnConnect;
 	//! \brief Close connection Button
 	QPushButton		*btnClose;
+	//! \brief Container widget for connection-widgets
+	QWidget			*wConnection;
 	
 	//! \Brief Chatbox
 	ChatBox			*m_pChat;
