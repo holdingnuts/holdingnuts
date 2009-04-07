@@ -245,6 +245,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pTimeout->hide();
 
 	connect(m_pTimeout, SIGNAL(timeup(int)), this, SLOT(slotTimeup(int)));
+	connect(m_pTimeout, SIGNAL(quarterElapsed(int)), this, SLOT(slotFirstReminder(int)));
+	connect(m_pTimeout, SIGNAL(threeQuarterElapsed(int)), this, SLOT(slotSecondReminder(int)));
 
 	m_pScene->addItem(m_pTimeout);
 
@@ -1309,6 +1311,58 @@ void WTable::slotShow()
 void WTable::slotTimeup(int seat)
 {
 	qDebug() << "timeup seat= " << seat;
+}
+
+void WTable::slotFirstReminder(int seatnr)
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	
+	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	
+	const table_snapshot *snap = &(tinfo->snap);
+	
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+
+	if (snap->my_seat != seatnr)
+		return;
+
+	const seatinfo *seat = &(snap->seats[seatnr]);
+
+	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+		
+	addServerMessage(
+		QString(tr("%1, it's your turn!")
+			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))));
+}
+
+void WTable::slotSecondReminder(int seatnr)
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	
+	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	
+	const table_snapshot *snap = &(tinfo->snap);
+	
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+
+	if (snap->my_seat != seatnr)
+		return;
+
+	const seatinfo *seat = &(snap->seats[seatnr]);
+
+	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+		
+	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
+
+	Q_ASSERT_X(ginfo, Q_FUNC_INFO, "invalid gameinfo pointer");
+		
+	addServerMessage(
+		QString(tr("%1, You have %2 seconds left to respond!")
+			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))
+			.arg(ginfo->player_timeout / 4 * 3)));
+
+	// additionally play sound
+	playSound(SOUND_REMINDER_1);
 }
 
 void WTable::resizeEvent(QResizeEvent *event)
