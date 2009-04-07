@@ -90,7 +90,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinStake->setMinimum(500.0);
 	spinStake->setMaximum(1000000.0);
 	spinStake->setSingleStep(100.0);
-	spinStake->setValue(5000.0);
+	spinStake->setValue(1500.0);
 	
 	QGridLayout *layoutPlayers = new QGridLayout;
 	layoutPlayers->addWidget(labelPlayers, 0, 0);
@@ -118,7 +118,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinBlindsFactor->setMinimum(1.0);
 	spinBlindsFactor->setMaximum(3.5);
 	spinBlindsFactor->setSingleStep(0.1);
-	spinBlindsFactor->setValue(2.0);
+	spinBlindsFactor->setValue(1.5);
 	
 	QLabel *labelBlindsTime = new QLabel(tr("Raise time"), this);
 	spinBlindsTime = new QSpinBox(this);
@@ -137,10 +137,30 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	groupBlinds->setLayout(layoutBlinds);
 	
 	
+	QGroupBox *groupPrivate = new QGroupBox(tr("Private game"), this);
+	
+	QLabel *labelPrivate = new QLabel(tr("Password protected"), this);
+	QCheckBox *checkPrivate = new QCheckBox(this);
+	connect(checkPrivate, SIGNAL(stateChanged(int)), this, SLOT(slotCheckStatePrivate(int)));
+	
+	QLabel *labelPassword = new QLabel(tr("Password:"), this);
+	editPassword = new QLineEdit(this);
+	editPassword->setEnabled(false);
+	
+	
+	QGridLayout *layoutPrivate = new QGridLayout;
+	layoutPrivate->addWidget(labelPrivate, 0, 0);
+	layoutPrivate->addWidget(checkPrivate, 0, 1);
+	layoutPrivate->addWidget(labelPassword, 1, 0);
+	layoutPrivate->addWidget(editPassword, 1, 1);
+	groupPrivate->setLayout(layoutPrivate);
+	
+	
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	mainLayout->addWidget(groupGeneral);
 	mainLayout->addWidget(groupPlayers);
 	mainLayout->addWidget(groupBlinds);
+	mainLayout->addWidget(groupPrivate);
 	mainLayout->addWidget(buttonBox);
 	setLayout(mainLayout);
 }
@@ -157,37 +177,47 @@ void CreateGameDialog::actionOk()
 	}
 }
 
-QString CreateGameDialog::getName()
+void CreateGameDialog::slotCheckStatePrivate(int value)
+{
+	editPassword->setEnabled(value);
+}
+
+QString CreateGameDialog::getName() const
 {
 	return editName->text();
 }
 
-double CreateGameDialog::getStake()
+QString CreateGameDialog::getPassword() const
+{
+	return editPassword->text();
+}
+
+double CreateGameDialog::getStake() const
 {
 	return spinStake->value();
 }
 
-unsigned int CreateGameDialog::getPlayers()
+unsigned int CreateGameDialog::getPlayers() const
 { 
 	return spinPlayers->value();
 }
 
-unsigned int CreateGameDialog::getTimeout()
+unsigned int CreateGameDialog::getTimeout() const
 { 
 	return spinTimeout->value();
 }
 
-double CreateGameDialog::getBlindsStart()
+double CreateGameDialog::getBlindsStart() const
 {
 	return spinBlindsStart->value();
 }
 
-double CreateGameDialog::getBlindsFactor()
+double CreateGameDialog::getBlindsFactor() const
 {
 	return spinBlindsFactor->value();
 }
 
-unsigned int CreateGameDialog::getBlindsTime()
+unsigned int CreateGameDialog::getBlindsTime() const
 { 
 	return spinBlindsTime->value();
 }

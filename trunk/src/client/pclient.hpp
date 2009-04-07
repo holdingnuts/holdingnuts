@@ -88,6 +88,8 @@ typedef struct {
 	gamemode		mode;
 	//! \brief gamestate
 	gamestate		state;
+	//! \brief wherther the game is password protected or not
+	bool			password;
 	//! \brief timeout in seconds if no answer from player
 	unsigned int	player_timeout;
 	//! \brief current playerscount registered in game
@@ -124,6 +126,7 @@ typedef struct {
 	unsigned int blinds_time;
 	double blinds_start;
 	double blinds_factor;
+	QString password;
 } gamecreate;
 
 
@@ -152,7 +155,7 @@ public:
 	
 	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
 	
-	void doRegister(int gid, bool bRegister=true);
+	void doRegister(int gid, bool bRegister=true, const QString& password="");
 	
 #if 0
 	const gamelist_type& getGameList();

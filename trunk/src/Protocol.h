@@ -85,6 +85,12 @@ typedef enum {
 } playerstate;
 
 typedef enum {
+	GameInfoRegistered	= 0x01,
+	GameInfoPassword	= 0x02,
+	GameInfoRestart		= 0x04,
+} gameinfo_flags;
+
+typedef enum {
 	ErrProtocol = 0x1,
 	ErrWrongVersion = 0x2,
 	ErrNotImplemented = 0x3,

@@ -43,13 +43,15 @@ friend class WMain;
 public:
 	CreateGameDialog(QWidget *parent = 0);
 	
-	QString getName();
-	double getStake();
-	unsigned int getPlayers();
-	unsigned int getTimeout();
-	double getBlindsStart();
-	double getBlindsFactor();
-	unsigned int getBlindsTime();
+	QString getName() const;
+	QString getPassword() const;
+	double getStake() const;
+	unsigned int getPlayers() const;
+	unsigned int getTimeout() const;
+	double getBlindsStart() const;
+	double getBlindsFactor() const;
+	unsigned int getBlindsTime() const;
+	
 
 private:
 	QLineEdit	*editName;
@@ -59,9 +61,11 @@ private:
 	QDoubleSpinBox  *spinBlindsStart;
 	QDoubleSpinBox  *spinBlindsFactor;
 	QSpinBox        *spinBlindsTime;
+	QLineEdit	*editPassword;
 	
 private slots:
 	void actionOk();
+	void slotCheckStatePrivate(int value);
 };
 
 #endif /* _CREATEGAME_DIALOG_H */
