@@ -80,11 +80,13 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lblBanner->setPalette(p);
 	
 	lblWelcome = new QLabel(this);
+	connect(lblWelcome, SIGNAL(linkActivated(const QString&)), this, SLOT(actionClose()));
 	lblServerTime = new QLabel(this);
 	
 	QVBoxLayout *lHeaderLabels = new QVBoxLayout;
 	lHeaderLabels->addWidget(lblWelcome, 99, Qt::AlignVCenter);
 	lHeaderLabels->addWidget(lblServerTime, 1, Qt::AlignBottom);
+	
 	
 	QLabel *lblLogo = new QLabel(this);
 	lblLogo->setPixmap(QPixmap(":res/hn_logo.png"));
@@ -238,7 +240,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lConnect->addWidget(editSrvAddr);
 	lConnect->addWidget(btnConnect);
 	lConnect->addWidget(btnClose);
-
+	
+	// container widget
+	wConnection = new QWidget(this);
+	wConnection->setLayout(lConnect);
+	
 	
 	// the foyer chat box
 	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
@@ -254,7 +260,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// content layout
 	QGridLayout *layout = new QGridLayout;
 	// row 0
-	layout->addLayout(lConnect, 0, 0, 1, 2);
+	layout->addWidget(wConnection, 0, 0, 1, 2);
 	// row 1
 	layout->addWidget(viewGameList, 1, 0, 1, 1);
 	layout->addWidget(wGameInfo, 1, 1, 2, 1, Qt::AlignCenter | Qt::AlignTop);
@@ -403,6 +409,8 @@ void WMain::updateConnectionStatus()
 		btnConnect->setEnabled(false);
 		btnClose->setEnabled(true);
 		editSrvAddr->setEnabled(false);
+		
+		wConnection->setVisible(true);
 	}
 	else if (is_connected)
 	{
@@ -414,6 +422,8 @@ void WMain::updateConnectionStatus()
 		timerGamelistUpdate->start(60*1000);
 		timerSelectedGameUpdate->start(15*1000);
 		timerServerTimeUpdate->start(1000);
+		
+		wConnection->setVisible(false);
 	}
 	else  // disconnected
 	{
@@ -430,6 +440,8 @@ void WMain::updateConnectionStatus()
 		timerGamelistUpdate->stop();
 		timerSelectedGameUpdate->stop();
 		timerServerTimeUpdate->stop();
+		
+		wConnection->setVisible(true);
 	}
 	
 	m_pChat->setEnabled(is_connected);
@@ -847,9 +859,15 @@ void WMain::updateWelcomeLabel()
 {
 	const bool is_connected = ((PClient*)qApp)->isConnected();
 	
+	QString strConnectionState;
+	if (is_connected)
+		strConnectionState = "<a href=\"#logout\">" + tr("Logout") + "</a>";
+	else
+		strConnectionState = "offline";
+	
 	lblWelcome->setText("<qt>" + tr("Welcome") +
 		" <strong>" + QString::fromStdString(config.get("player_name")) + "</strong>" +
-		(is_connected ? "" : "&nbsp; <em>(" + tr("offline") + ")</em>") +
+		"&nbsp; <em>(" + strConnectionState + ")</em>" +
 		"</qt>");
 }
 
