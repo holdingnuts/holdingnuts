@@ -23,6 +23,7 @@
 config.set("version",		VERSION);		// config file version
 config.set("default_host",	"game.holdingnuts.net");	// default host to connect to
 config.set("default_port",	DEFAULT_SERVER_PORT);	// default port to connect to
+config.set("auto_connect",	false);			// automatically connect to default server
 config.set("player_name",	"Unnamed");		// the player name
 config.set("info_location",	"");			// info: geographical location of the player
 config.set("uuid",		"");			// unique ID for re-connect
@@ -36,7 +37,7 @@ config.set("sound",		true);			// play sounds
 config.set("sound_focus",	true);			// only play sound if window has focus
 
 #ifdef DEBUG
-config.set("dbg_register",	-1);			// automatically connect and register to a game (value is gid)
+config.set("dbg_register",	-1);			// automatically register to a game (value is gid; auto_connect must be set)
 config.set("dbg_bbox",		false);			// show bounding boxes around scene items
 config.set("dbg_srv_cmd",	false);			// log every message from server
 config.set("dbg_name",		false);			// appends a random number to player name
