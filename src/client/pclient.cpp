@@ -1425,14 +1425,18 @@ int PClient::init()
 	wMain->updateConnectionStatus();
 	wMain->show();
 	
-#ifdef DEBUG
-	// automatically connect to default server and register to the game
-	if (config.getInt("dbg_register") != -1)
+	
+	// automatically connect to default server
+	if (config.getBool("auto_connect"))
 	{
 		doConnect(config.get("default_host").c_str(),
 			config.getInt("default_port"));
-		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 	}
+	
+#ifdef DEBUG
+	// automatically register to the game  (auto_connect must be set)
+	if (config.getInt("dbg_register") != -1)
+		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 #endif
 	
 #if 1
