@@ -885,7 +885,7 @@ void WTable::updateSeat(unsigned int s)
 			{
 				const unsigned int curseat_mapped = seatToCentralView(snap->my_seat, snap->s_cur);
 				m_pTimeout->setPos(calcTimeoutPos(curseat_mapped));
-				m_pTimeout->start(curseat_mapped, ginfo->player_timeout);
+				m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
 				m_pTimeout->show();
 			}
 			else
@@ -1458,9 +1458,9 @@ void WTable::slotSecondReminder(int seatnr)
 	Q_ASSERT_X(ginfo, Q_FUNC_INFO, "invalid gameinfo pointer");
 		
 	addServerMessage(
-		QString(tr("%1, You have %2 seconds left to respond!")
+		QString(tr("%1, you have %2 seconds left to respond!")
 			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))
-			.arg(ginfo->player_timeout / 4 * 3)));
+			.arg(ginfo->player_timeout - ginfo->player_timeout / 4 * 3)));
 
 	// additionally play sound
 	playSound(SOUND_REMINDER_1);
