@@ -91,13 +91,16 @@ public:
 	WTable(int gid, int tid, QWidget *parent = 0);
 	~WTable();
 	
+	//! \brief Update whole table view
 	void updateView();
+	
 
 	void addChat(const QString& from, const QString& text);
 	void addServerMessage(const QString& text);
 	
 	void playSound(unsigned int id) const;
 	
+	//! \brief Translate seat-number depending on view-point
 	unsigned int seatToCentralView(int my, unsigned int seat) const;
 	
 	static const unsigned int	nMaxSeats;
@@ -135,6 +138,14 @@ protected:
 
 	//! \brief returns current Potsize including all Bets on Table
 	float currentPot() const;
+	
+	void updateSeat(unsigned int s);
+	void updatePots();
+	void updateDealerButton();
+	void updateCommunityCards();
+	void updateHandStrength();
+	
+	void handleAutoActions();
 
 private slots:
 	void actionFold();
