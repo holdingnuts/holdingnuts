@@ -37,14 +37,16 @@ public:
 	bool load(const char *filename);
 	bool save(const char *filename);
 	
-	bool get(const std::string &name, std::string &value);
-	std::string get(const std::string &name);
+	bool exists(const std::string &name) const;
 	
-	bool getInt(const std::string &name, int &value);
-	int getInt(const std::string &name);
+	bool get(const std::string &name, std::string &value) const;
+	std::string get(const std::string &name) const;
 	
-	bool getBool(const std::string &name, bool &value);
-	bool getBool(const std::string &name);
+	bool getInt(const std::string &name, int &value) const;
+	int getInt(const std::string &name) const;
+	
+	bool getBool(const std::string &name, bool &value) const;
+	bool getBool(const std::string &name) const;
 	
 	bool set(const std::string &name, const std::string &value);
 	bool set(const std::string &name, const char *value);

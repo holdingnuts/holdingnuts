@@ -116,7 +116,11 @@ bool send_response(socktype sock, bool is_success, int last_msgid, int code=0, c
 
 bool send_ok(clientcon *client, int code=0, const char *str="")
 {
+#if 0
 	return send_response(client->sock, true, client->last_msgid, code, str);
+#else
+	return true;
+#endif
 }
 
 bool send_err(clientcon *client, int code=0, const char *str="")
@@ -755,7 +759,9 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 		g->getPlayerCount(), g->getPlayerMax());
 	
 	log_msg("game", "%s", msg);
+#if 0
 	client_chat(-1, -1, msg);
+#endif
 	
 	send_ok(client);
 	
@@ -805,7 +811,9 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 		g->getPlayerCount(), g->getPlayerMax());
 	
 	log_msg("game", "%s", msg);
+#if 0
 	client_chat(-1, -1, msg);
+#endif
 	
 	send_ok(client);
 	
@@ -1039,8 +1047,10 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		
 		send_ok(client);
 		
+#if 0
 		snprintf(msg, sizeof(msg), "Your game '%d' has been created.", gid);
 		client_chat(-1, client->id, msg);
+#endif
 		
 		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
 		{
@@ -1083,6 +1093,46 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 		send_ok(client);
 		
 	}
+	else
+		send_err(client, 0, "auth failed");
+	
+	return 0;
+}
+
+int client_cmd_config(clientcon *client, Tokenizer &t)
+{
+	bool cmderr = false;
+	
+	if (client->state & Authed)
+	{
+		const string action = t.getNext();
+		const string varname = t.getNext();
+		
+		if (action == "get")
+		{
+			if (config.exists(varname))
+				snprintf(msg, sizeof(msg), "Config: %s=%s",
+					varname.c_str(),
+					config.get(varname).c_str());
+			else
+				snprintf(msg, sizeof(msg), "Config: %s not set",
+					varname.c_str());
+			client_chat(-1, client->id, msg);
+		}
+		else if (action == "set")
+		{
+			const string varvalue = t.getNext();
+			
+			config.set(varname, varvalue);
+		}
+		else
+			cmderr = true;
+	}
+	else
+		cmderr = true;
+	
+	if (!cmderr)
+		send_ok(client);
 	else
 		send_err(client, 0, "auth failed");
 	
@@ -1140,6 +1190,8 @@ int client_execute(clientcon *client, const char *cmd)
 		return client_cmd_create(client, t);
 	else if (command == "AUTH")
 		return client_cmd_auth(client, t);
+	else if (command == "CONFIG")
+		return client_cmd_config(client, t);
 	else if (command == "QUIT")
 	{
 		send_ok(client);

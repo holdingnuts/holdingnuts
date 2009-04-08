@@ -95,7 +95,14 @@ bool ConfigParser::save(const char *filename)
 	return true;
 }
 
-bool ConfigParser::get(const string &name, string &value)
+bool ConfigParser::exists(const std::string &name) const
+{
+	cfgvars_type::const_iterator it = vars.find(name);
+	
+	return (it != vars.end());
+}
+
+bool ConfigParser::get(const string &name, string &value) const
 {
 	cfgvars_type::const_iterator it = vars.find(name);
 	
@@ -107,7 +114,7 @@ bool ConfigParser::get(const string &name, string &value)
 	return true;
 }
 
-string ConfigParser::get(const string &name)
+string ConfigParser::get(const string &name) const
 {
 	string value = "";
 	
@@ -116,7 +123,7 @@ string ConfigParser::get(const string &name)
 	return value;
 }
 
-bool ConfigParser::getInt(const string &name, int &value)
+bool ConfigParser::getInt(const string &name, int &value) const
 {
 	string svalue;
 	if (!get(name, svalue))
@@ -127,7 +134,7 @@ bool ConfigParser::getInt(const string &name, int &value)
 	return true;
 }
 
-int ConfigParser::getInt(const string &name)
+int ConfigParser::getInt(const string &name) const
 {
 	int value = 0;
 	
@@ -136,7 +143,7 @@ int ConfigParser::getInt(const string &name)
 	return value;
 }
 
-bool ConfigParser::getBool(const string &name, bool &value)
+bool ConfigParser::getBool(const string &name, bool &value) const
 {
 	string svalue;
 	if (!get(name, svalue))
@@ -150,7 +157,7 @@ bool ConfigParser::getBool(const string &name, bool &value)
 	return true;
 }
 
-bool ConfigParser::getBool(const string &name)
+bool ConfigParser::getBool(const string &name) const
 {
 	bool value = false;
 	

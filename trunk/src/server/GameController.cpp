@@ -556,11 +556,11 @@ void GameController::stateBlinds(Table *t)
 	// give out hole-cards
 	dealHole(t);
 	
-	
+#if 0
 	// tell player 'under the gun' it's his turn
 	Player *p = t->seats[t->cur_player].player;
 	snap(p->client_id, t->table_id, SnapPlayerCurrent);
-	
+#endif
 	
 	t->betround = Table::Preflop;
 	t->scheduleState(Table::Betting, 3);
@@ -864,11 +864,12 @@ void GameController::stateBetting(Table *t)
 		sendTableSnapshot(t);
 	}
 	
-	
+#if 0
 	// tell player it's his turn
 	p = t->seats[t->cur_player].player;
 	if (!t->nomoreaction && p->stake > 0)
 		snap(p->client_id, t->table_id, SnapPlayerCurrent);
+#endif
 }
 
 void GameController::stateBettingEnd(Table *t)
