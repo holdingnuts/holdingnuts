@@ -819,10 +819,10 @@ unsigned int WTable::seatToCentralView(int my, unsigned int seat) const
 	if (my != -1 && config.getBool("ui_centralized_view"))
 	{
 		mapped_seat = (seat - my) + 4;
-		if (mapped_seat > 9)
-			mapped_seat -= 10;
+		if (mapped_seat >= (int)nMaxSeats)
+			mapped_seat -= nMaxSeats;
 		else if (mapped_seat < 0)
-			mapped_seat += 10;
+			mapped_seat += nMaxSeats;
 	}
 	else
 		mapped_seat = seat;
@@ -830,10 +830,315 @@ unsigned int WTable::seatToCentralView(int my, unsigned int seat) const
 	return mapped_seat;
 }
 
+void WTable::updateSeat(unsigned int s)
+{
+	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
+	if (!ginfo)
+		return;
+	
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+
+	const table_snapshot *snap = &(tinfo->snap);
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	
+	const seatinfo *seat = &(snap->seats[s]);
+	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	
+	
+	// get correct mapping (central/normal view) for seat-id
+	const unsigned int mapped_seat = seatToCentralView(snap->my_seat, s);
+	
+	// pointer to seat-entity
+	Seat *ui_seat = wseats[mapped_seat];
+	
+	// update seat widget if seat is occupied
+	if (seat->valid)
+	{
+		ui_seat->setValid(true);
+		ui_seat->setStake(seat->stake);
+		ui_seat->setSitout(seat->sitout);
+		
+		
+		const int cid = seat->client_id;
+		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
+		
+		// check if playerinfo is available
+		if (pinfo)
+			ui_seat->setInfo(pinfo->name,
+						pinfo->location);
+		else
+			ui_seat->setInfo(((PClient*)qApp)->getPlayerName(cid), "");
+		
+		
+		if (snap->state > Table::ElectDealer)
+		{
+			// highlight current seat
+			ui_seat->setCurrent(snap->s_cur == s);
+			
+			// update timeout display
+			if ((snap->state == Table::Blinds || 
+				snap->state == Table::Betting) &&
+				snap->seats[snap->s_cur].stake > 0 &&
+				snap->seats[snap->s_cur].sitout == false)
+			{
+				const unsigned int curseat_mapped = seatToCentralView(snap->my_seat, snap->s_cur);
+				m_pTimeout->setPos(calcTimeoutPos(curseat_mapped));
+				m_pTimeout->start(curseat_mapped, ginfo->player_timeout);
+				m_pTimeout->show();
+			}
+			else
+			{
+				m_pTimeout->hide();
+				m_pTimeout->stop();
+			}
+		}
+		
+		// in case the player associated with seat is involved in hand
+		if (seat->in_round)
+		{
+			// is it our seat?
+			ui_seat->setMySeat(snap->my_seat == (int)s);
+			
+			
+			if (snap->state == Table::EndRound)
+				ui_seat->setWin(seat->bet);
+			else
+				ui_seat->setAction((seat->stake == 0) ? Player::Allin : seat->action,
+								seat->bet);
+			
+			
+			
+			std::vector<Card> allcards;
+			
+			// use cards of saved holecards or snapshot
+			if (snap->my_seat == (int)s)
+				tinfo->holecards.copyCards(&allcards);
+			else
+				seat->holecards.copyCards(&allcards);
+			
+			// are there cards visible?
+			if (allcards.size())
+			{
+				char card1[3], card2[3];
+				strcpy(card1, allcards[0].getName());
+				strcpy(card2, allcards[1].getName());
+				ui_seat->setCards(card1, card2);
+				
+				ui_seat->showBigCards(true);
+			}
+			else
+			{
+				if (snap->my_seat == (int)s)
+					ui_seat->setCards("blank", "blank");
+				else
+					ui_seat->setCards("back", "back");
+				
+				ui_seat->showBigCards(false);
+			}
+			
+			ui_seat->showSmallCards(true);
+		}
+		else   // player isn't anymore involved in current hand
+		{
+			ui_seat->setAction(seat->action);
+			ui_seat->setCards("blank", "blank");
+			ui_seat->showBigCards(false);
+			ui_seat->showSmallCards(false);
+		}
+
+		// schedule scene update
+		ui_seat->update(ui_seat->boundingRect());
+	}
+	else
+	{
+		// if seat was valid force schedule redraw
+		if (ui_seat->isValid())
+		{
+			ui_seat->update(ui_seat->boundingRect());
+			ui_seat->setValid(false);
+		}
+	}
+}
+
+void WTable::updatePots()
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+
+	const table_snapshot *snap = &(tinfo->snap);
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	
+	
+	QString strPots;
+	if (snap->pots.at(0) > .0f)
+	{
+		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0), 0, 'f', 2));
+		for (unsigned int t = 1; t < snap->pots.size(); ++t)
+		{
+			strPots.append(
+				QString("  " + tr("Side pot %1: %2")
+					.arg(t).arg(snap->pots.at(t), 0, 'f', 2)));
+		}
+	}
+	
+	m_pTxtPots->setText(strPots);
+	m_pTxtPots->setPos(calcPotsPos());
+}
+
+void WTable::updateDealerButton()
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+
+	const table_snapshot *snap = &(tinfo->snap);
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	
+	
+	// remember last state change
+	static int last_state = -1;
+	
+	if (snap->state == Table::NewRound && last_state != snap->state)
+	{
+		// update dealer button
+		const unsigned int dealerseat_mapped = seatToCentralView(snap->my_seat, snap->s_dealer);
+		m_pDealerButton->startAnimation(m_ptDealerBtn[dealerseat_mapped]);
+	}
+	
+	last_state = snap->state;
+}
+
+void WTable::updateCommunityCards()
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+
+	const table_snapshot *snap = &(tinfo->snap);
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	
+	
+	if (snap->state == Table::NewRound)
+		for (unsigned int i = 0; i < 5; i++)
+			m_CommunityCards[i]->hide();
+	
+	
+	std::vector<Card> allcards;
+	snap->communitycards.copyCards(&allcards);
+	
+	
+	// load community cards   // FIXME: cache pixmaps
+	for (unsigned int i = 0; i < allcards.size(); i++)
+	{
+		m_CommunityCards[i]->setPixmap(
+			QPixmap(
+				QString("gfx/deck/%1/%2.png")
+					.arg(QString::fromStdString(config.get("ui_card_deck")))
+					.arg(allcards[i].getName())));
+		m_CommunityCards[i]->show();
+	}
+}
+
+void WTable::handleAutoActions()
+{	
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+
+	const table_snapshot *snap = &(tinfo->snap);
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	
+	if (snap->my_seat == -1)
+		return;
+	
+	const seatinfo *seat = &(snap->seats[snap->my_seat]);
+	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	
+	
+	// handle auto-actions
+	if (snap->state == Table::Betting)
+	{
+		if ((int)snap->s_cur == snap->my_seat)
+		{
+			if (chkAutoFoldCheck->checkState() == Qt::Checked)
+			{
+				if (greaterBet(snap, seat->bet))
+					actionFold();
+				else
+					actionCheckCall();
+				
+				chkAutoFoldCheck->setCheckState(Qt::Unchecked);
+				stlayActions->setCurrentIndex(m_nNoAction);
+			}
+			else if (chkAutoCheckCall->checkState() == Qt::Checked)
+			{
+				qreal greatest_bet;
+				greaterBet(snap, 0, &greatest_bet);
+				
+				if (m_autocall_amount >= greatest_bet)
+				{
+					actionCheckCall();
+					stlayActions->setCurrentIndex(m_nNoAction);
+				}
+				
+				chkAutoCheckCall->setCheckState(Qt::Unchecked);
+			}
+		}
+		else  // validate pre-actions
+		{
+			if (chkAutoCheckCall->checkState() == Qt::Checked)
+			{
+				qreal greatest_bet;
+				greaterBet(snap, 0, &greatest_bet);
+				
+				if (m_autocall_amount < greatest_bet)
+					chkAutoCheckCall->setCheckState(Qt::Unchecked);
+			}
+		}
+	}
+}
+
+void WTable::updateHandStrength()
+{
+	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (!tinfo)
+		return;
+
+	const table_snapshot *snap = &(tinfo->snap);
+	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	
+	if (snap->my_seat == -1)
+		return;
+	
+	const seatinfo *seat = &(snap->seats[snap->my_seat]);
+	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	
+	
+	if (seat->in_round)
+	{
+		vector<Card> allcards;
+		tinfo->holecards.copyCards(&allcards);
+		
+		if (allcards.size())
+		{
+			HandStrength strength;
+			GameLogic::getStrength(&(tinfo->holecards), &(snap->communitycards), &strength);
+			
+			m_pTxtHandStrength->setText(WTable::buildHandStrengthString(&strength, 0));
+			m_pTxtHandStrength->setPos(calcHandStrengthPos());
+		}
+		else
+			m_pTxtHandStrength->setText(QString());
+	}
+	else
+		m_pTxtHandStrength->setText(QString());
+}
+
 void WTable::updateView()
 {
-	int my_cid = ((PClient*)qApp)->getMyCId();
-	
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
 	if (!ginfo)
 		return;
@@ -846,242 +1151,38 @@ void WTable::updateView()
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 	
 	
+	
+	// update seat widgets
 	for (unsigned int i=0; i < nMaxSeats; i++)
-	{
-		const seatinfo *seat = &(snap->seats[i]);
-		
-		// centralized view
-		const unsigned int mapped_seat = seatToCentralView(snap->my_seat, i);
-		
-		
-		Seat *ui_seat = wseats[mapped_seat];
-		
-		if (seat->valid)
-		{
-			int cid = seat->client_id;
-			playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
-			
-			if (pinfo)
-				ui_seat->setInfo(pinfo->name, pinfo->location);
-			else
-				ui_seat->setInfo(QString("??? (%1)").arg(cid), "");
-			
-			ui_seat->setStake(seat->stake);
-			ui_seat->setValid(true);
-			ui_seat->setSitout(seat->sitout);
-			
-			if (snap->state > Table::ElectDealer)
-			{
-				ui_seat->setCurrent(snap->s_cur == i);
-				
-				if ((snap->state == Table::Blinds || 
-					snap->state == Table::Betting) &&
-					snap->seats[snap->s_cur].stake > 0 &&
-					snap->seats[snap->s_cur].sitout == false)
-				{
-					const unsigned int curseat_mapped = seatToCentralView(snap->my_seat, snap->s_cur);
-					m_pTimeout->setPos(calcTimeoutPos(curseat_mapped));
-					m_pTimeout->start(curseat_mapped, ginfo->player_timeout);
-					m_pTimeout->show();
-				}
-				else
-				{
-					m_pTimeout->hide();
-					m_pTimeout->stop();
-				}
-			}
-			
-			if (seat->in_round)
-			{
-				if (snap->state == Table::EndRound)
-				{
-					ui_seat->setWin(seat->bet);
-				}
-				else
-				{
-					if (seat->stake == 0)
-						ui_seat->setAction(Player::Allin, seat->bet);
-					else
-						ui_seat->setAction(seat->action, seat->bet);
-				}
-				
-				ui_seat->setMySeat(my_cid == cid);
-				
-				std::vector<Card> allcards;
-				
-				if (my_cid == cid)
-					tinfo->holecards.copyCards(&allcards);
-				else
-					seat->holecards.copyCards(&allcards);
-				
-				if (allcards.size())
-				{
-					char card1[3], card2[3];
-					strcpy(card1, allcards[0].getName());
-					strcpy(card2, allcards[1].getName());
-					ui_seat->setCards(card1, card2);
-					
-					ui_seat->showBigCards(true);
-				}
-				else
-				{
-					if (my_cid == cid)
-						ui_seat->setCards("blank", "blank");
-					else
-						ui_seat->setCards("back", "back");
-					
-					ui_seat->showBigCards(false);
-				}
-				
-				ui_seat->showSmallCards(true);
-			}
-			else   // player isn't anymore involved in current hand
-			{
-				ui_seat->setAction(seat->action);
-				ui_seat->setCards("blank", "blank");
-				ui_seat->showBigCards(false);
-				ui_seat->showSmallCards(false);
-			}
-
-			// schedule scene update
-			ui_seat->update(ui_seat->boundingRect());
-		}
-		else
-		{
-			// if seat was valid force schedule redraw
-			if (ui_seat->isValid())
-				ui_seat->update(ui_seat->boundingRect());
-
-			ui_seat->setValid(false);
-		}
-	}
+		updateSeat(i);
 	
 	
-	// remember last state change
-	static int last_state = -1;
-	
-	if (snap->state == Table::NewRound && last_state != snap->state)
-	{
-		// dealerbutton
-		const unsigned int dealerseat_mapped = seatToCentralView(snap->my_seat, snap->s_dealer);
-		m_pDealerButton->startAnimation(m_ptDealerBtn[dealerseat_mapped]);
-	}
-	
-	last_state = snap->state;
+	// update the dealer button
+	updateDealerButton();
 	
 	
-	// Pots
-	QString strPots;
-	if (snap->pots.at(0) > .0f)
-	{
-		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0), 0, 'f', 2));
-		for (unsigned int t = 1; t < snap->pots.size(); ++t)
-		{
-			strPots.append(
-				QString("  " + tr("Side pot %1: %2")
-					.arg(t).arg(snap->pots.at(t), 0, 'f', 2)));
-		}
-	}
-		
-	m_pTxtPots->setText(strPots);
-	m_pTxtPots->setPos(calcPotsPos());
+	// update all pots
+	updatePots();
 	
-	// CommunityCards
-	if (snap->state == Table::NewRound)
-		for (unsigned int i = 0; i < 5; i++)
-			m_CommunityCards[i]->hide();
-
-	std::vector<Card> allcards;
-	snap->communitycards.copyCards(&allcards);
 	
-	// load community cards
-	for (unsigned int i = 0; i < allcards.size(); i++)
-	{
-		m_CommunityCards[i]->setPixmap(
-			QPixmap(
-				QString("gfx/deck/%1/%2.png")
-					.arg(QString::fromStdString(config.get("ui_card_deck")))
-					.arg(allcards[i].getName())));
-		m_CommunityCards[i]->show();
-	}
-
+	// update hand-strength
+	updateHandStrength();
+	
+	
+	// update the community cards
+	updateCommunityCards();
+	
+	
+	// evaluate all available actions
 	evaluateActions(snap);
 	
 	
-	if (snap->my_seat != -1)
-	{
-		const seatinfo *s = &(snap->seats[snap->my_seat]);
-		
-		
-		// handle auto-actions
-		if (snap->state == Table::Betting)
-		{
-			if ((int)snap->s_cur == snap->my_seat)
-			{
-				if (chkAutoFoldCheck->checkState() == Qt::Checked)
-				{
-					if (greaterBet(snap, s->bet))
-						actionFold();
-					else
-						actionCheckCall();
-					
-					chkAutoFoldCheck->setCheckState(Qt::Unchecked);
-					stlayActions->setCurrentIndex(m_nNoAction);
-				}
-				else if (chkAutoCheckCall->checkState() == Qt::Checked)
-				{
-					qreal greatest_bet;
-					greaterBet(snap, 0, &greatest_bet);
-					
-					if (m_autocall_amount >= greatest_bet)
-					{
-						actionCheckCall();
-						stlayActions->setCurrentIndex(m_nNoAction);
-					}
-					
-					chkAutoCheckCall->setCheckState(Qt::Unchecked);
-				}
-			}
-			else  // validate pre-actions
-			{
-				if (chkAutoCheckCall->checkState() == Qt::Checked)
-				{
-					qreal greatest_bet;
-					greaterBet(snap, 0, &greatest_bet);
-					
-					if (m_autocall_amount < greatest_bet)
-						chkAutoCheckCall->setCheckState(Qt::Unchecked);
-				}
-			}
-		}
-		
-		
-		// determine hand-strength
-		if (s->in_round)
-		{
-			vector<Card> allcards;
-			tinfo->holecards.copyCards(&allcards);
-			
-			if (allcards.size())
-			{
-				HandStrength strength;
-				GameLogic::getStrength(&(tinfo->holecards), &(snap->communitycards), &strength);
-				//const char *sstrength = HandStrength::getRankingName(strength.getRanking());
-				
-				m_pTxtHandStrength->setText(WTable::buildHandStrengthString(&strength, 0));
-				m_pTxtHandStrength->setPos(calcHandStrengthPos());
-			}
-			else
-				m_pTxtHandStrength->setText(QString());
-		}
-		else
-			m_pTxtHandStrength->setText(QString());
-	}
-	else
-		m_pTxtHandStrength->setText(QString());
+	// handle pre-set actions
+	handleAutoActions();
 	
 	
-	// set focus on EditableSlider if focus isn't on ChatBox
+	
+	// set focus on EditableSlider only if focus isn't on ChatBox
 	if (focusWidget() != m_pChat->getInputWidget())
 		m_pSliderAmount->setFocus();
 }
