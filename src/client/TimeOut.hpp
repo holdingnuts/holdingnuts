@@ -67,6 +67,10 @@ private:
 	int						m_nFrame;
 	//! \brief Seat ID
 	int						m_nSeat;
+	
+	bool 					m_bQuarterAlreadyEmitted;
+	bool 					m_bHalfAlreadyEmitted;
+	bool 					m_bThreeQuarterAlreadyEmitted;
 };
 
 #endif /* _HOLDING_NUTS_TIMEOUT_H */
