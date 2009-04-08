@@ -34,7 +34,10 @@ extern ConfigParser config;
 TimeOut::TimeOut()
 :	m_Image("gfx/table/timeout.png"),
 	m_nFrame(0),
-	m_nSeat(0)
+	m_nSeat(0),
+	m_bQuarterAlreadyEmitted(false),
+	m_bHalfAlreadyEmitted(false),
+	m_bThreeQuarterAlreadyEmitted(false)
 {
 	this->setEnabled(false);
 	this->setZValue(10);
@@ -90,6 +93,10 @@ void TimeOut::start(int seat, int sec_timeout)
 	m_tl.start();
 
 	m_nSeat = seat;
+	
+	m_bQuarterAlreadyEmitted = false;
+	m_bHalfAlreadyEmitted = false;
+	m_bThreeQuarterAlreadyEmitted = false;
 }
 
 void TimeOut::stop()
@@ -102,46 +109,33 @@ void TimeOut::update(int frame)
 {
 	m_nFrame = frame;
 	
-	// handle inaccuracy of timer
-	static bool bQuarterAlreadyEmitted = false;
-	static bool bHalfAlreadyEmitted = false;
-	static bool bThreeQuarterAlreadyEmitted = false;
-
-	// inital state	
-	if (m_nFrame < 2)
-	{
-		bQuarterAlreadyEmitted = false;
-		bHalfAlreadyEmitted = false;
-		bThreeQuarterAlreadyEmitted = false;
-	}
-
 	// pass 1/4
 	if (m_nFrame > m_Image.width() / 4)
 	{
-		if (!bQuarterAlreadyEmitted)
+		if (!m_bQuarterAlreadyEmitted)
 		{
 			emit quarterElapsed(m_nSeat);
-			bQuarterAlreadyEmitted = true;
+			m_bQuarterAlreadyEmitted = true;
 		}
 	}
 	
 	// pass 2/4
 	if (m_nFrame > m_Image.width() / 2)
 	{
-		if (!bHalfAlreadyEmitted)
+		if (!m_bHalfAlreadyEmitted)
 		{
 			emit halfElapsed(m_nSeat);
-			bHalfAlreadyEmitted = true;
+			m_bHalfAlreadyEmitted = true;
 		}
 	}
 	
 	// pass 3/4
 	if (m_nFrame > m_Image.width() / 4 * 3)
 	{
-		if (!bThreeQuarterAlreadyEmitted)
+		if (!m_bThreeQuarterAlreadyEmitted)
 		{
 			emit threeQuarterElapsed(m_nSeat);
-			bThreeQuarterAlreadyEmitted = true;
+			m_bThreeQuarterAlreadyEmitted = true;
 		}
 	}
 
