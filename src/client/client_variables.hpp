@@ -35,6 +35,7 @@ config.set("ui_centralized_view",	true);		// enable centralized table view
 config.set("ui_card_deck",	"default");		// card deck to use
 config.set("sound",		true);			// play sounds
 config.set("sound_focus",	true);			// only play sound if window has focus
+config.set("chat_console",	false);			// send raw commands if chat prefixed with '/'
 
 #ifdef DEBUG
 config.set("dbg_register",	-1);			// automatically register to a game (value is gid; auto_connect must be set)
