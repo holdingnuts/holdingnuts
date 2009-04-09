@@ -702,7 +702,7 @@ void WMain::actionCreateGame()
 void WMain::actionChat(QString msg)
 {
 	// send raw to server if first char is '/'
-	if (config.get("chat_console") && msg.at(0) == QChar('/'))
+	if (config.getBool("chat_console") && msg.at(0) == QChar('/'))
 	{
 		((PClient*)qApp)->sendDebugMsg(msg.mid(1));
 		return;
