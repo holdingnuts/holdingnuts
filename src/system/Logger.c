@@ -23,6 +23,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <time.h>
 #include <string.h>
 
 #include "Logger.h"
@@ -33,7 +34,7 @@
 #endif
 
 static filetype *logger[2] = { 0, 0 };
-
+static int log_timestamp = 0;
 
 void log_msg(const char *level, const char *format, ...)
 {
@@ -54,7 +55,11 @@ void log_msg(const char *level, const char *format, ...)
 		if (!logger[i])
 			continue;
 		
-		fprintf(logger[i], "[%10s]  %s\n", level, msg);
+		if (log_timestamp)
+			fprintf(logger[i], "[%ld %10s]  %s\n", time(0), level, msg);
+		else
+			fprintf(logger[i], "[%10s]  %s\n", level, msg);
+		
 		fflush(logger[i]);
 	}
 }
@@ -63,6 +68,11 @@ void log_set(filetype *stream1, filetype *stream2)
 {
 	logger[0] = stream1;
 	logger[1] = stream2;
+}
+
+void log_use_timestamp(int use_timestamp)
+{
+	log_timestamp = use_timestamp;
 }
 
 #if defined __cplusplus

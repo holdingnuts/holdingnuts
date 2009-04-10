@@ -36,6 +36,7 @@
 
 void log_msg(const char *level, const char *format, ...);
 void log_set(filetype *stream1, filetype *stream2);
+void log_use_timestamp(int use_timestamp);
 
 #if defined __cplusplus
     }

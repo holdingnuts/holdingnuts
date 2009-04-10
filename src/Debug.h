@@ -26,16 +26,17 @@
 
 #if DEBUG
 #include <stdio.h>
+#include <time.h>
 
 #ifndef _MSC_VER
 
 # define dbg_msg(level, s, args...) \
-	do { fprintf(stderr, "[%10s]  "s"\n", level, ##args) ; fflush(stderr); } while(0)
+	do { fprintf(stderr, "[%ld %10s]  "s"\n", time(0), level, ##args) ; fflush(stderr); } while(0)
 
 #else /* _MSC_VER */
 
 # define dbg_msg(level, s, ...) \
-	do { fprintf(stderr, "[%10s]  "s"\n", level, __VA_ARGS__) ; fflush(stderr); } while(0)
+	do { fprintf(stderr, "[%ld %10s]  "s"\n", time(0), level, __VA_ARGS__) ; fflush(stderr); } while(0)
 
 #endif /* _MSC_VER */
 
