@@ -577,9 +577,11 @@ void PClient::serverCmdSnap(Tokenizer &t)
 		if (!tinfo || !tinfo->window)
 			return;
 		
+#if 0
 		tinfo->window->addServerMessage(
 			QString(tr("%1, it's your turn!")
 				.arg(getPlayerName(srv.cid))));
+#endif
 		break;
 	case SnapPlayerAction:
 		serverCmdSnapPlayerAction(t, gid, tid, tinfo);
@@ -1508,7 +1510,12 @@ int main(int argc, char **argv)
 		snprintf(logfile, sizeof(logfile), "%s/client.log", sys_config_path());
 		fplog = file_open(logfile, mode_write);
 		
+		// log destination
 		log_set(stdout, fplog);
+		
+		// log timestamp
+		if (config.getBool("log_timestamp"))
+			log_use_timestamp(1);
 	}
 	
 #if defined(DEBUG) && defined(PLATFORM_WINDOWS)

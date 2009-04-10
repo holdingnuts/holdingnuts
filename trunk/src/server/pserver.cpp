@@ -245,7 +245,12 @@ int main(int argc, char **argv)
 		snprintf(logfile, sizeof(logfile), "%s/server.log", sys_config_path());
 		fplog = file_open(logfile, mode_write);
 		
+		// log destination
 		log_set(stdout, fplog);
+		
+		// log timestamp
+		if (config.getBool("log_timestamp"))
+			log_use_timestamp(1);
 	}
 	
 	network_init();
