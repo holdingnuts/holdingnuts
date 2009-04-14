@@ -584,7 +584,8 @@ QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
 	
 	QPointF pt = wseats[nSeatID]->scenePos();
 
-	pt.ry() += wseats[nSeatID]->boundingRectSeat().height();
+	pt.ry() += wseats[nSeatID]->boundingRectSeat().height() - 
+		m_pTimeout->boundingRect().height();
 
 	return pt;
 }
