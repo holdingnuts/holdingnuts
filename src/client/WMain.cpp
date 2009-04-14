@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
 
@@ -41,6 +42,7 @@
 
 #include <cstdio>
 #include <vector>
+
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
@@ -53,6 +55,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QInputDialog>
+#include <QComboBox>
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -121,7 +124,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setFont(font);
 #endif
 	viewGameList->setModel(proxyModelGameList);
-	// width colomn 0 is default
+	viewGameList->setColumnWidth(0, 200);	// name
 	viewGameList->setColumnWidth(1, 90);	// type
 	viewGameList->setColumnWidth(2, 50);	// players
 	viewGameList->setColumnWidth(3, 50);	// state
@@ -221,11 +224,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	wGameInfo->setFixedWidth(260);
 	
 	// connection
-	editSrvAddr = new QLineEdit(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")), this);
-	editSrvAddr->setToolTip(
+	cbSrvAddr = new QComboBox(this);
+	cbSrvAddr->setEditable(true); 
+	cbSrvAddr->setInsertPolicy(QComboBox::InsertAtTop);
+	cbSrvAddr->setToolTip(
 		tr("The desired server (domain-name or IP) to connect with.\nYou can optionally specify a port number.\nFormat: <host>[:<port>]"));
-	connect(editSrvAddr, SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
-	connect(editSrvAddr, SIGNAL(returnPressed()), this, SLOT(actionConnect()));
+
+	// obsolete connect(cbSrvAddr->lineEdit(), SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
+	connect(cbSrvAddr->lineEdit(), SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
 	btnConnect = new QPushButton(tr("&Connect"), this);
 	btnConnect->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -234,10 +240,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnClose = new QPushButton(tr("Cl&ose"), this);
 	btnClose->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnClose, SIGNAL(clicked()), this, SLOT(actionClose()));
-		
+
+	QLabel *lblServer = new QLabel(tr("Server:"), this);
+	lblServer->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+
 	QHBoxLayout *lConnect = new QHBoxLayout();
-	lConnect->addWidget(new QLabel(tr("Server:"), this));
-	lConnect->addWidget(editSrvAddr);
+	lConnect->setContentsMargins(0,0,0,0);
+	lConnect->addWidget(lblServer);
+	lConnect->addWidget(cbSrvAddr);
 	lConnect->addWidget(btnConnect);
 	lConnect->addWidget(btnClose);
 	
@@ -359,15 +369,29 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// initially enable/disabled widgets
 	updateConnectionStatus();
 
-/*
 	// load gui settings
-	QSettings settings("xyz", CONFIG_APPNAME);
+	QSettings settings;
 
 	settings.beginGroup("MainWindow");
 		this->resize(settings.value("size", QSize(700, 600)).toSize());
 		this->move(settings.value("pos", QPoint(50, 50)).toPoint());
 	settings.endGroup();
-*/	
+	
+	int nSrvAddr = settings.beginReadArray("Serverlist");
+	
+	for (int i = 0; i < nSrvAddr; ++i)
+	{
+		settings.setArrayIndex(i);
+		
+		QString server = settings.value("Name").toString();
+
+		if (!server.isEmpty())
+			cbSrvAddr->addItem(server);
+	}
+	settings.endArray();
+	
+	if (!cbSrvAddr->count())
+		cbSrvAddr->addItem(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")));
 }
 
 void WMain::addLog(const QString &line)
@@ -408,7 +432,7 @@ void WMain::updateConnectionStatus()
 	{
 		btnConnect->setEnabled(false);
 		btnClose->setEnabled(true);
-		editSrvAddr->setEnabled(false);
+		cbSrvAddr->setEnabled(false);
 		
 		wConnection->setVisible(true);
 	}
@@ -416,7 +440,7 @@ void WMain::updateConnectionStatus()
 	{
 		btnConnect->setEnabled(false);
 		btnClose->setEnabled(true);
-		editSrvAddr->setEnabled(false);
+		cbSrvAddr->setEnabled(false);
 		
 		// setup timers for gamelist update, select-game update, server-time update
 		timerGamelistUpdate->start(60*1000);
@@ -427,12 +451,12 @@ void WMain::updateConnectionStatus()
 	}
 	else  // disconnected
 	{
-		if (editSrvAddr->text().length())
+		if (cbSrvAddr->lineEdit()->text().length())
 			btnConnect->setEnabled(true);
 		else
 			btnConnect->setEnabled(false);
 		btnClose->setEnabled(false);
-		editSrvAddr->setEnabled(true);
+		cbSrvAddr->setEnabled(true);
 		
 		modelGameList->clear();
 		modelPlayerList->clear();
@@ -536,11 +560,17 @@ void WMain::updatePlayerList(int gid)
 
 void WMain::actionConnect()
 {
-	if (!editSrvAddr->text().length() || ((PClient*)qApp)->isConnected())
+	if (!cbSrvAddr->lineEdit()->text().length() || ((PClient*)qApp)->isConnected())
 		return;
 	
+	// store server in combobox and settings
+	if (cbSrvAddr->findText(cbSrvAddr->lineEdit()->text()) == -1)
+		cbSrvAddr->addItem(cbSrvAddr->lineEdit()->text());
+
+	writeServerlist();
+	
 	// split up the connect-string: <hostname>:<port>
-	QStringList srvlist = editSrvAddr->text().split(":", QString::SkipEmptyParts);
+	QStringList srvlist = cbSrvAddr->lineEdit()->text().split(":", QString::SkipEmptyParts);
 	
 	unsigned int port = config.getInt("default_port");
 	
@@ -578,10 +608,13 @@ void WMain::actionTest()
 #endif
 }
 
+// obsolete
+/*
 void WMain::slotSrvTextChanged()
 {
 	updateConnectionStatus();
 }
+*/
 
 void WMain::doRegister(bool bRegister)
 {
@@ -744,7 +777,17 @@ void WMain::closeEvent(QCloseEvent *event)
 		showMinimized();
 	}
 	else
+	{
+		// store settings
+		QSettings settings;
+
+		settings.beginGroup("MainWindow");
+			settings.setValue("size", this->size());
+			settings.setValue("pos", this->pos());
+		settings.endGroup();
+
 		event->accept();
+	}
 }
 
 QString WMain::getGametypeString(gametype type)
@@ -919,3 +962,25 @@ void WMain::updateServerTimeLabel()
 	else
 		lblServerTime->clear();
 }
+
+void WMain::writeServerlist() const
+{
+	QSettings settings;
+
+	settings.beginWriteArray("Serverlist");
+	
+	int numServer = cbSrvAddr->count();
+	
+	// store maximal 10 server in recent list
+	if (numServer > 10)
+		numServer = 10;
+
+	for (int i = 0; i < numServer; ++i)
+	{
+		settings.setArrayIndex(i);
+		settings.setValue("Name", cbSrvAddr->itemText(i));
+	}
+
+	settings.endArray();
+}
+

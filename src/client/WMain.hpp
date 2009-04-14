@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
 
@@ -41,7 +42,7 @@ class QTextEdit;
 class QStandardItemModel;
 class QTableView;
 class QListView;
-
+class QComboBox;
 
 //! \brief Mainwindow
 class WMain : public QMainWindow
@@ -77,14 +78,14 @@ protected:
 	
 	void updateWelcomeLabel();
 	void updateGameinfo(int gid);
+	
+	void writeServerlist() const;
 
 private slots:
 	void closeEvent(QCloseEvent *event);
 	
 	void actionConnect();
 	void actionClose();
-	
-	void slotSrvTextChanged();
 	
 	void actionRegister();
 	void actionUnregister();
@@ -116,8 +117,8 @@ private:
 	//! \brief Label in header displaying the server time
 	QLabel 			*lblServerTime;
 	
-	//! \brief Editbox server adress
-	QLineEdit		*editSrvAddr;
+	//! \brief Combobox server adress
+	QComboBox		*cbSrvAddr;
 	//! \brief Connect Button
 	QPushButton		*btnConnect;
 	//! \brief Close connection Button

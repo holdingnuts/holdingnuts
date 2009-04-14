@@ -1326,6 +1326,11 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	
 	// app icon
 	Q_INIT_RESOURCE(pclient);
+	
+	// app info for settings
+	QCoreApplication::setOrganizationName(CONFIG_APPNAME);
+	QCoreApplication::setOrganizationDomain("www.holdingnuts.net");
+	QCoreApplication::setApplicationName(CONFIG_APPNAME);
 }
 
 PClient::~PClient()
