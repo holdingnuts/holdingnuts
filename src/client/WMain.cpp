@@ -645,7 +645,7 @@ void WMain::doRegister(bool bRegister)
 		{
 			bool ok;
 			password = QInputDialog::getText(this, tr("Private game"),
-						tr("Please enter the game password:"), QLineEdit::Normal,
+					tr("Please enter the game password:"), (config.getBool("ui_echo_password") ? QLineEdit::Normal : QLineEdit::Password), //inline if statement to echo or mask password
 						QString(), &ok);
 			if (!ok)
 				return;
