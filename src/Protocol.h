@@ -47,10 +47,10 @@ typedef enum {
 	SnapCards		= 0x03,
 	SnapWinPot		= 0x07,
 	SnapOddChips		= 0x08,
-	SnapPlayerBroke		= 0x09,
 	SnapPlayerAction	= 0x0a,
 	SnapPlayerCurrent	= 0x0b,
 	SnapPlayerShow		= 0x0c,
+	SnapFoyer		= 0x10,
 } snaptype;
 
 //! \brief Snapshot gamestate types
@@ -58,7 +58,9 @@ typedef enum {
 	SnapGameStateStart	= 0x01,
 	SnapGameStateEnd	= 0x02,
 	SnapGameStateSeat	= 0x03,   // TODO
-	SnapGameStateNewHand	= 0x04,	
+	SnapGameStateNewHand	= 0x04,
+	SnapGameStateWon	= 0x10,
+	SnapGameStateBroke	= 0x11,
 } snap_gamestate_type;
 
 //! \brief Snapshot cards types
@@ -79,6 +81,13 @@ typedef enum {
 	SnapPlayerActionAllin	= 0x06,  // cid, amount
 } snap_playeraction_type;
 
+//! \brief Snapshot foyer types
+typedef enum {
+	SnapFoyerJoin		= 0x01,
+	SnapFoyerLeave		= 0x02,
+} snap_foyer_type;
+
+
 typedef enum {
 	PlayerInRound = 0x01,
 	PlayerSitout  = 0x02,
@@ -88,6 +97,7 @@ typedef enum {
 	GameInfoRegistered	= 0x01,
 	GameInfoPassword	= 0x02,
 	GameInfoRestart		= 0x04,
+	GameInfoOwner		= 0x08,
 } gameinfo_flags;
 
 typedef enum {

@@ -114,6 +114,8 @@ public:
 	
 	bool setPlayerAction(int cid, Player::PlayerAction action, chips_type amount);
 	
+	void start();
+	
 	int tick();
 	
 #ifdef DEBUG
@@ -121,9 +123,8 @@ public:
 #endif
 	
 protected:
-	void start();
-	
 	Player* findPlayer(int cid);
+	void selectNewOwner();
 	
 	void snap(int tid, int sid, const char* msg="");
 	void snap(int cid, int tid, int sid, const char* msg="");

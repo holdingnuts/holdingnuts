@@ -91,6 +91,7 @@ private slots:
 	void actionUnregister();
 	void actionOpenTable();
 	void actionCreateGame();
+	void actionStartGame();
 	
 	void actionSettings();
 	
@@ -171,6 +172,7 @@ private:
 	QPushButton		*btnUnregister;
 	
 	QPushButton		*btnOpenTable;
+	QPushButton		*btnStartGame;
 	
 	//! \brief Timer for updating the gamelist
 	QTimer			*timerGamelistUpdate;

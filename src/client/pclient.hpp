@@ -90,6 +90,8 @@ typedef struct {
 	gamestate		state;
 	//! \brief wherther the game is password protected or not
 	bool			password;
+	//! \brief wherther the player is owner of this game
+	bool			owner;
 	//! \brief timeout in seconds if no answer from player
 	unsigned int	player_timeout;
 	//! \brief current playerscount registered in game
@@ -156,6 +158,7 @@ public:
 	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
 	
 	void doRegister(int gid, bool bRegister=true, const QString& password="");
+	void doStartGame(int gid);
 	
 #if 0
 	const gamelist_type& getGameList();

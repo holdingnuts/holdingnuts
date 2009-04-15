@@ -550,6 +550,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		state,
 		(g->isPlayer(client->id) ? GameInfoRegistered : 0) |
 			(g->hasPassword() ? GameInfoPassword : 0) |
+			(g->getOwner() == client->id ? GameInfoOwner : 0) |
 			(g->getRestart() ? GameInfoRestart : 0),
 		g->getPlayerMax(),
 		g->getPlayerCount(),
@@ -653,6 +654,23 @@ bool client_cmd_request_serverinfo(clientcon *client, Tokenizer &t)
 	return true;
 }
 
+bool client_cmd_request_gamestart(clientcon *client, Tokenizer &t)
+{
+	int gid;
+	t >> gid;
+	
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+		return false;
+	
+	if (g->getOwner() != client->id)
+		return false;
+	
+	g->start();
+	
+	return true;
+}
+
 int client_cmd_request(clientcon *client, Tokenizer &t)
 {
 	if (!t.count())
@@ -676,6 +694,8 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		cmderr = !client_cmd_request_playerlist(client, t);
 	else if (request == "serverinfo")
 		cmderr = !client_cmd_request_serverinfo(client, t);
+	else if (request == "start")
+		cmderr = !client_cmd_request_gamestart(client, t);
 	else
 		cmderr = true;
 

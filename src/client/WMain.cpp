@@ -182,10 +182,15 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnOpenTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnOpenTable, SIGNAL(clicked()), this, SLOT(actionOpenTable()));
 	
+	btnStartGame = new QPushButton(tr("&Start game"), this);
+	btnStartGame->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnStartGame, SIGNAL(clicked()), this, SLOT(actionStartGame()));
+	
 	QHBoxLayout *lRegister = new QHBoxLayout();
 	lRegister->addWidget(btnRegister);
 	lRegister->addWidget(btnUnregister);
 	lRegister->addWidget(btnOpenTable);
+	lRegister->addWidget(btnStartGame);
 	
 	
 	// gameinfo
@@ -682,6 +687,24 @@ void WMain::actionOpenTable()
 	}
 }
 
+void WMain::actionStartGame()
+{
+	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
+	
+	QItemSelectionModel *pSelect = viewGameList->selectionModel();
+
+	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
+	
+	if (pSelect->hasSelection())
+	{
+		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+		const int gid = modelGameList->findGidByRow(selected_row);
+		
+		((PClient*)qApp)->doStartGame(gid);
+		((PClient*)qApp)->requestGameinfo(gid);
+	}
+}
+
 void WMain::actionSettings()
 {
 	char cfgfile[1024];
@@ -926,6 +949,9 @@ void WMain::updateGameinfo(int gid)
 		btnRegister->setEnabled(false);
 		btnUnregister->setEnabled(false);
 		btnOpenTable->setEnabled(false);
+		btnStartGame->setEnabled(false);
+		
+		return;
 	}
 	
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
@@ -948,6 +974,7 @@ void WMain::updateGameinfo(int gid)
 	btnRegister->setEnabled(!gi->registered && gi->state == GameStateWaiting);
 	btnUnregister->setEnabled(gi->registered && gi->state == GameStateWaiting);
 	btnOpenTable->setEnabled(gi->registered && gi->state != GameStateWaiting);
+	btnStartGame->setEnabled(gi->owner && gi->state == GameStateWaiting);
 }
 
 void WMain::updateServerTimeLabel()

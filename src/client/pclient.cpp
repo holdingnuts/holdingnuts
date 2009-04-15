@@ -726,6 +726,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	unsigned int flags = it.getNextInt();
 	gi->registered = flags & GameInfoRegistered;
 	gi->password = flags & GameInfoPassword;
+	gi->owner = flags & GameInfoOwner;
 	
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
@@ -960,6 +961,18 @@ void PClient::doRegister(int gid, bool bRegister, const QString& password)
 		snprintf(msg, sizeof(msg), "REGISTER %d %s", gid, password.toStdString().c_str());
 	else
 		snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
+		
+	netSendMsg(msg);
+}
+
+void PClient::doStartGame(int gid)
+{
+	char msg[1024];
+	
+	if (!connected)
+		return;
+	
+	snprintf(msg, sizeof(msg), "REQUEST start %d", gid);
 		
 	netSendMsg(msg);
 }
