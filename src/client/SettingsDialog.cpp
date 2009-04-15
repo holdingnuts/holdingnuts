@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
 
@@ -59,7 +60,6 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	// --- tabGeneral ---
 	
 	// logging options
-	QLabel *labelLog = new QLabel(tr("Log to file"), tabGeneral);
 	checkLog = new QCheckBox(tr("enabled"), tabGeneral);
 	checkLog->setCheckState(cfg->getBool("log") ? Qt::Checked : Qt::Unchecked);
 	checkLogChat = new QCheckBox(tr("log chat"), tabGeneral);
@@ -72,7 +72,6 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	layoutLog->addWidget(checkLog);
 	layoutLog->addWidget(checkLogChat);
 	
-	QLabel *labelLocale = new QLabel(tr("Locale"), tabGeneral);
 	comboLocale = new QComboBox(tabGeneral);
 	
 	// locales (Note: names are not translated)
@@ -96,7 +95,6 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	}
 	
 	// sound options
-	QLabel *labelSound = new QLabel(tr("Sounds"), tabGeneral);
 	checkSound = new QCheckBox(tr("enabled"), tabGeneral);
 	checkSound->setCheckState(cfg->getBool("sound") ? Qt::Checked : Qt::Unchecked);
 	checkSoundFocus = new QCheckBox(tr("only on focus"), tabGeneral);
@@ -110,7 +108,6 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	layoutSound->addWidget(checkSoundFocus);
 	
 	// UUID
-	QLabel *labelUUID = new QLabel(tr("UUID"), tabGeneral);
 	labelUUIDdisplay = new QLabel(QString::fromStdString(cfg->get("uuid")), tabGeneral);
 	labelUUIDdisplay->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	
@@ -129,49 +126,31 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	layoutUUID->addWidget(labelUUIDdisplay);
 	layoutUUID->addLayout(layoutUUIDButtons);
 	
-	
-	// basic layout
-	QGridLayout *gridGeneral = new QGridLayout;
-	gridGeneral->setHorizontalSpacing(15);
-	gridGeneral->addWidget(labelLog, 1, 0, Qt::AlignRight | Qt::AlignTop);
-	gridGeneral->addLayout(layoutLog, 1, 1, Qt::AlignTop);
-	gridGeneral->addWidget(labelLocale, 2, 0, Qt::AlignRight | Qt::AlignTop);
-	gridGeneral->addWidget(comboLocale, 2, 1, Qt::AlignTop);
-	gridGeneral->addWidget(labelSound, 3, 0, Qt::AlignRight | Qt::AlignTop);
-	gridGeneral->addLayout(layoutSound, 3, 1, Qt::AlignTop);
-	gridGeneral->addWidget(labelUUID, 4, 0, Qt::AlignRight | Qt::AlignTop);
-	gridGeneral->addLayout(layoutUUID, 4, 1, Qt::AlignTop);
-	tabGeneral->setLayout(gridGeneral);
-	
-	
+	QFormLayout *formGeneral = new QFormLayout;
+	formGeneral->addRow(tr("Log to file"), layoutLog);
+	formGeneral->addRow(tr("Locale"), comboLocale);
+	formGeneral->addRow(tr("Sounds"), layoutSound);
+	formGeneral->addRow(tr("UUID"), layoutUUID);
+	tabGeneral->setLayout(formGeneral);
+
 	
 	// --- tabPlayerinfo ---
-	QLabel *labelPlayerName = new QLabel(tr("Player name"), tabPlayerinfo);
 	editPlayerName = new QLineEdit(QString::fromStdString(cfg->get("player_name")), tabPlayerinfo);
-	
-	QLabel *labelPlayerLocation = new QLabel(tr("Location"), tabPlayerinfo);
 	editPlayerLocation = new QLineEdit(QString::fromStdString(cfg->get("info_location")), tabPlayerinfo);
-	
-	QGridLayout *gridPlayerinfo = new QGridLayout;
-	gridPlayerinfo->setHorizontalSpacing(15);
-	gridPlayerinfo->addWidget(labelPlayerName, 0, 0, Qt::AlignRight | Qt::AlignTop);
-	gridPlayerinfo->addWidget(editPlayerName, 0, 1, Qt::AlignTop);
-	gridPlayerinfo->addWidget(labelPlayerLocation, 1, 0, Qt::AlignRight | Qt::AlignTop);
-	gridPlayerinfo->addWidget(editPlayerLocation, 1, 1, Qt::AlignTop);
-	tabPlayerinfo->setLayout(gridPlayerinfo);
-	
+
+	QFormLayout *formPlayerinfo = new QFormLayout;
+	formPlayerinfo->addRow(tr("Player name"), editPlayerName);
+	formPlayerinfo->addRow(tr("Location"), editPlayerLocation);
+	tabPlayerinfo->setLayout(formPlayerinfo);
 	
 	
 	// --- tabAppearance ---
-	QLabel *labelHandStrength = new QLabel(tr("Show strength of hand"), tabAppearance);
 	checkHandStrength = new QCheckBox("", tabAppearance);
 	checkHandStrength->setCheckState(cfg->getBool("ui_show_handstrength") ? Qt::Checked : Qt::Unchecked);
-	
-	QLabel *labelCentralView = new QLabel(tr("Centralized table view"), tabAppearance);
+
 	checkCentralView = new QCheckBox("", tabAppearance);
 	checkCentralView->setCheckState(cfg->getBool("ui_centralized_view") ? Qt::Checked : Qt::Unchecked);
 	
-	QLabel *labelCarddeck = new QLabel(tr("Card deck"), tabAppearance);
 	comboCarddeck = new QComboBox(tabAppearance);
 	
 	// card decks  // FIXME: retrieve directory listing
@@ -191,16 +170,11 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 			comboCarddeck->setCurrentIndex(i);
 	}
 	
-	
-	QGridLayout *gridAppearance = new QGridLayout;
-	gridAppearance->setHorizontalSpacing(15);
-	gridAppearance->addWidget(labelHandStrength, 0, 0, Qt::AlignRight | Qt::AlignTop);
-	gridAppearance->addWidget(checkHandStrength, 0, 1, Qt::AlignTop);
-	gridAppearance->addWidget(labelCentralView, 1, 0, Qt::AlignRight | Qt::AlignTop);
-	gridAppearance->addWidget(checkCentralView, 1, 1, Qt::AlignTop);
-	gridAppearance->addWidget(labelCarddeck, 2, 0, Qt::AlignRight | Qt::AlignTop);
-	gridAppearance->addWidget(comboCarddeck, 2, 1, Qt::AlignTop);
-	tabAppearance->setLayout(gridAppearance);
+	QFormLayout *formAppearance = new QFormLayout;
+	formAppearance->addRow(tr("Show strength of hand"), checkHandStrength);
+	formAppearance->addRow(tr("Centralized table view"), checkCentralView);
+	formAppearance->addRow(tr("Card deck"), comboCarddeck);
+	tabAppearance->setLayout(formAppearance);
 }
 
 void SettingsDialog::actionGenUUID()
