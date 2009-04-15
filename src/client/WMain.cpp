@@ -189,9 +189,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	QHBoxLayout *lRegister = new QHBoxLayout();
 	lRegister->addWidget(btnRegister);
 	lRegister->addWidget(btnUnregister);
-	lRegister->addWidget(btnOpenTable);
-	lRegister->addWidget(btnStartGame);
 	
+	
+	QHBoxLayout *lGameActions = new QHBoxLayout();
+	lGameActions->addWidget(btnOpenTable);
+	lGameActions->addWidget(btnStartGame);
 	
 	// gameinfo
 	lblGameInfoName = new QLabel(this);
@@ -223,6 +225,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lGameInfo->addWidget(lblGameInfoBlinds, 5, 1, 1, 1);
 	lGameInfo->addWidget(viewPlayerList, 6, 0, 1, 2);
 	lGameInfo->addLayout(lRegister, 7, 0, 1, 2);
+	lGameInfo->addLayout(lGameActions, 8, 0, 1, 2);
 
 	wGameInfo = new QWidget(this);
 	wGameInfo->setLayout(lGameInfo);
@@ -859,7 +862,9 @@ void WMain::notifyGameinfo(int gid)
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
 		
-	modelGameList->updateGameName(gid, QString("%1 [%2]").arg(gi->name).arg(gid));
+	modelGameList->updateGameName(gid, QString("%1 [%2]")
+		.arg(gi->password ? tr("[private] ") + gi->name : gi->name)
+		.arg(gid));
 	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
 	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	modelGameList->updateGameState(gid, getGamestateString(gi->state));
@@ -897,9 +902,11 @@ void WMain::notifyGamelist()
 
 void WMain::actionSelectedGameUpdate()
 {
+#if 0
 	// do not update if window hasn't the focus
 	if (!isActiveWindow())
 		return;
+#endif
 	
 	
 	QItemSelectionModel *pSelect = viewGameList->selectionModel();
@@ -948,8 +955,9 @@ void WMain::updateGameinfo(int gid)
 		
 		btnRegister->setEnabled(false);
 		btnUnregister->setEnabled(false);
-		btnOpenTable->setEnabled(false);
-		btnStartGame->setEnabled(false);
+		
+		btnOpenTable->setVisible(false);
+		btnStartGame->setVisible(false);
 		
 		return;
 	}
@@ -973,8 +981,12 @@ void WMain::updateGameinfo(int gid)
 	
 	btnRegister->setEnabled(!gi->registered && gi->state == GameStateWaiting);
 	btnUnregister->setEnabled(gi->registered && gi->state == GameStateWaiting);
-	btnOpenTable->setEnabled(gi->registered && gi->state != GameStateWaiting);
-	btnStartGame->setEnabled(gi->owner && gi->state == GameStateWaiting);
+	
+	btnOpenTable->setVisible(gi->registered && gi->state != GameStateWaiting);
+	btnStartGame->setVisible(gi->registered &&
+		gi->owner &&
+		gi->players_count >= 2 &&
+		gi->state == GameStateWaiting);
 }
 
 void WMain::updateServerTimeLabel()
