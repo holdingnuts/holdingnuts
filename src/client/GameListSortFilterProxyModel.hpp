@@ -25,8 +25,7 @@
 #define _HOLDING_NUTS_GAMELIST_SORT_FILTER_PROXY_MODEL_H
 
 #include <QSortFilterProxyModel>
-
-#include <Protocol.h>
+#include <QStringList>
 
 class GameListSortFilterProxyModel : public QSortFilterProxyModel
 {
@@ -37,17 +36,16 @@ public:
 
 	// name filter with setFilterRegExp(...); from baseclass
 
-	void setFilterGameType(const gametype& type);
+	void hideGameState(const QString& filter);
+	void showGameState(const QString& filter);
 	
-	void setFilterGameMode(const gamemode& mode);
-	
-	void setFilterGameState(const gamestate& state);
+	void showPrivateGames(bool value);
 
-	void setFilterMinimumPlayers(int n);
-	void setFilterMaximumPlayers(int n);
+	//void setFilterMinimumPlayers(int n);
+	//void setFilterMaximumPlayers(int n);
 
-	void setFilterMinimumRegisteredPlayers(int n);
-	void setFilterMaximumRegisteredPlayers(int n);
+	//void setFilterMinimumRegisteredPlayers(int n);
+	//void setFilterMaximumRegisteredPlayers(int n);
 
 protected:
 	bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
@@ -56,11 +54,9 @@ private:
 	bool playersInRange(int i) const;
 
 private:
-	gametype	filterGameType;
+	QStringList	filterGameState;
 	
-	gamemode	filterGameMode;
-	
-	gamestate	filterGameState;
+	bool		bShowPrivateGames;
 
 	int			minPlayers;
 	int			maxPlayers;

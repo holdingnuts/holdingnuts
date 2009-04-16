@@ -43,6 +43,7 @@ class QStandardItemModel;
 class QTableView;
 class QListView;
 class QComboBox;
+class QCheckBox;
 
 //! \brief Mainwindow
 class WMain : public QMainWindow
@@ -112,6 +113,9 @@ private slots:
 	
 	void updateServerTimeLabel();
 	
+	void filterHideStartedGames(int state);
+	void filterHidePrivateGames(int state);
+	
 private:
 	//! \brief Label in header displaying a welcome message
 	QLabel			*lblWelcome;
@@ -138,6 +142,10 @@ private:
 	GameListSortFilterProxyModel	*proxyModelGameList;
 	
 	QLineEdit		*filterPatternGame;
+	//! \brief Checkbox for hiding started games
+	QCheckBox		*chkHideStartedGames;
+	//! \brief Checkbox for hiding private games
+	QCheckBox		*chkHidePrivateGames;
 	
 	//! \brief MVC Model
 	PlayerListTableModel	*modelPlayerList;

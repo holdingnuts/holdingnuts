@@ -128,6 +128,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setColumnWidth(1, 90);	// type
 	viewGameList->setColumnWidth(2, 50);	// players
 	viewGameList->setColumnWidth(3, 50);	// state
+	viewGameList->setColumnHidden(4, true);
 
 	connect(
 		viewGameList->selectionModel(),
@@ -139,11 +140,20 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	// view game filter
 	filterPatternGame = new QLineEdit(this);
+	filterPatternGame->hide();
+	
+	chkHideStartedGames = new QCheckBox(tr("hide started Games"), this);
+	connect(chkHideStartedGames, SIGNAL(stateChanged(int)), this, SLOT(filterHideStartedGames(int)));
+	
+	chkHidePrivateGames = new QCheckBox(tr("hide private Games"), this);
+	connect(chkHidePrivateGames, SIGNAL(stateChanged(int)), this, SLOT(filterHidePrivateGames(int)));
 
 	QHBoxLayout *lGameFilter = new QHBoxLayout();
 	lGameFilter->setContentsMargins(0, 0, 0, 0);
-	lGameFilter->addWidget(new QLabel(tr("Game name filter:"), this));
-	lGameFilter->addWidget(filterPatternGame);
+	//lGameFilter->addWidget(new QLabel(tr("Game name filter:"), this));
+	//lGameFilter->addWidget(filterPatternGame);
+	lGameFilter->addWidget(chkHideStartedGames);
+	lGameFilter->addWidget(chkHidePrivateGames);
 
 	connect(filterPatternGame,
 		SIGNAL(textChanged(const QString&)),
@@ -383,6 +393,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	settings.beginGroup("MainWindow");
 		this->resize(settings.value("size", QSize(700, 600)).toSize());
 		this->move(settings.value("pos", QPoint(50, 50)).toPoint());
+		// filter
+		chkHideStartedGames->setCheckState(
+			Qt::CheckState(settings.value("filterHideStartedGames", 0).toInt()));
+		chkHidePrivateGames->setCheckState(
+			Qt::CheckState(settings.value("filterHidePrivateGames", 0).toInt()));
 	settings.endGroup();
 	
 	int nSrvAddr = settings.beginReadArray("Serverlist");
@@ -616,14 +631,6 @@ void WMain::actionTest()
 #endif
 }
 
-// obsolete
-/*
-void WMain::slotSrvTextChanged()
-{
-	updateConnectionStatus();
-}
-*/
-
 void WMain::doRegister(bool bRegister)
 {
 	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
@@ -753,8 +760,8 @@ void WMain::actionCreateGame()
 	gc.blinds_factor = dialogCreateGame.getBlindsFactor();
 	gc.blinds_time = dialogCreateGame.getBlindsTime();
 	gc.password = dialogCreateGame.getPassword();
+
 	((PClient*)qApp)->createGame(&gc);
-	
 	((PClient*)qApp)->requestGamelist();
 }
 
@@ -810,6 +817,9 @@ void WMain::closeEvent(QCloseEvent *event)
 		settings.beginGroup("MainWindow");
 			settings.setValue("size", this->size());
 			settings.setValue("pos", this->pos());
+			// filter
+			settings.setValue("filterHideStartedGames", chkHideStartedGames->checkState());
+			settings.setValue("filterHidePrivateGames", chkHidePrivateGames->checkState());
 		settings.endGroup();
 
 		event->accept();
@@ -868,8 +878,11 @@ void WMain::notifyGameinfo(int gid)
 	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
 	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	modelGameList->updateGameState(gid, getGamestateString(gi->state));
+	modelGameList->updatePassword(gid, gi->password);
 	
 	viewGameList->resizeRowsToContents();
+	
+	proxyModelGameList->invalidate();
 	
 	// update gameinfo panel
 	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
@@ -1023,3 +1036,15 @@ void WMain::writeServerlist() const
 	settings.endArray();
 }
 
+void WMain::filterHideStartedGames(int state)
+{
+	if (state == Qt::Checked)
+		proxyModelGameList->hideGameState(getGamestateString(GameStateStarted));
+	else		
+		proxyModelGameList->showGameState(getGamestateString(GameStateStarted));
+}
+
+void WMain::filterHidePrivateGames(int state)
+{
+	proxyModelGameList->showPrivateGames(state == Qt::Checked);
+}

@@ -61,12 +61,13 @@ public:
 		int rows,
 		const QModelIndex &index = QModelIndex());
 		
-	void updateValue(int gid, int column, const QString& value);
+	void updateValue(int gid, int column, const QVariant& value);
 
 	void updateGameName(int gid, const QString& value);
 	void updateGameType(int gid, const QString& value);
 	void updatePlayers(int gid, const QString& value);
 	void updateGameState(int gid, const QString& value);
+	void updatePassword(int gid, bool value);
 
 	//! \brief clear's the list
 	void clear();
@@ -83,8 +84,13 @@ private:
 	QStringList				strlstHeaderLabels;
 	
 	struct dataitem{
-		int gid;
-		QStringList cols;	// QStringList == row[n,0], row[n,1],... 
+		int			gid;
+		// row[n,0] == name
+		// row[n,1] == type
+		// row[n,2] == players
+		// row[n,3] == state
+		// row[n,4] == password
+		QList<QVariant>		cols;
 	};
 	
 	QList<dataitem>		datarows;
