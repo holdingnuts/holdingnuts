@@ -527,9 +527,9 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 	
 	std::vector<Card> allcards;
 	
-	for (unsigned int i=0; i < 5; i++)
+	std::string scard;
+	while (t.getNext(scard))
 	{
-		std::string scard = t.getNext();
 		Card c(scard.c_str());
 		
 		allcards.push_back(c);
