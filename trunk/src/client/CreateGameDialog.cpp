@@ -75,7 +75,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinPlayers->setMinimum(2);
 	spinPlayers->setMaximum(10);
 	spinPlayers->setSingleStep(1);
-	spinPlayers->setValue(10);
+	spinPlayers->setValue(5);
 	
 	QLabel *labelTimeout = new QLabel(tr("Timeout"), this);
 	spinTimeout = new QSpinBox(this);
@@ -118,14 +118,14 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinBlindsFactor->setMinimum(1.0);
 	spinBlindsFactor->setMaximum(3.5);
 	spinBlindsFactor->setSingleStep(0.1);
-	spinBlindsFactor->setValue(1.5);
+	spinBlindsFactor->setValue(2.0);
 	
 	QLabel *labelBlindsTime = new QLabel(tr("Raise time"), this);
 	spinBlindsTime = new QSpinBox(this);
 	spinBlindsTime->setMinimum(60);
 	spinBlindsTime->setMaximum(10*60);
 	spinBlindsTime->setSingleStep(60);
-	spinBlindsTime->setValue(3*60);
+	spinBlindsTime->setValue(5*60);
 	
 	QGridLayout *layoutBlinds = new QGridLayout;
 	layoutBlinds->addWidget(labelBlindsStart, 0, 0);

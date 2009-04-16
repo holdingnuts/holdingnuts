@@ -691,6 +691,8 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 	players[cid] = pi;
 	
 	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
+
+	wMain->playerList()->updatePlayerName(cid, pi.name);
 	
 	wMain->notifyPlayerinfo(cid);
 }
@@ -726,6 +728,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	unsigned int flags = it.getNextInt();
 	gi->registered = flags & GameInfoRegistered;
 	gi->password = flags & GameInfoPassword;
+	gi->owner = flags & GameInfoOwner;
 	
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
@@ -964,6 +967,18 @@ void PClient::doRegister(int gid, bool bRegister, const QString& password)
 	netSendMsg(msg);
 }
 
+void PClient::doStartGame(int gid)
+{
+	char msg[1024];
+	
+	if (!connected)
+		return;
+	
+	snprintf(msg, sizeof(msg), "REQUEST start %d", gid);
+		
+	netSendMsg(msg);
+}
+
 bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 {
 	if (!connected)
@@ -1094,7 +1109,7 @@ playerinfo* PClient::getPlayerInfo(int cid)
 
 QString PClient::getPlayerName(int cid)
 {
-	const playerinfo* pi = getPlayerInfo(cid);
+/*	const playerinfo* pi = getPlayerInfo(cid);
 	QString player_name;
 	if (!pi)
 		player_name = QString("??? (%1)").arg(cid);
@@ -1102,6 +1117,8 @@ QString PClient::getPlayerName(int cid)
 		player_name = pi->name;
 	
 	return player_name;
+*/
+	return wMain->playerList()->getPlayerName(cid);
 }
 
 int PClient::getMyCId()
@@ -1326,6 +1343,11 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	
 	// app icon
 	Q_INIT_RESOURCE(pclient);
+	
+	// app info for settings
+	QCoreApplication::setOrganizationName(CONFIG_APPNAME);
+	QCoreApplication::setOrganizationDomain("www.holdingnuts.net");
+	QCoreApplication::setApplicationName(CONFIG_APPNAME);
 }
 
 PClient::~PClient()

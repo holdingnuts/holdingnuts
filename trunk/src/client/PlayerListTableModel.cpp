@@ -37,6 +37,7 @@ int PlayerListTableModel::rowCount(const QModelIndex& parent) const
 	if (parent.isValid())	// see qt-tip in doc
 		return 0;
 
+	//return players.size();
 	return lstRows.count();
 }
 
@@ -48,15 +49,28 @@ int PlayerListTableModel::columnCount(const QModelIndex& parent) const
 QVariant PlayerListTableModel::data(const QModelIndex& index, int role) const
 {
 	if (!index.isValid())
-		return QVariant();
+	{
+		qDebug() << "PlayerListTableModel::data() invalided index= " << index;	
+			return QVariant();
+	}
 
-	if (index.row() > lstRows.size())
-		return QVariant();
+	if (index.row() > players.size())
+	{
+		qDebug() << "PlayerListTableModel::data() index.row("<<index.row()<<") greater than players.size("<<players.size()<<")";
+			return QVariant();
+	}
+
+	if (index.column() > this->columnCount())
+	{
+		qDebug() << "PlayerListTableModel::data() index.column("<<index.column()<<") greater than columnCount("<<columnCount()<<")";
+			return QVariant();
+	}
 
 	if (role != Qt::DisplayRole)
 		return QVariant();
 
-	return lstRows.at(index.row()).at(index.column());
+	//return lstRows.at(index.row()).at(index.column());
+	return players[index.row()].at(index.column());
 }
 
 QVariant PlayerListTableModel::headerData(
@@ -78,31 +92,62 @@ bool PlayerListTableModel::setData(
 	const QVariant& value,
 	int role)
 {
-	if (index.isValid() && role == Qt::EditRole)
+	if (!index.isValid())
 	{
-		lstRows[index.row()].replace(index.column(), value.toString());
-		
-		emit dataChanged(index, index);
-		
-		return true;
-	}
-	else
 		qDebug() << "PlayerListTableModel::setData() invalided index= " << index;
+			return false;
+	}
 
-	return false;
+	if (index.column() > this->columnCount())
+	{
+		qDebug() << "PlayerListTableModel::setData() index.column("<<index.column()<<") greater than columnCount("<<columnCount()<<")";
+			return false;
+	}
+
+	if (role != Qt::EditRole)
+		return false;
+
+
+	lstRows[index.row()].replace(index.column(), value.toString());
+	
+	
+
+	players_type::iterator it = players.find(index.row());
+
+	if (it == players.end()) // player id not found
+	{
+		players_type::mapped_type	data;
+		data.insert(index.column(), value);
+		
+		players.insert(index.row(), data);
+	}
+	else // player id found
+	{
+		// TODO check if value exists in playerdata
+		it->replace(index.column(), value);
+	}
+	
+	emit dataChanged(index, index);
+		
+	return true;
 }
 
-bool PlayerListTableModel::insertRows(int position, int rows, const QModelIndex& parent)
+bool PlayerListTableModel::insertRows(int position, int rows, const QModelIndex& index)
 {
-	beginInsertRows(parent, position, position + rows - 1);
+	Q_UNUSED(index);
+	
+	beginInsertRows(QModelIndex(), position, position + rows - 1);
 
 	QStringList lstTemp;
-
+	
 	for (int j = 0; j < this->columnCount(); ++j)
 		lstTemp.insert(j, "");
 
 	for (int i = position; i < (position + rows); ++i)
 		lstRows.insert(i, lstTemp);
+
+	// map
+	
 
 	endInsertRows();
 	
@@ -113,7 +158,7 @@ bool PlayerListTableModel::appendRows(int rows, const QModelIndex& parent)
 {
 	return this->insertRows(this->rowCount(), rows, parent);
 }
-
+/*
 void PlayerListTableModel::updateRow(int row, const QStringList& value)
 {
 	if (row >= this->rowCount())
@@ -122,8 +167,8 @@ void PlayerListTableModel::updateRow(int row, const QStringList& value)
 	for (int j = 0; j < value.count(); ++j)
 		this->setData(createIndex(row, j), value.at(j));
 }
-
-void PlayerListTableModel::updateValue(int row, int column, const QString& value)
+*/
+void PlayerListTableModel::updateValue(int row, int column, const QVariant& value)
 {
 	if (row >= this->rowCount())
 		appendRows(this->rowCount() - row + 1);
@@ -131,9 +176,21 @@ void PlayerListTableModel::updateValue(int row, int column, const QString& value
 	this->setData(createIndex(row, column), value);
 }
 
-void PlayerListTableModel::updatePlayerName(int row, const QString& value)
+void PlayerListTableModel::updatePlayerName(int cid, const QString& value)
 {
-	updateValue(row, 0, value);
+	updateValue(cid, 0, value);
+	
+	dump();
+}
+
+QString PlayerListTableModel::getPlayerName(int cid) const
+{
+	players_type::const_iterator it = players.find(cid);
+	
+	if (it != players.end())
+		return it->at(0).toString();
+
+	return QString("??? (%1)").arg(cid);
 }
 
 void PlayerListTableModel::clear()
@@ -155,8 +212,21 @@ void PlayerListTableModel::clear()
 void PlayerListTableModel::dump()
 {
 #ifdef DEBUG
-	for (int i = 0; i < rowCount(); ++i)
-		qDebug() << "row(" << i << ") " << lstRows.at(i);
+//	for (int i = 0; i < rowCount(); ++i)
+//		qDebug() << "row(" << i << ") " << lstRows.at(i);
+		
+	qDebug() << "-----------------";	
+
+	players_type::const_iterator it = players.constBegin();
+	
+	while (it != players.constEnd())
+	{
+		qDebug() << "player" << it.key() << ":" << it.value();
+		++it;
+	}
+
+	qDebug() << "-----------------";	
+		
 #endif
 }
 

@@ -29,15 +29,20 @@
 #include <QVBoxLayout>
 #include <QScrollBar>
 #include <QPushButton>
+#include <QCompleter>
+#include <QKeyEvent>
+#include <QAbstractItemView>
+#include <QDebug>
 
 ChatBox::ChatBox(
 	InputLineAlignment align,
 	int nTextLogHeight,
-	QWidget *parent) : QWidget(parent)
+	QWidget *parent) : QWidget(parent), m_pCompleter(0)
 {
 	m_pEditChat = new QLineEdit(this);
 
 	connect(m_pEditChat, SIGNAL(returnPressed()), this, SLOT(actionChat()));
+	connect(m_pEditChat, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
 
 	m_pEditChatLog = new QTextEdit(this);
 	m_pEditChatLog->setReadOnly(true);
@@ -146,6 +151,18 @@ void ChatBox::setEnabled(bool enable)
 	m_pSendMsg->setEnabled(enable);
 }
 
+void ChatBox::setCompleter(QCompleter *completer)
+{
+	m_pCompleter = completer;
+	
+	m_pCompleter->setWidget(m_pEditChat);
+	m_pCompleter->setCompletionMode(QCompleter::PopupCompletion);
+	
+	connect(
+		m_pCompleter, SIGNAL(activated(const QString&)),
+		this, SLOT(insertCompletion(const QString&)));
+}
+
 void ChatBox::resizeEvent(QResizeEvent *event)
 {
 	// scroll the chatlog to bottom
@@ -155,6 +172,9 @@ void ChatBox::resizeEvent(QResizeEvent *event)
 
 void ChatBox::actionChat()
 {
+	if (m_pCompleter && m_pCompleter->popup()->isVisible())
+		return;
+
 	if (m_pEditChat->text().length())
 	{
 		emit dispatchedMessage(m_pEditChat->text());
@@ -162,4 +182,32 @@ void ChatBox::actionChat()
 		m_pEditChat->clear();
 		m_pEditChat->setFocus();
 	}
+}
+
+void ChatBox::textEdited(const QString& text)
+{
+	QString completionPrefix = text.section(' ', -1);
+	
+	if (completionPrefix.isEmpty() || !m_pCompleter)
+		return;
+
+	if (completionPrefix != m_pCompleter->completionPrefix())
+	{
+		m_pCompleter->setCompletionPrefix(completionPrefix);
+		m_pCompleter->popup()->setCurrentIndex(
+			m_pCompleter->completionModel()->index(0, 0));
+	}
+	
+	m_pCompleter->complete();
+}
+
+void ChatBox::insertCompletion(const QString& completion)
+{
+	if (m_pCompleter->widget() != m_pEditChat)
+		return;
+		
+	m_pEditChat->cursorBackward(true, m_pCompleter->completionPrefix().length());
+	m_pEditChat->insert(completion);
+	
+	m_pCompleter->popup()->hide();
 }

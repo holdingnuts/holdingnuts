@@ -489,7 +489,14 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setMinimumSize(640, 480);
 	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
-	this->resize(800, 630);
+	
+	// load gui settings
+	QSettings settings;
+
+	settings.beginGroup("TableWindow");
+		this->resize(settings.value("size", QSize(800, 630)).toSize());
+		this->move(settings.value("pos", QPoint(50, 50)).toPoint());
+	settings.endGroup();
 }
 
 WTable::~WTable()
@@ -577,7 +584,8 @@ QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
 	
 	QPointF pt = wseats[nSeatID]->scenePos();
 
-	pt.ry() += wseats[nSeatID]->boundingRectSeat().height();
+	pt.ry() += wseats[nSeatID]->boundingRectSeat().height() - 
+		m_pTimeout->boundingRect().height();
 
 	return pt;
 }
@@ -1200,6 +1208,14 @@ void WTable::addServerMessage(const QString& text)
 void WTable::closeEvent(QCloseEvent *event)
 {
 	// FIXME: handle this case: send sitout if player (my_seat != -1 && sitout == false)
+	
+	// store settings
+	QSettings settings;
+
+	settings.beginGroup("TableWindow");
+		settings.setValue("size", this->size());
+		settings.setValue("pos", this->pos());
+	settings.endGroup();
 }
 
 void WTable::actionFold()

@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Dominik Geyer <dominik.geyer@holdingnuts.net>
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
 
@@ -29,9 +30,10 @@
 
 #include <Protocol.h>
 
+#include "PlayerListTableModel.hpp"
+
 class ChatBox;
 class GameListTableModel;
-class PlayerListTableModel;
 class GameListSortFilterProxyModel;
 
 class QLabel;
@@ -41,7 +43,8 @@ class QTextEdit;
 class QStandardItemModel;
 class QTableView;
 class QListView;
-
+class QComboBox;
+class QCheckBox;
 
 //! \brief Mainwindow
 class WMain : public QMainWindow
@@ -72,11 +75,15 @@ public:
 	static QString getGamemodeString(gamemode mode);
 	static QString getGamestateString(gamestate state);
 	
+	PlayerListTableModel* playerList() const { return modelPlayerList; }
+	
 protected:
 	void doRegister(bool bRegister);
 	
 	void updateWelcomeLabel();
 	void updateGameinfo(int gid);
+	
+	void writeServerlist() const;
 
 private slots:
 	void closeEvent(QCloseEvent *event);
@@ -84,12 +91,11 @@ private slots:
 	void actionConnect();
 	void actionClose();
 	
-	void slotSrvTextChanged();
-	
 	void actionRegister();
 	void actionUnregister();
 	void actionOpenTable();
 	void actionCreateGame();
+	void actionStartGame();
 	
 	void actionSettings();
 	
@@ -110,14 +116,17 @@ private slots:
 	
 	void updateServerTimeLabel();
 	
+	void filterHideStartedGames(int state);
+	void filterHidePrivateGames(int state);
+	
 private:
 	//! \brief Label in header displaying a welcome message
 	QLabel			*lblWelcome;
 	//! \brief Label in header displaying the server time
 	QLabel 			*lblServerTime;
 	
-	//! \brief Editbox server adress
-	QLineEdit		*editSrvAddr;
+	//! \brief Combobox server adress
+	QComboBox		*cbSrvAddr;
 	//! \brief Connect Button
 	QPushButton		*btnConnect;
 	//! \brief Close connection Button
@@ -136,6 +145,10 @@ private:
 	GameListSortFilterProxyModel	*proxyModelGameList;
 	
 	QLineEdit		*filterPatternGame;
+	//! \brief Checkbox for hiding started games
+	QCheckBox		*chkHideStartedGames;
+	//! \brief Checkbox for hiding private games
+	QCheckBox		*chkHidePrivateGames;
 	
 	//! \brief MVC Model
 	PlayerListTableModel	*modelPlayerList;
@@ -170,6 +183,7 @@ private:
 	QPushButton		*btnUnregister;
 	
 	QPushButton		*btnOpenTable;
+	QPushButton		*btnStartGame;
 	
 	//! \brief Timer for updating the gamelist
 	QTimer			*timerGamelistUpdate;

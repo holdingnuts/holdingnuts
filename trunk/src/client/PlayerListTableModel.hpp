@@ -60,11 +60,13 @@ public:
 
 	//! \brief 
 	//! \param value
-	void updateRow(int row, const QStringList& value);
+//	void updateRow(int row, const QStringList& value);
 
-	void updateValue(int row, int column, const QString& value);
+	void updateValue(int row, int column, const QVariant& value);
 
-	void updatePlayerName(int row, const QString& value);
+	void updatePlayerName(int cid, const QString& value);
+
+	QString getPlayerName(int cid) const;
 
 	//! \brief clear's the list
 	void clear();
@@ -73,6 +75,16 @@ public:
 
 private:
 	QStringList				strlstHeaderLabels;
+/*	
+	typedef struct {
+		QString		name;
+		QString		location;
+	} playerinfo;
+*/
+	// map<cid, playerinfo>
+	typedef QMap<int, QList<QVariant> >	players_type;
+	
+	players_type					players;
 	
 	QList<QStringList>		lstRows; // QStringList == row[n,0], row[n,1],... 
 };

@@ -30,24 +30,35 @@ GameListSortFilterProxyModel::GameListSortFilterProxyModel(QObject *parent)
 :	QSortFilterProxyModel(parent)
 { }
 
-void GameListSortFilterProxyModel::setFilterGameType(const gametype& type)
+void GameListSortFilterProxyModel::hideGameState(const QString& filter)
 {
-	filterGameType = type;
+	if (filterGameState.contains(filter))
+		return;
+		
+	filterGameState.append(filter);
+	
 	invalidateFilter();
 }
 
-void GameListSortFilterProxyModel::setFilterGameMode(const gamemode& mode)
+void GameListSortFilterProxyModel::showGameState(const QString& filter)
 {
-	filterGameMode = mode;
+	int i = filterGameState.indexOf(filter);
+	
+	if (i == -1)
+		return;
+		
+	filterGameState.removeAt(i);
+
 	invalidateFilter();
 }
 
-void GameListSortFilterProxyModel::setFilterGameState(const gamestate& state)
+void GameListSortFilterProxyModel::showPrivateGames(bool value)
 {
-	filterGameState = state;
+	bShowPrivateGames = value;
+
 	invalidateFilter();
 }
-
+/*
 void GameListSortFilterProxyModel::setFilterMinimumPlayers(int n)
 {
 	minPlayers = n;
@@ -71,7 +82,7 @@ void GameListSortFilterProxyModel::setFilterMaximumRegisteredPlayers(int n)
 	maxRegisteredPlayers = n;
 	invalidateFilter();
 }
-
+*/
 bool GameListSortFilterProxyModel::filterAcceptsRow(
 	int sourceRow,
 	const QModelIndex& sourceParent) const
@@ -79,28 +90,12 @@ bool GameListSortFilterProxyModel::filterAcceptsRow(
 	const QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent); // name
 	const QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent); // gametype + gamemode
 	const QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent); // players (current / max)
-	const QModelIndex index3 = sourceModel()->index(sourceRow, 2, sourceParent); // gamestate
+	const QModelIndex index3 = sourceModel()->index(sourceRow, 3, sourceParent); // gamestate
+	const QModelIndex index4 = sourceModel()->index(sourceRow, 4, sourceParent); // password
 
-//	const QStringList lstPlayers =  sourceModel()->data(index2).toString().split("/", QString::SkipEmptyParts);
-
-//	const int currentPlayers = lstPlayers.at(0).toInt();
-
-	return (sourceModel()->data(index0).toString().contains(filterRegExp())
-	
-			); // && 
-/*	
-	TODO: 
-
-			sourceModel()->data(index1).toString().compare(
-				QString(
-					WMain::getGametypeString(filterGameType) + " " + WMain::getGamemodeString(filterGameMode)),
-				Qt::CaseInsensitive) &&
-
-			playersInRange(sourceModel()->data(index2).toDate(),
-			
-			sourceModel()->data(index3).toString().compare(
-				WMain::getGamestateString(filterGameState), Qt::CaseInsensitive));
-*/				
+	return (sourceModel()->data(index0).toString().contains(filterRegExp()) &&
+			!filterGameState.contains(sourceModel()->data(index3).toString()) &&
+			!(sourceModel()->data(index4).toBool() && bShowPrivateGames));
 }
 
 bool GameListSortFilterProxyModel::playersInRange(int i) const

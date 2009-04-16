@@ -91,12 +91,22 @@ bool GameController::removePlayer(int cid)
 	if (started)
 		return false;
 	
+	
 	players_type::iterator it = players.find(cid);
 	
 	if (it == players.end())
 		return false;
 	
+	bool bIsOwner = false;
+	if (owner == cid)
+		bIsOwner = true;
+	
 	players.erase(it);
+	
+	
+	// find a new owner
+	if (bIsOwner)
+		selectNewOwner();
 	
 	return true;
 }
@@ -148,6 +158,15 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 		client_list.push_back(e->first);
 	
 	return true;
+}
+
+void GameController::selectNewOwner()
+{
+	players_type::const_iterator e = players.begin();
+	if (e == players.end())
+		return;
+	
+	owner = e->second->client_id;
 }
 
 void GameController::chat(int tid, const char* msg)
@@ -1196,6 +1215,11 @@ int GameController::handleTable(Table *t)
 
 void GameController::start()
 {
+	// at least 2 players needed
+	if (players.size() < 2)
+		return;
+	
+	
 	log_msg("game", "game %d has been started", game_id);
 	
 	started = true;
