@@ -92,7 +92,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	
 	QLabel *lblLogo = new QLabel(this);
-	lblLogo->setPixmap(QPixmap(":res/hn_logo.png"));
+	lblLogo->setPixmap(QPixmap(":res/hn_logo_wide.png"));
 	
 	
 	QHBoxLayout *lHeader = new QHBoxLayout;
