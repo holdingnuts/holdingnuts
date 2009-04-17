@@ -25,7 +25,7 @@
 #include "GameListTableModel.hpp"
 
 #include <QDebug>
-
+#include <QIcon>
 
 GameListTableModel::GameListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
@@ -65,10 +65,16 @@ QVariant GameListTableModel::data(const QModelIndex& index, int role) const
 			return QVariant();
 	}
 
-	if (role != Qt::DisplayRole)
-		return QVariant();
+	if (role == Qt::DisplayRole)
+		return datarows.at(index.row()).cols.at(index.column());
 
-	return datarows.at(index.row()).cols.at(index.column());
+	if (
+		role == Qt::DecorationRole && 
+		index.column() == 0 &&
+		datarows.at(index.row()).cols.at(4).toBool())
+			return QVariant(QIcon("gfx/foyer/lock.png"));
+	
+	return QVariant();
 }
 
 QVariant GameListTableModel::headerData(
