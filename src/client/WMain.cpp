@@ -142,10 +142,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	filterPatternGame = new QLineEdit(this);
 	filterPatternGame->hide();
 	
-	chkHideStartedGames = new QCheckBox(tr("hide started Games"), this);
+	chkHideStartedGames = new QCheckBox(tr("hide started"), this);
 	connect(chkHideStartedGames, SIGNAL(stateChanged(int)), this, SLOT(filterHideStartedGames(int)));
 	
-	chkHidePrivateGames = new QCheckBox(tr("hide private Games"), this);
+	chkHidePrivateGames = new QCheckBox(tr("hide private"), this);
 	connect(chkHidePrivateGames, SIGNAL(stateChanged(int)), this, SLOT(filterHidePrivateGames(int)));
 
 	QHBoxLayout *lGameFilter = new QHBoxLayout();
@@ -872,9 +872,7 @@ void WMain::notifyGameinfo(int gid)
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
 		
-	modelGameList->updateGameName(gid, QString("%1 [%2]")
-		.arg(gi->password ? tr("[private] ") + gi->name : gi->name)
-		.arg(gid));
+	modelGameList->updateGameName(gid, gi->name);
 	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
 	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	modelGameList->updateGameState(gid, getGamestateString(gi->state));
