@@ -1650,6 +1650,9 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 		break;
 	case HandStrength::Flush:
 		sstrength = tr("Flush");
+		for (unsigned int i=0; i < rank.size(); i++)
+			slkicker += QString(rank[i].getName());
+		
 		srank = QString("%1").arg(buildSuitString(rank[0]));
 		break;
 	case HandStrength::FullHouse:
@@ -1663,10 +1666,16 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	case HandStrength::StraightFlush:
 		// handle RoyalFlush as special case
 		if (strength->getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
+		{
 			sstrength = tr("Royal Flush");
+			srank = QString("%1").arg(buildSuitString(rank[0]));
+		}
 		else
+		{
 			sstrength = tr("Straight Flush");
-		srank = tr("%1 high").arg(buildFaceString(rank[0]));
+			srank = QString("%1 ").arg(buildSuitString(rank[0])) +
+				tr("%1 high").arg(buildFaceString(rank[0]));
+		}
 		break;
 	}
 	

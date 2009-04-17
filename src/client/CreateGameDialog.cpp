@@ -146,6 +146,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	QLabel *labelPassword = new QLabel(tr("Password:"), this);
 	editPassword = new QLineEdit(this);
 	editPassword->setEnabled(false);
+	editPassword->setEchoMode(config.getBool("ui_echo_password") ? QLineEdit::Normal : QLineEdit::Password);
 	
 	
 	QGridLayout *layoutPrivate = new QGridLayout;
