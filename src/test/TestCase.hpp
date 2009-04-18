@@ -21,30 +21,32 @@
  */
 
 
-#ifndef _DECK_H
-#define _DECK_H
+#ifndef _TESTCASE_H
+#define _TESTCASE_H
 
-#include <vector>
+#include <string>
 
-#include "Card.hpp"
 
-class Deck
+class TestCase
 {
 public:
-	void fill();
-	void empty();
-	int count() const;
+	TestCase();
+	virtual bool run() = 0;
 	
-	bool push(Card card);
-	bool pop(Card &card);
-	bool shuffle();
+	const std::string& name() const { return m_name; };
+	unsigned int countResults() const { return m_count; };
+	unsigned int countFailed() const { return m_fail; };
+	unsigned int countSuccess() const { return countResults() - countFailed(); };
+
+protected:
+	bool test(bool result, const std::string& desc="");
 	
-	void debugRemoveCard(Card card);
-	void debugPushCards(const std::vector<Card> *cardsvec);
-	void debug();
+	void setName(const std::string& name) { m_name = name; };
 	
 private:
-	std::vector<Card> cards;
+	std::string m_name;
+	unsigned int m_count;
+	unsigned int m_fail;
 };
 
-#endif /* _DECK_H */
+#endif /* _TESTCASE_H */

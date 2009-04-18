@@ -21,30 +21,29 @@
  */
 
 
-#ifndef _DECK_H
-#define _DECK_H
+#include <iostream>
 
-#include <vector>
+#include "TestCase.hpp"
 
-#include "Card.hpp"
 
-class Deck
+using namespace std;
+
+
+TestCase::TestCase() :
+	m_name("Unnamed test"),
+	m_count(0), m_fail(0)
 {
-public:
-	void fill();
-	void empty();
-	int count() const;
 	
-	bool push(Card card);
-	bool pop(Card &card);
-	bool shuffle();
-	
-	void debugRemoveCard(Card card);
-	void debugPushCards(const std::vector<Card> *cardsvec);
-	void debug();
-	
-private:
-	std::vector<Card> cards;
-};
+}
 
-#endif /* _DECK_H */
+bool TestCase::test(bool result, const string& desc)
+{
+	m_count++;
+	
+	if (!result)
+		m_fail++;
+	
+	cerr << "TEST " << (result ? "OK  " : "FAIL") << " [" << m_name << "] " << " " << desc  << endl;
+	
+	return result;
+}

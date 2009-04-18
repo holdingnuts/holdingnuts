@@ -1650,10 +1650,10 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 		break;
 	case HandStrength::Flush:
 		sstrength = tr("Flush");
+		srank = QString("%1 ").arg(buildSuitString(rank[0]));
 		for (unsigned int i=0; i < rank.size(); i++)
-			slkicker += QString(rank[i].getName());
+			srank += QString(rank[i].getName());
 		
-		srank = QString("%1").arg(buildSuitString(rank[0]));
 		break;
 	case HandStrength::FullHouse:
 		sstrength = tr("Full House");

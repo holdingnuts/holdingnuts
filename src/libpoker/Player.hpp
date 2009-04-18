@@ -33,6 +33,7 @@ typedef unsigned int chips_type;
 class Player
 {
 friend class GameController;
+friend class TestCaseGameController;
 
 public:
 	typedef enum {

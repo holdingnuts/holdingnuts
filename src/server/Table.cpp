@@ -184,7 +184,8 @@ void Table::collectBets()
 		
 		
 #if 0
-		log_msg("collectBets", "smallest_bet: %s = %.2f", need_sidepot ? "true" : "false", smallest_bet / 100.0f);
+		log_msg("collectBets", "smallest_bet: sidepot=%s with %d", 
+			need_sidepot ? "true" : "false", smallest_bet);
 #endif
 		// there are no bets, do nothing
 		if (smallest_bet == 0)

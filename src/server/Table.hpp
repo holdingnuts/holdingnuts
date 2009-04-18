@@ -32,6 +32,7 @@
 class Table
 {
 friend class GameController;
+friend class TestCaseGameController;
 
 public:
 	typedef enum {

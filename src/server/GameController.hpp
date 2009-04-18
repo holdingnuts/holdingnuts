@@ -40,6 +40,8 @@
 
 class GameController
 {
+friend class TestCaseGameController;
+
 public:
 	typedef std::map<int,Table*>	tables_type;
 	typedef std::map<int,Player*>	players_type;
@@ -118,9 +120,6 @@ public:
 	
 	int tick();
 	
-#ifdef DEBUG
-	void debugSetPlayerStake(int cid, chips_type stake) { findPlayer(cid)->stake = stake; };
-#endif
 	
 protected:
 	Player* findPlayer(int cid);
@@ -185,6 +184,10 @@ private:
 	
 	std::string name;
 	std::string password;
+	
+#ifdef DEBUG
+	std::vector<Card> debug_cards;
+#endif
 };
 
 #endif /* _GAMECONTROLLER_H */

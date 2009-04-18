@@ -28,10 +28,6 @@
 
 using namespace std;
 
-Deck::Deck()
-{
-
-}
 
 void Deck::fill()
 {
@@ -50,7 +46,7 @@ void Deck::empty()
 	cards.clear();
 }
 
-int Deck::count()
+int Deck::count() const
 {
 	return cards.size();
 }
@@ -77,6 +73,7 @@ bool Deck::shuffle()
 	return true;
 }
 
+
 void Deck::debug()
 {
 	print_cards("Deck", &cards);
@@ -91,4 +88,10 @@ void Deck::debugRemoveCard(Card card)
 			break;
 		}
 	}
+}
+
+void Deck::debugPushCards(const vector<Card> *cardsvec)
+{
+	for (vector<Card>::const_iterator e = cardsvec->begin(); e != cardsvec->end(); e++)
+		push(*e);
 }

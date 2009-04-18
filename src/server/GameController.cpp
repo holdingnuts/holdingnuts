@@ -355,7 +355,7 @@ void GameController::sendTableSnapshot(Table *t)
 	
 	snprintf(msg, sizeof(msg),
 		"%d:%d "           // <state>:<betting-round>
-		"%s "              // <dealer>:<SB>:<BB>:<current>
+		"%s "              // <dealer>:<SB>:<BB>:<current>:<last-bet>
 		"cc:%s "           // <community-cards>
 		"%s "              // seats
 		"%s "              // pots
@@ -479,9 +479,26 @@ void GameController::stateNewRound(Table *t)
 	log_msg("Table", "Hand #%d (gid=%d tid=%d)", hand_no, game_id, t->table_id);
 #endif
 	
+
+#ifndef SERVER_TESTING
 	// fill and shuffle card-deck
 	t->deck.fill();
 	t->deck.shuffle();
+#else
+	// set defined cards for testing
+	if (debug_cards.size())
+	{
+		dbg_msg("deck", "using defined cards");
+		t->deck.empty();
+		t->deck.debugPushCards(&debug_cards);
+	}
+	else
+	{
+		dbg_msg("deck", "using random cards");
+		t->deck.fill();
+		t->deck.shuffle();
+	}
+#endif
 	
 	
 	// reset round-related
