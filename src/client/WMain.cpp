@@ -117,7 +117,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewGameList->setSortingEnabled(true);
+	viewGameList->setSortingEnabled(false);   // FIXME: disabled till issues solved
 	
 #if 0
 	QFont font = viewGameList->font();
@@ -232,8 +232,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lGameInfo->addWidget(lblGameInfoStakes, 3, 1, 1, 1);
 	lGameInfo->addWidget(new QLabel(tr("Player timeout"), this), 4, 0, 1, 1);
 	lGameInfo->addWidget(lblGameInfoTimeout, 4, 1, 1, 1);
-	lGameInfo->addWidget(new QLabel(tr("Blinds"), this), 5, 0, 1, 1);
-	lGameInfo->addWidget(lblGameInfoBlinds, 5, 1, 1, 1);
+	lGameInfo->addWidget(new QLabel(tr("Blinds"), this), 5, 0, 1, 1, Qt::AlignTop);
+	lGameInfo->addWidget(lblGameInfoBlinds, 5, 1, 1, 1, Qt::AlignTop);
 	lGameInfo->addWidget(viewPlayerList, 6, 0, 1, 2);
 	lGameInfo->addLayout(lRegister, 7, 0, 1, 2);
 	lGameInfo->addLayout(lGameActions, 8, 0, 1, 2);
@@ -982,7 +982,7 @@ void WMain::updateGameinfo(int gid)
 	lblGameInfoId->setText(QString("%1").arg(gid));
 	lblGameInfoStakes->setText(QString("%1").arg(gi->initial_stakes));
 	lblGameInfoTimeout->setText(QString("%1").arg(gi->player_timeout));
-	lblGameInfoBlinds->setText(QString("%1 / x%2 / %3s")
+	lblGameInfoBlinds->setText(QString("<qt>%1 /<br/><b>x</b>%2 /<br/>%3<b>s</b></qt>")
 		.arg(gi->blinds_start, 0, 'f', 2)
 		.arg(gi->blinds_factor, 0, 'f', 2)
 		.arg(gi->blinds_time));

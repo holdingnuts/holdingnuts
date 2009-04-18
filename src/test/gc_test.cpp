@@ -356,9 +356,9 @@ int main(void)
 	// perform these test cases
 	TestCase *tests[] = {
 		//					    stake1/2  blinds dealer win1
-		new TestHeadsup("sb allin (less BB)", 		20, 500, 80, false, false),
-		new TestHeadsup("sb allin (complete BB)",	40, 500, 80, false, false),
-		new TestHeadsup("sb (more than BB)",		60, 500, 80, false, false),  // action needed
+		new TestHeadsup("sb allin (less SB)", 		20, 500, 80, false, false),
+		new TestHeadsup("sb allin (complete SB)",	40, 500, 80, false, false),
+		new TestHeadsup("sb (more than SB)",		60, 500, 80, false, false),  // action needed
 		new TestHeadsup("bb allin (less BB), win1", 	20, 500, 80, true, true),
 		new TestHeadsup("bb allin (less BB), win1", 	40, 500, 80, true, true),
 		new TestHeadsup("bb allin (complete BB), win1",	80, 500, 80, true, true), // action needed
