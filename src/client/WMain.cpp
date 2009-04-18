@@ -106,7 +106,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// sort and filter proxy model
 	proxyModelGameList = new GameListSortFilterProxyModel(this);
 	proxyModelGameList->setSourceModel(modelGameList);
-
+	proxyModelGameList->setDynamicSortFilter(true);
+			
 	// view game
 	viewGameList = new QTableView(this);
 	viewGameList->setShowGrid(false);
@@ -879,8 +880,6 @@ void WMain::notifyGameinfo(int gid)
 	modelGameList->updatePassword(gid, gi->password);
 	
 	viewGameList->resizeRowsToContents();
-	
-	proxyModelGameList->invalidate();
 	
 	// update gameinfo panel
 	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
