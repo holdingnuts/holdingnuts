@@ -370,6 +370,23 @@ void GameController::sendTableSnapshot(Table *t)
 	snap(t->table_id, SnapTable, msg);
 }
 
+void GameController::sendPlayerShowSnapshot(Table *t, Player *p)
+{
+	vector<Card> allcards;
+	p->holecards.copyCards(&allcards);
+	t->communitycards.copyCards(&allcards);
+	
+	string hsstr;
+	for (vector<Card>::const_iterator e = allcards.begin(); e != allcards.end(); e++)
+		hsstr += string(e->getName()) + string(" ");
+	
+	snprintf(msg, sizeof(msg), "%d %s",
+		p->client_id,
+		hsstr.c_str());
+	
+	snap(t->table_id, SnapPlayerShow, msg);
+}
+
 chips_type GameController::determineMinimumBet(Table *t) const
 {
 	if (t->bet_amount == 0)
@@ -580,6 +597,20 @@ void GameController::stateBlinds(Table *t)
 	Player *p = t->seats[t->cur_player].player;
 	snap(p->client_id, t->table_id, SnapPlayerCurrent);
 #endif
+	
+	// check if there is any more action possible
+	if (t->isAllin())
+	{
+		if ((pBig->stake == 0 && pSmall->stake == 0) ||   // both players are allin
+			(pBig->stake == 0 && t->seats[t->sb].bet >= t->seats[t->bb].bet) ||  // BB is allin, and SB has bet more or equal BB
+			(pSmall->stake == 0))  // SB is allin
+		{
+			dbg_msg("no-more-action", "sb-allin:%s  bb-allin:%s",
+				pSmall->stake ? "no" : "yes",
+				pBig->stake ? "no" : "yes");
+			t->nomoreaction = true;
+		}
+	}
 	
 	t->betround = Table::Preflop;
 	t->scheduleState(Table::Betting, 3);
@@ -936,6 +967,9 @@ void GameController::stateAskShow(Table *t)
 			
 			chose_action = true;
 		}
+#else /* SERVER_TESTING */
+		t->seats[t->cur_player].showcards = true;
+		chose_action = true;
 #endif /* SERVER_TESTING */
 	}
 	
@@ -986,6 +1020,11 @@ void GameController::stateAllFolded(Table *t)
 	// get last remaining player
 	Player *p = t->seats[t->cur_player].player;
 	
+	// send PlayerShow snapshot if cards were shown
+	if (t->seats[t->cur_player].showcards)
+		sendPlayerShowSnapshot(t, p);
+	
+	
 	p->stake += t->pots[0].amount;
 	t->seats[t->cur_player].bet = t->pots[0].amount;
 	
@@ -1001,26 +1040,14 @@ void GameController::stateShowdown(Table *t)
 	// the player who did the last action is first
 	unsigned int showdown_player = t->last_bet_player;
 	
-	// determine and send out hand-strength messages
+	// determine and send out PlayerShow snapshots
 	for (unsigned int i=0; i < t->countActivePlayers(); i++)
 	{
 		if (t->seats[showdown_player].showcards || t->nomoreaction)
 		{
 			Player *p = t->seats[showdown_player].player;
 			
-			vector<Card> allcards;
-			p->holecards.copyCards(&allcards);
-			t->communitycards.copyCards(&allcards);
-			
-			string hsstr;
-			for (vector<Card>::const_iterator e = allcards.begin(); e != allcards.end(); e++)
-				hsstr += string(e->getName()) + string(" ");
-			
-			snprintf(msg, sizeof(msg), "%d %s",
-				p->client_id,
-				hsstr.c_str());
-			
-			snap(t->table_id, SnapPlayerShow, msg);
+			sendPlayerShowSnapshot(t, p);
 		}
 		
 		showdown_player = t->getNextActivePlayer(showdown_player);
@@ -1216,7 +1243,7 @@ int GameController::handleTable(Table *t)
 void GameController::start()
 {
 	// at least 2 players needed
-	if (players.size() < 2)
+	if (started || players.size() < 2)
 		return;
 	
 	
@@ -1245,7 +1272,10 @@ void GameController::start()
 			rndseats.push_back(0);
 	}
 	
+	
+#ifndef SERVER_TESTING
 	random_shuffle(rndseats.begin(), rndseats.end());
+#endif
 	
 	bool chose_dealer = false;
 	for (unsigned int i=0; i < rndseats.size(); i++)

@@ -151,6 +151,7 @@ protected:
 	void dealRiver(Table *t);
 	
 	void sendTableSnapshot(Table *t);
+	void sendPlayerShowSnapshot(Table *t, Player *p);
 	
 private:
 	int game_id;
