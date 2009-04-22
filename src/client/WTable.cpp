@@ -754,7 +754,6 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(false);
 					m_pSliderAmount->setVisible(false);
-					
 					wRaiseBtns->setVisible(false);
 					
 					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
@@ -777,6 +776,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(true);
+					wRaiseBtns->setVisible(true);
+					
 					shortcutAllin->setEnabled(false);
 					shortcutBet->setEnabled(true);
 					shortcutRaise->setEnabled(true);
