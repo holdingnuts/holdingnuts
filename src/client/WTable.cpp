@@ -957,19 +957,13 @@ void WTable::updateSeat(unsigned int s)
 			ui_seat->showBigCards(false);
 			ui_seat->showSmallCards(false);
 		}
-
-		// schedule scene update
-		ui_seat->update(ui_seat->boundingRect());
 	}
 	else
-	{
-		// if seat was valid force schedule redraw
-		if (ui_seat->isValid())
-		{
-			ui_seat->update(ui_seat->boundingRect());
-			ui_seat->setValid(false);
-		}
-	}
+		ui_seat->setValid(false);
+	
+	
+	// schedule scene update
+	ui_seat->update(ui_seat->boundingRect());
 }
 
 void WTable::updatePots()
