@@ -328,7 +328,7 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	table.minimum_bet = Tokenizer::string2float(tmp) / 100.0f;
 	
 	
-	if (table.state == Table::Blinds)
+	if (table.state == Table::NewRound)
 		holecards.clear();
 	
 	if (tinfo->window)
