@@ -379,6 +379,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	
 	chkAutoFoldCheck = new QCheckBox("Fold/Check", this);
+	connect(chkAutoFoldCheck, SIGNAL(stateChanged(int)), this, SLOT(actionAutoFoldCheck(int)));
 	chkAutoCheckCall = new QCheckBox("Check/Call", this);
 	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
 	
@@ -1312,10 +1313,21 @@ void WTable::actionBack()
 	doSitout(false);
 }
 
+void WTable::actionAutoFoldCheck(int state)
+{
+	// uncheck other auto-actions
+	if (state == Qt::Checked)
+		chkAutoCheckCall->setCheckState(Qt::Unchecked);
+}
+
 void WTable::actionAutoCheckCall(int state)
 {
 	if (state != Qt::Checked)
 		return;
+	
+	// uncheck other auto-actions
+	chkAutoFoldCheck->setCheckState(Qt::Unchecked);
+	
 	
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
