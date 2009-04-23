@@ -265,7 +265,7 @@
     <message>
         <location filename="../pclient.cpp" line="607"/>
         <source>%1 receives %3 odd chips of split pot #%2.</source>
-        <translation>%1 bekommt %3 unteilbare Chips aus Split pot #%2.</translation>
+        <translation>%1 erhält %3 unteilbare Chips aus Split pot #%2.</translation>
     </message>
     <message>
         <location filename="../pclient.cpp" line="821"/>
@@ -660,32 +660,32 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
 <context>
     <name>WTable</name>
     <message>
-        <location filename="../WTable.cpp" line="805"/>
+        <location filename="../WTable.cpp" line="807"/>
         <source>Fold</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="490"/>
+        <location filename="../WTable.cpp" line="491"/>
         <source>HoldingNuts table</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="815"/>
+        <location filename="../WTable.cpp" line="817"/>
         <source>Check</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="814"/>
+        <location filename="../WTable.cpp" line="816"/>
         <source>Check/Fold</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1556"/>
+        <location filename="../WTable.cpp" line="1573"/>
         <source>Saved screenshot: %1.</source>
         <translation>Screenshot gespeichert: %1.</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1558"/>
+        <location filename="../WTable.cpp" line="1575"/>
         <source>Unable to save screenshot in %1.</source>
         <translation>Screenshot konnte nicht in %1 gespeichert werden.</translation>
     </message>
@@ -697,12 +697,12 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
     <message>
         <location filename="../WTable.cpp" line="326"/>
         <source>&amp;Show</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Zeigen</translation>
     </message>
     <message>
         <location filename="../WTable.cpp" line="329"/>
         <source>&amp;Muck</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Verdecken</translation>
     </message>
     <message>
         <location filename="../WTable.cpp" line="332"/>
@@ -745,63 +745,63 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="452"/>
+        <location filename="../WTable.cpp" line="453"/>
         <source>Ctrl+F</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="455"/>
+        <location filename="../WTable.cpp" line="456"/>
         <source>Ctrl+C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="458"/>
+        <location filename="../WTable.cpp" line="459"/>
         <source>Ctrl+B</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="461"/>
+        <location filename="../WTable.cpp" line="462"/>
         <source>Ctrl+R</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="464"/>
+        <location filename="../WTable.cpp" line="465"/>
         <source>Ctrl+A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="468"/>
+        <location filename="../WTable.cpp" line="469"/>
         <source>Ctrl+M</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="471"/>
+        <location filename="../WTable.cpp" line="472"/>
         <source>Ctrl+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="474"/>
+        <location filename="../WTable.cpp" line="475"/>
         <source>Ctrl+O</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="477"/>
+        <location filename="../WTable.cpp" line="478"/>
         <source>Ctrl+K</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="726"/>
+        <location filename="../WTable.cpp" line="727"/>
         <source>&amp;Call %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="727"/>
-        <location filename="../WTable.cpp" line="738"/>
+        <location filename="../WTable.cpp" line="728"/>
+        <location filename="../WTable.cpp" line="739"/>
         <source>&amp;Raise %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="745"/>
+        <location filename="../WTable.cpp" line="746"/>
         <source>&amp;Bet %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -812,249 +812,249 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="808"/>
+        <location filename="../WTable.cpp" line="810"/>
         <source>Allin %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="810"/>
+        <location filename="../WTable.cpp" line="812"/>
         <source>Call %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="734"/>
+        <location filename="../WTable.cpp" line="735"/>
         <source>&amp;Check</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="986"/>
+        <location filename="../WTable.cpp" line="988"/>
         <source>Main pot: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="990"/>
+        <location filename="../WTable.cpp" line="992"/>
         <source>Side pot %1: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1451"/>
+        <location filename="../WTable.cpp" line="1468"/>
         <source>%1, it&apos;s your turn!</source>
         <translation>%1, du bist dran!</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1477"/>
+        <location filename="../WTable.cpp" line="1494"/>
         <source>%1, you have %2 seconds left to respond!</source>
         <translation>%1, du hast %2 Sekunden verbleibend zu reagieren!</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1582"/>
+        <location filename="../WTable.cpp" line="1599"/>
         <source>Spades</source>
         <translation>Pik</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1583"/>
+        <location filename="../WTable.cpp" line="1600"/>
         <source>Hearts</source>
         <translation>Herz</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1584"/>
+        <location filename="../WTable.cpp" line="1601"/>
         <source>Diamonds</source>
         <translation>Karo</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1585"/>
+        <location filename="../WTable.cpp" line="1602"/>
         <source>Clubs</source>
         <translation>Kreuz</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1597"/>
+        <location filename="../WTable.cpp" line="1614"/>
         <source>Deuce</source>
         <translation>Zwei</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1597"/>
+        <location filename="../WTable.cpp" line="1614"/>
         <source>Deuces</source>
         <translation>Zweier</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1598"/>
+        <location filename="../WTable.cpp" line="1615"/>
         <source>Three</source>
         <translation>Drei</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1598"/>
+        <location filename="../WTable.cpp" line="1615"/>
         <source>Threes</source>
         <translation>Dreier</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1599"/>
+        <location filename="../WTable.cpp" line="1616"/>
         <source>Four</source>
         <translation>Vier</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1599"/>
+        <location filename="../WTable.cpp" line="1616"/>
         <source>Fours</source>
         <translation>Vierer</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1600"/>
+        <location filename="../WTable.cpp" line="1617"/>
         <source>Five</source>
         <translation>Fünf</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1600"/>
+        <location filename="../WTable.cpp" line="1617"/>
         <source>Fives</source>
         <translation>Fünfer</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1601"/>
+        <location filename="../WTable.cpp" line="1618"/>
         <source>Six</source>
         <translation>Sechs</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1601"/>
+        <location filename="../WTable.cpp" line="1618"/>
         <source>Sixes</source>
         <translation>Sechser</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1602"/>
+        <location filename="../WTable.cpp" line="1619"/>
         <source>Seven</source>
         <translation>Sieben</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1602"/>
+        <location filename="../WTable.cpp" line="1619"/>
         <source>Sevens</source>
         <translation>Siebener</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1603"/>
+        <location filename="../WTable.cpp" line="1620"/>
         <source>Eight</source>
         <translation>Acht</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1603"/>
+        <location filename="../WTable.cpp" line="1620"/>
         <source>Eights</source>
         <translation>Achter</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1604"/>
+        <location filename="../WTable.cpp" line="1621"/>
         <source>Nine</source>
         <translation>Neun</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1604"/>
+        <location filename="../WTable.cpp" line="1621"/>
         <source>Nines</source>
         <translation>Neuner</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1605"/>
+        <location filename="../WTable.cpp" line="1622"/>
         <source>Ten</source>
         <translation>Zehn</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1605"/>
+        <location filename="../WTable.cpp" line="1622"/>
         <source>Tens</source>
         <translation>Zehner</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1606"/>
+        <location filename="../WTable.cpp" line="1623"/>
         <source>Jack</source>
         <translation>Bube</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1606"/>
+        <location filename="../WTable.cpp" line="1623"/>
         <source>Jacks</source>
         <translation>Buben</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1607"/>
+        <location filename="../WTable.cpp" line="1624"/>
         <source>Queen</source>
         <translation>Dame</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1607"/>
+        <location filename="../WTable.cpp" line="1624"/>
         <source>Queens</source>
         <translation>Damen</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1608"/>
+        <location filename="../WTable.cpp" line="1625"/>
         <source>King</source>
         <translation>König</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1608"/>
+        <location filename="../WTable.cpp" line="1625"/>
         <source>Kings</source>
         <translation>Könige</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1609"/>
+        <location filename="../WTable.cpp" line="1626"/>
         <source>Ace</source>
         <translation>Ass</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1609"/>
+        <location filename="../WTable.cpp" line="1626"/>
         <source>Aces</source>
         <translation>Asse</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1632"/>
+        <location filename="../WTable.cpp" line="1649"/>
         <source>High Card</source>
         <translation>Höchste Karte</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1649"/>
-        <location filename="../WTable.cpp" line="1677"/>
+        <location filename="../WTable.cpp" line="1666"/>
+        <location filename="../WTable.cpp" line="1701"/>
         <source>%1 high</source>
         <translation>%1 hoch</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1636"/>
+        <location filename="../WTable.cpp" line="1653"/>
         <source>One Pair</source>
         <translation>Ein Paar</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1640"/>
+        <location filename="../WTable.cpp" line="1657"/>
         <source>Two Pair</source>
         <translation>Zwei Paare</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1641"/>
-        <location filename="../WTable.cpp" line="1660"/>
+        <location filename="../WTable.cpp" line="1658"/>
+        <location filename="../WTable.cpp" line="1684"/>
         <source>%1 and %2</source>
         <translation>%1 und %2</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1644"/>
+        <location filename="../WTable.cpp" line="1661"/>
         <source>Three Of A Kind</source>
         <translation>Drilling</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1648"/>
+        <location filename="../WTable.cpp" line="1665"/>
         <source>Straight</source>
         <translation>Straße</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1652"/>
+        <location filename="../WTable.cpp" line="1669"/>
         <source>Flush</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1659"/>
+        <location filename="../WTable.cpp" line="1683"/>
         <source>Full House</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1663"/>
+        <location filename="../WTable.cpp" line="1687"/>
         <source>Four Of A Kind</source>
         <translation>Vierling</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1675"/>
+        <location filename="../WTable.cpp" line="1699"/>
         <source>Straight Flush</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1670"/>
+        <location filename="../WTable.cpp" line="1694"/>
         <source>Royal Flush</source>
         <translation></translation>
     </message>
