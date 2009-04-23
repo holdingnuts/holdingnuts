@@ -698,12 +698,14 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		cmderr = !client_cmd_request_gamestart(client, t);
 	else
 		cmderr = true;
-
 	
+	// FIXME: temporarily disabled for release 0.0.3
+#if 0
 	if (!cmderr)
 		send_ok(client);
 	else
 		send_err(client);
+#endif
 	
 	return 0;
 }
