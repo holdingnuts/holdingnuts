@@ -1119,8 +1119,12 @@ void WTable::updateHandStrength()
 	const table_snapshot *snap = &(tinfo->snap);
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 	
+	// is not a player
 	if (snap->my_seat == -1)
+	{
+		m_pTxtHandStrength->setText(QString());
 		return;
+	}
 	
 	const seatinfo *seat = &(snap->seats[snap->my_seat]);
 	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
