@@ -1386,17 +1386,17 @@ void WTable::actionBetsizeMinimum()
 
 void WTable::actionBetsizeQuarterPot()
 {
-	m_pSliderAmount->setValue(currentPot() * 0.25f);
+	m_pSliderAmount->setValue(int(currentPot() * 0.25f));
 }
 
 void WTable::actionBetsizeHalfPot()
 {
-	m_pSliderAmount->setValue(currentPot() * 0.5f);
+	m_pSliderAmount->setValue(int(currentPot() * 0.5f));
 }
 
 void WTable::actionBetsizeThreeQuarterPot()
 {
-	m_pSliderAmount->setValue(currentPot() * 0.75f);
+	m_pSliderAmount->setValue(int(currentPot() * 0.75f));
 }
 
 void WTable::actionBetsizePotsize()
@@ -1655,10 +1655,17 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 		break;
 	case HandStrength::Flush:
 		sstrength = tr("Flush");
-		srank = QString("%1 ").arg(buildSuitString(rank[0]));
-		for (unsigned int i=0; i < rank.size(); i++)
-			srank += QString(rank[i].getName());
+		srank = QString("%1").arg(buildSuitString(rank[0]));
 		
+		if (verbosity)
+		{
+			QStringList slrank;
+			
+			for (unsigned int i=0; i < rank.size(); i++)
+				slrank += QString(rank[i].getName());
+			
+			srank += " (" + slrank.join(" ") + ")";
+		}
 		break;
 	case HandStrength::FullHouse:
 		sstrength = tr("Full House");
