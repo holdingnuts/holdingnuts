@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
      <file>res/hn_logo.png</file>
+     <file>res/hn_logo_wide.png</file>
 </qresource>
 </RCC>

@@ -29,7 +29,7 @@
 PlayerListTableModel::PlayerListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
 {
-	strlstHeaderLabels << tr("Name"); 
+	strlstHeaderLabels << tr("ID") << tr("Name") << tr("Location"); 
 }
 
 int PlayerListTableModel::rowCount(const QModelIndex& parent) const
@@ -37,7 +37,7 @@ int PlayerListTableModel::rowCount(const QModelIndex& parent) const
 	if (parent.isValid())	// see qt-tip in doc
 		return 0;
 
-	return lstRows.count();
+	return players.size();
 }
 
 int PlayerListTableModel::columnCount(const QModelIndex& parent) const
@@ -50,13 +50,27 @@ QVariant PlayerListTableModel::data(const QModelIndex& index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	if (index.row() > lstRows.size())
+	if (index.row() >= players.size() || index.row() < 0)
 		return QVariant();
 
-	if (role != Qt::DisplayRole)
-		return QVariant();
+	if (role == Qt::DisplayRole)
+	{
+		playerinfo data = players.at(index.row());
 
-	return lstRows.at(index.row()).at(index.column());
+		switch (index.column())
+		{
+			case 0:
+				return data.cid;
+			case 1:
+				return data.name;
+			case 2:
+				return data.location;
+			default:
+				qDebug() << "PlayerListTableModel::data() invalided column ("<<index.column()<<")";
+		}
+	}
+	
+	return QVariant();
 }
 
 QVariant PlayerListTableModel::headerData(
@@ -80,86 +94,164 @@ bool PlayerListTableModel::setData(
 {
 	if (index.isValid() && role == Qt::EditRole)
 	{
-		lstRows[index.row()].replace(index.column(), value.toString());
-		
-		emit dataChanged(index, index);
-		
+		const int row = index.row();
+
+		playerinfo data = players.value(row);
+
+		switch (index.column())
+		{
+			case 0:
+					data.cid = value.toInt();
+				break;
+			case 1:
+					data.name = value.toString();
+				break;
+			case 2:
+					data.location = value.toString();
+				break;
+			default:
+			{
+				qDebug() << "PlayerListTableModel::setData() invalided column ("<<index.column()<<")";
+					return false;
+			}
+		}
+
+		players.replace(row, data);
+
+		emit(dataChanged(index, index));
+
 		return true;
 	}
-	else
-		qDebug() << "PlayerListTableModel::setData() invalided index= " << index;
 
 	return false;
 }
 
-bool PlayerListTableModel::insertRows(int position, int rows, const QModelIndex& parent)
+bool PlayerListTableModel::insertRows(int position, int rows, const QModelIndex& index)
 {
-	beginInsertRows(parent, position, position + rows - 1);
+	Q_UNUSED(index);
+	
+	beginInsertRows(QModelIndex(), position, position + rows - 1);
 
-	QStringList lstTemp;
-
-	for (int j = 0; j < this->columnCount(); ++j)
-		lstTemp.insert(j, "");
-
-	for (int i = position; i < (position + rows); ++i)
-		lstRows.insert(i, lstTemp);
+	for (int row = 0; row < rows; row++)
+		players.insert(position, playerinfo());
 
 	endInsertRows();
 	
 	return true;
 }
 
-bool PlayerListTableModel::appendRows(int rows, const QModelIndex& parent)
+bool PlayerListTableModel::removeRows(int position, int rows, const QModelIndex& index)
 {
-	return this->insertRows(this->rowCount(), rows, parent);
+	Q_UNUSED(index);
+	
+	beginRemoveRows(QModelIndex(), position, position + rows - 1);
+
+	for (int row = 0; row < rows; ++row)
+         players.removeAt(position);
+
+	endRemoveRows();
+
+	return true;
 }
 
-void PlayerListTableModel::updateRow(int row, const QStringList& value)
+void PlayerListTableModel::updateValue(int cid, int column, const QVariant& value)
 {
-	if (row >= this->rowCount())
-		appendRows(this->rowCount() - row + 1);
+	for (int i = 0; i < players.size(); ++i)
+	{
+		if (players.at(i).cid == cid)
+		{
+			this->setData(createIndex(i, column), value, Qt::EditRole);
+				return;
+		}
+	}
 
-	for (int j = 0; j < value.count(); ++j)
-		this->setData(createIndex(row, j), value.at(j));
+	// cid not found --> add new entry
+	this->insertRows(0, 1, QModelIndex());
+	this->setData(createIndex(0, 0), cid, Qt::EditRole);
+	this->setData(createIndex(0, column), value, Qt::EditRole);
 }
 
-void PlayerListTableModel::updateValue(int row, int column, const QString& value)
+void PlayerListTableModel::updatePlayerName(int cid, const QString& value)
 {
-	if (row >= this->rowCount())
-		appendRows(this->rowCount() - row + 1);
-
-	this->setData(createIndex(row, column), value);
+	updateValue(cid, 1, value);
 }
 
-void PlayerListTableModel::updatePlayerName(int row, const QString& value)
+void PlayerListTableModel::updatePlayerLocation(int cid, const QString& value)
 {
-	updateValue(row, 0, value);
+	updateValue(cid, 2, value);
+}
+
+QString PlayerListTableModel::getPlayerName(int cid) const
+{
+	players_type::const_iterator it;
+	
+	for (it = players.constBegin(); it != players.constEnd(); ++it)
+		if (it->cid == cid)
+			return it->name;
+
+	return QString("??? (%1)").arg(cid);
+}
+
+QString PlayerListTableModel::getLocation(int cid) const
+{
+	players_type::const_iterator it;
+	
+	for (it = players.constBegin(); it != players.constEnd(); ++it)
+		if (it->cid == cid)
+			return it->location;
+
+	return QString();
+}
+
+QString PlayerListTableModel::name(int cid) const
+{
+	players_type::const_iterator it;
+	
+	for (it = players.constBegin(); it != players.constEnd(); ++it)
+		if (it->cid == cid)
+			return it->name;
+
+	return QString("??? (%1)").arg(cid);
+}
+
+QString PlayerListTableModel::location(int cid) const
+{
+	players_type::const_iterator it;
+	
+	for (it = players.constBegin(); it != players.constEnd(); ++it)
+		if (it->cid == cid)
+			return it->location;
+
+	return QString();
 }
 
 void PlayerListTableModel::clear()
 {
-	if (!this->rowCount()) return;
+	players.clear();
+}
+
+bool PlayerListTableModel::containsId(int cid) const
+{
+	players_type::const_iterator it;
 	
-	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
-	
-	//for (int i = 0; i < rowCount(); ++i)
-	//	lstRows[i].clear();
-		
-	lstRows.clear();
-	
-	endRemoveRows();
-	
-	reset();
+	for (it = players.constBegin(); it != players.constEnd(); ++it)
+		if (it->cid == cid)
+			return true;
+			
+	return false;			
 }
 
 void PlayerListTableModel::dump()
 {
 #ifdef DEBUG
+
+	qDebug() << "-----------------";	
+
 	for (int i = 0; i < rowCount(); ++i)
-		qDebug() << "row(" << i << ") " << lstRows.at(i);
+		qDebug() << "row(" << i << ") " << players.at(i).cid << players.at(i).name << players.at(i).location;
+
+	qDebug() << "-----------------";	
+		
 #endif
 }
-
-
-
 

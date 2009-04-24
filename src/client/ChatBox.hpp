@@ -30,6 +30,7 @@
 class QLineEdit;
 class QTextEdit;
 class QPushButton;
+class QCompleter;
 
 class ChatBox : public QWidget
 {
@@ -50,12 +51,13 @@ public:
 	void addMessage(const QString &msg, const QString &from = "", const QColor &color = Qt::black);
 	void addMessage(const QString &msg, const QColor &color = Qt::black);
 	
-	void setFontPointSize(int size);
-	int fontPointSize() const;	
-
 	void showChatBtn(bool bShow);
 
+	void setFontPointSize(int size);
 	void setEnabled(bool enable);
+	void setCompleter(QCompleter *completer);
+	
+	int fontPointSize() const;
 	const QLineEdit* getInputWidget() const { return m_pEditChat; };
 
 protected:
@@ -65,6 +67,10 @@ protected:
 
 private slots:
 	void actionChat();
+	
+	void textEdited(const QString& text);
+
+	void insertCompletion(const QString &completion);
 
 signals:
      void dispatchedMessage(QString msg);
@@ -77,6 +83,8 @@ private:
 	QTextEdit		*m_pEditChatLog;
 	//! \brief send message button, default is hidden
 	QPushButton		*m_pSendMsg;
+	//! \brief Playername Completer
+	QCompleter		*m_pCompleter;
 };
 
 #endif /* _HOLDINGNUTS_CHATBOX_H */

@@ -29,8 +29,9 @@
 #include "CreateGameDialog.hpp"
 #include "AboutDialog.hpp"
 #include "GameListTableModel.hpp"
-#include "PlayerListTableModel.hpp"
 #include "GameListSortFilterProxyModel.hpp"
+#include "PlayerListTableModel.hpp"
+#include "PlayerListSortFilterProxyModel.hpp"
 
 #include "Config.h"
 #include "Debug.h"
@@ -56,6 +57,11 @@
 #include <QUrl>
 #include <QInputDialog>
 #include <QComboBox>
+#include <QCompleter>
+#include <QCheckBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QListView>
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -92,7 +98,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	
 	QLabel *lblLogo = new QLabel(this);
-	lblLogo->setPixmap(QPixmap(":res/hn_logo.png"));
+	lblLogo->setPixmap(QPixmap(":res/hn_logo_wide.png"));
 	
 	
 	QHBoxLayout *lHeader = new QHBoxLayout;
@@ -106,7 +112,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// sort and filter proxy model
 	proxyModelGameList = new GameListSortFilterProxyModel(this);
 	proxyModelGameList->setSourceModel(modelGameList);
-
+	proxyModelGameList->setDynamicSortFilter(true);
+			
 	// view game
 	viewGameList = new QTableView(this);
 	viewGameList->setShowGrid(false);
@@ -116,7 +123,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewGameList->setSortingEnabled(true);
+	viewGameList->setSortingEnabled(false);   // FIXME: disabled till issues solved
 	
 #if 0
 	QFont font = viewGameList->font();
@@ -128,6 +135,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setColumnWidth(1, 90);	// type
 	viewGameList->setColumnWidth(2, 50);	// players
 	viewGameList->setColumnWidth(3, 50);	// state
+	viewGameList->setColumnHidden(4, true);
 
 	connect(
 		viewGameList->selectionModel(),
@@ -139,19 +147,30 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	// view game filter
 	filterPatternGame = new QLineEdit(this);
+	filterPatternGame->hide();
+	
+	chkHideStartedGames = new QCheckBox(tr("hide started Games"), this);
+	connect(chkHideStartedGames, SIGNAL(stateChanged(int)), this, SLOT(filterHideStartedGames(int)));
+	
+	chkHidePrivateGames = new QCheckBox(tr("hide private Games"), this);
+	connect(chkHidePrivateGames, SIGNAL(stateChanged(int)), this, SLOT(filterHidePrivateGames(int)));
 
 	QHBoxLayout *lGameFilter = new QHBoxLayout();
 	lGameFilter->setContentsMargins(0, 0, 0, 0);
-	lGameFilter->addWidget(new QLabel(tr("Game name filter:"), this));
-	lGameFilter->addWidget(filterPatternGame);
+	//lGameFilter->addWidget(new QLabel(tr("Game name filter:"), this));
+	//lGameFilter->addWidget(filterPatternGame);
+	lGameFilter->addWidget(chkHideStartedGames);
+	lGameFilter->addWidget(chkHidePrivateGames);
 
 	connect(filterPatternGame,
 		SIGNAL(textChanged(const QString&)),
 		this,
 		SLOT(gameFilterChanged()));
 
-	// model player
-	modelPlayerList = new PlayerListTableModel(this);
+	// sort and filter proxy model
+	proxyModelPlayerList = new PlayerListSortFilterProxyModel(this);
+	proxyModelPlayerList->setSourceModel(((PClient*)qApp)->playerList());
+	proxyModelPlayerList->setDynamicSortFilter(true);
 
 	// view player
 	viewPlayerList = new QTableView(this);
@@ -162,7 +181,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewPlayerList->verticalHeader()->setHighlightSections(false);
 	viewPlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewPlayerList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewPlayerList->setModel(modelPlayerList);
+	viewPlayerList->setModel(proxyModelPlayerList);
 	
 	// container widget
 	wGameFilter = new QWidget(this);
@@ -221,8 +240,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	lGameInfo->addWidget(lblGameInfoStakes, 3, 1, 1, 1);
 	lGameInfo->addWidget(new QLabel(tr("Player timeout"), this), 4, 0, 1, 1);
 	lGameInfo->addWidget(lblGameInfoTimeout, 4, 1, 1, 1);
-	lGameInfo->addWidget(new QLabel(tr("Blinds"), this), 5, 0, 1, 1);
-	lGameInfo->addWidget(lblGameInfoBlinds, 5, 1, 1, 1);
+	lGameInfo->addWidget(new QLabel(tr("Blinds"), this), 5, 0, 1, 1, Qt::AlignTop);
+	lGameInfo->addWidget(lblGameInfoBlinds, 5, 1, 1, 1, Qt::AlignTop);
 	lGameInfo->addWidget(viewPlayerList, 6, 0, 1, 2);
 	lGameInfo->addLayout(lRegister, 7, 0, 1, 2);
 	lGameInfo->addLayout(lGameActions, 8, 0, 1, 2);
@@ -238,7 +257,6 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	cbSrvAddr->setToolTip(
 		tr("The desired server (domain-name or IP) to connect with.\nYou can optionally specify a port number.\nFormat: <host>[:<port>]"));
 
-	// obsolete connect(cbSrvAddr->lineEdit(), SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
 	connect(cbSrvAddr->lineEdit(), SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
 	btnConnect = new QPushButton(tr("&Connect"), this);
@@ -262,11 +280,19 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// container widget
 	wConnection = new QWidget(this);
 	wConnection->setLayout(lConnect);
+
+	QListView *popupView = new QListView;
+	popupView->setModelColumn(1);
 	
-	
+	QCompleter *cmpChat = new QCompleter(((PClient*)qApp)->playerList(), this);
+	cmpChat->setPopup(popupView);
+	cmpChat->setCompletionRole(Qt::DisplayRole);
+	cmpChat->setCompletionColumn(1);
+
 	// the foyer chat box
 	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
+	m_pChat->setCompleter(cmpChat);
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 
@@ -383,6 +409,11 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	settings.beginGroup("MainWindow");
 		this->resize(settings.value("size", QSize(700, 600)).toSize());
 		this->move(settings.value("pos", QPoint(50, 50)).toPoint());
+		// filter
+		chkHideStartedGames->setCheckState(
+			Qt::CheckState(settings.value("filterHideStartedGames", 0).toInt()));
+		chkHidePrivateGames->setCheckState(
+			Qt::CheckState(settings.value("filterHidePrivateGames", 0).toInt()));
 	settings.endGroup();
 	
 	int nSrvAddr = settings.beginReadArray("Serverlist");
@@ -467,7 +498,6 @@ void WMain::updateConnectionStatus()
 		cbSrvAddr->setEnabled(true);
 		
 		modelGameList->clear();
-		modelPlayerList->clear();
 		
 		timerGamelistUpdate->stop();
 		timerSelectedGameUpdate->stop();
@@ -499,17 +529,10 @@ void WMain::updateConnectionStatus()
 	else
 		updateGameinfo(-1);
 }
-
+/*
 void WMain::notifyPlayerinfo(int cid)
 {
 	//dbg_msg("DEBUG", "notify playerinfo <%d>", cid);
-
-#if 0
-	const playerinfo *player = ((PClient*)qApp)->getPlayerInfo(cid);
-	
-	if (!player)
-		return;
-#endif
 
 	// FIXME: update the model only if cid is element of selected game;
 	//		and update only the needed items like in gamelistmodel
@@ -545,27 +568,15 @@ void WMain::notifyPlayerlist(int gid)
 
 void WMain::updatePlayerList(int gid)
 {
-	modelPlayerList->clear();
-
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(gid);
 	
 	if (!ginfo)
 		return;
-	
-	for (unsigned int i = 0; i < ginfo->players.size(); ++i)
-	{
-		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(ginfo->players[i]);
-			
-		if (pinfo)
-			modelPlayerList->updatePlayerName(i, pinfo->name);
-		else
-			modelPlayerList->updatePlayerName(i,
-				QString("??? (%1)").arg(ginfo->players[i]));
-	}
-	
+
+	proxyModelPlayerList->filterListCid(QVector<int>::fromStdVector(ginfo->players));
 	viewPlayerList->resizeRowsToContents(); 
 }
-
+*/
 void WMain::actionConnect()
 {
 	if (!cbSrvAddr->lineEdit()->text().length() || ((PClient*)qApp)->isConnected())
@@ -615,14 +626,6 @@ void WMain::actionTest()
 #endif /* NOAUDIO */
 #endif
 }
-
-// obsolete
-/*
-void WMain::slotSrvTextChanged()
-{
-	updateConnectionStatus();
-}
-*/
 
 void WMain::doRegister(bool bRegister)
 {
@@ -753,8 +756,8 @@ void WMain::actionCreateGame()
 	gc.blinds_factor = dialogCreateGame.getBlindsFactor();
 	gc.blinds_time = dialogCreateGame.getBlindsTime();
 	gc.password = dialogCreateGame.getPassword();
+
 	((PClient*)qApp)->createGame(&gc);
-	
 	((PClient*)qApp)->requestGamelist();
 }
 
@@ -810,6 +813,9 @@ void WMain::closeEvent(QCloseEvent *event)
 		settings.beginGroup("MainWindow");
 			settings.setValue("size", this->size());
 			settings.setValue("pos", this->pos());
+			// filter
+			settings.setValue("filterHideStartedGames", chkHideStartedGames->checkState());
+			settings.setValue("filterHidePrivateGames", chkHidePrivateGames->checkState());
 		settings.endGroup();
 
 		event->accept();
@@ -862,12 +868,11 @@ void WMain::notifyGameinfo(int gid)
 	const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
 	Q_ASSERT_X(gi, Q_FUNC_INFO, "invalid gameinfo pointer");
 		
-	modelGameList->updateGameName(gid, QString("%1 [%2]")
-		.arg(gi->password ? tr("[private] ") + gi->name : gi->name)
-		.arg(gid));
+	modelGameList->updateGameName(gid, gi->name);
 	modelGameList->updateGameType(gid, getGametypeString(gi->type) + " " + getGamemodeString(gi->mode));
 	modelGameList->updatePlayers(gid, QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	modelGameList->updateGameState(gid, getGamestateString(gi->state));
+	modelGameList->updatePassword(gid, gi->password);
 	
 	viewGameList->resizeRowsToContents();
 	
@@ -972,7 +977,7 @@ void WMain::updateGameinfo(int gid)
 	lblGameInfoId->setText(QString("%1").arg(gid));
 	lblGameInfoStakes->setText(QString("%1").arg(gi->initial_stakes));
 	lblGameInfoTimeout->setText(QString("%1").arg(gi->player_timeout));
-	lblGameInfoBlinds->setText(QString("%1 / x%2 / %3s")
+	lblGameInfoBlinds->setText(QString("<qt>%1 /<br/><b>x</b>%2 /<br/>%3<b>s</b></qt>")
 		.arg(gi->blinds_start, 0, 'f', 2)
 		.arg(gi->blinds_factor, 0, 'f', 2)
 		.arg(gi->blinds_time));
@@ -1023,3 +1028,15 @@ void WMain::writeServerlist() const
 	settings.endArray();
 }
 
+void WMain::filterHideStartedGames(int state)
+{
+	if (state == Qt::Checked)
+		proxyModelGameList->hideGameState(getGamestateString(GameStateStarted));
+	else		
+		proxyModelGameList->showGameState(getGamestateString(GameStateStarted));
+}
+
+void WMain::filterHidePrivateGames(int state)
+{
+	proxyModelGameList->showPrivateGames(state == Qt::Checked);
+}

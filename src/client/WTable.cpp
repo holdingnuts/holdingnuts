@@ -39,6 +39,8 @@
 #include <QGraphicsItemAnimation>
 #include <QShortcut>
 #include <QMenu>
+#include <QCompleter>
+#include <QListView>
 
 #include "Config.h"
 #include "Debug.h"
@@ -55,6 +57,7 @@
 #include "DealerButton.hpp"
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
+#include "PlayerListTableModel.hpp"
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -379,6 +382,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	
 	chkAutoFoldCheck = new QCheckBox("Fold/Check", this);
+	connect(chkAutoFoldCheck, SIGNAL(stateChanged(int)), this, SLOT(actionAutoFoldCheck(int)));
 	chkAutoCheckCall = new QCheckBox("Check/Call", this);
 	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
 	
@@ -432,10 +436,19 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblActions->setScaledContents(true);
 	lblActions->setFixedSize(450, 80);
 	lblActions->setLayout(stlayActions);
+	
+	QListView *popupView = new QListView;
+	popupView->setModelColumn(1);
+	
+	QCompleter *cmpChat = new QCompleter(((PClient*)qApp)->playerList(), this);
+	cmpChat->setPopup(popupView);
+	cmpChat->setCompletionRole(Qt::DisplayRole);
+	cmpChat->setCompletionColumn(1);
 
 	m_pChat	= new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->setFixedHeight(150);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
+	m_pChat->setCompleter(cmpChat);
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 	QGridLayout *mainLayout = new QGridLayout(this);
@@ -754,7 +767,6 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(false);
 					m_pSliderAmount->setVisible(false);
-					
 					wRaiseBtns->setVisible(false);
 					
 					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
@@ -777,6 +789,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				{
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(true);
+					wRaiseBtns->setVisible(true);
+					
 					shortcutAllin->setEnabled(false);
 					shortcutBet->setEnabled(true);
 					shortcutRaise->setEnabled(true);
@@ -867,18 +881,9 @@ void WTable::updateSeat(unsigned int s)
 		ui_seat->setValid(true);
 		ui_seat->setStake(seat->stake);
 		ui_seat->setSitout(seat->sitout);
-		
-		
-		const int cid = seat->client_id;
-		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
-		
-		// check if playerinfo is available
-		if (pinfo)
-			ui_seat->setInfo(pinfo->name,
-						pinfo->location);
-		else
-			ui_seat->setInfo(((PClient*)qApp)->getPlayerName(cid), "");
-		
+		ui_seat->setInfo(
+			((PClient*)qApp)->playerList()->name(seat->client_id),
+			((PClient*)qApp)->playerList()->location(seat->client_id));
 		
 		if (snap->state > Table::ElectDealer)
 		{
@@ -955,19 +960,13 @@ void WTable::updateSeat(unsigned int s)
 			ui_seat->showBigCards(false);
 			ui_seat->showSmallCards(false);
 		}
-
-		// schedule scene update
-		ui_seat->update(ui_seat->boundingRect());
 	}
 	else
-	{
-		// if seat was valid force schedule redraw
-		if (ui_seat->isValid())
-		{
-			ui_seat->update(ui_seat->boundingRect());
-			ui_seat->setValid(false);
-		}
-	}
+		ui_seat->setValid(false);
+	
+	
+	// schedule scene update
+	ui_seat->update(ui_seat->boundingRect());
 }
 
 void WTable::updatePots()
@@ -1118,8 +1117,12 @@ void WTable::updateHandStrength()
 	const table_snapshot *snap = &(tinfo->snap);
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 	
+	// is not a player
 	if (snap->my_seat == -1)
+	{
+		m_pTxtHandStrength->setText(QString());
 		return;
+	}
 	
 	const seatinfo *seat = &(snap->seats[snap->my_seat]);
 	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
@@ -1307,10 +1310,21 @@ void WTable::actionBack()
 	doSitout(false);
 }
 
+void WTable::actionAutoFoldCheck(int state)
+{
+	// uncheck other auto-actions
+	if (state == Qt::Checked)
+		chkAutoCheckCall->setCheckState(Qt::Unchecked);
+}
+
 void WTable::actionAutoCheckCall(int state)
 {
 	if (state != Qt::Checked)
 		return;
+	
+	// uncheck other auto-actions
+	chkAutoFoldCheck->setCheckState(Qt::Unchecked);
+	
 	
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
@@ -1381,17 +1395,17 @@ void WTable::actionBetsizeMinimum()
 
 void WTable::actionBetsizeQuarterPot()
 {
-	m_pSliderAmount->setValue(currentPot() * 0.25f);
+	m_pSliderAmount->setValue(int(currentPot() * 0.25f));
 }
 
 void WTable::actionBetsizeHalfPot()
 {
-	m_pSliderAmount->setValue(currentPot() * 0.5f);
+	m_pSliderAmount->setValue(int(currentPot() * 0.5f));
 }
 
 void WTable::actionBetsizeThreeQuarterPot()
 {
-	m_pSliderAmount->setValue(currentPot() * 0.75f);
+	m_pSliderAmount->setValue(int(currentPot() * 0.75f));
 }
 
 void WTable::actionBetsizePotsize()
@@ -1449,7 +1463,7 @@ void WTable::slotFirstReminder(int seatnr)
 		
 	addServerMessage(
 		QString(tr("%1, it's your turn!")
-			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))));
+			.arg(((PClient*)qApp)->playerList()->name(seat->client_id))));
 }
 
 void WTable::slotSecondReminder(int seatnr)
@@ -1475,7 +1489,7 @@ void WTable::slotSecondReminder(int seatnr)
 		
 	addServerMessage(
 		QString(tr("%1, you have %2 seconds left to respond!")
-			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))
+			.arg(((PClient*)qApp)->playerList()->name(seat->client_id))
 			.arg(ginfo->player_timeout - ginfo->player_timeout / 4 * 3)));
 
 	// additionally play sound
@@ -1651,6 +1665,16 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	case HandStrength::Flush:
 		sstrength = tr("Flush");
 		srank = QString("%1").arg(buildSuitString(rank[0]));
+		
+		if (verbosity)
+		{
+			QStringList slrank;
+			
+			for (unsigned int i=0; i < rank.size(); i++)
+				slrank += QString(rank[i].getName());
+			
+			srank += " (" + slrank.join(" ") + ")";
+		}
 		break;
 	case HandStrength::FullHouse:
 		sstrength = tr("Full House");
@@ -1663,10 +1687,16 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	case HandStrength::StraightFlush:
 		// handle RoyalFlush as special case
 		if (strength->getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
+		{
 			sstrength = tr("Royal Flush");
+			srank = QString("%1").arg(buildSuitString(rank[0]));
+		}
 		else
+		{
 			sstrength = tr("Straight Flush");
-		srank = tr("%1 high").arg(buildFaceString(rank[0]));
+			srank = QString("%1 ").arg(buildSuitString(rank[0])) +
+				tr("%1 high").arg(buildFaceString(rank[0]));
+		}
 		break;
 	}
 	

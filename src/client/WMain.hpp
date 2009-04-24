@@ -32,7 +32,6 @@
 
 class ChatBox;
 class GameListTableModel;
-class PlayerListTableModel;
 class GameListSortFilterProxyModel;
 
 class QLabel;
@@ -43,6 +42,9 @@ class QStandardItemModel;
 class QTableView;
 class QListView;
 class QComboBox;
+class QCheckBox;
+
+#include "PlayerListSortFilterProxyModel.hpp"
 
 //! \brief Mainwindow
 class WMain : public QMainWindow
@@ -64,15 +66,18 @@ public:
 	void notifyGameinfo(int gid);
 	void notifyGamelist();
 
-	void notifyPlayerinfo(int cid);
-	void notifyPlayerlist(int gid);
+//	void notifyPlayerinfo(int cid);
+//	void notifyPlayerlist(int gid);
 	
-	void updatePlayerList(int gid);
+//	void updatePlayerList(int gid);
 
 	static QString getGametypeString(gametype type);
 	static QString getGamemodeString(gamemode mode);
 	static QString getGamestateString(gamestate state);
 	
+	PlayerListSortFilterProxyModel *playerListFilter()
+		{ return proxyModelPlayerList; }
+
 protected:
 	void doRegister(bool bRegister);
 	
@@ -112,6 +117,9 @@ private slots:
 	
 	void updateServerTimeLabel();
 	
+	void filterHideStartedGames(int state);
+	void filterHidePrivateGames(int state);
+	
 private:
 	//! \brief Label in header displaying a welcome message
 	QLabel			*lblWelcome;
@@ -138,11 +146,17 @@ private:
 	GameListSortFilterProxyModel	*proxyModelGameList;
 	
 	QLineEdit		*filterPatternGame;
+	//! \brief Checkbox for hiding started games
+	QCheckBox		*chkHideStartedGames;
+	//! \brief Checkbox for hiding private games
+	QCheckBox		*chkHidePrivateGames;
 	
 	//! \brief MVC Model
-	PlayerListTableModel	*modelPlayerList;
+//	PlayerListTableModel	*modelPlayerList;
 	//! \brief Playerlist of game
 	QTableView 	 	*viewPlayerList;
+	//! \brief Sort- and Filter Proxy Model
+	PlayerListSortFilterProxyModel	*proxyModelPlayerList;
 	
 	//! \brief Label for Gamename
 	QLabel			*lblGameInfoName;

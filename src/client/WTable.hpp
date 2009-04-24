@@ -34,7 +34,6 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QPalette>
-#include <QGridLayout>	// TODO: remove!!! only wmain needs this
 #include <QGraphicsView>
 #include <QGraphicsItemAnimation>
 
@@ -155,6 +154,8 @@ private slots:
 	void actionMuck();
 	void actionBack();
 	void actionSitout();
+	
+	void actionAutoFoldCheck(int state);
 	void actionAutoCheckCall(int state);
 
 	void slotTimeup(int seat);

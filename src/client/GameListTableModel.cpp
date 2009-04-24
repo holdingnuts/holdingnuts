@@ -25,7 +25,7 @@
 #include "GameListTableModel.hpp"
 
 #include <QDebug>
-
+#include <QIcon>
 
 GameListTableModel::GameListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
@@ -33,7 +33,8 @@ GameListTableModel::GameListTableModel(QObject *parent)
 	strlstHeaderLabels << tr("Name") 
 		<< tr("Gametype") 
 		<< tr("Players") 
-		<< tr("State");
+		<< tr("State")
+		<< tr("Password Protected");
 }
 
 int GameListTableModel::rowCount(const QModelIndex& parent) const
@@ -55,13 +56,25 @@ QVariant GameListTableModel::data(const QModelIndex& index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	if (index.row() > datarows.size() || index.column() > this->columnCount())
+	if (index.row() > datarows.size())
 		return QVariant();
 
-	if (role != Qt::DisplayRole)
-		return QVariant();
+	if (index.column() > datarows.at(index.row()).cols.size())
+	{
+		qDebug() << "GameListTableModel::data() index.column("<<index.column()<<") greater than datarows.column("<<datarows.at(index.row()).cols.size()<<")";
+			return QVariant();
+	}
 
-	return datarows.at(index.row()).cols.at(index.column());
+	if (role == Qt::DisplayRole)
+		return datarows.at(index.row()).cols.at(index.column());
+
+	if (
+		role == Qt::DecorationRole && 
+		index.column() == 0 &&
+		datarows.at(index.row()).cols.at(4).toBool())
+			return QVariant(QIcon("gfx/foyer/lock.png"));
+	
+	return QVariant();
 }
 
 QVariant GameListTableModel::headerData(
@@ -70,6 +83,9 @@ QVariant GameListTableModel::headerData(
 	int role) const
 {
 	if (role != Qt::DisplayRole)
+		return QVariant();
+
+	if (section >= this->columnCount())
 		return QVariant();
 
 	if (orientation == Qt::Horizontal)
@@ -83,18 +99,33 @@ bool GameListTableModel::setData(
 	const QVariant& value,
 	int role)
 {
-	if (index.isValid() && role == Qt::EditRole)
+	if (!index.isValid())
 	{
-		datarows[index.row()].cols.replace(index.column(), value.toString());
-		
-		emit dataChanged(index, index);
-		
-		return true;
-	}
-	else
 		qDebug() << "GameListTableModel::setData() invalided index= " << index;
+			return false;
+	}
 
-	return false;
+	if (index.row() > datarows.size())
+	{
+		qDebug() << "GameListTableModel::setData() index.row("<<index.row()<<") greater than datarows.size("<<datarows.size()<<")";
+			return false;
+	}
+
+
+	if (index.column() > datarows.at(index.row()).cols.size())
+	{
+		qDebug() << "GameListTableModel::setData() index.column("<<index.column()<<") greater than datarows.column("<<datarows.at(index.row()).cols.size()<<")";
+			return false;
+	}
+
+	if (role != Qt::EditRole)
+		return false;
+
+	datarows[index.row()].cols.replace(index.column(), value);
+		
+	emit dataChanged(index, index);
+		
+	return true;
 }
 
 bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& index)
@@ -106,8 +137,11 @@ bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& i
 	dataitem di;
 	di.gid = -1;
 	
-	for (int j = 0; j < this->columnCount(); ++j)
+	// name, gametype, players, state
+	for (int j = 0; j < this->columnCount() - 1; ++j)
 		di.cols.insert(j, QString());
+
+	di.cols.insert(this->columnCount() + 0, false);	// password
 
 	for (int i = position; i < (position + rows); ++i)
 		datarows.insert(i, di);
@@ -131,7 +165,7 @@ bool GameListTableModel::removeRows(int position, int rows, const QModelIndex& i
 	return true;
 }
 
-void GameListTableModel::updateValue(int gid, int column, const QString& value)
+void GameListTableModel::updateValue(int gid, int column, const QVariant& value)
 {
 	if (findRowByGid(gid) == -1)
 	{
@@ -168,6 +202,11 @@ void GameListTableModel::updatePlayers(int gid, const QString& value)
 void GameListTableModel::updateGameState(int gid, const QString& value)
 {
 	updateValue(gid, 3, value);
+}
+
+void GameListTableModel::updatePassword(int gid, bool value)
+{
+	updateValue(gid, 4, value);
 }
 
 void GameListTableModel::clear()
