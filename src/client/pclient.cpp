@@ -1298,7 +1298,7 @@ void PClient::requestGameinfo(int gid)
 	char msg[1024];
 	
 	// get game info
-	snprintf(msg, sizeof(msg), "REQUEST gameinfo %ds", gid);
+	snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", gid);
 	netSendMsg(msg);
 }
 
