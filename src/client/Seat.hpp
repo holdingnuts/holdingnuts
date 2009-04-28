@@ -27,6 +27,7 @@
 #include <QGraphicsItem>
 #include <QObject>
 #include <QLabel>
+#include <QFont>
 
 #include "Player.hpp"
 
@@ -58,10 +59,14 @@ public:
 		QWidget* widget);
 		
 	bool isValid() const { return m_bValid; }
-
+	
+	static void setInSeatFont(const QFont& font);
+	
 private:
 	void calcSCardPos(qreal& x, qreal& y) const;
 	void calcBetTextPos(qreal& x, qreal& y, int txt_width) const;
+	
+	void chopName();
 	
 public:
 	// cards size
@@ -98,6 +103,11 @@ private:
 	bool					m_bSmallCards;
 	//! \brief display small-cards
 	bool					m_bBigCards;
+	
+	//! \brief In-Seat-Font (Name, Amount, ...)
+	static QFont			m_ftInSeat;
+	//! \brief Font Metrics from InSeatFont
+	static QFontMetrics		m_fmInSeat;
 };
 
 #endif /* _HOLDING_NUTS_SEAT_H */

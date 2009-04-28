@@ -39,6 +39,10 @@ const qreal Seat::sy_card = 138;
 const qreal Seat::sx_mini_card = 41;
 const qreal Seat::sy_mini_card = 58;
 
+// In-Seat-Font
+QFont Seat::m_ftInSeat;
+QFontMetrics Seat::m_fmInSeat(Seat::m_ftInSeat);
+
 Seat::Seat(unsigned int id, QWidget *parent)
 :	m_nID(id),
 	m_bValid(false),
@@ -58,7 +62,21 @@ void Seat::setValid(bool valid)
 void Seat::setInfo(const QString& name, const QString& location)
 {
 	m_strName = name;
-	this->setToolTip(tr("Location: %1").arg(location));
+	
+	chopName();
+	
+	if (m_strName.length() < name.length())
+		m_strName.append("...");
+	
+	QString tooltip(tr("Name: %1").arg(name));
+	
+	if (!location.isEmpty())
+	{
+		tooltip.append(tr("\nLocation: "));
+		tooltip.append(location);
+	}
+	
+	this->setToolTip(tooltip);
 }
 
 void Seat::setStake(qreal amount)
@@ -225,12 +243,10 @@ void Seat::paint(
 	else
 		imgBack = &(SeatImages::Instance().imgBack);
 	
-	
-	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-	
-	
 	painter->save();
-	
+
+	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+
 	painter->drawImage(
 			QRectF(
 			0,
@@ -251,38 +267,31 @@ void Seat::paint(
 			*m_pCurrentActionImg);
 	}
 
-	// TODO: font
-	static QFont normal_font("Arial", 18,  QFont::Normal);
-	static QFont bold_font("Arial", 18,  QFont::Bold);
-	
-	normal_font.setStyleStrategy(QFont::ForceOutline);
-	bold_font.setStyleStrategy(QFont::ForceOutline);
-	
-	static const QFontMetrics fm_bold(bold_font);
-
+	// text name
 	QPainterPath pathTxtName;
-	pathTxtName.addText(10, fm_bold.height() + 10, bold_font, m_strName);
+	pathTxtName.addText(10, m_fmInSeat.height() + 10, m_ftInSeat, m_strName);
 	
 	painter->fillPath(pathTxtName, Qt::black);
 	
+	// text stake
 	QPainterPath pathTxtStake;
-	pathTxtStake.addText(10, 75, normal_font, m_strStake);
+	pathTxtStake.addText(10, 75, m_ftInSeat, m_strStake);
 	
 	painter->fillPath(pathTxtStake, Qt::black);
 
+	// text amount
 	qreal tx_pos = 0;
 	qreal ty_pos = 0;
 			
-	calcBetTextPos(tx_pos, ty_pos, fm_bold.width(m_strAmount));
-	
-	// TODO: QPainterPath test
-	painter->setFont(bold_font);
+	calcBetTextPos(tx_pos, ty_pos, m_fmInSeat.width(m_strAmount));
+
+	painter->setFont(m_ftInSeat);
 	painter->drawText(
 		QRectF(
 			tx_pos,
 			ty_pos,
-			fm_bold.width(m_strAmount),
-			fm_bold.height()),
+			m_fmInSeat.width(m_strAmount),
+			m_fmInSeat.height()),
 		Qt::AlignLeft,
 		m_strAmount);
 
@@ -398,4 +407,22 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 				y = SeatImages::Instance().imgBack.height() - 30;
 			break;
 	}
+}
+
+void Seat::chopName()
+{
+	while (m_fmInSeat.width(m_strName) > (SeatImages::Instance().imgBack.width() - 
+									SeatImages::Instance().imgActNone.width()))
+	{
+		m_strName.chop(1);
+		chopName();
+	}
+}
+
+void Seat::setInSeatFont(const QFont& font)
+{
+	m_ftInSeat = font;
+	m_fmInSeat = QFontMetrics(m_ftInSeat);
+	
+	m_ftInSeat.setStyleStrategy(QFont::ForceOutline);
 }

@@ -276,6 +276,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		m_ptDealerBtn[i] = calcDealerBtnPos(i);
 	}
 
+	Seat::setInSeatFont(QFont("Arial", 18,  QFont::Bold));
+
 	QFont font = QApplication::font();
 	
 	font.setPointSize(20); 
