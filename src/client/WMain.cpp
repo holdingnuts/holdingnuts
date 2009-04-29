@@ -56,6 +56,7 @@
 #include <QUrl>
 #include <QInputDialog>
 #include <QComboBox>
+#include <QStandardItemModel>
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -245,7 +246,6 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// connection
 	cbSrvAddr = new QComboBox(this);
 	cbSrvAddr->setEditable(true); 
-	cbSrvAddr->setInsertPolicy(QComboBox::InsertAtTop);
 	cbSrvAddr->setToolTip(
 		tr("The desired server (domain-name or IP) to connect with.\nYou can optionally specify a port number.\nFormat: <host>[:<port>]"));
 
@@ -401,6 +401,12 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 			Qt::CheckState(settings.value("filterHidePrivateGames", 0).toInt()));
 	settings.endGroup();
 	
+	// load serverlist model
+	QStandardItemModel *modelSrvLst = new QStandardItemModel(0, 2, parent);
+
+	modelSrvLst->setHeaderData(0, Qt::Horizontal, QObject::tr("Name"));
+	modelSrvLst->setHeaderData(1, Qt::Horizontal, QObject::tr("Connections"));
+	
 	int nSrvAddr = settings.beginReadArray("Serverlist");
 	
 	for (int i = 0; i < nSrvAddr; ++i)
@@ -410,12 +416,27 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 		QString server = settings.value("Name").toString();
 
 		if (!server.isEmpty())
-			cbSrvAddr->addItem(server);
+		{
+			modelSrvLst->insertRow(0);
+			modelSrvLst->setData(modelSrvLst->index(0, 0), server);
+			modelSrvLst->setData(modelSrvLst->index(0, 1), settings.value("Connections").toInt());
+		}
 	}
 	settings.endArray();
-	
-	if (!cbSrvAddr->count())
-		cbSrvAddr->addItem(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")));
+
+	modelSrvLst->sort(1, Qt::DescendingOrder);
+
+	// no serverhistory found then use default server from config
+	if (modelSrvLst->rowCount() == 0)
+	{
+		modelSrvLst->insertRow(0);
+		modelSrvLst->setData(
+			modelSrvLst->index(0, 0),
+			QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")));
+		modelSrvLst->setData(modelSrvLst->index(0, 1), 0);
+	}
+		
+	cbSrvAddr->setModel(modelSrvLst);
 }
 
 void WMain::addLog(const QString &line)
@@ -588,9 +609,24 @@ void WMain::actionConnect()
 		return;
 	
 	// store server in combobox and settings
-	if (cbSrvAddr->findText(cbSrvAddr->lineEdit()->text()) == -1)
-		cbSrvAddr->addItem(cbSrvAddr->lineEdit()->text());
+	int idx = cbSrvAddr->findText(cbSrvAddr->lineEdit()->text());
 
+	QAbstractItemModel *modelSrvLst = cbSrvAddr->model();
+
+	if (idx == -1)
+	{
+		modelSrvLst->insertRow(0);
+		modelSrvLst->setData(modelSrvLst->index(0, 0), cbSrvAddr->lineEdit()->text());
+		modelSrvLst->setData(modelSrvLst->index(0, 1), 1);
+	}
+	else
+	{
+		int count = modelSrvLst->data(modelSrvLst->index(idx, 1)).toInt();
+
+		modelSrvLst->setData(modelSrvLst->index(idx, 1), ++count);
+		modelSrvLst->sort(1, Qt::DescendingOrder);
+	}
+	
 	writeServerlist();
 	
 	// split up the connect-string: <hostname>:<port>
@@ -1024,10 +1060,13 @@ void WMain::writeServerlist() const
 	if (numServer > 10)
 		numServer = 10;
 
+	QAbstractItemModel *pModel = cbSrvAddr->model();
+
 	for (int i = 0; i < numServer; ++i)
 	{
 		settings.setArrayIndex(i);
-		settings.setValue("Name", cbSrvAddr->itemText(i));
+		settings.setValue("Name", pModel->data(pModel->index(i, 0)));
+		settings.setValue("Connections", pModel->data(pModel->index(i, 1)).toInt());
 	}
 
 	settings.endArray();
