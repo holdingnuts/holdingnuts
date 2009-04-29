@@ -26,20 +26,6 @@
 #include <cmath>
 #include <numeric>
 
-#include <QGraphicsScene>
-#include <QPainter>
-#include <QStyleOption>
-#include <QTime>
-#include <QGraphicsPixmapItem>
-#include <QResizeEvent>
-#include <QStackedLayout>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QTimeLine>
-#include <QGraphicsItemAnimation>
-#include <QShortcut>
-#include <QMenu>
-
 #include "Config.h"
 #include "Debug.h"
 #include "Logger.h"
@@ -61,6 +47,22 @@
 #endif
 #include "data.h"
 
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QPainter>
+#include <QStyleOption>
+#include <QTime>
+#include <QGraphicsPixmapItem>
+#include <QResizeEvent>
+#include <QStackedLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QTimeLine>
+#include <QGraphicsItemAnimation>
+#include <QShortcut>
+#include <QMenu>
+#include <QPushButton>
+#include <QCheckBox>
 
 using namespace std;
 
@@ -273,7 +275,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		m_pScene->addItem(wseats[i]);
 		
 		// calculate dealer button pos
-		m_ptDealerBtn[i] = calcDealerBtnPos(i);
+		m_ptDealerBtn[i] = calcDealerBtnPos(i, 10);
 	}
 
 	Seat::setInSeatFont(QFont("Arial", 18,  QFont::Bold));
@@ -576,7 +578,7 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 
 	return QPointF(
 		((m_pScene->width() - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
-		m_pScene->height() * 0.4);
+		m_pScene->height() * 0.375);
 }
 
 QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
@@ -603,7 +605,7 @@ QPointF WTable::calcHandStrengthPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtHandStrength->text()) / 2),
-		230 + fm.height());
+		220 + fm.height());
 }
 
 QPointF WTable::calcPotsPos() const
@@ -616,7 +618,7 @@ QPointF WTable::calcPotsPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2),
-		230);
+		220);
 }
 
 QPointF WTable::calcDealerBtnPos(
@@ -1193,7 +1195,7 @@ void WTable::updateView()
 	
 	
 	// set focus on EditableSlider only if focus isn't on ChatBox
-	if (focusWidget() != m_pChat->getInputWidget())
+	if (!m_pChat->hasInputFocus())
 		m_pSliderAmount->setFocus();
 }
 
@@ -1706,3 +1708,44 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	
 	return retstr;
 }
+
+#ifdef DEBUG
+
+void WTable::showCompleteTable()
+{
+	qsrand(QDateTime::currentDateTime().toTime_t());
+
+	m_pDealerButton->hide();
+
+	DealerButton *dealerBtn[nMaxSeats];
+	
+	// seats and dealerbutton
+	for (unsigned int i = 0; i < nMaxSeats; i++)
+	{
+		wseats[i]->setAction(
+			Player::PlayerAction(qrand() % 10 + 1),
+			(qrand() % 100 + 1) * 100);
+		wseats[i]->setValid(true);
+		wseats[i]->showBigCards(true);
+		wseats[i]->showSmallCards(true);
+		wseats[i]->setCards("As", "7h");
+
+		// dealerbutton
+		dealerBtn[i] = new DealerButton;
+		dealerBtn[i]->setPos(m_ptDealerBtn[i]);
+
+		m_pScene->addItem(dealerBtn[i]);	
+	}
+
+	// community cards
+	for (unsigned int j = 0; j < 5; j++)
+	{
+		m_CommunityCards[j]->setPixmap(
+			QPixmap(
+				QString("gfx/deck/%1/Ac.png")
+					.arg(QString::fromStdString(config.get("ui_card_deck")))));
+		m_CommunityCards[j]->show();
+	}
+}
+
+#endif /* DEBUG */

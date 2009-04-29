@@ -25,19 +25,6 @@
 #ifndef _WTABLE_H
 #define _WTABLE_H
 
-#include <vector>
-
-#include <QLineEdit>
-#include <QLabel>
-#include <QTextEdit>
-#include <QButtonGroup>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QPalette>
-#include <QGridLayout>	// TODO: remove!!! only wmain needs this
-#include <QGraphicsView>
-#include <QGraphicsItemAnimation>
-
 #include "Card.hpp"
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
@@ -45,6 +32,8 @@
 #include "Table.hpp"
 #include "Player.hpp"
 #include "Seat.hpp"
+
+#include <vector>
 
 typedef struct {
 	bool valid;
@@ -72,11 +61,14 @@ typedef struct {
 	int my_seat;
 } table_snapshot;
 
-
+class QGraphicsView;
+class QGraphicsScene;
 class QStackedLayout;
 class QLabel;
 class QSlider;
 class QShortcut;
+class QPushButton;
+class QCheckBox;
 
 class ChatBox;
 class DealerButton;
@@ -108,6 +100,11 @@ public:
 	static QString buildHandStrengthString(HandStrength *strength, int verbosity=0);
 	static QString buildFaceString(const Card& card, bool plural=false);
 	static QString buildSuitString(const Card& card);
+	
+#ifdef DEBUG
+	//! \brief shows all entitys from table
+	void showCompleteTable();
+#endif
 
 protected:
 	void closeEvent(QCloseEvent *event);

@@ -57,6 +57,8 @@
 #include <QInputDialog>
 #include <QComboBox>
 #include <QStandardItemModel>
+#include <QGridLayout>
+#include <QCheckBox>
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -660,6 +662,7 @@ void WMain::actionTest()
 #ifdef DEBUG
 	WTable *table = new WTable(0, 0);
 	table->slotShow();
+	table->showCompleteTable();
 	
 #ifndef NOAUDIO
 	dbg_msg("DEBUG", "playing test sound");

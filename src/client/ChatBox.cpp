@@ -146,6 +146,13 @@ void ChatBox::setEnabled(bool enable)
 	m_pSendMsg->setEnabled(enable);
 }
 
+bool ChatBox::hasInputFocus() const
+{
+	Q_ASSERT_X(m_pEditChat, Q_FUNC_INFO, "invalid lineedit pointer");
+
+	return m_pEditChat->hasFocus();
+}
+
 void ChatBox::resizeEvent(QResizeEvent *event)
 {
 	// scroll the chatlog to bottom

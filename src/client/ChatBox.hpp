@@ -56,7 +56,8 @@ public:
 	void showChatBtn(bool bShow);
 
 	void setEnabled(bool enable);
-	const QLineEdit* getInputWidget() const { return m_pEditChat; };
+
+	bool hasInputFocus() const;
 
 protected:
 	ChatBox();
