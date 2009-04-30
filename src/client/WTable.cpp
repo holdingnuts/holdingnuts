@@ -1709,10 +1709,9 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	return retstr;
 }
 
-#ifdef DEBUG
-
 void WTable::showCompleteTable()
 {
+#ifdef DEBUG
 	qsrand(QDateTime::currentDateTime().toTime_t());
 
 	m_pDealerButton->hide();
@@ -1746,6 +1745,5 @@ void WTable::showCompleteTable()
 					.arg(QString::fromStdString(config.get("ui_card_deck")))));
 		m_CommunityCards[j]->show();
 	}
-}
-
 #endif /* DEBUG */
+}

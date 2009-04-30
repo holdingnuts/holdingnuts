@@ -170,7 +170,10 @@ void PClient::serverCmdMsg(Tokenizer &t)
 			qchatmsg.replace(rx, name);
 		}
 	}
-	
+
+	// handle escape sequences
+	qchatmsg.replace("\\\"", "\"");
+
 	
 	if (gid != -1 && tid != -1)
 	{
@@ -1036,10 +1039,13 @@ void PClient::chatAll(const QString& text)
 	// foyer chat
 	if (!connected)
 		return;
+
+	QString strMsg = "CHAT -1 " + text.simplified();
 	
-	char msg[1024];
-	snprintf(msg, sizeof(msg), "CHAT %d %s", -1, text.simplified().toStdString().c_str());
-	netSendMsg(msg);
+	if (!config.getBool("chat_console"))
+		strMsg.replace("\"", "\\\"");
+
+	netSendMsg(strMsg.toStdString().c_str());
 }
 
 void PClient::chat(const QString& text, int gid, int tid)
@@ -1047,9 +1053,13 @@ void PClient::chat(const QString& text, int gid, int tid)
 	if (!connected)
 		return;
 
-	char msg[1024];
-	snprintf(msg, sizeof(msg), "CHAT %d:%d %s", gid, tid, text.simplified().toStdString().c_str());
-	netSendMsg(msg);
+	QString strMsg = QString("CHAT %1:%2 %3")
+		.arg(gid).arg(tid).arg(text.simplified());
+	
+	if (!config.getBool("chat_console"))
+		strMsg.replace("\"", "\\\"");
+
+	netSendMsg(strMsg.toStdString().c_str());
 }
 
 bool PClient::createGame(gamecreate *createinfo)

@@ -101,10 +101,8 @@ public:
 	static QString buildFaceString(const Card& card, bool plural=false);
 	static QString buildSuitString(const Card& card);
 	
-#ifdef DEBUG
 	//! \brief shows all entitys from table
 	void showCompleteTable();
-#endif
 
 protected:
 	void closeEvent(QCloseEvent *event);
