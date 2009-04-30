@@ -24,6 +24,8 @@
 #ifndef _TABLE_H
 #define _TABLE_H
 
+#include <ctime>
+
 #include "Deck.hpp"
 #include "CommunityCards.hpp"
 #include "Player.hpp"
