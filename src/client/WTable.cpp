@@ -706,7 +706,10 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	else if (snap->state == Table::AskShow)
 	{
 		if (snap->s_cur == (unsigned int)snap->my_seat)
+		{
+			setForegroundWindow();
 			stlayActions->setCurrentIndex(m_nPostActions);
+		}
 		else
 			stlayActions->setCurrentIndex(m_nNoAction);
 	}
@@ -726,6 +729,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				stlayActions->setCurrentIndex(m_nNoAction);
 			else
 			{
+				setForegroundWindow();
+				
 				if (bGreaterBet)
 				{
 					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet, 0, 'f', 2));
@@ -1747,3 +1752,24 @@ void WTable::showCompleteTable()
 	}
 #endif /* DEBUG */
 }
+
+#if defined(Q_OS_WIN)
+#	include <windows.h>
+#endif
+
+void WTable::setForegroundWindow()
+{
+	if (!config.getBool("ui_bring_on_top"))
+		return;
+
+	this->activateWindow();
+	this->raise();
+	
+#if defined(Q_OS_WIN)
+	SetWindowPos(winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	SetWindowPos(winId(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+#endif
+
+// TODO: test on other platforms
+}
+

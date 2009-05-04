@@ -103,6 +103,9 @@ public:
 	
 	//! \brief shows all entitys from table
 	void showCompleteTable();
+	
+	//! \brief brings window to foreground
+	void setForegroundWindow();
 
 protected:
 	void closeEvent(QCloseEvent *event);

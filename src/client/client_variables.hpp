@@ -35,6 +35,7 @@ config.set("ui_show_handstrength", 	true);		// display hand strength on table
 config.set("ui_centralized_view",	true);		// enable centralized table view
 config.set("ui_card_deck",	"default");		// card deck to use
 config.set("ui_echo_password",	true);		// echo password for private games by default
+config.set("ui_bring_on_top",	true);		// brings window on top if player action expected
 config.set("sound",		true);			// play sounds
 config.set("sound_focus",	true);			// only play sound if window has focus
 config.set("chat_console",	false);			// send raw commands if chat prefixed with '/'

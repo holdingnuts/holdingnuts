@@ -150,6 +150,9 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 
 	checkCentralView = new QCheckBox("", tabAppearance);
 	checkCentralView->setCheckState(cfg->getBool("ui_centralized_view") ? Qt::Checked : Qt::Unchecked);
+
+	checkBringOnTop = new QCheckBox("", tabAppearance);
+	checkBringOnTop->setCheckState(cfg->getBool("ui_bring_on_top") ? Qt::Checked : Qt::Unchecked);
 	
 	comboCarddeck = new QComboBox(tabAppearance);
 	
@@ -173,6 +176,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	QFormLayout *formAppearance = new QFormLayout;
 	formAppearance->addRow(tr("Show strength of hand"), checkHandStrength);
 	formAppearance->addRow(tr("Centralized table view"), checkCentralView);
+	formAppearance->addRow(tr("Bring Window on Top"), checkBringOnTop);
 	formAppearance->addRow(tr("Card deck"), comboCarddeck);
 	tabAppearance->setLayout(formAppearance);
 }
@@ -213,6 +217,7 @@ void SettingsDialog::actionOk()
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_centralized_view", (checkCentralView->checkState() == Qt::Checked) ? true : false);
+		cfg->set("ui_bring_on_top", (checkBringOnTop->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_card_deck", comboCarddeck->itemData(comboCarddeck->currentIndex()).toString().toStdString());
 		
 		accept();
