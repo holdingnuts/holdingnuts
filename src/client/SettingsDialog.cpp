@@ -80,8 +80,9 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 		QString lName;
 	} locales[] = {
 		{ "",	tr("Auto-Detect") },
-		{ "en",	"English" },
 		{ "de",	"German" },
+		{ "en",	"English" },
+		{ "ja", "Japanese" },
 		{ "nl", "Dutch" },
 		{ "ro", "Romanian" },
 	};
