@@ -220,7 +220,7 @@
     <message>
         <location filename="../pclient.cpp" line="469"/>
         <source>%1 was checked.</source>
-        <translation>%1 wurde gechecket.</translation>
+        <translation>%1 wurde gecheckt.</translation>
     </message>
     <message>
         <location filename="../pclient.cpp" line="471"/>
