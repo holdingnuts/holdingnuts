@@ -79,12 +79,12 @@ void Seat::setInfo(const QString& name, const QString& location)
 	this->setToolTip(tooltip);
 }
 
-void Seat::setStake(qreal amount)
+void Seat::setStake(chips_type amount)
 {
-	m_strStake.setNum(amount, 'f', 2);
+	m_strStake.setNum(amount);
 }
 
-void Seat::setAction(Player::PlayerAction action, qreal amount)
+void Seat::setAction(Player::PlayerAction action, chips_type amount)
 {
 	switch ((int)action)
 	{
@@ -117,17 +117,17 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 			break;
 	}
 	
-	if (amount > 0.0)
-		m_strAmount.setNum(amount, 'f', 2);
+	if (amount > 0)
+		m_strAmount.setNum(amount);
 	else
 		m_strAmount.clear();
 }
 
-void Seat::setWin(qreal amount)
+void Seat::setWin(chips_type amount)
 {	
-	if (amount > 0.0)
+	if (amount > 0)
 	{
-		m_strAmount.setNum(amount, 'f', 2);
+		m_strAmount.setNum(amount);
 		m_pCurrentActionImg = &SeatImages::Instance().imgStatusWin;
 	}
 	else

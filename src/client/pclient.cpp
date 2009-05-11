@@ -291,8 +291,8 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		if (pstate & PlayerSitout)
 			si.sitout = true;
 		
-		si.stake = st.getNextInt() / 100.0f;
-		si.bet = st.getNextInt() / 100.0f;
+		si.stake = st.getNextInt();
+		si.bet = st.getNextInt();
 		si.action = (Player::PlayerAction) st.getNextInt();
 		
 		std::string shole = st.getNext();
@@ -321,14 +321,14 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		pt.parse(tmp);
 		
 		pt.getNext();   // pot-no; unused
-		float potsize = pt.getNextInt() / 100.0f;
+		chips_type potsize = pt.getNextInt();
 		table.pots.push_back(potsize);
 		
 		tmp = t.getNext();
 	} while (tmp[0] == 'p');
 	
 	
-	table.minimum_bet = Tokenizer::string2float(tmp) / 100.0f;
+	table.minimum_bet = Tokenizer::string2int(tmp);
 	
 	
 	if (table.state == Table::NewRound)
@@ -488,7 +488,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 		{
 			smsg = QString(tr("%1 called %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 			
 			sound = SOUND_CHIP_1;
 		}
@@ -496,19 +496,19 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 		{
 			smsg = QString(tr("%1 bet to %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 		}
 		else if (type == SnapPlayerActionRaised)
 		{
 			smsg = QString(tr("%1 raised to %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 		}
 		else if (type == SnapPlayerActionAllin)
 		{
 			smsg = QString(tr("%1 is allin with %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 		}
 		
 		if (tinfo->window)
@@ -605,12 +605,12 @@ void PClient::serverCmdSnap(Tokenizer &t)
 				smsg = QString(tr("%1 wins pot #%2 with %3.")
 					.arg(getPlayerName(cid))
 					.arg(poti+1)
-					.arg(amount / 100.0f));
+					.arg(amount));
 			else
 				smsg = QString(tr("%1 receives %3 odd chips of split pot #%2.")
 					.arg(getPlayerName(cid))
 					.arg(poti+1)
-					.arg(amount / 100.0f));
+					.arg(amount));
 			
 			tinfo->window->addServerMessage(smsg);
 		}
@@ -734,14 +734,14 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
 	gi->player_timeout = it.getNextInt();
-	gi->initial_stakes = it.getNextInt() / 100.0f;
+	gi->initial_stakes = it.getNextInt();
 	
 	
 	// unpack blinds-rule
 	const std::string sblinds = t.getNext();
 	it.parse(sblinds);
 	
-	gi->blinds_start = it.getNextInt() / 100.0f;
+	gi->blinds_start = it.getNextInt();
 	gi->blinds_factor = it.getNextFloat();
 	gi->blinds_time = it.getNextInt();
 	
@@ -980,7 +980,7 @@ void PClient::doStartGame(int gid)
 	netSendMsg(msg);
 }
 
-bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
+bool PClient::doSetAction(int gid, Player::PlayerAction action, chips_type amount)
 {
 	if (!connected)
 		return false;
@@ -1024,7 +1024,7 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 	char msg[1024];
 	if (bAmount)
 		snprintf(msg, sizeof(msg), "ACTION %d %s %d",
-			gid, saction, (int)(amount * 100));
+			gid, saction, amount);
 	else
 		snprintf(msg, sizeof(msg), "ACTION %d %s",
 			gid, saction);
@@ -1066,15 +1066,13 @@ bool PClient::createGame(gamecreate *createinfo)
 {
 	char msg[1024];
 	
-	dbg_msg("DEBUG", "float %.2f  int %d", createinfo->stake, (int)(createinfo->stake*100.0f));
-	
 	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%d timeout:%d "
 		"blinds_start:%d blinds_factor:%.2f blinds_time:%d password:%s "
 		"\"name:%s\"",
 		createinfo->max_players,
-		(int)(createinfo->stake*100),
+		createinfo->stake,
 		createinfo->timeout,
-		(int)(createinfo->blinds_start*100),
+		createinfo->blinds_start,
 		createinfo->blinds_factor,
 		createinfo->blinds_time,
 		createinfo->password.simplified().toStdString().c_str(),

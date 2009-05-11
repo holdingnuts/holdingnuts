@@ -38,8 +38,8 @@
 typedef struct {
 	bool valid;
 	int client_id;
-	float bet;
-	float stake;
+	chips_type bet;
+	chips_type stake;
 	bool in_round;
 	bool sitout;
 	Player::PlayerAction action;
@@ -54,8 +54,8 @@ typedef struct {
 	unsigned int s_bb;
 	unsigned int s_cur;
 	unsigned int s_lastbet;
-	std::vector<float> pots;
-	float minimum_bet;
+	std::vector<chips_type> pots;
+	chips_type minimum_bet;
 	CommunityCards communitycards;
 	seatinfo seats[10];
 	int my_seat;
@@ -130,12 +130,12 @@ protected:
 	
 	bool greaterBet(
 		const table_snapshot *snap,
-		const qreal& bet,
-		qreal *pbet = 0) const;
+		const chips_type bet,
+		chips_type *pbet = 0) const;
 	
 
 	//! \brief returns current Potsize including all Bets on Table
-	float currentPot() const;
+	chips_type currentPot() const;
 	
 	void updateSeat(unsigned int s);
 	void updatePots();
@@ -220,7 +220,7 @@ private:
 	int				m_nNoAction;
 	int				m_nSitoutActions;
 	
-	qreal			m_autocall_amount;
+	chips_type			m_autocall_amount;
 	
 	// precomputed dealerbtn positions
 	QPointF			m_ptDealerBtn[10];

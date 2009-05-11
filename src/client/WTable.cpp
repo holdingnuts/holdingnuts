@@ -288,7 +288,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	const QFontMetrics fm(font);
 	const QPointF ptCenter = m_pImgTable->boundingRect().center();
 	
-	m_pTxtPots = m_pScene->addSimpleText("Main pot: 0.00", font);
+	m_pTxtPots = m_pScene->addSimpleText("Main pot: 0", font);
 	m_pTxtPots->setPos(calcPotsPos());
 	m_pTxtPots->setZValue(3);
 	
@@ -720,12 +720,12 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		btnBetRaise->setEnabled(true);
 		
 		
-		qreal greatest_bet = 0;
+		chips_type greatest_bet = 0;
 		bool bGreaterBet = greaterBet(snap, s->bet, &greatest_bet);
 		
 		if (snap->s_cur == (unsigned int)snap->my_seat)
 		{
-			if ((int)s->stake == 0)
+			if (s->stake == 0)
 				stlayActions->setCurrentIndex(m_nNoAction);
 			else
 			{
@@ -733,8 +733,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				
 				if (bGreaterBet)
 				{
-					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet, 0, 'f', 2));
-					btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value(), 0, 'f', 2));
+					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet));
+					btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
 					
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(true);
@@ -745,14 +745,14 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					
 					if (greaterBet(snap, 0))
 					{
-						btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value(), 0, 'f', 2));
+						btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
 						
 						shortcutBet->setEnabled(false);
 						shortcutRaise->setEnabled(true);
 					}
 					else
 					{
-						btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value(), 0, 'f', 2));
+						btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value()));
 						
 						shortcutBet->setEnabled(true);
 						shortcutRaise->setEnabled(false);
@@ -766,7 +766,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					m_pSliderAmount->setVisible(false);
 					wRaiseBtns->setVisible(false);
 					
-					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
+					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(false);
@@ -777,7 +777,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					m_pSliderAmount->setVisible(false);
 					wRaiseBtns->setVisible(false);
 					
-					btnBetRaise->setText(tr("&Allin %1").arg(s->stake, 0, 'f', 2));
+					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(false);
@@ -796,7 +796,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				stlayActions->setCurrentIndex(m_nActions);
 				
 				
-				const float cur_pot = currentPot();
+				const chips_type cur_pot = currentPot();
 				
 				btnBetsizeMinimum->setEnabled(s->stake + s->bet > snap->minimum_bet);
 				btnBetsizeQuarterPot->setEnabled(cur_pot * 0.25f > snap->minimum_bet);
@@ -807,7 +807,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		}
 		else
 		{
-			if ((int)s->stake == 0 || (!bGreaterBet && snap->s_lastbet == (unsigned int)snap->my_seat))  // FIXME: do not show actions if there is no action possible for this betting round
+			if (s->stake == 0 || (!bGreaterBet && snap->s_lastbet == (unsigned int)snap->my_seat))  // FIXME: do not show actions if there is no action possible for this betting round
 				stlayActions->setCurrentIndex(m_nNoAction);
 			else
 			{
@@ -816,9 +816,9 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					chkAutoFoldCheck->setText(tr("Fold"));
 					
 					if (greatest_bet >= s->stake + s->bet)
-						chkAutoCheckCall->setText(tr("Allin %1").arg(s->stake, 0, 'f', 2));
+						chkAutoCheckCall->setText(tr("Allin %1").arg(s->stake));
 					else
-						chkAutoCheckCall->setText(tr("Call %1").arg(greatest_bet - s->bet, 0, 'f', 2));
+						chkAutoCheckCall->setText(tr("Call %1").arg(greatest_bet - s->bet));
 				}
 				else
 				{
@@ -986,14 +986,14 @@ void WTable::updatePots()
 	
 	
 	QString strPots;
-	if (snap->pots.at(0) > .0f)
+	if (snap->pots.at(0) > 0)
 	{
-		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0), 0, 'f', 2));
+		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
 		for (unsigned int t = 1; t < snap->pots.size(); ++t)
 		{
 			strPots.append(
 				QString("  " + tr("Side pot %1: %2")
-					.arg(t).arg(snap->pots.at(t), 0, 'f', 2)));
+					.arg(t).arg(snap->pots.at(t))));
 		}
 	}
 	
@@ -1088,7 +1088,7 @@ void WTable::handleAutoActions()
 			}
 			else if (chkAutoCheckCall->checkState() == Qt::Checked)
 			{
-				qreal greatest_bet;
+				chips_type greatest_bet;
 				greaterBet(snap, 0, &greatest_bet);
 				
 				if (m_autocall_amount >= greatest_bet)
@@ -1104,7 +1104,7 @@ void WTable::handleAutoActions()
 		{
 			if (chkAutoCheckCall->checkState() == Qt::Checked)
 			{
-				qreal greatest_bet;
+				chips_type greatest_bet;
 				greaterBet(snap, 0, &greatest_bet);
 				
 				if (m_autocall_amount < greatest_bet)
@@ -1254,7 +1254,7 @@ void WTable::actionBetRaise()
 	if (snap->my_seat == -1)
 		return;
 	
-	qreal greatest_bet = 0;
+	chips_type greatest_bet = 0;
 	greaterBet(snap, 0, &greatest_bet);
 	
 	if (greatest_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet ||
@@ -1340,7 +1340,7 @@ void WTable::actionAutoCheckCall(int state)
 	if (!snap)
 		return;
 	
-	qreal greatest_bet;
+	chips_type greatest_bet;
 	greaterBet(snap, 0, &greatest_bet);
 	
 	m_autocall_amount = greatest_bet;
@@ -1357,10 +1357,10 @@ void WTable::slotBetRaiseAmountChanged()
 	
 	btnBetRaise->setText(QString("%1 %2")
 				.arg(str.left(str.lastIndexOf(' ')))
-				.arg(m_pSliderAmount->value(), 0, 'f', 2));
+				.arg(m_pSliderAmount->value()));
 }
 
-float WTable::currentPot() const
+chips_type WTable::currentPot() const
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
@@ -1370,7 +1370,7 @@ float WTable::currentPot() const
 	
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 
-	float cur_pot = snap->pots.at(snap->pots.size() - 1);
+	chips_type cur_pot = snap->pots.at(snap->pots.size() - 1);
 	
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
@@ -1518,9 +1518,9 @@ void WTable::resizeEvent(QResizeEvent *event)
 	m_pView->fitInView(m_pScene->itemsBoundingRect());
 }
 
-bool WTable::greaterBet(const table_snapshot *snap, const qreal& bet, qreal *pbet) const
+bool WTable::greaterBet(const table_snapshot *snap, const chips_type bet, chips_type *pbet) const
 {
-	qreal cur_bet = bet;
+	chips_type cur_bet = bet;
 	
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
@@ -1550,7 +1550,7 @@ bool WTable::isNoMoreActionPossible(const table_snapshot *snap)
 		{
 			countPlayers++;
 			
-			if ((int)seat->stake == 0)
+			if (seat->stake == 0)
 				countAllin++;
 		}
 	}

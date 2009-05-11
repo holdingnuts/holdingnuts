@@ -28,9 +28,11 @@
 #include <QWidget>
 #include <QSize>
 
+#include "Player.hpp"		// chips_type
+
 class QSlider;
 class QLineEdit;
-class QDoubleValidator;
+class QIntValidator;
 
 class EditableSlider : public QWidget
 {
@@ -41,17 +43,17 @@ public:
 
 	virtual ~EditableSlider();
 		
-	void setMinimum(float value);
-	void setMaximum(float value);
-	void setValue(float value);
+	void setMinimum(chips_type value);
+	void setMaximum(chips_type value);
+	void setValue(chips_type value);
 
-	float value() const;
+	chips_type value() const;
 
 	bool validValue() const;
 	void setFocus();
 	
 protected:
-	int valueToSliderPosition(float value) const;
+	int valueToSliderPosition(chips_type value) const;
 
 signals:
 	void dataChanged();
@@ -67,10 +69,10 @@ private slots:
 private:
 	QSlider			*m_pSlider;
 	QLineEdit		*m_pEdit;
-	QDoubleValidator	*m_pValidator;
+	QIntValidator		*m_pValidator;
 			
-	float		m_nMin;
-	float		m_nMax;
+	chips_type	m_nMin;
+	chips_type	m_nMax;
 };
 
 #endif /* _HOLDING_NUTS_EDITABLE_SLIDER_H */

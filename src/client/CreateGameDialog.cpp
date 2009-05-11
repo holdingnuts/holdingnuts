@@ -85,12 +85,11 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinTimeout->setValue(30);
 	
 	QLabel *labelStake = new QLabel(tr("Initial stake"), this);
-	spinStake = new QDoubleSpinBox(this);
-	spinStake->setDecimals(2);
-	spinStake->setMinimum(500.0);
-	spinStake->setMaximum(1000000.0);
-	spinStake->setSingleStep(100.0);
-	spinStake->setValue(1500.0);
+	spinStake = new QSpinBox(this);
+	spinStake->setMinimum(500);
+	spinStake->setMaximum(1000000);
+	spinStake->setSingleStep(100);
+	spinStake->setValue(1500);
 	
 	QGridLayout *layoutPlayers = new QGridLayout;
 	layoutPlayers->addWidget(labelPlayers, 0, 0);
@@ -105,12 +104,11 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	QGroupBox *groupBlinds = new QGroupBox(tr("Blinds"), this);
 	
 	QLabel *labelBlindsStart = new QLabel(tr("Starting blinds"), this);
-	spinBlindsStart = new QDoubleSpinBox(this);
-	spinBlindsStart->setDecimals(2);
-	spinBlindsStart->setMinimum(5.0);
-	spinBlindsStart->setMaximum(200.0);
-	spinBlindsStart->setSingleStep(10.0);
-	spinBlindsStart->setValue(20.0);
+	spinBlindsStart = new QSpinBox(this);
+	spinBlindsStart->setMinimum(5);
+	spinBlindsStart->setMaximum(200);
+	spinBlindsStart->setSingleStep(10);
+	spinBlindsStart->setValue(20);
 	
 	QLabel *labelBlindsFactor = new QLabel(tr("Raise factor"), this);
 	spinBlindsFactor = new QDoubleSpinBox(this);
@@ -193,7 +191,7 @@ QString CreateGameDialog::getPassword() const
 	return editPassword->text();
 }
 
-double CreateGameDialog::getStake() const
+chips_type CreateGameDialog::getStake() const
 {
 	return spinStake->value();
 }
@@ -208,7 +206,7 @@ unsigned int CreateGameDialog::getTimeout() const
 	return spinTimeout->value();
 }
 
-double CreateGameDialog::getBlindsStart() const
+chips_type CreateGameDialog::getBlindsStart() const
 {
 	return spinBlindsStart->value();
 }

@@ -1022,7 +1022,7 @@ void WMain::updateGameinfo(int gid)
 	lblGameInfoStakes->setText(QString("%1").arg(gi->initial_stakes));
 	lblGameInfoTimeout->setText(QString("%1").arg(gi->player_timeout));
 	lblGameInfoBlinds->setText(QString("<qt>%1 /<br/><b>x</b>%2 /<br/>%3<b>s</b></qt>")
-		.arg(gi->blinds_start, 0, 'f', 2)
+		.arg(gi->blinds_start)
 		.arg(gi->blinds_factor, 0, 'f', 2)
 		.arg(gi->blinds_time));
 	
