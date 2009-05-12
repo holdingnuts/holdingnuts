@@ -1370,8 +1370,13 @@ chips_type WTable::currentPot() const
 	
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 
-	chips_type cur_pot = snap->pots.at(snap->pots.size() - 1);
+	chips_type cur_pot = 0;
 	
+	// sum all pots
+	for (unsigned int i=0; i < snap->pots.size(); i++)
+		cur_pot += snap->pots.at(i);
+	
+	// sum all seat bets
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
 		const seatinfo *seat = &(snap->seats[i]);
