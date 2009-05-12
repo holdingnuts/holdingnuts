@@ -49,7 +49,11 @@ private:
 	QCheckBox *checkLog, *checkLogChat;
 	QComboBox *comboLocale;
 	QCheckBox *checkSound, *checkSoundFocus;
-	QCheckBox *checkTimeInFoyerChat;
+	QCheckBox *checkVerboseFoyerTime;
+	QCheckBox *checkVerboseFoyerJoinLeft;
+	QCheckBox *checkVerboseFoyerGameState;
+	QCheckBox *checkVerboseTablePlayerActions;
+	QCheckBox *checkVerboseTableCards;
 	
 	// tabAppearance
 	QCheckBox *checkHandStrength;
