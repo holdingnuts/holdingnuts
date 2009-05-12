@@ -373,6 +373,20 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 		tinfo->window->addServerMessage(
 			QString(tr("A new hand (#%1) begins.").arg(hand_no)));
 	}
+	else if (type == SnapGameStateBlinds)
+	{
+		const chips_type blind_small = t.getNextInt();
+		const chips_type blind_big = t.getNextInt();
+		
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		tinfo->window->addServerMessage(
+			QString(tr("Blinds are now at %1/%2.")
+				.arg(blind_small)
+				.arg(blind_big)));
+	}
 	// TODO: else if (type == "your_seat")
 }
 

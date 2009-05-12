@@ -568,6 +568,10 @@ void GameController::stateBlinds(Table *t)
 		{
 			blind.last_blinds_time = time(NULL);
 			blind.amount = (int)(blind.blinds_factor * blind.amount);
+			
+			// send out blinds snapshot
+			snprintf(msg, sizeof(msg), "%d %d %d", SnapGameStateBlinds, blind.amount / 2, blind.amount);
+			snap(t->table_id, SnapGameState, msg);
 		}
 		break;
 	}
@@ -1351,7 +1355,7 @@ int GameController::tick()
 	else if (ended)
 	{
 		// delay before game gets deleted
-		if ((unsigned int) difftime(time(NULL), ended_time) >= 2 * 60)
+		if ((unsigned int) difftime(time(NULL), ended_time) >= 4 * 60)
 		{
 			// remove all players
 			for (players_type::iterator e = players.begin(); e != players.end();)
