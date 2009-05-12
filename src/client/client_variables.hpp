@@ -39,8 +39,8 @@ config.set("ui_bring_on_top",	true);		// brings window on top if player action e
 config.set("sound",		true);			// play sounds
 config.set("sound_focus",	true);			// only play sound if window has focus
 config.set("chat_console",	false);			// send raw commands if chat prefixed with '/'
-config.set("chat_verbosity_foyer", 0);
-config.set("chat_verbosity_table", 0);
+config.set("chat_verbosity_foyer", 13);
+config.set("chat_verbosity_table", 7);
 
 #ifdef DEBUG
 config.set("dbg_register",	-1);			// automatically register to a game (value is gid; auto_connect must be set)

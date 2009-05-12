@@ -184,39 +184,22 @@ void PClient::serverCmdMsg(Tokenizer &t)
 			return;
 
 		if (cid == -1) // message from server to table
-		{
-			// drop message if verbose level is greater than 0
-			if (
-				config.getInt("verbose_tablechat") > 0 && 
-					(
-						qchatmsg.contains("checked", Qt::CaseInsensitive) || 
-						qchatmsg.contains("called", Qt::CaseInsensitive) ||
-						qchatmsg.contains("allin", Qt::CaseInsensitive) ||
-						qchatmsg.contains("folded", Qt::CaseInsensitive) ||
-						qchatmsg.contains("bet", Qt::CaseInsensitive)
-					)
-				)
-				return;
-
 			tinfo->window->addServerMessage(qchatmsg);
-		}
 		else // message from user to table
-			tinfo->window->addChat(qsfrom, qchatmsg);
+		{
+			if ((config.getInt("chat_verbosity_table") & 0x4))
+				tinfo->window->addChat(qsfrom, qchatmsg);
+		}
 	}
 	else
 	{
 		if (from == -1) // message from server to foyer
-		{
-			// drop message "player joined/left"
-			if ((config.getInt("chat_verbosity_foyer") & 0x2) && 
-					(qchatmsg.contains("joined", Qt::CaseInsensitive) || 
-					 qchatmsg.contains("left", Qt::CaseInsensitive)))
-				return;
-
 			wMain->addServerMessage(qchatmsg);
-		}
 		else // message from user to foyer
-			wMain->addChat(qsfrom, qchatmsg);
+		{
+			if ((config.getInt("chat_verbosity_foyer") & 0x8))
+				wMain->addChat(qsfrom, qchatmsg);
+		}
 	}
 }
 
@@ -368,17 +351,16 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	
 	if (type == SnapGameStateStart)
 	{
-		if (!(config.getInt("chat_verbosity_foyer") & 0x4))
+		if ((config.getInt("chat_verbosity_foyer") & 0x4))
 			wMain->addServerMessage(
 				QString(tr("Game (%1) has been started.").arg(gid)));
 		
 		addTable(gid, tid);
 	}
-	else if (type == SnapGameStateEnd)
+	else if (type == SnapGameStateEnd && (config.getInt("chat_verbosity_foyer") & 0x4))
 	{
-		if (!(config.getInt("chat_verbosity_foyer") & 0x4))
-			wMain->addServerMessage(
-				QString(tr("Game (%1) has been ended.").arg(gid)));
+		wMain->addServerMessage(
+			QString(tr("Game (%1) has been ended.").arg(gid)));
 	}
 	else if (type == SnapGameStateNewHand)
 	{
@@ -421,7 +403,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		
 		if (bUpdateView && tinfo->window)
 		{
-			if (!(config.getInt("chat_verbosity_table") & 0x2))
+			if ((config.getInt("chat_verbosity_table") & 0x2))
 				tinfo->window->addServerMessage(
 					QString(tr("Your hole cards: [%1 %2].")
 						.arg(QString::fromStdString(card1))
@@ -433,7 +415,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	}
 	else if (type == SnapCardsFlop || type == SnapCardsTurn || type == SnapCardsRiver)
 	{
-		if ((config.getInt("chat_verbosity_table") & 0x2))
+		if (!(config.getInt("chat_verbosity_table") & 0x2))
 			return;
 
 		// silently drop message if there is no table-info
@@ -545,9 +527,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 	}
 	
 	if ((config.getInt("chat_verbosity_table") & 0x1))
-		return;
-
-	tinfo->window->addServerMessage(smsg);
+		tinfo->window->addServerMessage(smsg);
 }
 
 void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
