@@ -278,7 +278,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// the foyer chat box
 	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
-	m_pChat->showTime(config.getBool("time_in_foyerchat"));
+	m_pChat->showTime(config.getBool("chat_time_foyer"));
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 
