@@ -49,6 +49,7 @@ private:
 	QCheckBox *checkLog, *checkLogChat;
 	QComboBox *comboLocale;
 	QCheckBox *checkSound, *checkSoundFocus;
+	QCheckBox *checkTimeInFoyerChat;
 	
 	// tabAppearance
 	QCheckBox *checkHandStrength;

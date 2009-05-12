@@ -72,6 +72,10 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	layoutLog->addWidget(checkLog);
 	layoutLog->addWidget(checkLogChat);
 	
+	// time in chatbox
+	checkTimeInFoyerChat = new QCheckBox(tr("enabled"), tabGeneral);
+	checkTimeInFoyerChat->setCheckState(cfg->getBool("time_in_foyerchat") ? Qt::Checked : Qt::Unchecked);
+	
 	comboLocale = new QComboBox(tabGeneral);
 	
 	// locales (Note: names are not translated)
@@ -129,6 +133,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	
 	QFormLayout *formGeneral = new QFormLayout;
 	formGeneral->addRow(tr("Log to file"), layoutLog);
+	formGeneral->addRow(tr("Show Time in Foyerchat"), checkTimeInFoyerChat);
 	formGeneral->addRow(tr("Locale"), comboLocale);
 	formGeneral->addRow(tr("Sounds"), layoutSound);
 	formGeneral->addRow(tr("UUID"), layoutUUID);
@@ -210,6 +215,7 @@ void SettingsDialog::actionOk()
 		cfg->set("locale", comboLocale->itemData(comboLocale->currentIndex()).toString().toStdString());
 		cfg->set("sound", (checkSound->checkState() == Qt::Checked) ? true : false);
 		cfg->set("sound_focus", (checkSoundFocus->checkState() == Qt::Checked) ? true : false);
+		cfg->set("time_in_foyerchat", (checkSoundFocus->checkState() == Qt::Checked) ? true : false);
 		
 		// tabPlayerinfo
 		cfg->set("player_name", editPlayerName->text().toStdString());

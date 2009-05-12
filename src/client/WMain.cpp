@@ -250,8 +250,6 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	cbSrvAddr->setEditable(true); 
 	cbSrvAddr->setToolTip(
 		tr("The desired server (domain-name or IP) to connect with.\nYou can optionally specify a port number.\nFormat: <host>[:<port>]"));
-
-	// obsolete connect(cbSrvAddr->lineEdit(), SIGNAL(textChanged(const QString&)), this, SLOT(slotSrvTextChanged()));
 	connect(cbSrvAddr->lineEdit(), SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
 	btnConnect = new QPushButton(tr("&Connect"), this);
@@ -280,6 +278,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// the foyer chat box
 	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
+	m_pChat->showTime(config.getBool("time_in_foyerchat"));
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 
@@ -451,7 +450,7 @@ void WMain::addChat(const QString &from, const QString &text)
 	m_pChat->addMessage(text, from);
 	
 	if (config.getBool("log_chat"))
-		log_msg("chat", "(%s) %s",
+		log_msg("foyer", "(%s) %s",
 			 from.toStdString().c_str(), text.toStdString().c_str());
 }
 

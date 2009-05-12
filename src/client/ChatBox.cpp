@@ -29,11 +29,12 @@
 #include <QVBoxLayout>
 #include <QScrollBar>
 #include <QPushButton>
+#include <QTime>
 
 ChatBox::ChatBox(
 	InputLineAlignment align,
 	int nTextLogHeight,
-	QWidget *parent) : QWidget(parent)
+	QWidget *parent) : QWidget(parent), m_bShowTime(false)
 {
 	m_pEditChat = new QLineEdit(this);
 
@@ -93,6 +94,9 @@ void ChatBox::addMessage(const QString &msg, const QString &from, const QColor &
 	m_pEditChatLog->setTextColor(color);
 	m_pEditChatLog->setFontPointSize(m_nFontPointSize);
 	
+	if (m_bShowTime)
+		m_pEditChatLog->insertPlainText("< " + QTime::currentTime().toString("hh:mm") + " > ");
+	
 	// is the message from other client
 	if (from.length())
 	{
@@ -138,6 +142,11 @@ int ChatBox::fontPointSize() const
 void ChatBox::showChatBtn(bool bShow)
 {
 	m_pSendMsg->setVisible(bShow);
+}
+
+void ChatBox::showTime(bool bShow)
+{
+	m_bShowTime = bShow;
 }
 
 void ChatBox::setEnabled(bool enable)

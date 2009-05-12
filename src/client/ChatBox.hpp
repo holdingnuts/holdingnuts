@@ -46,7 +46,7 @@ public:
 		InputLineAlignment align = INPUTLINE_TOP,
 		int nTextLogHeight = 0,
 		QWidget *parent = 0);
-	
+		
 	void addMessage(const QString &msg, const QString &from = "", const QColor &color = Qt::black);
 	void addMessage(const QString &msg, const QColor &color = Qt::black);
 	
@@ -54,6 +54,7 @@ public:
 	int fontPointSize() const;	
 
 	void showChatBtn(bool bShow);
+	void showTime(bool bShow);
 
 	void setEnabled(bool enable);
 
@@ -71,13 +72,13 @@ signals:
      void dispatchedMessage(QString msg);
 
 private:
-	int			m_nGameID;
-	int			m_nTableID;
 	int			m_nFontPointSize;
 	QLineEdit		*m_pEditChat;
 	QTextEdit		*m_pEditChatLog;
 	//! \brief send message button, default is hidden
 	QPushButton		*m_pSendMsg;
+	//! \brief shows human-readable Timestamp 
+	bool			m_bShowTime;
 };
 
 #endif /* _HOLDINGNUTS_CHATBOX_H */
