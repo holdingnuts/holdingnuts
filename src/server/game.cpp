@@ -131,7 +131,7 @@ bool send_err(clientcon *client, int code=0, const char *str="")
 // from client/foyer to client/foyer
 bool client_chat(int from, int to, const char *message)
 {
-	char msg[128];
+	char msg[256];
 	
 	if (from == -1)
 	{
@@ -173,7 +173,7 @@ bool client_chat(int from, int to, const char *message)
 // from game/table to client
 bool client_chat(int from_gid, int from_tid, int to, const char *message)
 {
-	char msg[128];
+	char msg[256];
 	
 	snprintf(msg, sizeof(msg), "MSG %d:%d %s %s",
 		from_gid, from_tid, (from_tid == -1) ? "game" : "table", message);
@@ -188,7 +188,7 @@ bool client_chat(int from_gid, int from_tid, int to, const char *message)
 // from client to game/table
 bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 {
-	char msg[128];
+	char msg[256];
 	
 	clientcon* fromclient = get_client_by_id(from_cid);
 	
@@ -954,9 +954,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		"user_game",
 		10,
 		GameController::SNG,
-		1500*100,
+		1500,
 		30,
-		20*100,
+		20,
 		2.0f,
 		180,
 		"",
@@ -995,7 +995,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			ginfo.stake = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.stake < 10*100 || ginfo.stake > 1000000*100)
+			if (ginfo.stake < 10 || ginfo.stake > 1000000*100)
 				cmderr = true;
 		}
 		else if (infotype == "timeout" && havearg)
@@ -1016,7 +1016,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			ginfo.blinds_start = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.blinds_start < 5*100 || ginfo.blinds_start > 200*100)
+			if (ginfo.blinds_start < 5 || ginfo.blinds_start > 200*100)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_factor" && havearg)
@@ -1030,7 +1030,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			ginfo.blinds_time = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.blinds_time < 30 || ginfo.blinds_time > 20*60)
+			if (ginfo.blinds_time < 30 || ginfo.blinds_time > 30*60)
 				cmderr = true;
 		}
 		else if (infotype == "password" && havearg)
