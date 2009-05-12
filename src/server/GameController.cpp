@@ -927,6 +927,10 @@ void GameController::stateBetting(Table *t)
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		t->timeout_start = time(NULL);
 		
+		// reset current player's last action
+		p = t->seats[t->cur_player].player;
+		p->resetLastAction();
+		
 		t->scheduleState(Table::Betting, 1);
 		sendTableSnapshot(t);
 	}
