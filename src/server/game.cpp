@@ -432,6 +432,19 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 			con_archive[client->uuid] = ar;
 		}
 		
+		
+		// send welcome message
+		const string welcome_message = config.get("welcome_message");
+		if (welcome_message.length())
+		{
+			snprintf(msg, sizeof(msg),
+				"%s",
+				welcome_message.c_str());
+		
+			client_chat(-1, client->id, msg);
+		}
+		
+		
 		// send broadcast message to foyer
 		snprintf(msg, sizeof(msg),
 			"%s (%d) joined foyer",
