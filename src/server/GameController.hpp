@@ -76,8 +76,8 @@ public:
 	void setPlayerTimeout(unsigned int respite) { timeout = respite; };
 	unsigned int getPlayerTimeout() const { return timeout; };
 	
-	void setBlindsStart(chips_type blinds_start) { blind.amount = blinds_start; };
-	chips_type getBlindsStart() const { return blind.amount; };
+	void setBlindsStart(chips_type blinds_start) { blind.start = blinds_start; };
+	chips_type getBlindsStart() const { return blind.start; };
 	void setBlindsFactor(float blinds_factor) { blind.blinds_factor = blinds_factor; };
 	float getBlindsFactor() const { return blind.blinds_factor; };
 	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
@@ -167,6 +167,7 @@ private:
 	tables_type tables;
 	
 	struct {
+		chips_type start;
 		chips_type amount;
 		BlindRule blindrule;
 		unsigned int blinds_time;  // seconds

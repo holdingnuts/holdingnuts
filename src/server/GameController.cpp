@@ -51,12 +51,12 @@ GameController::GameController()
 	max_players = 10;
 	restart = false;
 	
-	player_stakes = 1500*100;
+	player_stakes = 1500;
 	
 	blind.blindrule = BlindByTime;
 	blind.blinds_time = 60 * 4;
 	blind.blinds_factor = 2.0f;
-	blind.amount = 10*100;
+	blind.start = 10;
 	
 	hand_no = 0;
 	
@@ -699,8 +699,8 @@ void GameController::stateBetting(Table *t)
 				chat(p->client_id, t->table_id, "You cannot bet, there was already a bet! Try raise.");
 			else if (p->next_action.amount < minimum_bet)
 			{
-				snprintf(msg, sizeof(msg), "You cannot bet this amount. Minimum bet is %.2f.",
-					minimum_bet / 100.0f);
+				snprintf(msg, sizeof(msg), "You cannot bet this amount. Minimum bet is %d.",
+					minimum_bet);
 				chat(p->client_id, t->table_id, msg);
 			}
 			else
@@ -721,8 +721,8 @@ void GameController::stateBetting(Table *t)
 			}
 			else if (p->next_action.amount < minimum_bet)
 			{
-				snprintf(msg, sizeof(msg), "You cannot raise this amount. Minimum bet is %.2f.",
-					minimum_bet / 100.0f);
+				snprintf(msg, sizeof(msg), "You cannot raise this amount. Minimum bet is %d.",
+					minimum_bet);
 				chat(p->client_id, t->table_id, msg);
 			}
 			else
@@ -1178,8 +1178,8 @@ void GameController::stateShowdown(Table *t)
 		
 		if (pot->amount > 0)
 		{
-			log_msg("winlist", "error: remaining chips in pot %d: %.2f",
-				i, pot->amount / 100.0f);
+			log_msg("winlist", "error: remaining chips in pot %d: %d",
+				i, pot->amount);
 		}
 	}
 #endif
@@ -1331,6 +1331,7 @@ void GameController::start()
 	t->state = Table::GameStart;
 	tables[tid] = t;
 	
+	blind.amount = blind.start;
 	blind.last_blinds_time = time(NULL);
 	
 	snprintf(msg, sizeof(msg), "%d", SnapGameStateStart);
