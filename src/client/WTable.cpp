@@ -1198,7 +1198,6 @@ void WTable::updateView()
 	handleAutoActions();
 	
 	
-	
 	// set focus on EditableSlider only if focus isn't on ChatBox
 	if (!m_pChat->hasInputFocus())
 		m_pSliderAmount->setFocus();
@@ -1207,11 +1206,24 @@ void WTable::updateView()
 void WTable::addChat(const QString& from, const QString& text)
 {
 	m_pChat->addMessage(text, from);
+	
+	if (config.getBool("log_chat"))
+		log_msg("table", "(%d:%d) (%s) %s",
+			m_nGid,
+			m_nTid,
+			from.toStdString().c_str(),
+			text.toStdString().c_str());
 }
 
 void WTable::addServerMessage(const QString& text)
 {
 	m_pChat->addMessage(text, Qt::blue);
+	
+	if (config.getBool("log_chat"))
+		log_msg("table", "(%d:%d) %s",
+			m_nGid,
+			m_nTid,
+			text.toStdString().c_str());
 }
 
 void WTable::closeEvent(QCloseEvent *event)
