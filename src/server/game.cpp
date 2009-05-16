@@ -676,11 +676,28 @@ bool client_cmd_request_gamestart(clientcon *client, Tokenizer &t)
 	if (!g)
 		return false;
 	
-	if (g->getOwner() != client->id)
+	if (g->getOwner() != client->id && !(client->state & Authed))
 		return false;
 	
 	g->start();
 	
+	return true;
+}
+
+bool client_cmd_request_gamerestart(clientcon *client, Tokenizer &t)
+{
+	int gid, restart;
+	t >> gid >> restart;
+
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+		return false;
+
+	if (!(client->state & Authed))
+		return false;
+
+	g->setRestart(restart);
+
 	return true;
 }
 
@@ -709,6 +726,8 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		cmderr = !client_cmd_request_serverinfo(client, t);
 	else if (request == "start")
 		cmderr = !client_cmd_request_gamestart(client, t);
+	else if (request == "restart")
+		cmderr = !client_cmd_request_gamerestart(client, t);
 	else
 		cmderr = true;
 	
