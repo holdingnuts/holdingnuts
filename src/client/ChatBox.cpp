@@ -96,7 +96,7 @@ void ChatBox::addMessage(const QString &msg, const QString &from, const QColor &
 	m_pEditChatLog->setFontPointSize(m_nFontPointSize);
 	
 	if (m_bShowTime)
-		m_pEditChatLog->insertPlainText("< " + QTime::currentTime().toString("hh:mm") + " > ");
+		m_pEditChatLog->insertPlainText("<" + QTime::currentTime().toString("hh:mm") + "> ");
 	
 	// is the message from other client
 	if (from.length())

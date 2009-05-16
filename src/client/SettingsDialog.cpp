@@ -72,12 +72,12 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	layoutLog->addWidget(checkLog);
 	layoutLog->addWidget(checkLogChat);
 	
-	// verbose foyer
+	// verbosity level foyer
 	checkVerboseFoyerTime = new QCheckBox(tr("Display time in foyer chat"), tabGeneral);	// 0x1
 	checkVerboseFoyerTime->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x1) ? Qt::Checked : Qt::Unchecked);
 	
-//	checkVerboseFoyerJoinLeft = new QCheckBox(tr("Display Player Connections"), tabGeneral);	// 0x2
-//	checkVerboseFoyerJoinLeft->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x2) ? Qt::Checked : Qt::Unchecked);
+	checkVerboseFoyerJoinLeft = new QCheckBox(tr("Display join/left messages"), tabGeneral);	// 0x2
+	checkVerboseFoyerJoinLeft->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x2) ? Qt::Checked : Qt::Unchecked);
 
 	checkVerboseFoyerGameState = new QCheckBox(tr("Display game states"), tabGeneral);			// 0x4
 	checkVerboseFoyerGameState->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x4) ? Qt::Checked : Qt::Unchecked);
@@ -85,7 +85,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	checkVerboseFoyerPlayerChat = new QCheckBox(tr("Display player chat"), tabGeneral);			// 0x8
 	checkVerboseFoyerPlayerChat->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x8) ? Qt::Checked : Qt::Unchecked);
 
-	// verbose table
+	// verbosity level table
 	checkVerboseTablePlayerActions = new QCheckBox(tr("Display player actions"), tabGeneral);	// 0x1
 	checkVerboseTablePlayerActions->setCheckState((cfg->getInt("chat_verbosity_table") & 0x1) ? Qt::Checked : Qt::Unchecked);
 
@@ -154,7 +154,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	QFormLayout *formGeneral = new QFormLayout;
 	formGeneral->addRow(tr("Log to file"), layoutLog);
 	formGeneral->addRow(tr("Foyer chat verbosity"), checkVerboseFoyerTime);
-//	formGeneral->addRow(" ", checkVerboseFoyerJoinLeft);
+	formGeneral->addRow(" ", checkVerboseFoyerJoinLeft);
 	formGeneral->addRow(" ", checkVerboseFoyerGameState);
 	formGeneral->addRow(" ", checkVerboseFoyerPlayerChat);
 	formGeneral->addRow(tr("Table chat verbosity"), checkVerboseTablePlayerActions);
@@ -242,12 +242,14 @@ void SettingsDialog::actionOk()
 		cfg->set("sound", (checkSound->checkState() == Qt::Checked) ? true : false);
 		cfg->set("sound_focus", (checkSoundFocus->checkState() == Qt::Checked) ? true : false);
 		
+		
+		// verbosity level foyer
 		int chat_verbosity_foyer = 0;
 		
 		if (checkVerboseFoyerTime->checkState() == Qt::Checked)
 			chat_verbosity_foyer |= 0x1;
-//		if (checkVerboseFoyerJoinLeft->checkState() == Qt::Checked)
-//			chat_verbosity_foyer |= 0x2;
+		if (checkVerboseFoyerJoinLeft->checkState() == Qt::Checked)
+			chat_verbosity_foyer |= 0x2;
 		if (checkVerboseFoyerGameState->checkState() == Qt::Checked)
 			chat_verbosity_foyer |= 0x4;			
 		if (checkVerboseFoyerPlayerChat->checkState() == Qt::Checked)
@@ -255,6 +257,8 @@ void SettingsDialog::actionOk()
 			
 		cfg->set("chat_verbosity_foyer", chat_verbosity_foyer);
 		
+		
+		// verbosity level table
 		int chat_verbosity_table = 0;
 		
 		if (checkVerboseTablePlayerActions->checkState() == Qt::Checked)
@@ -265,6 +269,7 @@ void SettingsDialog::actionOk()
 			chat_verbosity_table |= 0x4;
 
 		cfg->set("chat_verbosity_table", chat_verbosity_table);
+		
 		
 		// tabPlayerinfo
 		cfg->set("player_name", editPlayerName->text().toStdString());

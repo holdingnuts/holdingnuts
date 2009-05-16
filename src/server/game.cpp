@@ -216,12 +216,26 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 
 bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *message)
 {
-	snprintf(msg, sizeof(msg), "SNAP %d:%d %d %s",
+	char buf[MSG_BUFFER_SIZE];
+	snprintf(buf, sizeof(buf), "SNAP %d:%d %d %s",
 		from_gid, from_tid, sid, message);
 	
 	clientcon* toclient = get_client_by_id(to);
-	if (toclient)
-		send_msg(toclient->sock, msg);
+	if (toclient && toclient->state & Introduced)
+		send_msg(toclient->sock, buf);
+	
+	return true;
+}
+
+bool client_snapshot(int to, int sid, const char *message)
+{
+	if (to == -1)  // to all
+	{
+		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
+			client_snapshot(-1, -1, e->id, sid, message);
+	}
+	else
+		client_snapshot(-1, -1, to, sid, message);
 	
 	return true;
 }
@@ -295,8 +309,8 @@ bool client_remove(socktype sock)
 				
 				
 				snprintf(msg, sizeof(msg),
-					"%s (%d) left foyer",
-					client->info.name, client->id);
+					"%d %d %s",
+					SnapFoyerLeave, client->id, client->info.name);
 				
 				send_msg = true;
 				
@@ -314,9 +328,9 @@ bool client_remove(socktype sock)
 			
 			clients.erase(client);
 			
-			// send client-left-msg to all remaining clients
+			// send foyer snapshot to all remaining clients
 			if (send_msg)
-				client_chat(-1, -1, msg);
+				client_snapshot(-1, SnapFoyer, msg);
 			
 			break;
 		}
@@ -445,12 +459,12 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 		}
 		
 		
-		// send broadcast message to foyer
+		// send foyer snapshot broadcast
 		snprintf(msg, sizeof(msg),
-			"%s (%d) joined foyer",
-			client->info.name, client->id);
+			"%d %d %s",
+			SnapFoyerJoin, client->id, client->info.name);
 		
-		client_chat(-1, -1, msg);
+		client_snapshot(-1, SnapFoyer, msg);
 	}
 	
 	client->state |= SentInfo;

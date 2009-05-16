@@ -39,7 +39,7 @@ config.set("ui_bring_to_top",	false);			// bring window to top if player action 
 config.set("sound",		true);			// play sounds
 config.set("sound_focus",	true);			// only play sound if window has focus
 config.set("chat_console",	false);			// send raw commands if chat prefixed with '/'
-config.set("chat_verbosity_foyer", 0x0d);		// verbosity level for foyer chat
+config.set("chat_verbosity_foyer", 0x0f);		// verbosity level for foyer chat
 config.set("chat_verbosity_table", 0x07);		// verbosity level for table chat
 
 #ifdef DEBUG

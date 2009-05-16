@@ -187,7 +187,7 @@ void PClient::serverCmdMsg(Tokenizer &t)
 			tinfo->window->addServerMessage(qchatmsg);
 		else // message from user to table
 		{
-			if ((config.getInt("chat_verbosity_table") & 0x4))
+			if (config.getInt("chat_verbosity_table") & 0x4)
 				tinfo->window->addChat(qsfrom, qchatmsg);
 		}
 	}
@@ -197,7 +197,7 @@ void PClient::serverCmdMsg(Tokenizer &t)
 			wMain->addServerMessage(qchatmsg);
 		else // message from user to foyer
 		{
-			if ((config.getInt("chat_verbosity_foyer") & 0x8))
+			if (config.getInt("chat_verbosity_foyer") & 0x8)
 				wMain->addChat(qsfrom, qchatmsg);
 		}
 	}
@@ -233,7 +233,6 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	// community-cards
 	{
-		//table.communitycards = t.getNext().substr(3);
 		std::string board = t.getNext().substr(3);
 		CommunityCards &cc = table.communitycards;
 		
@@ -275,7 +274,7 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	tmp = t.getNext();
 	do {
-		//log_msg("seat", "%s", tmp.c_str());
+		//dbg_msg("seat", "%s", tmp.c_str());
 		
 		Tokenizer st(":");
 		st.parse(tmp);
@@ -322,7 +321,7 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	// pots
 	do {
-		//log_msg("pot", "%s", tmp.c_str());
+		//dbg_msg("pot", "%s", tmp.c_str());
 		Tokenizer pt(":");
 		pt.parse(tmp);
 		
@@ -351,13 +350,13 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	
 	if (type == SnapGameStateStart)
 	{
-		if ((config.getInt("chat_verbosity_foyer") & 0x4))
+		if (config.getInt("chat_verbosity_foyer") & 0x4)
 			wMain->addServerMessage(
 				QString(tr("Game (%1) has been started.").arg(gid)));
 		
 		addTable(gid, tid);
 	}
-	else if (type == SnapGameStateEnd && (config.getInt("chat_verbosity_foyer") & 0x4))
+	else if (type == SnapGameStateEnd && config.getInt("chat_verbosity_foyer") & 0x4)
 	{
 		wMain->addServerMessage(
 			QString(tr("Game (%1) has been ended.").arg(gid)));
@@ -417,7 +416,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		
 		if (bUpdateView && tinfo->window)
 		{
-			if ((config.getInt("chat_verbosity_table") & 0x2))
+			if (config.getInt("chat_verbosity_table") & 0x2)
 				tinfo->window->addServerMessage(
 					QString(tr("Your hole cards: [%1 %2].")
 						.arg(QString::fromStdString(card1))
@@ -540,7 +539,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 			tinfo->window->playSound(sound);
 	}
 	
-	if ((config.getInt("chat_verbosity_table") & 0x1))
+	if (config.getInt("chat_verbosity_table") & 0x1)
 		tinfo->window->addServerMessage(smsg);
 }
 
@@ -573,6 +572,26 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 		QString(tr("%1 shows %2.")
 			.arg(player_name)
 			.arg(sstrength)));
+}
+
+void PClient::serverCmdSnapFoyer(Tokenizer &t)
+{
+	const snap_foyer_type type = (snap_foyer_type) t.getNextInt();
+	const int cid = t.getNextInt();
+	const std::string cname = t.getNext();
+	
+	if (type == SnapFoyerJoin && config.getInt("chat_verbosity_foyer") & 0x2)
+	{
+		wMain->addServerMessage(tr("%2 (%1) joined foyer.")
+			.arg(cid)
+			.arg(QString::fromStdString(cname)));
+	}
+	else if (type == SnapFoyerLeave && config.getInt("chat_verbosity_foyer") & 0x2)
+	{
+		wMain->addServerMessage(tr("%2 (%1) left foyer.")
+			.arg(cid)
+			.arg(QString::fromStdString(cname)));
+	}
 }
 
 // server cmd SNAP
@@ -643,6 +662,9 @@ void PClient::serverCmdSnap(Tokenizer &t)
 		break;
 	case SnapPlayerShow:
 		serverCmdSnapPlayerShow(t, gid, tid, tinfo);
+		break;
+	case SnapFoyer:
+		serverCmdSnapFoyer(t);
 		break;
 	}
 }

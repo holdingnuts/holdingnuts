@@ -50,7 +50,7 @@ private:
 	QComboBox *comboLocale;
 	QCheckBox *checkSound, *checkSoundFocus;
 	QCheckBox *checkVerboseFoyerTime;
-//	QCheckBox *checkVerboseFoyerJoinLeft;
+	QCheckBox *checkVerboseFoyerJoinLeft;
 	QCheckBox *checkVerboseFoyerGameState;
 	QCheckBox *checkVerboseFoyerPlayerChat;
 	QCheckBox *checkVerboseTablePlayerActions;

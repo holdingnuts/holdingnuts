@@ -211,6 +211,7 @@ private:
 	void serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
 	void serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
 	void serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
+	void serverCmdSnapFoyer(Tokenizer &t);
 	void serverCmdPlayerlist(Tokenizer &t);
 	void serverCmdClientinfo(Tokenizer &t);
 	void serverCmdGameinfo(Tokenizer &t);
