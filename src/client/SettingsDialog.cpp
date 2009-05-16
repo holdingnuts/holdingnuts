@@ -79,20 +79,20 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 //	checkVerboseFoyerJoinLeft = new QCheckBox(tr("Display Player Connections"), tabGeneral);	// 0x2
 //	checkVerboseFoyerJoinLeft->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x2) ? Qt::Checked : Qt::Unchecked);
 
-	checkVerboseFoyerGameState = new QCheckBox(tr("Display Gamestates"), tabGeneral);			// 0x4
+	checkVerboseFoyerGameState = new QCheckBox(tr("Display game states"), tabGeneral);			// 0x4
 	checkVerboseFoyerGameState->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x4) ? Qt::Checked : Qt::Unchecked);
 
-	checkVerboseFoyerPlayerChat = new QCheckBox(tr("Display Player Chat Messages"), tabGeneral);			// 0x8
+	checkVerboseFoyerPlayerChat = new QCheckBox(tr("Display player chat"), tabGeneral);			// 0x8
 	checkVerboseFoyerPlayerChat->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x8) ? Qt::Checked : Qt::Unchecked);
 
 	// verbose table
-	checkVerboseTablePlayerActions = new QCheckBox(tr("Display Playeractions"), tabGeneral);	// 0x1
+	checkVerboseTablePlayerActions = new QCheckBox(tr("Display player actions"), tabGeneral);	// 0x1
 	checkVerboseTablePlayerActions->setCheckState((cfg->getInt("chat_verbosity_table") & 0x1) ? Qt::Checked : Qt::Unchecked);
 
-	checkVerboseTableCards = new QCheckBox(tr("Display Cardsinfo"), tabGeneral);	// 0x2
+	checkVerboseTableCards = new QCheckBox(tr("Display hole/community cards"), tabGeneral);	// 0x2
 	checkVerboseTableCards->setCheckState((cfg->getInt("chat_verbosity_table") & 0x2) ? Qt::Checked : Qt::Unchecked);
 
-	checkVerboseTablePlayerChat = new QCheckBox(tr("Display Player Chat Messages"), tabGeneral);	// 0x4
+	checkVerboseTablePlayerChat = new QCheckBox(tr("Display player chat"), tabGeneral);	// 0x4
 	checkVerboseTablePlayerChat->setCheckState((cfg->getInt("chat_verbosity_table") & 0x4) ? Qt::Checked : Qt::Unchecked);
 
 
@@ -153,11 +153,11 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	
 	QFormLayout *formGeneral = new QFormLayout;
 	formGeneral->addRow(tr("Log to file"), layoutLog);
-	formGeneral->addRow(tr("Verbose Level Foyerchat"), checkVerboseFoyerTime);
+	formGeneral->addRow(tr("Foyer chat verbosity"), checkVerboseFoyerTime);
 //	formGeneral->addRow(" ", checkVerboseFoyerJoinLeft);
 	formGeneral->addRow(" ", checkVerboseFoyerGameState);
 	formGeneral->addRow(" ", checkVerboseFoyerPlayerChat);
-	formGeneral->addRow(tr("Verbose Level Tablechat"), checkVerboseTablePlayerActions);
+	formGeneral->addRow(tr("Table chat verbosity"), checkVerboseTablePlayerActions);
 	formGeneral->addRow(" ", checkVerboseTableCards);
 	formGeneral->addRow(" ", checkVerboseTablePlayerChat);
 	formGeneral->addRow(tr("Locale"), comboLocale);
@@ -183,8 +183,8 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	checkCentralView = new QCheckBox("", tabAppearance);
 	checkCentralView->setCheckState(cfg->getBool("ui_centralized_view") ? Qt::Checked : Qt::Unchecked);
 
-	checkBringOnTop = new QCheckBox("", tabAppearance);
-	checkBringOnTop->setCheckState(cfg->getBool("ui_bring_on_top") ? Qt::Checked : Qt::Unchecked);
+	checkBringToTop = new QCheckBox("", tabAppearance);
+	checkBringToTop->setCheckState(cfg->getBool("ui_bring_to_top") ? Qt::Checked : Qt::Unchecked);
 	
 	comboCarddeck = new QComboBox(tabAppearance);
 	
@@ -208,7 +208,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	QFormLayout *formAppearance = new QFormLayout;
 	formAppearance->addRow(tr("Show strength of hand"), checkHandStrength);
 	formAppearance->addRow(tr("Centralized table view"), checkCentralView);
-	formAppearance->addRow(tr("Bring Window on Top"), checkBringOnTop);
+	formAppearance->addRow(tr("Bring window to top"), checkBringToTop);
 	formAppearance->addRow(tr("Card deck"), comboCarddeck);
 	tabAppearance->setLayout(formAppearance);
 }
@@ -273,7 +273,7 @@ void SettingsDialog::actionOk()
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_centralized_view", (checkCentralView->checkState() == Qt::Checked) ? true : false);
-		cfg->set("ui_bring_on_top", (checkBringOnTop->checkState() == Qt::Checked) ? true : false);
+		cfg->set("ui_bring_to_top", (checkBringToTop->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_card_deck", comboCarddeck->itemData(comboCarddeck->currentIndex()).toString().toStdString());
 		
 		accept();

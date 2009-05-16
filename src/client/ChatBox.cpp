@@ -37,6 +37,7 @@ ChatBox::ChatBox(
 	QWidget *parent) : QWidget(parent), m_bShowTime(false)
 {
 	m_pEditChat = new QLineEdit(this);
+	m_pEditChat->setMaxLength(200);
 
 	connect(m_pEditChat, SIGNAL(returnPressed()), this, SLOT(actionChat()));
 

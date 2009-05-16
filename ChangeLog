@@ -1,6 +1,27 @@
 ChangeLog
 =========
 
+
+HoldingNuts 0.0.4 (???)
+
+  * fixed sending quotes in chat
+  * fixed server-history (sort to most recent server)
+  * chop long nicknames on table
+  * fixed dealer-button position
+  * option to bring table-window to top
+  * new translation: Japanese
+  * removed support for cent-amounts, only whole chips bets possible
+  * fixed resetting last action of current player
+  * option to display time in foyer chat
+  * several verbosity levels for chat/log messages
+  * increased maximum chat length
+  * fixed client calculation for determining quick-bet buttons
+  * send blinds-message to table on blinds raise
+  * log table messages
+  * send welcome message to clients on connect
+  * fixed show starting blinds in gameinfo instead of current blinds
+
+
 HoldingNuts 0.0.3 (released on 24 April 2009)
 
   * bugfix: fixed losing chatbox input focus

@@ -34,13 +34,13 @@ config.set("log_chat",		false);			// include player chat in log
 config.set("ui_show_handstrength", 	true);		// display hand strength on table
 config.set("ui_centralized_view",	true);		// enable centralized table view
 config.set("ui_card_deck",	"default");		// card deck to use
-config.set("ui_echo_password",	true);		// echo password for private games by default
-config.set("ui_bring_on_top",	true);		// brings window on top if player action expected
+config.set("ui_echo_password",	true);			// echo password for private games by default
+config.set("ui_bring_to_top",	false);			// bring window to top if player action expected
 config.set("sound",		true);			// play sounds
 config.set("sound_focus",	true);			// only play sound if window has focus
 config.set("chat_console",	false);			// send raw commands if chat prefixed with '/'
-config.set("chat_verbosity_foyer", 13);
-config.set("chat_verbosity_table", 7);
+config.set("chat_verbosity_foyer", 0x0d);		// verbosity level for foyer chat
+config.set("chat_verbosity_table", 0x07);		// verbosity level for table chat
 
 #ifdef DEBUG
 config.set("dbg_register",	-1);			// automatically register to a game (value is gid; auto_connect must be set)

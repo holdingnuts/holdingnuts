@@ -35,6 +35,10 @@
 #include "CommunityCards.hpp"
 #include "GameLogic.hpp"
 
+#if 0
+#define HW_RANDOM	"/dev/urandom"
+#endif
+
 using namespace std;
 
 /* Combination probabilities:
@@ -44,30 +48,40 @@ using namespace std;
  * 	http://www.thema-poker.com/wahrscheinlichkeiten/starthaende
  */
  
-int main(void)
+int main(int argc, char **argv)
 {
 	printf("Poker Hand-Simulator\n");
 	
+	unsigned long tests;
+	
+	if (argc < 2)
+		tests = 10000000;
+	else
+		tests = atoi(argv[1]);
+	
+#ifdef HW_RANDOM
+	FILE *fp = fopen(HW_RANDOM, "r");
+#else
 	// init PRNG
 	srand((unsigned) time(NULL));
+#endif /* HW_RANDOM */
 	
 	struct {
 		const char *str;
 		const double probab;
 	} rankings[] = {
-		{ "High Card",		17.411920	},
-		{ "One Pair",		43.8322546	},
-		{ "Two Pair",		23.495536	},
-		{ "Three Of A Kind", 	4.829870	},
-		{ "Straight",		4.61938		},
-		{ "Flush",		3.03255		},
-		{ "Full House",		2.596102	},
-		{ "Four Of A Kind",	0.168067	},
-		{ "Straight Flush",	0.027851	},
-		{ "Royal Flush",	0.003232	}
+		{ "High Card",		.17411920	},
+		{ "One Pair",		.438322546	},
+		{ "Two Pair",		.23495536	},
+		{ "Three Of A Kind", 	.04829870	},
+		{ "Straight",		.0461938	},
+		{ "Flush",		.0303255	},
+		{ "Full House",		.02596102	},
+		{ "Four Of A Kind",	.00168067	},
+		{ "Straight Flush",	.00027851	},
+		{ "Royal Flush",	.00003232	}
 	};
 	
-	const long int tests = 1000000;
 	
 	printf("Iterations: %ld\n", tests);
 	
@@ -83,11 +97,26 @@ int main(void)
 		
 		printf(".");
 		
-		for (long int i=0; i < tests; i++)
+		for (unsigned long i=0; i < tests; i++)
 		{
+#ifdef HW_RANDOM
+			unsigned long seed;
+			size_t read_elements;
+			read_elements = fread(&seed, sizeof(seed), 1, fp);
+			
+			if (read_elements*sizeof(seed) != sizeof(seed))
+			{
+				fprintf(stderr, "Error reading from random device (bytes read: %d; bytes expected: %d).\n",
+					(int)read_elements, (int)sizeof(seed));
+				return -1;
+			}
+			
+			srand(seed);
+#endif /* HW_RANDOM */
+
 			// progress
 			if (!(i % 1000))
-				{
+			{
 				int progress = 80 * i / tests;
 				if (progress > last_progress)
 				{
@@ -144,10 +173,10 @@ int main(void)
 		printf("\n");
 		
 		for (int i=0; i < strengths; i++)
-			printf("%.6lf (%7.4lf%%  %+7.4lf%%) - %s\n",
+			printf("%.8lf (%+7.8lf = %+7.6lf%%) - %s\n",
 				(double)count[i] / (double) tests,
-				100 * ((double)count[i] / (double) tests),
-				100 * ((double)count[i] / (double) tests) - rankings[i].probab,
+				(double)count[i] / (double) tests - rankings[i].probab,
+				((double)count[i] / (double) tests - rankings[i].probab)*100.0,
 				rankings[i].str);
 	}
 	
@@ -165,7 +194,7 @@ int main(void)
 		h1->setCards(card1, card2);
 		
 		
-		for (long int i=0; i < tests; i++)
+		for (unsigned long i=0; i < tests; i++)
 		{
 			Deck *d = new Deck();
 			
@@ -224,6 +253,10 @@ int main(void)
 			100 * ((double) losecount / (double) tests),
 			100 * ((double) splitcount / (double) tests));
 	}
+	
+#ifdef HW_RANDOM
+	fclose(fp);
+#endif /* HW_RANDOM */
 	
 	return 0;
 }

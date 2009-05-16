@@ -60,7 +60,7 @@ private:
 	// tabAppearance
 	QCheckBox *checkHandStrength;
 	QCheckBox *checkCentralView;
-	QCheckBox *checkBringOnTop;
+	QCheckBox *checkBringToTop;
 	QComboBox *comboCarddeck;
 	
 	// tabPlayerinfo

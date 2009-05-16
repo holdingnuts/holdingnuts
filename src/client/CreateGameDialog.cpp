@@ -70,7 +70,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	
 	QGroupBox *groupPlayers = new QGroupBox(tr("Players"), this);
 	
-	QLabel *labelPlayers = new QLabel(tr("Max. Players"), this);
+	QLabel *labelPlayers = new QLabel(tr("Max. players"), this);
 	spinPlayers = new QSpinBox(this);
 	spinPlayers->setMinimum(2);
 	spinPlayers->setMaximum(10);
@@ -141,7 +141,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	QCheckBox *checkPrivate = new QCheckBox(this);
 	connect(checkPrivate, SIGNAL(stateChanged(int)), this, SLOT(slotCheckStatePrivate(int)));
 	
-	QLabel *labelPassword = new QLabel(tr("Password:"), this);
+	QLabel *labelPassword = new QLabel(tr("Password"), this);
 	editPassword = new QLineEdit(this);
 	editPassword->setEnabled(false);
 	editPassword->setEchoMode(config.getBool("ui_echo_password") ? QLineEdit::Normal : QLineEdit::Password);
