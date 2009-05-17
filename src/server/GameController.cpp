@@ -1206,10 +1206,14 @@ void GameController::stateEndRound(Table *t)
 		// player has no stake left
 		if ((int)p->stake == 0)
 		{
-			log_msg("stateEndRound", "removed player %d", p->client_id);
+			//dbg_msg("stateEndRound", "removed player %d", p->client_id);
 			
-			snprintf(msg, sizeof(msg), "[%d] broke", p->client_id);
-			chat(t->table_id, msg);
+			snprintf(msg, sizeof(msg), "%d %d %d",
+				SnapGameStateBroke,
+				p->client_id,
+				-1 /* FIXME: finish-position */);
+			
+			snap(t->table_id, SnapGameState, msg);
 			
 			t->seats[i].occupied = false;
 		}

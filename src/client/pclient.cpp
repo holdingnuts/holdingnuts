@@ -386,6 +386,21 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 				.arg(blind_small)
 				.arg(blind_big)));
 	}
+	else if (type == SnapGameStateBroke)
+	{
+		const int cid = t.getNextInt();
+		const int position = t.getNextInt();
+		const QString player_name = getPlayerName(cid);
+		
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		tinfo->window->addServerMessage(
+			tr("Player %1 broke.")
+				.arg(player_name) +
+			((position != -1) ? QString(" #%1").arg(position) : QString()));
+	}
 	// TODO: else if (type == "your_seat")
 }
 
