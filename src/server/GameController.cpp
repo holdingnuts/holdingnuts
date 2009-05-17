@@ -340,7 +340,7 @@ void GameController::sendTableSnapshot(Table *t)
 			t->seats[t->dealer].seat_no,
 			t->seats[t->sb].seat_no,
 			t->seats[t->bb].seat_no,
-			t->seats[t->cur_player].seat_no,
+			t->cur_player == -1 ? -1 : t->seats[t->cur_player].seat_no,
 			t->seats[t->last_bet_player].seat_no);
 		sturn = tmp;
 	}
@@ -844,7 +844,7 @@ void GameController::stateBetting(Table *t)
 	
 	
 	// is next the player who did the last bet/action? if yes, end this betting round
-	if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
+	if (t->getNextActivePlayer(t->cur_player) == t->last_bet_player)
 	{
 		// collect bets into pot
 		t->collectBets();
@@ -899,6 +899,10 @@ void GameController::stateBetting(Table *t)
 			return;
 		}
 		
+		// send helper-snapshot // FIXME: do this smarter
+		t->cur_player = -1;	// invalidate current player
+		sendTableSnapshot(t);
+		
 		
 		// reset the highest bet-amount
 		t->bet_amount = 0;
@@ -913,8 +917,6 @@ void GameController::stateBetting(Table *t)
 		
 		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
-		
-		sendTableSnapshot(t);
 		
 		t->resetLastPlayerActions();
 		
@@ -1015,7 +1017,7 @@ void GameController::stateAskShow(Table *t)
 	{
 		t->state = Table::AllFolded;
 		
-		sendTableSnapshot(t);
+		//sendTableSnapshot(t);
 	}
 	else
 	{
@@ -1023,9 +1025,8 @@ void GameController::stateAskShow(Table *t)
 		if (t->seats[t->cur_player].showcards == false)
 			t->seats[t->cur_player].in_round = false;
 		
-		sendTableSnapshot(t);
 		
-		if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
+		if (t->getNextActivePlayer(t->cur_player) == t->last_bet_player)
 		{
 			t->state = Table::Showdown;
 			return;
@@ -1036,6 +1037,9 @@ void GameController::stateAskShow(Table *t)
 			t->cur_player = t->getNextActivePlayer(t->cur_player);
 			
 			t->timeout_start = time(NULL);
+			
+			// send update snapshot
+			sendTableSnapshot(t);
 		}
 	}
 }
@@ -1053,8 +1057,10 @@ void GameController::stateAllFolded(Table *t)
 	p->stake += t->pots[0].amount;
 	t->seats[t->cur_player].bet = t->pots[0].amount;
 	
+	// send pot-win snapshot
 	snprintf(msg, sizeof(msg), "%d %d %d", p->client_id, 0, t->pots[0].amount);
 	snap(t->table_id, SnapWinPot, msg);
+	
 	
 	sendTableSnapshot(t);
 	t->scheduleState(Table::EndRound, 2);
@@ -1204,7 +1210,7 @@ void GameController::stateEndRound(Table *t)
 		Player *p = t->seats[i].player;
 		
 		// player has no stake left
-		if ((int)p->stake == 0)
+		if (p->stake == 0)
 		{
 			//dbg_msg("stateEndRound", "removed player %d", p->client_id);
 			

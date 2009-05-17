@@ -705,7 +705,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	}
 	else if (snap->state == Table::AskShow)
 	{
-		if (snap->s_cur == (unsigned int)snap->my_seat)
+		if (snap->s_cur == snap->my_seat)
 		{
 			setForegroundWindow();
 			stlayActions->setCurrentIndex(m_nPostActions);
@@ -723,7 +723,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		chips_type greatest_bet = 0;
 		bool bGreaterBet = greaterBet(snap, s->bet, &greatest_bet);
 		
-		if (snap->s_cur == (unsigned int)snap->my_seat)
+		if (snap->s_cur == snap->my_seat)
 		{
 			if (s->stake == 0)
 				stlayActions->setCurrentIndex(m_nNoAction);
@@ -795,19 +795,21 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				
 				stlayActions->setCurrentIndex(m_nActions);
 				
-				
-				const chips_type cur_pot = currentPot();
-				
-				btnBetsizeMinimum->setEnabled(s->stake + s->bet > snap->minimum_bet);
-				btnBetsizeQuarterPot->setEnabled(cur_pot * 0.25f > snap->minimum_bet);
-				btnBetsizeHalfPot->setEnabled(cur_pot * 0.5f > snap->minimum_bet);
-				btnBetsizeThreeQuarterPot->setEnabled(cur_pot * 0.75f > snap->minimum_bet);
-				btnBetsizePotsize->setEnabled(cur_pot >= snap->minimum_bet);
+				if (wRaiseBtns->isVisible())
+				{
+					const chips_type cur_pot = currentPot();
+					
+					btnBetsizeMinimum->setEnabled(s->stake + s->bet > snap->minimum_bet);
+					btnBetsizeQuarterPot->setEnabled(cur_pot * 0.25f > snap->minimum_bet);
+					btnBetsizeHalfPot->setEnabled(cur_pot * 0.5f > snap->minimum_bet);
+					btnBetsizeThreeQuarterPot->setEnabled(cur_pot * 0.75f > snap->minimum_bet);
+					btnBetsizePotsize->setEnabled(cur_pot >= snap->minimum_bet);
+				}
 			}
 		}
 		else
 		{
-			if (s->stake == 0 || (!bGreaterBet && snap->s_lastbet == (unsigned int)snap->my_seat))  // FIXME: do not show actions if there is no action possible for this betting round
+			if (s->stake == 0 || (!bGreaterBet && snap->s_lastbet == snap->my_seat))  // FIXME: do not show actions if there is no action possible for this betting round
 				stlayActions->setCurrentIndex(m_nNoAction);
 			else
 			{
@@ -894,10 +896,11 @@ void WTable::updateSeat(unsigned int s)
 		if (snap->state > Table::ElectDealer)
 		{
 			// highlight current seat
-			ui_seat->setCurrent(snap->s_cur == s);
+			ui_seat->setCurrent(snap->s_cur != -1 && snap->s_cur == (int)s);
 			
 			// update timeout display
-			if ((snap->state == Table::Blinds || 
+			if (snap->s_cur != -1 &&
+				(snap->state == Table::Blinds || 
 				snap->state == Table::Betting) &&
 				snap->seats[snap->s_cur].stake > 0 &&
 				snap->seats[snap->s_cur].sitout == false)

@@ -112,9 +112,9 @@ private:
 	BettingRound betround;
 	
 	Seat seats[10];
-	unsigned int dealer, sb, bb;
-	unsigned int cur_player;
-	unsigned int last_bet_player;
+	int dealer, sb, bb;
+	int cur_player;
+	int last_bet_player;
 	
 	chips_type bet_amount;
 	chips_type last_bet_amount;

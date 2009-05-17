@@ -49,11 +49,11 @@ typedef struct {
 typedef struct {
 	int state;
 	int betting_round;
-	unsigned int s_dealer;
-	unsigned int s_sb;
-	unsigned int s_bb;
-	unsigned int s_cur;
-	unsigned int s_lastbet;
+	int s_dealer;
+	int s_sb;
+	int s_bb;
+	int s_cur;
+	int s_lastbet;
 	std::vector<chips_type> pots;
 	chips_type minimum_bet;
 	CommunityCards communitycards;
