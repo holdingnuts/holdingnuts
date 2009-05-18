@@ -661,7 +661,7 @@ void WMain::actionTest()
 #ifdef DEBUG
 	WTable *table = new WTable(0, 0);
 	table->slotShow();
-	table->showCompleteTable();
+	table->showDebugTable();
 	
 #ifndef NOAUDIO
 	dbg_msg("DEBUG", "playing test sound");

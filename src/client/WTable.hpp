@@ -102,7 +102,7 @@ public:
 	static QString buildSuitString(const Card& card);
 	
 	//! \brief shows all entitys from table
-	void showCompleteTable();
+	void showDebugTable();
 	
 	//! \brief brings window to foreground
 	void setForegroundWindow();

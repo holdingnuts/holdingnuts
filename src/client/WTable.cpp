@@ -1476,7 +1476,8 @@ void WTable::slotFirstReminder(int seatnr)
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
-	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	if (!tinfo)
+		return;
 	
 	const table_snapshot *snap = &(tinfo->snap);
 	
@@ -1498,7 +1499,8 @@ void WTable::slotSecondReminder(int seatnr)
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
-	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	if (!tinfo)
+		return;
 	
 	const table_snapshot *snap = &(tinfo->snap);
 	
@@ -1736,7 +1738,7 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	return retstr;
 }
 
-void WTable::showCompleteTable()
+void WTable::showDebugTable()
 {
 #ifdef DEBUG
 	qsrand(QDateTime::currentDateTime().toTime_t());
@@ -1749,9 +1751,10 @@ void WTable::showCompleteTable()
 	for (unsigned int i = 0; i < nMaxSeats; i++)
 	{
 		wseats[i]->setAction(
-			Player::PlayerAction(qrand() % 10 + 1),
+			Player::PlayerAction(qrand() % Player::Sitout),
 			(qrand() % 100 + 1) * 100);
 		wseats[i]->setValid(true);
+		wseats[i]->setSitout(bool(qrand()%2));
 		wseats[i]->showBigCards(true);
 		wseats[i]->showSmallCards(true);
 		wseats[i]->setCards("As", "7h");
@@ -1762,6 +1765,11 @@ void WTable::showCompleteTable()
 
 		m_pScene->addItem(dealerBtn[i]);	
 	}
+	
+	// timeout
+	m_pTimeout->setPos(calcTimeoutPos(0));
+	m_pTimeout->start(0, 60);
+	m_pTimeout->show();
 
 	// community cards
 	for (unsigned int j = 0; j < 5; j++)
