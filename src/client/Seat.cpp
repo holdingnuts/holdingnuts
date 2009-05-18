@@ -57,6 +57,9 @@ Seat::Seat(unsigned int id, QWidget *parent)
 void Seat::setValid(bool valid)
 {
 	m_bValid = valid;
+	
+	if (!valid)
+		this->setToolTip(QString());	// unset tooltip
 }
 
 void Seat::setInfo(const QString& name, const QString& location)
@@ -71,10 +74,7 @@ void Seat::setInfo(const QString& name, const QString& location)
 	QString tooltip(tr("Name: %1").arg(name));
 	
 	if (!location.isEmpty())
-	{
-		tooltip.append(tr("\nLocation: "));
-		tooltip.append(location);
-	}
+		tooltip.append(tr("\nLocation: %1").arg(location));
 	
 	this->setToolTip(tooltip);
 }

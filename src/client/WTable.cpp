@@ -877,10 +877,11 @@ void WTable::updateSeat(unsigned int s)
 	// pointer to seat-entity
 	Seat *ui_seat = wseats[mapped_seat];
 	
+	ui_seat->setValid(seat->valid);
+	
 	// update seat widget if seat is occupied
 	if (seat->valid)
 	{
-		ui_seat->setValid(true);
 		ui_seat->setStake(seat->stake);
 		ui_seat->setSitout(seat->sitout);
 		
@@ -973,8 +974,6 @@ void WTable::updateSeat(unsigned int s)
 			ui_seat->showSmallCards(false);
 		}
 	}
-	else
-		ui_seat->setValid(false);
 	
 	
 	// schedule scene update
