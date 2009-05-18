@@ -364,7 +364,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	btnBetsizePotsize->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizePotsize, SIGNAL(clicked()), this, SLOT(actionBetsizePotsize()));
 
-	btnBetsizeAllin = new QPushButton(tr("Max"), this);
+	btnBetsizeAllin = new QPushButton(tr("Allin"), this);
 	btnBetsizeAllin->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizeAllin, SIGNAL(clicked()), this, SLOT(actionBetsizeAllin()));
 
@@ -402,9 +402,12 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lActions->addWidget(wRaiseBtns);
 	lActions->addLayout(lActionsBtns);
 	
-	QHBoxLayout *lPreActions = new QHBoxLayout();
-	lPreActions->addWidget(chkAutoFoldCheck);
-	lPreActions->addWidget(chkAutoCheckCall);
+	QHBoxLayout *lPreActionsAuto = new QHBoxLayout();
+	lPreActionsAuto->addWidget(chkAutoFoldCheck);
+	lPreActionsAuto->addWidget(chkAutoCheckCall);
+	
+	QVBoxLayout *lPreActions = new QVBoxLayout();
+	lPreActions->addLayout(lPreActionsAuto);
 	lPreActions->addWidget(btnSitout);   // FIXME: display outside StackedLayout
 	
 	QHBoxLayout *lPostActions = new QHBoxLayout();
@@ -435,7 +438,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QLabel *lblActions = new QLabel(this);
 	lblActions->setPixmap(QPixmap("gfx/table/actions.png"));
 	lblActions->setScaledContents(true);
-	lblActions->setFixedSize(450, 80);
+	lblActions->setFixedSize(450, 90);
 	lblActions->setLayout(stlayActions);
 
 	m_pChat	= new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
