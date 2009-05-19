@@ -59,6 +59,7 @@ typedef struct {
 	CommunityCards communitycards;
 	seatinfo seats[10];
 	int my_seat;
+	bool nomoreaction;
 } table_snapshot;
 
 class QGraphicsView;
@@ -123,10 +124,6 @@ protected:
 	void doSitout(bool bSitout);
 
 	void evaluateActions(const table_snapshot *snap);
-	
-#if 0
-	bool isNoMoreActionPossible(const table_snapshot *snap);
-#endif
 	
 	bool greaterBet(
 		const table_snapshot *snap,

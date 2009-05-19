@@ -703,8 +703,8 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	else if (!s->in_round ||
 		!(snap->state == Table::Blinds ||
 			snap->state == Table::Betting ||
-			snap->state == Table::AskShow)
-		/*|| isNoMoreActionPossible(snap)*/)  // FIXME: doesn't work that easy
+			snap->state == Table::AskShow) ||
+		(snap->state != Table::AskShow && snap->nomoreaction))
 	{
 		stlayActions->setCurrentIndex(m_nNoAction);
 	}
@@ -1561,29 +1561,6 @@ bool WTable::greaterBet(const table_snapshot *snap, const chips_type bet, chips_
 	
 	return (cur_bet > bet);
 }
-
-#if 0
-bool WTable::isNoMoreActionPossible(const table_snapshot *snap)
-{
-	unsigned int countPlayers = 0;
-	unsigned int countAllin = 0;
-	
-	for (unsigned int i=0; i < nMaxSeats; i++)
-	{
-		const seatinfo *seat = &(snap->seats[i]);
-		
-		if (seat->valid && seat->in_round)
-		{
-			countPlayers++;
-			
-			if (seat->stake == 0)
-				countAllin++;
-		}
-	}
-	
-	return (countAllin >= countPlayers - 1);
-}
-#endif
 
 void WTable::actionScreenshot()
 {

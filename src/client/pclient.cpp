@@ -268,6 +268,7 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	// table.seats
 	table.my_seat = -1;
+	table.nomoreaction = false;
 	
 	const unsigned int seat_max = 10;
 	memset(table.seats, 0, seat_max*sizeof(seatinfo));
@@ -306,6 +307,10 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 			Card h1(shole.substr(0, 2).c_str());
 			Card h2(shole.substr(2, 2).c_str());
 			si.holecards.setCards(h1, h2);
+			
+			// if there are hole-cards in the snapshot
+			// then there's no further action possible
+			table.nomoreaction = true;
 		}
 		else
 			si.holecards.clear();
