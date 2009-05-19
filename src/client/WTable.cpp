@@ -334,9 +334,11 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
 	QPushButton *btnBack = new QPushButton(tr("I'm bac&k"), this);
+	btnBack->setFixedWidth(actionbtn_width);
 	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
 	
 	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
+	btnSitout->setFixedWidth(actionbtn_width);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
 	
 	
@@ -408,7 +410,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	QVBoxLayout *lPreActions = new QVBoxLayout();
 	lPreActions->addLayout(lPreActionsAuto);
-	lPreActions->addWidget(btnSitout);   // FIXME: display outside StackedLayout
+	lPreActions->addWidget(btnSitout, 0, Qt::AlignRight);   // FIXME: display outside StackedLayout
 	
 	QHBoxLayout *lPostActions = new QHBoxLayout();
 	lPostActions->addWidget(btnMuck);

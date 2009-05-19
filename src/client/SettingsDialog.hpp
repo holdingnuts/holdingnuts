@@ -46,17 +46,9 @@ private:
 	
 	// tabGeneral
 	QLabel *labelUUIDdisplay;
-	QCheckBox *checkLog, *checkLogChat;
 	QComboBox *comboLocale;
 	QCheckBox *checkSound, *checkSoundFocus;
-	QCheckBox *checkVerboseFoyerTime;
-	QCheckBox *checkVerboseFoyerJoinLeft;
-	QCheckBox *checkVerboseFoyerGameState;
-	QCheckBox *checkVerboseFoyerPlayerChat;
-	QCheckBox *checkVerboseTablePlayerActions;
-	QCheckBox *checkVerboseTableCards;
-	QCheckBox *checkVerboseTablePlayerChat;
-
+	
 	// tabAppearance
 	QCheckBox *checkHandStrength;
 	QCheckBox *checkCentralView;
@@ -66,6 +58,16 @@ private:
 	// tabPlayerinfo
 	QLineEdit *editPlayerName;
 	QLineEdit *editPlayerLocation;
+	
+	// tabLogChat
+	QCheckBox *checkLog, *checkLogChat;
+	QCheckBox *checkVerboseFoyerTime;
+	QCheckBox *checkVerboseFoyerJoinLeft;
+	QCheckBox *checkVerboseFoyerGameState;
+	QCheckBox *checkVerboseFoyerPlayerChat;
+	QCheckBox *checkVerboseTablePlayerActions;
+	QCheckBox *checkVerboseTableCards;
+	QCheckBox *checkVerboseTablePlayerChat;
 	
 private slots:
 	void actionOk();
