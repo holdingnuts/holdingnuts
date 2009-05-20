@@ -915,6 +915,8 @@ void WTable::updateSeat(unsigned int s)
 				m_pTimeout->setPos(calcTimeoutPos(curseat_mapped));
 				m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
 				m_pTimeout->show();
+				
+				ui_seat->setAction(Player::None, seat->bet);
 			}
 			else
 			{
@@ -1091,7 +1093,6 @@ void WTable::handleAutoActions()
 					actionCheckCall();
 				
 				chkAutoFoldCheck->setCheckState(Qt::Unchecked);
-				stlayActions->setCurrentIndex(m_nNoAction);
 			}
 			else if (chkAutoCheckCall->checkState() == Qt::Checked)
 			{
@@ -1099,10 +1100,7 @@ void WTable::handleAutoActions()
 				greaterBet(snap, 0, &greatest_bet);
 				
 				if (m_autocall_amount >= greatest_bet)
-				{
 					actionCheckCall();
-					stlayActions->setCurrentIndex(m_nNoAction);
-				}
 				
 				chkAutoCheckCall->setCheckState(Qt::Unchecked);
 			}
