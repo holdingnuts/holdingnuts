@@ -915,8 +915,6 @@ void WTable::updateSeat(unsigned int s)
 				m_pTimeout->setPos(calcTimeoutPos(curseat_mapped));
 				m_pTimeout->start(snap->s_cur, ginfo->player_timeout);
 				m_pTimeout->show();
-				
-				ui_seat->setAction(Player::None, seat->bet);
 			}
 			else
 			{
