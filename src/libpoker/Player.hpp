@@ -70,7 +70,8 @@ public:
 private:
 	int client_id;
 	
-	chips_type stake;
+	chips_type stake;		// currrent stake
+	chips_type stake_before;	// stake before new hand
 	
 	HoleCards holecards;
 	

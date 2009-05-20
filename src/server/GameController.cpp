@@ -531,6 +531,8 @@ void GameController::stateNewRound(Table *t)
 		
 		p->holecards.clear();
 		p->resetLastAction();
+		
+		p->stake_before = p->stake;	// remember stake before this hand
 	}
 	
 	
@@ -1201,7 +1203,9 @@ void GameController::stateShowdown(Table *t)
 
 void GameController::stateEndRound(Table *t)
 {
-	// remove broken players from seats
+	multimap<chips_type,unsigned int> broken_players;
+	
+	// find broken players
 	for (unsigned int i=0; i < 10; i++)
 	{
 		if (!t->seats[i].occupied)
@@ -1211,22 +1215,37 @@ void GameController::stateEndRound(Table *t)
 		
 		// player has no stake left
 		if (p->stake == 0)
-		{
-			//dbg_msg("stateEndRound", "removed player %d", p->client_id);
-			
-			snprintf(msg, sizeof(msg), "%d %d %d",
-				SnapGameStateBroke,
-				p->client_id,
-				-1 /* FIXME: finish-position */);
-			
-			snap(t->table_id, SnapGameState, msg);
-			
-			t->seats[i].occupied = false;
-		}
+			broken_players.insert(pair<chips_type,int>(p->stake_before, i));
 	}
+	
+	// remove players in right order: sorted by stake_before
+	// FIXME: how to handle players which had the same stake?
+	for (multimap<chips_type,unsigned int>::iterator n = broken_players.begin(); n != broken_players.end(); n++)
+	{
+		//const chips_type stake_before = n->first;
+		const unsigned int seat_num = n->second;
+		
+		Player *p = t->seats[seat_num].player;
+		
+		
+		// send out player-broke snapshot
+		snprintf(msg, sizeof(msg), "%d %d %d",
+			SnapGameStateBroke,
+			p->client_id,
+			-1 /* FIXME: finish-position */);
+		
+		snap(t->table_id, SnapGameState, msg);
+		
+		
+		// mark seat as unused
+		t->seats[seat_num].occupied = false;
+	}
+	
 	
 	sendTableSnapshot(t);
 	
+	
+	// determine next dealer
 	t->dealer = t->getNextPlayer(t->dealer);
 	
 	t->scheduleState(Table::NewRound, 2);
