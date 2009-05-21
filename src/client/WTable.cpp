@@ -1565,8 +1565,9 @@ void WTable::actionScreenshot()
 	QString filename = QString("holdingnuts_%1.png")
 		.arg(datetime.toString("yyyy-MM-dd_hh.mm.ss"));
 	
-	if (!sys_isdir(pathScrshot.toStdString().c_str()))
-		sys_mkdir(pathScrshot.toStdString().c_str());
+	QDir dir;
+	if (!dir.exists(pathScrshot))
+		dir.mkdir(pathScrshot);
 	
 	// grab the content of this window
 	QPixmap pixShot = QPixmap::grabWidget(this);

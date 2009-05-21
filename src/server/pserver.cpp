@@ -233,9 +233,20 @@ int main(int argc, char **argv)
 	srand((unsigned) time(NULL));
 	
 	
+	// use config-directory set on command-line
+	if (argc >= 3 && (argv[1][0] == '-' && argv[1][1] == 'c'))
+	{
+		const char *path = argv[2];
+		
+		sys_set_config_path(path);
+		log_msg("config", "Using manual config-directory '%s'", path);
+	}
+	
+	
 	// load config
 	config_load();
 	config.print();
+	
 	
 	// start logging
 	filetype *fplog = NULL;
@@ -253,11 +264,13 @@ int main(int argc, char **argv)
 			log_use_timestamp(1);
 	}
 	
+	
 	network_init();
 	
 	mainloop();
 	
 	network_shutdown();
+	
 	
 	// close log-file
 	if (fplog)

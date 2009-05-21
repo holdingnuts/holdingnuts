@@ -1420,6 +1420,25 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	QCoreApplication::setOrganizationName(CONFIG_APPNAME);
 	QCoreApplication::setOrganizationDomain("www.holdingnuts.net");
 	QCoreApplication::setApplicationName(CONFIG_APPNAME);
+	
+	
+	// use config-directory set on command-line
+	if (argc >= 3 && (argv[1][0] == '-' && argv[1][1] == 'c'))
+	{
+		// we need an absolute path because we chdir into data-dir
+		QString path(argv[2]);
+		QDir dir(path);
+		
+		path = dir.absolutePath();
+		
+		sys_set_config_path(path.toStdString().c_str());
+		log_msg("config", "Using manual config-directory '%s'", path.toStdString().c_str());
+	}
+	
+	
+	// create config-dir if it doesn't yet exist
+	QDir config_dir;
+	config_dir.mkpath(QString(sys_config_path()));
 }
 
 PClient::~PClient()
@@ -1434,7 +1453,9 @@ int PClient::init()
 	if (datadir)
 	{
 		log_msg("main", "Using data-directory: %s", datadir);
-		sys_chdir(datadir);
+		
+		QString sdatadir(datadir);
+		QDir::setCurrent(sdatadir);
 	}
 	else
 	{
@@ -1553,9 +1574,6 @@ bool config_load()
 	// include config defaults
 	#include "client_variables.hpp"
 	
-	// create config-dir if it doesn't yet exist
-	sys_mkdir(sys_config_path());
-	
 	char cfgfile[1024];
 	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
 	
@@ -1592,6 +1610,10 @@ int main(int argc, char **argv)
 		qVersion());
 	
 	
+	// the app instance
+	PClient app(argc, argv);
+	
+	
 	// load config
 	config_load();
 	config.print();
@@ -1623,7 +1645,6 @@ int main(int argc, char **argv)
 	audio_init();
 #endif
 	
-	PClient app(argc, argv);
 	if (app.init())
 		return 1;
 	
