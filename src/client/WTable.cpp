@@ -1115,6 +1115,12 @@ void WTable::handleAutoActions()
 			}
 		}
 	}
+	else
+	{
+		// reset all actions (pre-caution)
+		chkAutoFoldCheck->setCheckState(Qt::Unchecked);
+		chkAutoCheckCall->setCheckState(Qt::Unchecked);
+	}
 }
 
 void WTable::updateHandStrength()
