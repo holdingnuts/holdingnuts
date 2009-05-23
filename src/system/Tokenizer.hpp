@@ -37,7 +37,7 @@ public:
 	std::string getNext();
 	std::string getTillEnd(char sep=' ');
 	int getNextInt();
-	float getNextFloat();
+	//float getNextFloat();
 	
 	bool popFirst();
 	
@@ -47,10 +47,10 @@ public:
 	bool isSep(char ch);
 	
 	static int string2int(std::string s, unsigned int base = 0);
-	static float string2float(std::string s);
+	//static float string2float(std::string s);
 	
 	friend Tokenizer& operator>>(Tokenizer& left, int& i);
-	friend Tokenizer& operator>>(Tokenizer& left, float& f);
+	//friend Tokenizer& operator>>(Tokenizer& left, float& f);
 	friend Tokenizer& operator>>(Tokenizer& left, std::string& str);
 	Tokenizer& operator--(); // prefix
 

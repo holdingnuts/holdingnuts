@@ -810,7 +810,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	it.parse(sblinds);
 	
 	gi->blinds_start = it.getNextInt();
-	gi->blinds_factor = it.getNextFloat();
+	gi->blinds_factor = it.getNextInt() / 10.0f;
 	gi->blinds_time = it.getNextInt();
 	
 	
@@ -1135,13 +1135,13 @@ bool PClient::createGame(gamecreate *createinfo)
 	char msg[1024];
 	
 	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%d timeout:%d "
-		"blinds_start:%d blinds_factor:%.2f blinds_time:%d password:%s "
+		"blinds_start:%d blinds_factor:%d blinds_time:%d password:%s "
 		"\"name:%s\"",
 		createinfo->max_players,
 		createinfo->stake,
 		createinfo->timeout,
 		createinfo->blinds_start,
-		createinfo->blinds_factor,
+		int(createinfo->blinds_factor * 10),
 		createinfo->blinds_time,
 		createinfo->password.simplified().toStdString().c_str(),
 		createinfo->name.simplified().toStdString().c_str());
@@ -1554,16 +1554,6 @@ int PClient::init()
 	// automatically register to the game  (auto_connect must be set)
 	if (config.getInt("dbg_register") != -1)
 		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
-#endif
-	
-#if 1
-	// FIXME: this is a temporary fix for the C-locale (sprintf-float/strtod) issue
-	
-	// set libc (and libstdc++) locale to "C"
-	std::setlocale(LC_ALL, "C");
-	
-	//std::locale::global(std::locale("C"));
-	//std::cout.imbue(std::locale());
 #endif
 	
 	return 0;

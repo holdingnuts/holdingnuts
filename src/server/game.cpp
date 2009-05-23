@@ -570,7 +570,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		state = GameStateWaiting;
 	
 	snprintf(msg, sizeof(msg),
-		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d:%d %d:%.2f:%d \"%s\"",
+		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d:%d %d:%d:%d \"%s\"",
 		gid,
 		(int) GameTypeHoldem,
 		game_mode,
@@ -584,7 +584,8 @@ bool send_gameinfo(clientcon *client, int gid)
 		g->getPlayerTimeout(),
 		g->getPlayerStakes(),
 		g->getBlindsStart(),
-		g->getBlindsFactor(), g->getBlindsTime(),
+		int(g->getBlindsFactor() * 10),
+		g->getBlindsTime(),
 		g->getName().c_str());
 	
 	send_msg(client->sock, msg);
@@ -1067,9 +1068,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		}
 		else if (infotype == "blinds_factor" && havearg)
 		{
-			ginfo.blinds_factor = Tokenizer::string2float(infoarg);
+			ginfo.blinds_factor = Tokenizer::string2int(infoarg) / 10.0f;
 			
-			if (ginfo.blinds_factor < 1.0f || ginfo.blinds_factor > 4.0f)
+			if (ginfo.blinds_factor < 1.2f || ginfo.blinds_factor > 4.0f)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_time" && havearg)

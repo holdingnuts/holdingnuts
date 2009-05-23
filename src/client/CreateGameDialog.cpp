@@ -113,7 +113,7 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	QLabel *labelBlindsFactor = new QLabel(tr("Raise factor"), this);
 	spinBlindsFactor = new QDoubleSpinBox(this);
 	spinBlindsFactor->setDecimals(2);
-	spinBlindsFactor->setMinimum(1.0);
+	spinBlindsFactor->setMinimum(1.3);
 	spinBlindsFactor->setMaximum(3.5);
 	spinBlindsFactor->setSingleStep(0.1);
 	spinBlindsFactor->setValue(2.0);

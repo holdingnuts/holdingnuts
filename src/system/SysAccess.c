@@ -266,8 +266,8 @@ const char* sys_data_path()
 	
 	for (i=0; i < count; i++)
 	{
-		// FIXME: ~/data would be found, too if run wrong $HOME.
-		//        add an additional check for file/dir in data-dir
+		// FIXME: ~/data could be found if run from $HOME.
+		//        add an additional check for present file/dir in data-dir
 		if (sys_isdir(search_dirs[i]))
 			return search_dirs[i];
 	}

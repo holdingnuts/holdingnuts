@@ -824,9 +824,12 @@ void WMain::gameListSelectionChanged(
 	{
 		const int selected_row = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
+		
+		/*
 		dbg_msg("gameListSelectionChanged", "selected-row:%d gid:%d",
 			selected_row,
 			gid);
+		*/
 		
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
@@ -968,7 +971,7 @@ void WMain::actionSelectedGameUpdate()
 	const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 	const int gid = modelGameList->findGidByRow(selected_row);
 	
-	dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
+	//dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
 	
 	((PClient*)qApp)->requestGameinfo(gid);
 	((PClient*)qApp)->requestPlayerlist(gid);
