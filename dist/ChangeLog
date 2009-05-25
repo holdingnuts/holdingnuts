@@ -22,9 +22,15 @@ HoldingNuts 0.0.4 (???)
   * fixed show starting blinds in gameinfo instead of current blinds
   * support for restart-games (games which restart after they ended)
   * localized server messages like "joined foyer", "player broke"
-  * fixed problem with bet-actions appearing a second time after action was performed
+  * fixed problem with bet-actions appearing
+    * a second time after action was performed
+    * when no more action was possible (e.g. all others allin)
   * prevent auto-action-checkboxes from overlapping action-buttons
-  
+  * fixed order of removing broken players from game
+    when two or more players go broke in the same hand
+  * added command-line option for specifying alternative config-directory 
+    (this allows multiple server/client instances)
+  * created man-pages
 
 
 HoldingNuts 0.0.3 (released on 24 April 2009)
