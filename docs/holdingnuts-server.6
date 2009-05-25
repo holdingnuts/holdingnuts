@@ -1,0 +1,48 @@
+.\" Man page for the HoldingNuts project
+.\"   groff -man -Tascii holdingnuts-server.6
+.TH HOLDINGNUTS 6 "Version 0.0.4" "Dominik Geyer" "HoldingNuts manual"
+.SH NAME
+HoldingNuts \- a poker client and server
+.SH SYNOPSIS
+.B holdingnuts-server [-c
+.I config-dir
+.B ]
+.SH DESCRIPTION
+.B HoldingNuts
+is an open source multi-platform poker client and server.
+
+You can play the popular Texas Hold'em variant with people all over the world, 
+meet your friends, run your own games and even setup your own poker-network.
+
+This is the server part which runs the games and listens on a specific port 
+(default: 40888) for client connections.
+.SH OPTIONS
+.IP "-c config-dir"
+Use an alternate
+.I config-dir
+instead of the default
+.IR ~/.holdingnuts .
+.SH FILES
+.I ~/.holdingnuts/server.cfg
+.RS
+The default server configuration file.
+.RE
+.I ~/.holdingnuts/server.log
+.RS
+The default server log file.
+.SH WWW
+The project webpage:
+.B http://www.holdingnuts.net/
+.PP
+The project wiki:
+.B http://wiki.holdingnuts.net/
+.PP
+The online manual:
+.B http://wiki.holdingnuts.net/manual
+.SH AUTHOR
+Dominik Geyer <dominik.geyer@holdingnuts.net> is the main author, but the whole
+list of contributors is found at 
+.PP
+.B http://www.holdingnuts.net/about
+.SH "SEE ALSO"
+.BR holdingnuts (6)
