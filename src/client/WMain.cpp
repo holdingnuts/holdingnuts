@@ -405,8 +405,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// load serverlist model
 	QStandardItemModel *modelSrvLst = new QStandardItemModel(0, 2, parent);
 
-	modelSrvLst->setHeaderData(0, Qt::Horizontal, QObject::tr("Name"));
-	modelSrvLst->setHeaderData(1, Qt::Horizontal, QObject::tr("Connections"));
+	modelSrvLst->setHeaderData(0, Qt::Horizontal, tr("Name"));
+	modelSrvLst->setHeaderData(1, Qt::Horizontal, tr("Connections"));
 	
 	int nSrvAddr = settings.beginReadArray("Serverlist");
 	
@@ -1022,7 +1022,7 @@ void WMain::updateGameinfo(int gid)
 	lblGameInfoPlayers->setText(QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	lblGameInfoId->setText(QString("%1").arg(gid));
 	lblGameInfoStakes->setText(QString("%1").arg(gi->initial_stakes));
-	lblGameInfoTimeout->setText(QString("%1").arg(gi->player_timeout));
+	lblGameInfoTimeout->setText(QString("<qt>%1<b>s</b></qt>").arg(gi->player_timeout));
 	lblGameInfoBlinds->setText(QString("<qt>%1 /<br/><b>x</b>%2 /<br/>%3<b>s</b></qt>")
 		.arg(gi->blinds_start)
 		.arg(gi->blinds_factor, 0, 'f', 2)

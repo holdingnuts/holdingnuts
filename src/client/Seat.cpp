@@ -74,7 +74,7 @@ void Seat::setInfo(const QString& name, const QString& location)
 	QString tooltip(tr("Name: %1").arg(name));
 	
 	if (!location.isEmpty())
-		tooltip.append(tr("\nLocation: %1").arg(location));
+		tooltip.append(QString("\n") + tr("Location: %1").arg(location));
 	
 	this->setToolTip(tooltip);
 }

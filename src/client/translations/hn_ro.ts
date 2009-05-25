@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.0" language="ro_RO" sourcelanguage="en">
-<defaultcodec></defaultcodec>
 <context>
     <name>AboutDialog</name>
     <message>
@@ -52,7 +51,7 @@
     </message>
     <message>
         <source>Max. Players</source>
-        <translation>Nr. max. de jucători</translation>
+        <translation type="obsolete">Nr. max. de jucători</translation>
     </message>
     <message>
         <source>Timeout</source>
@@ -77,6 +76,22 @@
     <message>
         <source>Raise time</source>
         <translation>Timpul de plusare</translation>
+    </message>
+    <message>
+        <source>Max. players</source>
+        <translation>Nr. max. de jucători</translation>
+    </message>
+    <message>
+        <source>Private game</source>
+        <translation>Joc privat</translation>
+    </message>
+    <message>
+        <source>Password protected</source>
+        <translation>Protejat de parolă</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Parola</translation>
     </message>
 </context>
 <context>
@@ -136,6 +151,102 @@
         <source>Connection closed.</source>
         <translation>Conexie închisă.</translation>
     </message>
+    <message>
+        <source>Server running version %1.%2.%3. Your client ID is %4.</source>
+        <translation>Serverul rulează versiunea %1.%2.%3. ID-ul dvs. de client este %4.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Eroare</translation>
+    </message>
+    <message>
+        <source>The version of the server isn&apos;t compatible anymore with this client version. Please either use an older client version or request the server admin to update the server version.</source>
+        <translation>Versiunea serverului nu mai este compatibilă cu această versiune de program. Vă rugă sau să folosiţi o versiune mai veche a programului, sau să cereţi administratorului serverului să-şi actualizeze versiunea.</translation>
+    </message>
+    <message>
+        <source>A new hand (#%1) begins.</source>
+        <translation>Începe o nouă mână (nr.%1).</translation>
+    </message>
+    <message>
+        <source>Blinds are now at %1/%2.</source>
+        <translation>Mizele oarbe au ajuns acum la %1/%2.</translation>
+    </message>
+    <message>
+        <source>Player %1 broke.</source>
+        <translation>Jucătorul %1 e falit.</translation>
+    </message>
+    <message>
+        <source>Your hole cards: [%1 %2].</source>
+        <translation>Toate cărţile dvs.: [%1 %2].</translation>
+    </message>
+    <message>
+        <source>The flop: [%1 %2 %3].</source>
+        <translation>Flopul (primele 3 cărţi întoarse de dealer): [%1 %2 %3].</translation>
+    </message>
+    <message>
+        <source>The turn: [%1].</source>
+        <translation>Rândul: [%1].</translation>
+    </message>
+    <message>
+        <source>The river: [%1].</source>
+        <translation>Riverul (ultima carte întoarsă de dealer): [%1].</translation>
+    </message>
+    <message>
+        <source>%1 was folded.</source>
+        <translation>%1 a fost scos.</translation>
+    </message>
+    <message>
+        <source>%1 folded.</source>
+        <translation>%1 s-a aruncat.</translation>
+    </message>
+    <message>
+        <source>%1 was checked.</source>
+        <translation>%1 a fost sărit.</translation>
+    </message>
+    <message>
+        <source>%1 checked.</source>
+        <translation>%1 a făcut Pas.</translation>
+    </message>
+    <message>
+        <source>%1 called %2.</source>
+        <translation>%1 a egalat pariul lui %2.</translation>
+    </message>
+    <message>
+        <source>%1 bet to %2.</source>
+        <translation>%1 pariază la %2.</translation>
+    </message>
+    <message>
+        <source>%1 raised to %2.</source>
+        <translation>%1 a plusat la %2.</translation>
+    </message>
+    <message>
+        <source>%1 is allin with %2.</source>
+        <translation>%1 a pariat tot, cu %2.</translation>
+    </message>
+    <message>
+        <source>%1 shows %2.</source>
+        <translation>%1 arată %2.</translation>
+    </message>
+    <message>
+        <source>%2 (%1) joined foyer.</source>
+        <translation>%2 (%1) a intrat în foaier.</translation>
+    </message>
+    <message>
+        <source>%2 (%1) left foyer.</source>
+        <translation>%2 (%1) a ieşit din foaier.</translation>
+    </message>
+    <message>
+        <source>%1, it&apos;s your turn!</source>
+        <translation>%1, e rândul tău!</translation>
+    </message>
+    <message>
+        <source>%1 wins pot #%2 with %3.</source>
+        <translation>%1 câştigă potul nr.%2 cu %3.</translation>
+    </message>
+    <message>
+        <source>%1 receives %3 odd chips of split pot #%2.</source>
+        <translation>%1 primeşte %3 cipuri în plus din potul împărţit nr.%2.</translation>
+    </message>
 </context>
 <context>
     <name>PlayerListTableModel</name>
@@ -145,10 +256,21 @@
     </message>
 </context>
 <context>
+    <name>QObject</name>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nume</translation>
+    </message>
+</context>
+<context>
     <name>Seat</name>
     <message>
         <source>Location: %1</source>
         <translation>Loc: %1</translation>
+    </message>
+    <message>
+        <source>Name: %1</source>
+        <translation>Nume: %1</translation>
     </message>
 </context>
 <context>
@@ -233,6 +355,50 @@
         <source>Classic</source>
         <translation>Clasic</translation>
     </message>
+    <message>
+        <source>Log and chat</source>
+        <translation>Înregistrare şi discuţii</translation>
+    </message>
+    <message>
+        <source>Centralized table view</source>
+        <translation>Vizualizare tabel centralizat</translation>
+    </message>
+    <message>
+        <source>Bring window to top</source>
+        <translation>Adu fereastra deasupra</translation>
+    </message>
+    <message>
+        <source>Display time in foyer chat</source>
+        <translation>Arată timpul în discuţiile din foaier</translation>
+    </message>
+    <message>
+        <source>Display join/left messages</source>
+        <translation>Arată mesajele de alăturare/părăsire (intrare/ieşire)</translation>
+    </message>
+    <message>
+        <source>Display game states</source>
+        <translation>Arată starea jocului</translation>
+    </message>
+    <message>
+        <source>Display player chat</source>
+        <translation>Arată discuţiile jucătorilor</translation>
+    </message>
+    <message>
+        <source>Display player actions</source>
+        <translation>Arată acţiunile jucătorilor</translation>
+    </message>
+    <message>
+        <source>Display hole/community cards</source>
+        <translation>Arată toate cărţile/cărţile comune</translation>
+    </message>
+    <message>
+        <source>Foyer chat verbosity</source>
+        <translation>Cantitatea de informaţii oferite în timpul discuţiilor din foaier</translation>
+    </message>
+    <message>
+        <source>Table chat verbosity</source>
+        <translation>Cantitatea de informaţii oferite în timpul discuţiilor de la masă</translation>
+    </message>
 </context>
 <context>
     <name>WMain</name>
@@ -242,7 +408,7 @@
     </message>
     <message>
         <source>Game name filter:</source>
-        <translation>Filtru joc:</translation>
+        <translation type="obsolete">Filtru joc:</translation>
     </message>
     <message>
         <source>&amp;Register</source>
@@ -398,7 +564,43 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
     </message>
     <message>
         <source>offline</source>
-        <translation>deconectat</translation>
+        <translation type="obsolete">deconectat</translation>
+    </message>
+    <message>
+        <source>hide started</source>
+        <translation>ascunde jocurile începute</translation>
+    </message>
+    <message>
+        <source>hide private</source>
+        <translation>ascunde jocurile private</translation>
+    </message>
+    <message>
+        <source>&amp;Open table</source>
+        <translation>D&amp;eschide masa</translation>
+    </message>
+    <message>
+        <source>&amp;Start game</source>
+        <translation>Î&amp;ncepe jocul</translation>
+    </message>
+    <message>
+        <source>Private game</source>
+        <translation>Joc privat</translation>
+    </message>
+    <message>
+        <source>Please enter the game password:</source>
+        <translation>Vă rugăm să introduceţi parola jocului:</translation>
+    </message>
+    <message>
+        <source>Logout</source>
+        <translation>Ieşire din cont</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Nume</translation>
+    </message>
+    <message>
+        <source>Connections</source>
+        <translation>Conexiuni</translation>
     </message>
 </context>
 <context>
@@ -437,7 +639,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
     </message>
     <message>
         <source>Potsize</source>
-        <translation>Mărimea potului</translation>
+        <translation type="obsolete">Mărimea potului</translation>
     </message>
     <message>
         <source>Allin</source>
@@ -578,6 +780,150 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
     <message>
         <source>Unable to save screenshot in %1.</source>
         <translation>Nu s-a putut salva imaginea în %1.</translation>
+    </message>
+    <message>
+        <source>Min</source>
+        <translation>Min</translation>
+    </message>
+    <message>
+        <source>Pot</source>
+        <translation>Pot</translation>
+    </message>
+    <message>
+        <source>%1, it&apos;s your turn!</source>
+        <translation>%1, e rândul tău!</translation>
+    </message>
+    <message>
+        <source>%1, you have %2 seconds left to respond!</source>
+        <translation>%1, mai ai %2 secunde pentru a răspunde!</translation>
+    </message>
+    <message>
+        <source>Spades</source>
+        <translation>Pică (inimă neagră)</translation>
+    </message>
+    <message>
+        <source>Hearts</source>
+        <translation>Cupă (inimă)</translation>
+    </message>
+    <message>
+        <source>Diamonds</source>
+        <translation>Caro (romb)</translation>
+    </message>
+    <message>
+        <source>Clubs</source>
+        <translation>Treflă</translation>
+    </message>
+    <message>
+        <source>Deuce</source>
+        <translation>Doi</translation>
+    </message>
+    <message>
+        <source>Deuces</source>
+        <translation>Doiari</translation>
+    </message>
+    <message>
+        <source>Three</source>
+        <translation>Trei</translation>
+    </message>
+    <message>
+        <source>Threes</source>
+        <translation>Treiari</translation>
+    </message>
+    <message>
+        <source>Four</source>
+        <translation>Patru</translation>
+    </message>
+    <message>
+        <source>Fours</source>
+        <translation>Pătrari</translation>
+    </message>
+    <message>
+        <source>Five</source>
+        <translation>Cinci</translation>
+    </message>
+    <message>
+        <source>Fives</source>
+        <translation>Cinciari</translation>
+    </message>
+    <message>
+        <source>Six</source>
+        <translation>Şase</translation>
+    </message>
+    <message>
+        <source>Sixes</source>
+        <translation>Şesari</translation>
+    </message>
+    <message>
+        <source>Seven</source>
+        <translation>Şapte</translation>
+    </message>
+    <message>
+        <source>Sevens</source>
+        <translation>Şeptari</translation>
+    </message>
+    <message>
+        <source>Eight</source>
+        <translation>Opt</translation>
+    </message>
+    <message>
+        <source>Eights</source>
+        <translation>Optari</translation>
+    </message>
+    <message>
+        <source>Nine</source>
+        <translation>Nouă</translation>
+    </message>
+    <message>
+        <source>Nines</source>
+        <translation>Noiari</translation>
+    </message>
+    <message>
+        <source>Ten</source>
+        <translation>Decar</translation>
+    </message>
+    <message>
+        <source>Tens</source>
+        <translation>Decari</translation>
+    </message>
+    <message>
+        <source>Jack</source>
+        <translation>Valet</translation>
+    </message>
+    <message>
+        <source>Jacks</source>
+        <translation>Valeţi</translation>
+    </message>
+    <message>
+        <source>Queen</source>
+        <translation>Damă</translation>
+    </message>
+    <message>
+        <source>Queens</source>
+        <translation>Dame</translation>
+    </message>
+    <message>
+        <source>King</source>
+        <translation>Popă</translation>
+    </message>
+    <message>
+        <source>Kings</source>
+        <translation>Popi</translation>
+    </message>
+    <message>
+        <source>Ace</source>
+        <translation>As</translation>
+    </message>
+    <message>
+        <source>Aces</source>
+        <translation>Aşi</translation>
+    </message>
+    <message>
+        <source>%1 and %2</source>
+        <translation>%1 şi %2</translation>
+    </message>
+    <message>
+        <source>%1 high</source>
+        <translation>mărit cu %1</translation>
     </message>
 </context>
 </TS>

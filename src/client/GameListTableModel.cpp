@@ -34,7 +34,7 @@ GameListTableModel::GameListTableModel(QObject *parent)
 		<< tr("Gametype") 
 		<< tr("Players") 
 		<< tr("State")
-		<< tr("Password Protected");
+		<< QString("Password protected");
 }
 
 int GameListTableModel::rowCount(const QModelIndex& parent) const

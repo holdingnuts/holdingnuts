@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.0" language="ja_JP">
-<defaultcodec></defaultcodec>
 <context>
     <name>AboutDialog</name>
     <message>
@@ -52,7 +51,7 @@
     </message>
     <message>
         <source>Max. Players</source>
-        <translation>最大プレーヤー数</translation>
+        <translation type="obsolete">最大プレーヤー数</translation>
     </message>
     <message>
         <source>Timeout</source>
@@ -88,7 +87,15 @@
     </message>
     <message>
         <source>Password:</source>
-        <translation>パスワード:</translation>
+        <translation type="obsolete">パスワード:</translation>
+    </message>
+    <message>
+        <source>Max. players</source>
+        <translation>最大プレーヤー数</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>パスワード</translation>
     </message>
 </context>
 <context>
@@ -107,11 +114,11 @@
     </message>
     <message>
         <source>State</source>
-        <translation>状態</translation>
+        <translation>状況</translation>
     </message>
     <message>
         <source>Password Protected</source>
-        <translation>パスワード制御</translation>
+        <translation type="obsolete">パスワード制御</translation>
     </message>
 </context>
 <context>
@@ -232,6 +239,22 @@
         <source>Connection closed.</source>
         <translation>接続を中止しました。</translation>
     </message>
+    <message>
+        <source>Blinds are now at %1/%2.</source>
+        <translation>ブラインドは今 %1/%2。</translation>
+    </message>
+    <message>
+        <source>Player %1 broke.</source>
+        <translation>プレイヤー %1 は破産。</translation>
+    </message>
+    <message>
+        <source>%2 (%1) joined foyer.</source>
+        <translation>%2 (%1) ロビーに入った。</translation>
+    </message>
+    <message>
+        <source>%2 (%1) left foyer.</source>
+        <translation>%2 (%1) ロビーを出た。</translation>
+    </message>
 </context>
 <context>
     <name>PlayerListTableModel</name>
@@ -244,18 +267,18 @@
     <name>QObject</name>
     <message>
         <source>Name</source>
-        <translation>ゲーム名</translation>
+        <translation type="obsolete">ゲーム名</translation>
     </message>
     <message>
         <source>Connections</source>
-        <translation>接続</translation>
+        <translation type="obsolete">接続</translation>
     </message>
 </context>
 <context>
     <name>Seat</name>
     <message>
         <source>Location: %1</source>
-        <translation type="obsolete">ロケーション: %1</translation>
+        <translation>ロケーション: %1</translation>
     </message>
     <message>
         <source>Name: %1</source>
@@ -264,7 +287,7 @@
     <message>
         <source>
 Location: </source>
-        <translation>
+        <translation type="obsolete">
 ロケーション: </translation>
     </message>
 </context>
@@ -288,7 +311,7 @@ Location: </source>
     </message>
     <message>
         <source>Log to file</source>
-        <translation>ファイルに保存</translation>
+        <translation>ファイルにログする</translation>
     </message>
     <message>
         <source>enabled</source>
@@ -296,7 +319,7 @@ Location: </source>
     </message>
     <message>
         <source>log chat</source>
-        <translation>チャットを保存</translation>
+        <translation>チャットをログ</translation>
     </message>
     <message>
         <source>Locale</source>
@@ -353,6 +376,46 @@ Location: </source>
     <message>
         <source>Classic</source>
         <translation>クラッシック</translation>
+    </message>
+    <message>
+        <source>Log and chat</source>
+        <translation>ログとチャット</translation>
+    </message>
+    <message>
+        <source>Bring window to top</source>
+        <translation>画面を一番上にする</translation>
+    </message>
+    <message>
+        <source>Display time in foyer chat</source>
+        <translation>ロビーでのチャットの時間を表示</translation>
+    </message>
+    <message>
+        <source>Display join/left messages</source>
+        <translation>出入りのメッセージを表示</translation>
+    </message>
+    <message>
+        <source>Display game states</source>
+        <translation>ゲーム状況を表示</translation>
+    </message>
+    <message>
+        <source>Display player chat</source>
+        <translation>プレーヤーのチャットを表示</translation>
+    </message>
+    <message>
+        <source>Display player actions</source>
+        <translation>プレーヤーのアクションを表示</translation>
+    </message>
+    <message>
+        <source>Display hole/community cards</source>
+        <translation>ホール／コミュニティカードを表示</translation>
+    </message>
+    <message>
+        <source>Foyer chat verbosity</source>
+        <translation>ロビーでのチャットオプション</translation>
+    </message>
+    <message>
+        <source>Table chat verbosity</source>
+        <translation>テーブルでのチャットオプション</translation>
     </message>
 </context>
 <context>
@@ -545,6 +608,14 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
         <source>&amp;Start game</source>
         <translation>ゲームを始める(&amp;S)</translation>
     </message>
+    <message>
+        <source>Name</source>
+        <translation>名前</translation>
+    </message>
+    <message>
+        <source>Connections</source>
+        <translation>接続</translation>
+    </message>
 </context>
 <context>
     <name>WTable</name>
@@ -590,7 +661,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>Max</source>
-        <translation>マックス</translation>
+        <translation type="obsolete">マックス</translation>
     </message>
     <message>
         <source>Ctrl+F</source>
@@ -863,6 +934,10 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     <message>
         <source>Straight Flush</source>
         <translation>ストレートフラッシュ</translation>
+    </message>
+    <message>
+        <source>Allin</source>
+        <translation>オールイン</translation>
     </message>
 </context>
 </TS>
