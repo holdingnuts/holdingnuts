@@ -2,35 +2,35 @@ ChangeLog
 =========
 
 
-HoldingNuts 0.0.4 (???)
+HoldingNuts 0.0.4 (released on 27 May 2009)
 
   * fixed sending quotes in chat
-  * fixed server-history (sort to most recent server)
-  * chop long nicknames on table
-  * fixed dealer-button position
-  * option to bring table-window to top
+  * fixed server-history (sort by most recent server)
+  * chop long nicknames on table-seat
+  * fixed positions of dealer-button
+  * new option: bring table-window to top
   * new translation: Japanese
   * removed support for cent-amounts, only whole chips bets possible
-  * fixed resetting last action of current player
-  * option to display time in foyer chat
-  * several verbosity levels for chat/log messages
-  * increased maximum chat length
+  * fixed displaying last action of current player
+  * new option: display time in foyer chat
+  * new option: several verbosity levels for chat/log messages
+  * increased maximum length of chat messages
   * fixed client calculation for determining quick-bet buttons
   * send blinds-message to table on blinds raise
   * log table messages
-  * send welcome message to clients on connect
-  * fixed show starting blinds in gameinfo instead of current blinds
+  * new option: send welcome message to clients on connect
+  * fixed: show starting blinds in gameinfo instead of current blinds
   * support for restart-games (games which restart after they ended)
-  * localized server messages like "joined foyer", "player broke"
-  * fixed problem with bet-actions appearing
+  * localized server messages like "joined foyer", "player broke", ...
+  * fixed client problem with bet-actions appearing
     * a second time after action was performed
     * when no more action was possible (e.g. all others allin)
   * prevent auto-action-checkboxes from overlapping action-buttons
   * fixed order of removing broken players from game
     when two or more players go broke in the same hand
   * added command-line option for specifying alternative config-directory 
-    (this allows multiple server/client instances)
-  * created man-pages
+    (this allows multiple server/client instances with independent config)
+  * created simple man-pages
 
 
 HoldingNuts 0.0.3 (released on 24 April 2009)
