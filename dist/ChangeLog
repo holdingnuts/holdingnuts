@@ -2,7 +2,7 @@ ChangeLog
 =========
 
 
-HoldingNuts 0.0.4 (released on 27 May 2009)
+HoldingNuts 0.0.4 (released on 29 May 2009)
 
   * fixed sending quotes in chat
   * fixed server-history (sort by most recent server)
@@ -31,6 +31,7 @@ HoldingNuts 0.0.4 (released on 27 May 2009)
   * added command-line option for specifying alternative config-directory 
     (this allows multiple server/client instances with independent config)
   * created simple man-pages
+  * adjusted version-compat to 0.0.4
 
 
 HoldingNuts 0.0.3 (released on 24 April 2009)
