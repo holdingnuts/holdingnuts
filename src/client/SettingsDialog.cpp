@@ -74,6 +74,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 		{ "ja", "Japanese" },
 		{ "nl", "Dutch" },
 		{ "ro", "Romanian" },
+		{ "ru", "Russian" },
 	};
 	const unsigned int locales_count = sizeof(locales) / sizeof(locales[0]);
 	
