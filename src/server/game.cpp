@@ -309,7 +309,7 @@ bool client_remove(socktype sock)
 				
 				
 				snprintf(msg, sizeof(msg),
-					"%d %d %s",
+					"%d %d \"%s\"",
 					SnapFoyerLeave, client->id, client->info.name);
 				
 				send_msg = true;
@@ -461,7 +461,7 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 		
 		// send foyer snapshot broadcast
 		snprintf(msg, sizeof(msg),
-			"%d %d %s",
+			"%d %d \"%s\"",
 			SnapFoyerJoin, client->id, client->info.name);
 		
 		client_snapshot(-1, SnapFoyer, msg);

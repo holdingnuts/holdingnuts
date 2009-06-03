@@ -963,7 +963,7 @@ void GameController::stateAskShow(Table *t)
 	
 	Player *p = t->seats[t->cur_player].player;
 	
-	if (!p->stake) // player has no chips left
+	if (!p->stake) // player is allin, no option to show/muck
 	{
 		t->seats[t->cur_player].showcards = true;
 		chose_action = true;
