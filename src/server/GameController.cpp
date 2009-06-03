@@ -811,7 +811,7 @@ void GameController::stateBetting(Table *t)
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
-			if (action == Player::Allin || amount == p->stake)
+			if (action == Player::Allin || amount >= p->stake)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionAllin, p->client_id, t->seats[t->cur_player].bet);
 			else if (action == Player::Bet)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionBet, p->client_id, t->bet_amount);
@@ -963,7 +963,13 @@ void GameController::stateAskShow(Table *t)
 	
 	Player *p = t->seats[t->cur_player].player;
 	
-	if (p->next_action.valid)  // has player set an action?
+	if (!p->stake) // player has no chips left
+	{
+		t->seats[t->cur_player].showcards = true;
+		chose_action = true;
+		p->next_action.valid = false;
+	}
+	else if (p->next_action.valid)  // has player set an action?
 	{
 		if (p->next_action.action == Player::Muck)
 		{
