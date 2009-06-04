@@ -47,18 +47,20 @@ public:
 		InputLineAlignment align = INPUTLINE_TOP,
 		int nTextLogHeight = 0,
 		QWidget *parent = 0);
-	
+		
 	void addMessage(const QString &msg, const QString &from = "", const QColor &color = Qt::black);
 	void addMessage(const QString &msg, const QColor &color = Qt::black);
 	
 	void showChatBtn(bool bShow);
+	void showTime(bool bShow);
 
 	void setFontPointSize(int size);
 	void setEnabled(bool enable);
 	void setCompleter(QCompleter *completer);
 	
 	int fontPointSize() const;
-	const QLineEdit* getInputWidget() const { return m_pEditChat; };
+
+	bool hasInputFocus() const;
 
 protected:
 	ChatBox();
@@ -76,8 +78,6 @@ signals:
      void dispatchedMessage(QString msg);
 
 private:
-	int			m_nGameID;
-	int			m_nTableID;
 	int			m_nFontPointSize;
 	QLineEdit		*m_pEditChat;
 	QTextEdit		*m_pEditChatLog;
@@ -85,6 +85,8 @@ private:
 	QPushButton		*m_pSendMsg;
 	//! \brief Playername Completer
 	QCompleter		*m_pCompleter;
+	//! \brief shows human-readable Timestamp 
+	bool			m_bShowTime;
 };
 
 #endif /* _HOLDINGNUTS_CHATBOX_H */

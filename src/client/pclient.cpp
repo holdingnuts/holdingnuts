@@ -171,7 +171,10 @@ void PClient::serverCmdMsg(Tokenizer &t)
 			qchatmsg.replace(rx, name);
 		}
 	}
-	
+
+	// handle escape sequences
+	qchatmsg.replace("\\\"", "\"");
+
 	
 	if (gid != -1 && tid != -1)
 	{
@@ -180,18 +183,24 @@ void PClient::serverCmdMsg(Tokenizer &t)
 		// silently drop message if there is no table-info
 		if (!tinfo)
 			return;
-		
+
 		if (cid == -1) // message from server to table
 			tinfo->window->addServerMessage(qchatmsg);
 		else // message from user to table
-			tinfo->window->addChat(qsfrom, qchatmsg);
+		{
+			if (config.getInt("chat_verbosity_table") & 0x4)
+				tinfo->window->addChat(qsfrom, qchatmsg);
+		}
 	}
 	else
 	{
 		if (from == -1) // message from server to foyer
 			wMain->addServerMessage(qchatmsg);
 		else // message from user to foyer
-			wMain->addChat(qsfrom, qchatmsg);
+		{
+			if (config.getInt("chat_verbosity_foyer") & 0x8)
+				wMain->addChat(qsfrom, qchatmsg);
+		}
 	}
 }
 
@@ -225,7 +234,6 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	// community-cards
 	{
-		//table.communitycards = t.getNext().substr(3);
 		std::string board = t.getNext().substr(3);
 		CommunityCards &cc = table.communitycards;
 		
@@ -261,13 +269,14 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	// table.seats
 	table.my_seat = -1;
+	table.nomoreaction = false;
 	
 	const unsigned int seat_max = 10;
 	memset(table.seats, 0, seat_max*sizeof(seatinfo));
 	
 	tmp = t.getNext();
 	do {
-		//log_msg("seat", "%s", tmp.c_str());
+		//dbg_msg("seat", "%s", tmp.c_str());
 		
 		Tokenizer st(":");
 		st.parse(tmp);
@@ -289,8 +298,8 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		if (pstate & PlayerSitout)
 			si.sitout = true;
 		
-		si.stake = st.getNextInt() / 100.0f;
-		si.bet = st.getNextInt() / 100.0f;
+		si.stake = st.getNextInt();
+		si.bet = st.getNextInt();
 		si.action = (Player::PlayerAction) st.getNextInt();
 		
 		std::string shole = st.getNext();
@@ -299,6 +308,10 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 			Card h1(shole.substr(0, 2).c_str());
 			Card h2(shole.substr(2, 2).c_str());
 			si.holecards.setCards(h1, h2);
+			
+			// if there are hole-cards in the snapshot
+			// then there's no further action possible
+			table.nomoreaction = true;
 		}
 		else
 			si.holecards.clear();
@@ -314,19 +327,19 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	// pots
 	do {
-		//log_msg("pot", "%s", tmp.c_str());
+		//dbg_msg("pot", "%s", tmp.c_str());
 		Tokenizer pt(":");
 		pt.parse(tmp);
 		
 		pt.getNext();   // pot-no; unused
-		float potsize = pt.getNextInt() / 100.0f;
+		chips_type potsize = pt.getNextInt();
 		table.pots.push_back(potsize);
 		
 		tmp = t.getNext();
 	} while (tmp[0] == 'p');
 	
 	
-	table.minimum_bet = Tokenizer::string2float(tmp) / 100.0f;
+	table.minimum_bet = Tokenizer::string2int(tmp);
 	
 	
 	if (table.state == Table::NewRound)
@@ -343,12 +356,13 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	
 	if (type == SnapGameStateStart)
 	{
-		wMain->addServerMessage(
-			QString(tr("Game (%1) has been started.").arg(gid)));
+		if (config.getInt("chat_verbosity_foyer") & 0x4)
+			wMain->addServerMessage(
+				QString(tr("Game (%1) has been started.").arg(gid)));
 		
 		addTable(gid, tid);
 	}
-	else if (type == SnapGameStateEnd)
+	else if (type == SnapGameStateEnd && config.getInt("chat_verbosity_foyer") & 0x4)
 	{
 		wMain->addServerMessage(
 			QString(tr("Game (%1) has been ended.").arg(gid)));
@@ -363,6 +377,35 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 		
 		tinfo->window->addServerMessage(
 			QString(tr("A new hand (#%1) begins.").arg(hand_no)));
+	}
+	else if (type == SnapGameStateBlinds)
+	{
+		const chips_type blind_small = t.getNextInt();
+		const chips_type blind_big = t.getNextInt();
+		
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		tinfo->window->addServerMessage(
+			QString(tr("Blinds are now at %1/%2.")
+				.arg(blind_small)
+				.arg(blind_big)));
+	}
+	else if (type == SnapGameStateBroke)
+	{
+		const int cid = t.getNextInt();
+		const int position = t.getNextInt();
+		const QString player_name = modelPlayerList->getPlayerName(cid);
+		
+		// silently drop message if there is no table-info
+		if (!tinfo)
+			return;
+		
+		tinfo->window->addServerMessage(
+			tr("Player %1 broke.")
+				.arg(player_name) +
+			((position != -1) ? QString(" #%1").arg(position) : QString()));
 	}
 	// TODO: else if (type == "your_seat")
 }
@@ -394,10 +437,11 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		
 		if (bUpdateView && tinfo->window)
 		{
-			tinfo->window->addServerMessage(
-				QString(tr("Your hole cards: [%1 %2].")
-					.arg(QString::fromStdString(card1))
-					.arg(QString::fromStdString(card2))));
+			if (config.getInt("chat_verbosity_table") & 0x2)
+				tinfo->window->addServerMessage(
+					QString(tr("Your hole cards: [%1 %2].")
+						.arg(QString::fromStdString(card1))
+						.arg(QString::fromStdString(card2))));
 				
 			tinfo->window->updateView();
 			tinfo->window->playSound(SOUND_DEAL_1);
@@ -405,6 +449,9 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	}
 	else if (type == SnapCardsFlop || type == SnapCardsTurn || type == SnapCardsRiver)
 	{
+		if (!(config.getInt("chat_verbosity_table") & 0x2))
+			return;
+
 		// silently drop message if there is no table-info
 		if (!tinfo || !tinfo->window)
 			return;
@@ -486,7 +533,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 		{
 			smsg = QString(tr("%1 called %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 			
 			sound = SOUND_CHIP_1;
 		}
@@ -494,26 +541,27 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 		{
 			smsg = QString(tr("%1 bet to %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 		}
 		else if (type == SnapPlayerActionRaised)
 		{
 			smsg = QString(tr("%1 raised to %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 		}
 		else if (type == SnapPlayerActionAllin)
 		{
 			smsg = QString(tr("%1 is allin with %2.")
 				.arg(player_name)
-				.arg(amount / 100.f));
+				.arg(amount));
 		}
 		
 		if (tinfo->window)
 			tinfo->window->playSound(sound);
 	}
 	
-	tinfo->window->addServerMessage(smsg);
+	if (config.getInt("chat_verbosity_table") & 0x1)
+		tinfo->window->addServerMessage(smsg);
 }
 
 void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo* tinfo)
@@ -545,6 +593,26 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 		QString(tr("%1 shows %2.")
 			.arg(player_name)
 			.arg(sstrength)));
+}
+
+void PClient::serverCmdSnapFoyer(Tokenizer &t)
+{
+	const snap_foyer_type type = (snap_foyer_type) t.getNextInt();
+	const int cid = t.getNextInt();
+	const std::string cname = t.getNext();
+	
+	if (type == SnapFoyerJoin && config.getInt("chat_verbosity_foyer") & 0x2)
+	{
+		wMain->addServerMessage(tr("%2 (%1) joined foyer.")
+			.arg(cid)
+			.arg(QString::fromStdString(cname)));
+	}
+	else if (type == SnapFoyerLeave && config.getInt("chat_verbosity_foyer") & 0x2)
+	{
+		wMain->addServerMessage(tr("%2 (%1) left foyer.")
+			.arg(cid)
+			.arg(QString::fromStdString(cname)));
+	}
 }
 
 // server cmd SNAP
@@ -603,18 +671,21 @@ void PClient::serverCmdSnap(Tokenizer &t)
 				smsg = QString(tr("%1 wins pot #%2 with %3.")
 					.arg(modelPlayerList->name(cid))
 					.arg(poti+1)
-					.arg(amount / 100.0f));
+					.arg(amount));
 			else
 				smsg = QString(tr("%1 receives %3 odd chips of split pot #%2.")
 					.arg(modelPlayerList->name(cid))
 					.arg(poti+1)
-					.arg(amount / 100.0f));
+					.arg(amount));
 			
 			tinfo->window->addServerMessage(smsg);
 		}
 		break;
 	case SnapPlayerShow:
 		serverCmdSnapPlayerShow(t, gid, tid, tinfo);
+		break;
+	case SnapFoyer:
+		serverCmdSnapFoyer(t);
 		break;
 	}
 }
@@ -723,18 +794,20 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->password = flags & GameInfoPassword;
 	gi->owner = flags & GameInfoOwner;
 	
+	qDebug() << "[" << getMyCId() << "]" << gid << "owner" << gi->owner;
+	
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
 	gi->player_timeout = it.getNextInt();
-	gi->initial_stakes = it.getNextInt() / 100.0f;
+	gi->initial_stakes = it.getNextInt();
 	
 	
 	// unpack blinds-rule
 	const std::string sblinds = t.getNext();
 	it.parse(sblinds);
 	
-	gi->blinds_start = it.getNextInt() / 100.0f;
-	gi->blinds_factor = it.getNextFloat();
+	gi->blinds_start = it.getNextInt();
+	gi->blinds_factor = it.getNextInt() / 10.0f;
 	gi->blinds_time = it.getNextInt();
 	
 	
@@ -972,7 +1045,7 @@ void PClient::doStartGame(int gid)
 	netSendMsg(msg);
 }
 
-bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
+bool PClient::doSetAction(int gid, Player::PlayerAction action, chips_type amount)
 {
 	if (!connected)
 		return false;
@@ -1016,7 +1089,7 @@ bool PClient::doSetAction(int gid, Player::PlayerAction action, float amount)
 	char msg[1024];
 	if (bAmount)
 		snprintf(msg, sizeof(msg), "ACTION %d %s %d",
-			gid, saction, (int)(amount * 100));
+			gid, saction, amount);
 	else
 		snprintf(msg, sizeof(msg), "ACTION %d %s",
 			gid, saction);
@@ -1031,10 +1104,13 @@ void PClient::chatAll(const QString& text)
 	// foyer chat
 	if (!connected)
 		return;
+
+	QString strMsg = "CHAT -1 " + text.simplified();
 	
-	char msg[1024];
-	snprintf(msg, sizeof(msg), "CHAT %d %s", -1, text.simplified().toStdString().c_str());
-	netSendMsg(msg);
+	if (!config.getBool("chat_console"))
+		strMsg.replace("\"", "\\\"");
+
+	netSendMsg(strMsg.toStdString().c_str());
 }
 
 void PClient::chat(const QString& text, int gid, int tid)
@@ -1042,25 +1118,27 @@ void PClient::chat(const QString& text, int gid, int tid)
 	if (!connected)
 		return;
 
-	char msg[1024];
-	snprintf(msg, sizeof(msg), "CHAT %d:%d %s", gid, tid, text.simplified().toStdString().c_str());
-	netSendMsg(msg);
+	QString strMsg = QString("CHAT %1:%2 %3")
+		.arg(gid).arg(tid).arg(text.simplified());
+	
+	if (!config.getBool("chat_console"))
+		strMsg.replace("\"", "\\\"");
+
+	netSendMsg(strMsg.toStdString().c_str());
 }
 
 bool PClient::createGame(gamecreate *createinfo)
 {
 	char msg[1024];
 	
-	dbg_msg("DEBUG", "float %.2f  int %d", createinfo->stake, (int)(createinfo->stake*100.0f));
-	
 	snprintf(msg, sizeof(msg), "CREATE players:%d stake:%d timeout:%d "
-		"blinds_start:%d blinds_factor:%.2f blinds_time:%d password:%s "
+		"blinds_start:%d blinds_factor:%d blinds_time:%d password:%s "
 		"\"name:%s\"",
 		createinfo->max_players,
-		(int)(createinfo->stake*100),
+		createinfo->stake,
 		createinfo->timeout,
-		(int)(createinfo->blinds_start*100),
-		createinfo->blinds_factor,
+		createinfo->blinds_start,
+		int(createinfo->blinds_factor * 10),
 		createinfo->blinds_time,
 		createinfo->password.simplified().toStdString().c_str(),
 		createinfo->name.simplified().toStdString().c_str());
@@ -1273,7 +1351,7 @@ void PClient::requestGameinfo(int gid)
 	char msg[1024];
 	
 	// get game info
-	snprintf(msg, sizeof(msg), "REQUEST gameinfo %ds", gid);
+	snprintf(msg, sizeof(msg), "REQUEST gameinfo %d", gid);
 	netSendMsg(msg);
 }
 
@@ -1322,6 +1400,24 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	
 	// model player
 	modelPlayerList = new PlayerListTableModel;
+	
+	// use config-directory set on command-line
+	if (argc >= 3 && (argv[1][0] == '-' && argv[1][1] == 'c'))
+	{
+		// we need an absolute path because we chdir into data-dir
+		QString path(argv[2]);
+		QDir dir(path);
+		
+		path = dir.absolutePath();
+		
+		sys_set_config_path(path.toStdString().c_str());
+		log_msg("config", "Using manual config-directory '%s'", path.toStdString().c_str());
+	}
+	
+	
+	// create config-dir if it doesn't yet exist
+	QDir config_dir;
+	config_dir.mkpath(QString(sys_config_path()));
 }
 
 PClient::~PClient()
@@ -1336,7 +1432,9 @@ int PClient::init()
 	if (datadir)
 	{
 		log_msg("main", "Using data-directory: %s", datadir);
-		sys_chdir(datadir);
+		
+		QString sdatadir(datadir);
+		QDir::setCurrent(sdatadir);
 	}
 	else
 	{
@@ -1437,16 +1535,6 @@ int PClient::init()
 		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 #endif
 	
-#if 1
-	// FIXME: this is a temporary fix for the C-locale (sprintf-float/strtod) issue
-	
-	// set libc (and libstdc++) locale to "C"
-	std::setlocale(LC_ALL, "C");
-	
-	//std::locale::global(std::locale("C"));
-	//std::cout.imbue(std::locale());
-#endif
-	
 	return 0;
 }
 
@@ -1454,9 +1542,6 @@ bool config_load()
 {
 	// include config defaults
 	#include "client_variables.hpp"
-	
-	// create config-dir if it doesn't yet exist
-	sys_mkdir(sys_config_path());
 	
 	char cfgfile[1024];
 	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
@@ -1494,6 +1579,10 @@ int main(int argc, char **argv)
 		qVersion());
 	
 	
+	// the app instance
+	PClient app(argc, argv);
+	
+	
 	// load config
 	config_load();
 	config.print();
@@ -1525,7 +1614,6 @@ int main(int argc, char **argv)
 	audio_init();
 #endif
 	
-	PClient app(argc, argv);
 	if (app.init())
 		return 1;
 	

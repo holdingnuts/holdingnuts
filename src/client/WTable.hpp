@@ -48,8 +48,8 @@
 typedef struct {
 	bool valid;
 	int client_id;
-	float bet;
-	float stake;
+	chips_type bet;
+	chips_type stake;
 	bool in_round;
 	bool sitout;
 	Player::PlayerAction action;
@@ -59,23 +59,27 @@ typedef struct {
 typedef struct {
 	int state;
 	int betting_round;
-	unsigned int s_dealer;
-	unsigned int s_sb;
-	unsigned int s_bb;
-	unsigned int s_cur;
-	unsigned int s_lastbet;
-	std::vector<float> pots;
-	float minimum_bet;
+	int s_dealer;
+	int s_sb;
+	int s_bb;
+	int s_cur;
+	int s_lastbet;
+	std::vector<chips_type> pots;
+	chips_type minimum_bet;
 	CommunityCards communitycards;
 	seatinfo seats[10];
 	int my_seat;
+	bool nomoreaction;
 } table_snapshot;
 
-
+class QGraphicsView;
+class QGraphicsScene;
 class QStackedLayout;
 class QLabel;
 class QSlider;
 class QShortcut;
+class QPushButton;
+class QCheckBox;
 
 class ChatBox;
 class DealerButton;
@@ -107,6 +111,12 @@ public:
 	static QString buildHandStrengthString(HandStrength *strength, int verbosity=0);
 	static QString buildFaceString(const Card& card, bool plural=false);
 	static QString buildSuitString(const Card& card);
+	
+	//! \brief shows all entitys from table
+	void showDebugTable();
+	
+	//! \brief brings window to foreground
+	void setForegroundWindow();
 
 protected:
 	void closeEvent(QCloseEvent *event);
@@ -125,18 +135,14 @@ protected:
 
 	void evaluateActions(const table_snapshot *snap);
 	
-#if 0
-	bool isNoMoreActionPossible(const table_snapshot *snap);
-#endif
-	
 	bool greaterBet(
 		const table_snapshot *snap,
-		const qreal& bet,
-		qreal *pbet = 0) const;
+		const chips_type bet,
+		chips_type *pbet = 0) const;
 	
 
 	//! \brief returns current Potsize including all Bets on Table
-	float currentPot() const;
+	chips_type currentPot() const;
 	
 	void updateSeat(unsigned int s);
 	void updatePots();
@@ -221,7 +227,7 @@ private:
 	int				m_nNoAction;
 	int				m_nSitoutActions;
 	
-	qreal			m_autocall_amount;
+	chips_type			m_autocall_amount;
 	
 	// precomputed dealerbtn positions
 	QPointF			m_ptDealerBtn[10];

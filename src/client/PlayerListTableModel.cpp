@@ -24,12 +24,12 @@
 #include "PlayerListTableModel.hpp"
 
 #include <QDebug>
-
+#include <QIcon>
 
 PlayerListTableModel::PlayerListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
 {
-	strlstHeaderLabels << tr("ID") << tr("Name") << tr("Location"); 
+	strlstHeaderLabels << tr("ID") << tr("Admin") << tr("Name") << tr("Location"); 
 }
 
 int PlayerListTableModel::rowCount(const QModelIndex& parent) const
@@ -62,14 +62,23 @@ QVariant PlayerListTableModel::data(const QModelIndex& index, int role) const
 			case 0:
 				return data.cid;
 			case 1:
-				return data.name;
+				return QVariant(); // TODO: data.admin;
 			case 2:
+				return data.name;
+			case 3:
 				return data.location;
 			default:
 				qDebug() << "PlayerListTableModel::data() invalided column ("<<index.column()<<")";
 		}
 	}
-	
+
+// TODO
+//	if (
+//		role == Qt::DecorationRole && 
+//		index.column() == 1 &&
+//		players.at(index.row()).admin)
+//			return QVariant(QIcon("gfx/foyer/admin.png"));
+
 	return QVariant();
 }
 
@@ -103,10 +112,14 @@ bool PlayerListTableModel::setData(
 			case 0:
 					data.cid = value.toInt();
 				break;
-			case 1:
+// TODO				
+//			case 1:
+//					data.admin = value.toBool();
+//				break;
+			case 2:
 					data.name = value.toString();
 				break;
-			case 2:
+			case 3:
 					data.location = value.toString();
 				break;
 			default:
@@ -171,14 +184,19 @@ void PlayerListTableModel::updateValue(int cid, int column, const QVariant& valu
 	this->setData(createIndex(0, column), value, Qt::EditRole);
 }
 
-void PlayerListTableModel::updatePlayerName(int cid, const QString& value)
+void PlayerListTableModel::updatePlayerAdmin(int cid, bool value)
 {
 	updateValue(cid, 1, value);
 }
 
-void PlayerListTableModel::updatePlayerLocation(int cid, const QString& value)
+void PlayerListTableModel::updatePlayerName(int cid, const QString& value)
 {
 	updateValue(cid, 2, value);
+}
+
+void PlayerListTableModel::updatePlayerLocation(int cid, const QString& value)
+{
+	updateValue(cid, 3, value);
 }
 
 QString PlayerListTableModel::getPlayerName(int cid) const
@@ -225,11 +243,6 @@ QString PlayerListTableModel::location(int cid) const
 	return QString();
 }
 
-void PlayerListTableModel::clear()
-{
-	players.clear();
-}
-
 bool PlayerListTableModel::containsId(int cid) const
 {
 	players_type::const_iterator it;
@@ -239,6 +252,13 @@ bool PlayerListTableModel::containsId(int cid) const
 			return true;
 			
 	return false;			
+}
+
+unsigned PlayerListTableModel::nameColumn() const { return 2; }
+
+void PlayerListTableModel::clear()
+{
+	players.clear();
 }
 
 void PlayerListTableModel::dump()

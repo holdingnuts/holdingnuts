@@ -39,6 +39,10 @@ const qreal Seat::sy_card = 138;
 const qreal Seat::sx_mini_card = 41;
 const qreal Seat::sy_mini_card = 58;
 
+// In-Seat-Font
+QFont Seat::m_ftInSeat;
+QFontMetrics Seat::m_fmInSeat(Seat::m_ftInSeat);
+
 Seat::Seat(unsigned int id, QWidget *parent)
 :	m_nID(id),
 	m_bValid(false),
@@ -53,20 +57,34 @@ Seat::Seat(unsigned int id, QWidget *parent)
 void Seat::setValid(bool valid)
 {
 	m_bValid = valid;
+	
+	if (!valid)
+		this->setToolTip(QString());	// unset tooltip
 }
 
 void Seat::setInfo(const QString& name, const QString& location)
 {
 	m_strName = name;
-	this->setToolTip(tr("Location: %1").arg(location));
+	
+	chopName();
+	
+	if (m_strName.length() < name.length())
+		m_strName.append("...");
+	
+	QString tooltip(tr("Name: %1").arg(name));
+	
+	if (!location.isEmpty())
+		tooltip.append(QString("\n") + tr("Location: %1").arg(location));
+	
+	this->setToolTip(tooltip);
 }
 
-void Seat::setStake(qreal amount)
+void Seat::setStake(chips_type amount)
 {
-	m_strStake.setNum(amount, 'f', 2);
+	m_strStake.setNum(amount);
 }
 
-void Seat::setAction(Player::PlayerAction action, qreal amount)
+void Seat::setAction(Player::PlayerAction action, chips_type amount)
 {
 	switch ((int)action)
 	{
@@ -99,17 +117,17 @@ void Seat::setAction(Player::PlayerAction action, qreal amount)
 			break;
 	}
 	
-	if (amount > 0.0)
-		m_strAmount.setNum(amount, 'f', 2);
+	if (amount > 0)
+		m_strAmount.setNum(amount);
 	else
 		m_strAmount.clear();
 }
 
-void Seat::setWin(qreal amount)
+void Seat::setWin(chips_type amount)
 {	
-	if (amount > 0.0)
+	if (amount > 0)
 	{
-		m_strAmount.setNum(amount, 'f', 2);
+		m_strAmount.setNum(amount);
 		m_pCurrentActionImg = &SeatImages::Instance().imgStatusWin;
 	}
 	else
@@ -225,12 +243,10 @@ void Seat::paint(
 	else
 		imgBack = &(SeatImages::Instance().imgBack);
 	
-	
-	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-	
-	
 	painter->save();
-	
+
+	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+
 	painter->drawImage(
 			QRectF(
 			0,
@@ -251,38 +267,31 @@ void Seat::paint(
 			*m_pCurrentActionImg);
 	}
 
-	// TODO: font
-	static QFont normal_font("Arial", 18,  QFont::Normal);
-	static QFont bold_font("Arial", 18,  QFont::Bold);
-	
-	normal_font.setStyleStrategy(QFont::ForceOutline);
-	bold_font.setStyleStrategy(QFont::ForceOutline);
-	
-	static const QFontMetrics fm_bold(bold_font);
-
+	// text name
 	QPainterPath pathTxtName;
-	pathTxtName.addText(10, fm_bold.height() + 10, bold_font, m_strName);
+	pathTxtName.addText(10, m_fmInSeat.height() + 10, m_ftInSeat, m_strName);
 	
 	painter->fillPath(pathTxtName, Qt::black);
 	
+	// text stake
 	QPainterPath pathTxtStake;
-	pathTxtStake.addText(10, 75, normal_font, m_strStake);
+	pathTxtStake.addText(10, 75, m_ftInSeat, m_strStake);
 	
 	painter->fillPath(pathTxtStake, Qt::black);
 
+	// text amount
 	qreal tx_pos = 0;
 	qreal ty_pos = 0;
 			
-	calcBetTextPos(tx_pos, ty_pos, fm_bold.width(m_strAmount));
-	
-	// TODO: QPainterPath test
-	painter->setFont(bold_font);
+	calcBetTextPos(tx_pos, ty_pos, m_fmInSeat.width(m_strAmount));
+
+	painter->setFont(m_ftInSeat);
 	painter->drawText(
 		QRectF(
 			tx_pos,
 			ty_pos,
-			fm_bold.width(m_strAmount),
-			fm_bold.height()),
+			m_fmInSeat.width(m_strAmount),
+			m_fmInSeat.height()),
 		Qt::AlignLeft,
 		m_strAmount);
 
@@ -398,4 +407,22 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 				y = SeatImages::Instance().imgBack.height() - 30;
 			break;
 	}
+}
+
+void Seat::chopName()
+{
+	while (m_fmInSeat.width(m_strName) > (SeatImages::Instance().imgBack.width() - 
+									SeatImages::Instance().imgActNone.width()))
+	{
+		m_strName.chop(1);
+		chopName();
+	}
+}
+
+void Seat::setInSeatFont(const QFont& font)
+{
+	m_ftInSeat = font;
+	m_fmInSeat = QFontMetrics(m_ftInSeat);
+	
+	m_ftInSeat.setStyleStrategy(QFont::ForceOutline);
 }

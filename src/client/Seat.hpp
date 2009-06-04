@@ -27,6 +27,7 @@
 #include <QGraphicsItem>
 #include <QObject>
 #include <QLabel>
+#include <QFont>
 
 #include "Player.hpp"
 
@@ -38,12 +39,12 @@ public:
 	Seat(unsigned int id, QWidget *parent);
 
 	void setInfo(const QString& name, const QString& location);
-	void setStake(qreal amount);
+	void setStake(chips_type amount);
 	void setCurrent(bool cur);
 	void setSitout(bool sitout);
 	void setMySeat(bool bMyseat);
-	void setAction(Player::PlayerAction action, qreal amount = 0.0);
-	void setWin(qreal amount = 0.0);
+	void setAction(Player::PlayerAction action, chips_type amount = 0);
+	void setWin(chips_type amount = 0);
 	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
 	void showBigCards(bool bShow) { m_bBigCards = bShow; };
@@ -58,10 +59,14 @@ public:
 		QWidget* widget);
 		
 	bool isValid() const { return m_bValid; }
-
+	
+	static void setInSeatFont(const QFont& font);
+	
 private:
 	void calcSCardPos(qreal& x, qreal& y) const;
 	void calcBetTextPos(qreal& x, qreal& y, int txt_width) const;
+	
+	void chopName();
 	
 public:
 	// cards size
@@ -98,6 +103,11 @@ private:
 	bool					m_bSmallCards;
 	//! \brief display small-cards
 	bool					m_bBigCards;
+	
+	//! \brief In-Seat-Font (Name, Amount, ...)
+	static QFont			m_ftInSeat;
+	//! \brief Font Metrics from InSeatFont
+	static QFontMetrics		m_fmInSeat;
 };
 
 #endif /* _HOLDING_NUTS_SEAT_H */

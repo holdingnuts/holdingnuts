@@ -25,6 +25,7 @@
 #define _CREATEGAME_DIALOG_H
 
 #include <QDialog>
+#include "Player.hpp"        // chips_type
 
 class WMain;
 class QTabWidget;
@@ -45,20 +46,20 @@ public:
 	
 	QString getName() const;
 	QString getPassword() const;
-	double getStake() const;
+	chips_type getStake() const;
 	unsigned int getPlayers() const;
 	unsigned int getTimeout() const;
-	double getBlindsStart() const;
+	chips_type getBlindsStart() const;
 	double getBlindsFactor() const;
 	unsigned int getBlindsTime() const;
 	
 
 private:
 	QLineEdit	*editName;
-	QDoubleSpinBox  *spinStake;
+	QSpinBox	*spinStake;
 	QSpinBox	*spinPlayers;
 	QSpinBox	*spinTimeout;
-	QDoubleSpinBox  *spinBlindsStart;
+	QSpinBox	*spinBlindsStart;
 	QDoubleSpinBox  *spinBlindsFactor;
 	QSpinBox        *spinBlindsTime;
 	QLineEdit	*editPassword;

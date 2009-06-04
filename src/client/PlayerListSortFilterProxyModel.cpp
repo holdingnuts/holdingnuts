@@ -42,8 +42,9 @@ bool PlayerListSortFilterProxyModel::filterAcceptsRow(
 	const QModelIndex& sourceParent) const
 {
 	const QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent); // cid
-	const QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent); // name
-	const QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent); // location
+	const QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent); // admin
+	const QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent); // name
+	const QModelIndex index3 = sourceModel()->index(sourceRow, 3, sourceParent); // location
 
 	return (lstPlayersCid.contains(sourceModel()->data(index0).toInt()));
 }

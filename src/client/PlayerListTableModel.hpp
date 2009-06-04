@@ -63,6 +63,7 @@ public:
 	//! \param value
 	void updateValue(int cid, int column, const QVariant& value);
 
+	void updatePlayerAdmin(int cid, bool value);
 	void updatePlayerName(int cid, const QString& value);
 	void updatePlayerLocation(int cid, const QString& value);
 
@@ -73,6 +74,8 @@ public:
 	QString location(int cid) const;
 
 	bool containsId(int cid) const;
+
+	unsigned nameColumn() const;
 
 	void clear();
 
@@ -92,9 +95,11 @@ private:
 		
 		//! \brief ID; ColumnIndex 0
 		int			cid;
-		//! \brief Playername; ColumnIndex 1
+		//! \brief Admin of Games; ColumnIndex 1 
+		QList<int>	admin;
+		//! \brief Playername; ColumnIndex 2
 		QString		name;
-		//! \brief Player Location; ColumnIndex 2
+		//! \brief Player Location; ColumnIndex 3
 		QString		location;
 	};
 

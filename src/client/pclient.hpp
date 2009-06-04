@@ -95,9 +95,9 @@ typedef struct {
 	//! \brief registered players
 	std::vector<int>	players;
 	//! \brief initial player stakes
-	float		initial_stakes;
+	chips_type	initial_stakes;
 	//! \brief starting blinds
-	float		blinds_start;
+	chips_type	blinds_start;
 	//! \brief blinds raise factor
 	float		blinds_factor;
 	//! \brief blinds raise time
@@ -115,10 +115,10 @@ typedef std::map<int,gameinfo>		games_type;
 typedef struct {
 	QString name;
 	unsigned int max_players;
-	double stake;
+	chips_type stake;
 	unsigned int timeout;
 	unsigned int blinds_time;
-	double blinds_start;
+	chips_type blinds_start;
 	double blinds_factor;
 	QString password;
 } gamecreate;
@@ -149,7 +149,7 @@ public:
 	
 	bool createGame(gamecreate *createinfo);
 	
-	bool doSetAction(int gid, Player::PlayerAction action, float amount=0.0f);
+	bool doSetAction(int gid, Player::PlayerAction action, chips_type amount=0);
 	
 	void doRegister(int gid, bool bRegister=true, const QString& password="");
 	void doStartGame(int gid);
@@ -209,6 +209,7 @@ private:
 	void serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
 	void serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
 	void serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo* tinfo);
+	void serverCmdSnapFoyer(Tokenizer &t);
 	void serverCmdPlayerlist(Tokenizer &t);
 	void serverCmdClientinfo(Tokenizer &t);
 	void serverCmdGameinfo(Tokenizer &t);

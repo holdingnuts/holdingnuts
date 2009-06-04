@@ -40,9 +40,12 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	QWidget *tabGeneral = new QWidget;
 	QWidget *tabPlayerinfo = new QWidget;
 	QWidget *tabAppearance = new QWidget;
+	QWidget *tabLogChat = new QWidget;
+	
 	tabWidget->addTab(tabGeneral, tr("General"));
 	tabWidget->addTab(tabPlayerinfo, tr("Player info"));
 	tabWidget->addTab(tabAppearance, tr("Appearance"));
+	tabWidget->addTab(tabLogChat, tr("Log and chat"));
 	
 	
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -58,32 +61,20 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	
 	
 	// --- tabGeneral ---
-	
-	// logging options
-	checkLog = new QCheckBox(tr("enabled"), tabGeneral);
-	checkLog->setCheckState(cfg->getBool("log") ? Qt::Checked : Qt::Unchecked);
-	checkLogChat = new QCheckBox(tr("log chat"), tabGeneral);
-	checkLogChat->setCheckState(cfg->getBool("log_chat") ? Qt::Checked : Qt::Unchecked);
-	
-	actionCheckStateLog(checkLog->checkState());
-	connect(checkLog, SIGNAL(stateChanged(int)), this, SLOT(actionCheckStateLog(int)));
-	
-	QHBoxLayout *layoutLog = new QHBoxLayout;
-	layoutLog->addWidget(checkLog);
-	layoutLog->addWidget(checkLogChat);
-	
 	comboLocale = new QComboBox(tabGeneral);
 	
-	// locales (Note: names are not translated)
+	// locales (Note: names are not being translated)
 	struct {
 		QString lId;
 		QString lName;
 	} locales[] = {
 		{ "",	tr("Auto-Detect") },
-		{ "en",	"English" },
 		{ "de",	"German" },
+		{ "en",	"English" },
+		{ "ja", "Japanese" },
 		{ "nl", "Dutch" },
 		{ "ro", "Romanian" },
+		{ "ru", "Russian" },
 	};
 	const unsigned int locales_count = sizeof(locales) / sizeof(locales[0]);
 	
@@ -127,7 +118,6 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	layoutUUID->addLayout(layoutUUIDButtons);
 	
 	QFormLayout *formGeneral = new QFormLayout;
-	formGeneral->addRow(tr("Log to file"), layoutLog);
 	formGeneral->addRow(tr("Locale"), comboLocale);
 	formGeneral->addRow(tr("Sounds"), layoutSound);
 	formGeneral->addRow(tr("UUID"), layoutUUID);
@@ -150,6 +140,9 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 
 	checkCentralView = new QCheckBox("", tabAppearance);
 	checkCentralView->setCheckState(cfg->getBool("ui_centralized_view") ? Qt::Checked : Qt::Unchecked);
+
+	checkBringToTop = new QCheckBox("", tabAppearance);
+	checkBringToTop->setCheckState(cfg->getBool("ui_bring_to_top") ? Qt::Checked : Qt::Unchecked);
 	
 	comboCarddeck = new QComboBox(tabAppearance);
 	
@@ -173,8 +166,59 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	QFormLayout *formAppearance = new QFormLayout;
 	formAppearance->addRow(tr("Show strength of hand"), checkHandStrength);
 	formAppearance->addRow(tr("Centralized table view"), checkCentralView);
+	formAppearance->addRow(tr("Bring window to top"), checkBringToTop);
 	formAppearance->addRow(tr("Card deck"), comboCarddeck);
 	tabAppearance->setLayout(formAppearance);
+	
+	
+	// --- tabLogChat ---
+	
+	// logging options
+	checkLog = new QCheckBox(tr("enabled"), tabGeneral);
+	checkLog->setCheckState(cfg->getBool("log") ? Qt::Checked : Qt::Unchecked);
+	checkLogChat = new QCheckBox(tr("log chat"), tabGeneral);
+	checkLogChat->setCheckState(cfg->getBool("log_chat") ? Qt::Checked : Qt::Unchecked);
+	
+	actionCheckStateLog(checkLog->checkState());
+	connect(checkLog, SIGNAL(stateChanged(int)), this, SLOT(actionCheckStateLog(int)));
+	
+	QHBoxLayout *layoutLog = new QHBoxLayout;
+	layoutLog->addWidget(checkLog);
+	layoutLog->addWidget(checkLogChat);
+	
+	// verbosity level foyer
+	checkVerboseFoyerTime = new QCheckBox(tr("Display time in foyer chat"), tabGeneral);	// 0x1
+	checkVerboseFoyerTime->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x1) ? Qt::Checked : Qt::Unchecked);
+	
+	checkVerboseFoyerJoinLeft = new QCheckBox(tr("Display join/left messages"), tabGeneral);	// 0x2
+	checkVerboseFoyerJoinLeft->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x2) ? Qt::Checked : Qt::Unchecked);
+
+	checkVerboseFoyerGameState = new QCheckBox(tr("Display game states"), tabGeneral);			// 0x4
+	checkVerboseFoyerGameState->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x4) ? Qt::Checked : Qt::Unchecked);
+
+	checkVerboseFoyerPlayerChat = new QCheckBox(tr("Display player chat"), tabGeneral);			// 0x8
+	checkVerboseFoyerPlayerChat->setCheckState((cfg->getInt("chat_verbosity_foyer") & 0x8) ? Qt::Checked : Qt::Unchecked);
+
+	// verbosity level table
+	checkVerboseTablePlayerActions = new QCheckBox(tr("Display player actions"), tabGeneral);	// 0x1
+	checkVerboseTablePlayerActions->setCheckState((cfg->getInt("chat_verbosity_table") & 0x1) ? Qt::Checked : Qt::Unchecked);
+
+	checkVerboseTableCards = new QCheckBox(tr("Display hole/community cards"), tabGeneral);	// 0x2
+	checkVerboseTableCards->setCheckState((cfg->getInt("chat_verbosity_table") & 0x2) ? Qt::Checked : Qt::Unchecked);
+
+	checkVerboseTablePlayerChat = new QCheckBox(tr("Display player chat"), tabGeneral);	// 0x4
+	checkVerboseTablePlayerChat->setCheckState((cfg->getInt("chat_verbosity_table") & 0x4) ? Qt::Checked : Qt::Unchecked);
+
+	QFormLayout *formLogChat = new QFormLayout;
+	formLogChat->addRow(tr("Log to file"), layoutLog);
+	formLogChat->addRow(tr("Foyer chat verbosity"), checkVerboseFoyerTime);
+	formLogChat->addRow(" ", checkVerboseFoyerJoinLeft);
+	formLogChat->addRow(" ", checkVerboseFoyerGameState);
+	formLogChat->addRow(" ", checkVerboseFoyerPlayerChat);
+	formLogChat->addRow(tr("Table chat verbosity"), checkVerboseTablePlayerActions);
+	formLogChat->addRow(" ", checkVerboseTableCards);
+	formLogChat->addRow(" ", checkVerboseTablePlayerChat);
+	tabLogChat->setLayout(formLogChat);
 }
 
 void SettingsDialog::actionGenUUID()
@@ -196,24 +240,58 @@ void SettingsDialog::actionOk()
 {
 	bool bError = false;
 	
+	// FIXME: validate settings
 	if (!bError)
 	{
 		// tabGeneral
 		cfg->set("uuid", labelUUIDdisplay->text().toStdString());
-		cfg->set("log", (checkLog->checkState() == Qt::Checked) ? true : false);
-		cfg->set("log_chat", (checkLogChat->checkState() == Qt::Checked) ? true : false);
 		cfg->set("locale", comboLocale->itemData(comboLocale->currentIndex()).toString().toStdString());
 		cfg->set("sound", (checkSound->checkState() == Qt::Checked) ? true : false);
 		cfg->set("sound_focus", (checkSoundFocus->checkState() == Qt::Checked) ? true : false);
+		
 		
 		// tabPlayerinfo
 		cfg->set("player_name", editPlayerName->text().toStdString());
 		cfg->set("info_location", editPlayerLocation->text().toStdString());
 		
+		
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_centralized_view", (checkCentralView->checkState() == Qt::Checked) ? true : false);
+		cfg->set("ui_bring_to_top", (checkBringToTop->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_card_deck", comboCarddeck->itemData(comboCarddeck->currentIndex()).toString().toStdString());
+		
+		
+		// tabLogChat
+		cfg->set("log", (checkLog->checkState() == Qt::Checked) ? true : false);
+		cfg->set("log_chat", (checkLogChat->checkState() == Qt::Checked) ? true : false);
+		
+		// verbosity level foyer
+		int chat_verbosity_foyer = 0;
+		
+		if (checkVerboseFoyerTime->checkState() == Qt::Checked)
+			chat_verbosity_foyer |= 0x1;
+		if (checkVerboseFoyerJoinLeft->checkState() == Qt::Checked)
+			chat_verbosity_foyer |= 0x2;
+		if (checkVerboseFoyerGameState->checkState() == Qt::Checked)
+			chat_verbosity_foyer |= 0x4;			
+		if (checkVerboseFoyerPlayerChat->checkState() == Qt::Checked)
+			chat_verbosity_foyer |= 0x8;
+			
+		cfg->set("chat_verbosity_foyer", chat_verbosity_foyer);
+		
+		// verbosity level table
+		int chat_verbosity_table = 0;
+		
+		if (checkVerboseTablePlayerActions->checkState() == Qt::Checked)
+			chat_verbosity_table |= 0x1;
+		if (checkVerboseTableCards->checkState() == Qt::Checked)
+			chat_verbosity_table |= 0x2;
+		if (checkVerboseTablePlayerChat->checkState() == Qt::Checked)
+			chat_verbosity_table |= 0x4;
+
+		cfg->set("chat_verbosity_table", chat_verbosity_table);
+		
 		
 		accept();
 	}

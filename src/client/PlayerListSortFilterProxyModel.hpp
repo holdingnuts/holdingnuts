@@ -35,6 +35,7 @@ public:
 	PlayerListSortFilterProxyModel(QObject *parent = 0);
 
 	//! \brief shows only the player that cid matches with list
+	//! \param lst Playerlist
 	void filterListCid(const QVector<int>& lst);
 
 protected:

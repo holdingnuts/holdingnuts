@@ -31,14 +31,14 @@
 
 EditableSlider::EditableSlider(QWidget *parent)
 :	QWidget(parent),
-	m_nMin(0.0f),
-	m_nMax(0.0f)
+	m_nMin(0),
+	m_nMax(0)
 {
 	m_pEdit = new QLineEdit("0", this);
 	m_pEdit->setAlignment(Qt::AlignRight);
 //	m_pEdit->setMinimumHeight(2* m_pEdit->fontInfo().pixelSize());
 	
-	m_pValidator = new QDoubleValidator(m_pEdit);
+	m_pValidator = new QIntValidator(m_pEdit);
 	
 	m_pEdit->setValidator(m_pValidator);
 	
@@ -67,7 +67,7 @@ EditableSlider::EditableSlider(QWidget *parent)
 
 EditableSlider::~EditableSlider() { }
 
-void EditableSlider::setMinimum(float value)
+void EditableSlider::setMinimum(chips_type value)
 {
 	m_nMin = value;
 	
@@ -78,20 +78,20 @@ void EditableSlider::setMinimum(float value)
 	m_pValidator->setBottom(value);
 }
 
-void EditableSlider::setMaximum(float value)
+void EditableSlider::setMaximum(chips_type value)
 {
 	m_nMax = value;
 }
 
-void EditableSlider::setValue(float value)
+void EditableSlider::setValue(chips_type value)
 {
 	m_pEdit->setText(QString::number(value));
 	m_pSlider->setSliderPosition(valueToSliderPosition(value));
 }
 
-float EditableSlider::value() const
+chips_type EditableSlider::value() const
 {
-	float value = m_pEdit->text().toFloat();
+	chips_type value = m_pEdit->text().toInt();
 	
 	if (value > m_nMax)
 		value = m_nMax;
@@ -111,7 +111,7 @@ bool EditableSlider::validValue() const
 
 void EditableSlider::sliderValueChanged(int value)
 {
-	float amount = .0f;
+	chips_type amount = 0;
 	
 	if (value == 100)	// 100% == allin
 		amount = m_nMax;
@@ -128,7 +128,7 @@ void EditableSlider::sliderValueChanged(int value)
 		else
 			amount = (int)(m_nMax * value / 100);
 		
-		amount += (int)m_nMin;
+		amount += m_nMin;
 	}
 	
 	QString str;
@@ -154,7 +154,7 @@ void EditableSlider::textChanged(const QString& text)
 	emit dataChanged();
 }
 
-int EditableSlider::valueToSliderPosition(float value) const
+int EditableSlider::valueToSliderPosition(chips_type value) const
 {
 	// FIXME: use exactly one mapping for fromValue and toValue
 	if (value >= m_nMax)
@@ -180,7 +180,7 @@ void EditableSlider::textEdited(const QString& text)
 
 	if (state == QValidator::Acceptable)
 	{
-		const float value = text.toFloat();
+		const chips_type value = text.toInt();
 		
 		m_pSlider->setSliderPosition(valueToSliderPosition(value));
 	}

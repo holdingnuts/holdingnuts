@@ -33,13 +33,16 @@
 #include <QKeyEvent>
 #include <QAbstractItemView>
 #include <QDebug>
+#include <QTime>
+
 
 ChatBox::ChatBox(
 	InputLineAlignment align,
 	int nTextLogHeight,
-	QWidget *parent) : QWidget(parent), m_pCompleter(0)
+	QWidget *parent) : QWidget(parent), m_pCompleter(0), m_bShowTime(false)
 {
 	m_pEditChat = new QLineEdit(this);
+	m_pEditChat->setMaxLength(200);
 
 	connect(m_pEditChat, SIGNAL(returnPressed()), this, SLOT(actionChat()));
 	connect(m_pEditChat, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
@@ -98,6 +101,9 @@ void ChatBox::addMessage(const QString &msg, const QString &from, const QColor &
 	m_pEditChatLog->setTextColor(color);
 	m_pEditChatLog->setFontPointSize(m_nFontPointSize);
 	
+	if (m_bShowTime)
+		m_pEditChatLog->insertPlainText("<" + QTime::currentTime().toString("hh:mm") + "> ");
+	
 	// is the message from other client
 	if (from.length())
 	{
@@ -145,6 +151,11 @@ void ChatBox::showChatBtn(bool bShow)
 	m_pSendMsg->setVisible(bShow);
 }
 
+void ChatBox::showTime(bool bShow)
+{
+	m_bShowTime = bShow;
+}
+
 void ChatBox::setEnabled(bool enable)
 {
 	m_pEditChat->setEnabled(enable);
@@ -160,6 +171,13 @@ void ChatBox::setCompleter(QCompleter *completer)
 	connect(
 		m_pCompleter, SIGNAL(activated(const QString&)),
 		this, SLOT(insertCompletion(const QString&)));
+}
+
+bool ChatBox::hasInputFocus() const
+{
+	Q_ASSERT_X(m_pEditChat, Q_FUNC_INFO, "invalid lineedit pointer");
+
+	return m_pEditChat->hasFocus();
 }
 
 void ChatBox::resizeEvent(QResizeEvent *event)
@@ -193,10 +211,10 @@ void ChatBox::textEdited(const QString& text)
 	if (completionPrefix != m_pCompleter->completionPrefix())
 	{
 		m_pCompleter->setCompletionPrefix(completionPrefix);
-//		m_pCompleter->popup()->setCurrentIndex(
-//			m_pCompleter->completionModel()->index(
-//				0,
-//				m_pCompleter->completionColumn()));
+		m_pCompleter->popup()->setCurrentIndex(
+			m_pCompleter->completionModel()->index(
+				0,
+				m_pCompleter->completionColumn()));
 	}
 	
 	m_pCompleter->complete();

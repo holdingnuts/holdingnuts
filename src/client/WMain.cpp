@@ -62,6 +62,9 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QListView>
+#include <QStandardItemModel>
+#include <QGridLayout>
+#include <QCheckBox>
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -175,14 +178,18 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// view player
 	viewPlayerList = new QTableView(this);
 	viewPlayerList->setShowGrid(false);
-	viewPlayerList->horizontalHeader()->hide();	// TODO: enable if required
 	viewPlayerList->horizontalHeader()->setHighlightSections(false);
 	viewPlayerList->verticalHeader()->hide();
 	viewPlayerList->verticalHeader()->setHighlightSections(false);
 	viewPlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewPlayerList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	viewPlayerList->setModel(proxyModelPlayerList);
-	
+#ifndef DEBUG
+	// hide cid and admin column if debug is disabled
+	viewPlayerList->setColumnHidden(0, true);
+	viewPlayerList->setColumnHidden(1, true);
+#endif
+
 	// container widget
 	wGameFilter = new QWidget(this);
 	wGameFilter->setLayout(lGameFilter);
@@ -253,10 +260,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// connection
 	cbSrvAddr = new QComboBox(this);
 	cbSrvAddr->setEditable(true); 
-	cbSrvAddr->setInsertPolicy(QComboBox::InsertAtTop);
 	cbSrvAddr->setToolTip(
 		tr("The desired server (domain-name or IP) to connect with.\nYou can optionally specify a port number.\nFormat: <host>[:<port>]"));
-
 	connect(cbSrvAddr->lineEdit(), SIGNAL(returnPressed()), this, SLOT(actionConnect()));
 	
 	btnConnect = new QPushButton(tr("&Connect"), this);
@@ -287,12 +292,13 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	QCompleter *cmpChat = new QCompleter(((PClient*)qApp)->playerList(), this);
 	cmpChat->setPopup(popupView);
 	cmpChat->setCompletionRole(Qt::DisplayRole);
-	cmpChat->setCompletionColumn(1);
+	cmpChat->setCompletionColumn(((PClient*)qApp)->playerList()->nameColumn());
 
 	// the foyer chat box
 	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
 	m_pChat->setCompleter(cmpChat);
+	m_pChat->showTime((config.getInt("chat_verbosity_foyer") & 0x1));
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 
@@ -416,6 +422,12 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 			Qt::CheckState(settings.value("filterHidePrivateGames", 0).toInt()));
 	settings.endGroup();
 	
+	// load serverlist model
+	QStandardItemModel *modelSrvLst = new QStandardItemModel(0, 2, parent);
+
+	modelSrvLst->setHeaderData(0, Qt::Horizontal, tr("Name"));
+	modelSrvLst->setHeaderData(1, Qt::Horizontal, tr("Connections"));
+	
 	int nSrvAddr = settings.beginReadArray("Serverlist");
 	
 	for (int i = 0; i < nSrvAddr; ++i)
@@ -425,12 +437,27 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 		QString server = settings.value("Name").toString();
 
 		if (!server.isEmpty())
-			cbSrvAddr->addItem(server);
+		{
+			modelSrvLst->insertRow(0);
+			modelSrvLst->setData(modelSrvLst->index(0, 0), server);
+			modelSrvLst->setData(modelSrvLst->index(0, 1), settings.value("Connections").toInt());
+		}
 	}
 	settings.endArray();
-	
-	if (!cbSrvAddr->count())
-		cbSrvAddr->addItem(QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")));
+
+	modelSrvLst->sort(1, Qt::DescendingOrder);
+
+	// no serverhistory found then use default server from config
+	if (modelSrvLst->rowCount() == 0)
+	{
+		modelSrvLst->insertRow(0);
+		modelSrvLst->setData(
+			modelSrvLst->index(0, 0),
+			QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")));
+		modelSrvLst->setData(modelSrvLst->index(0, 1), 0);
+	}
+		
+	cbSrvAddr->setModel(modelSrvLst);
 }
 
 void WMain::addLog(const QString &line)
@@ -443,7 +470,7 @@ void WMain::addChat(const QString &from, const QString &text)
 	m_pChat->addMessage(text, from);
 	
 	if (config.getBool("log_chat"))
-		log_msg("chat", "(%s) %s",
+		log_msg("foyer", "(%s) %s",
 			 from.toStdString().c_str(), text.toStdString().c_str());
 }
 
@@ -583,9 +610,24 @@ void WMain::actionConnect()
 		return;
 	
 	// store server in combobox and settings
-	if (cbSrvAddr->findText(cbSrvAddr->lineEdit()->text()) == -1)
-		cbSrvAddr->addItem(cbSrvAddr->lineEdit()->text());
+	int idx = cbSrvAddr->findText(cbSrvAddr->lineEdit()->text());
 
+	QAbstractItemModel *modelSrvLst = cbSrvAddr->model();
+
+	if (idx == -1)
+	{
+		modelSrvLst->insertRow(0);
+		modelSrvLst->setData(modelSrvLst->index(0, 0), cbSrvAddr->lineEdit()->text());
+		modelSrvLst->setData(modelSrvLst->index(0, 1), 1);
+	}
+	else
+	{
+		int count = modelSrvLst->data(modelSrvLst->index(idx, 1)).toInt();
+
+		modelSrvLst->setData(modelSrvLst->index(idx, 1), ++count);
+		modelSrvLst->sort(1, Qt::DescendingOrder);
+	}
+	
 	writeServerlist();
 	
 	// split up the connect-string: <hostname>:<port>
@@ -619,6 +661,7 @@ void WMain::actionTest()
 #ifdef DEBUG
 	WTable *table = new WTable(0, 0);
 	table->slotShow();
+	table->showDebugTable();
 	
 #ifndef NOAUDIO
 	dbg_msg("DEBUG", "playing test sound");
@@ -781,9 +824,12 @@ void WMain::gameListSelectionChanged(
 	{
 		const int selected_row = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
+		
+		/*
 		dbg_msg("gameListSelectionChanged", "selected-row:%d gid:%d",
 			selected_row,
 			gid);
+		*/
 		
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
@@ -925,7 +971,7 @@ void WMain::actionSelectedGameUpdate()
 	const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 	const int gid = modelGameList->findGidByRow(selected_row);
 	
-	dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
+	//dbg_msg(Q_FUNC_INFO, "timer: updating game %d", gid);
 	
 	((PClient*)qApp)->requestGameinfo(gid);
 	((PClient*)qApp)->requestPlayerlist(gid);
@@ -976,9 +1022,9 @@ void WMain::updateGameinfo(int gid)
 	lblGameInfoPlayers->setText(QString("%1 / %2").arg(gi->players_count).arg(gi->players_max));
 	lblGameInfoId->setText(QString("%1").arg(gid));
 	lblGameInfoStakes->setText(QString("%1").arg(gi->initial_stakes));
-	lblGameInfoTimeout->setText(QString("%1").arg(gi->player_timeout));
+	lblGameInfoTimeout->setText(QString("<qt>%1<b>s</b></qt>").arg(gi->player_timeout));
 	lblGameInfoBlinds->setText(QString("<qt>%1 /<br/><b>x</b>%2 /<br/>%3<b>s</b></qt>")
-		.arg(gi->blinds_start, 0, 'f', 2)
+		.arg(gi->blinds_start)
 		.arg(gi->blinds_factor, 0, 'f', 2)
 		.arg(gi->blinds_time));
 	
@@ -1019,10 +1065,13 @@ void WMain::writeServerlist() const
 	if (numServer > 10)
 		numServer = 10;
 
+	QAbstractItemModel *pModel = cbSrvAddr->model();
+
 	for (int i = 0; i < numServer; ++i)
 	{
 		settings.setArrayIndex(i);
-		settings.setValue("Name", cbSrvAddr->itemText(i));
+		settings.setValue("Name", pModel->data(pModel->index(i, 0)));
+		settings.setValue("Connections", pModel->data(pModel->index(i, 1)).toInt());
 	}
 
 	settings.endArray();
