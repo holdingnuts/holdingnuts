@@ -59,6 +59,7 @@ typedef enum {
 	SnapGameStateEnd	= 0x02,
 	SnapGameStateSeat	= 0x03,   // TODO
 	SnapGameStateNewHand	= 0x04,
+	SnapGameStateBlinds	= 0x05,
 	SnapGameStateWon	= 0x10,
 	SnapGameStateBroke	= 0x11,
 } snap_gamestate_type;

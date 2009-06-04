@@ -131,7 +131,7 @@ bool send_err(clientcon *client, int code=0, const char *str="")
 // from client/foyer to client/foyer
 bool client_chat(int from, int to, const char *message)
 {
-	char msg[128];
+	char msg[256];
 	
 	if (from == -1)
 	{
@@ -173,7 +173,7 @@ bool client_chat(int from, int to, const char *message)
 // from game/table to client
 bool client_chat(int from_gid, int from_tid, int to, const char *message)
 {
-	char msg[128];
+	char msg[256];
 	
 	snprintf(msg, sizeof(msg), "MSG %d:%d %s %s",
 		from_gid, from_tid, (from_tid == -1) ? "game" : "table", message);
@@ -188,7 +188,7 @@ bool client_chat(int from_gid, int from_tid, int to, const char *message)
 // from client to game/table
 bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 {
-	char msg[128];
+	char msg[256];
 	
 	clientcon* fromclient = get_client_by_id(from_cid);
 	
@@ -216,12 +216,26 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 
 bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *message)
 {
-	snprintf(msg, sizeof(msg), "SNAP %d:%d %d %s",
+	char buf[MSG_BUFFER_SIZE];
+	snprintf(buf, sizeof(buf), "SNAP %d:%d %d %s",
 		from_gid, from_tid, sid, message);
 	
 	clientcon* toclient = get_client_by_id(to);
-	if (toclient)
-		send_msg(toclient->sock, msg);
+	if (toclient && toclient->state & Introduced)
+		send_msg(toclient->sock, buf);
+	
+	return true;
+}
+
+bool client_snapshot(int to, int sid, const char *message)
+{
+	if (to == -1)  // to all
+	{
+		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
+			client_snapshot(-1, -1, e->id, sid, message);
+	}
+	else
+		client_snapshot(-1, -1, to, sid, message);
 	
 	return true;
 }
@@ -295,8 +309,8 @@ bool client_remove(socktype sock)
 				
 				
 				snprintf(msg, sizeof(msg),
-					"%s (%d) left foyer",
-					client->info.name, client->id);
+					"%d %d \"%s\"",
+					SnapFoyerLeave, client->id, client->info.name);
 				
 				send_msg = true;
 				
@@ -314,9 +328,9 @@ bool client_remove(socktype sock)
 			
 			clients.erase(client);
 			
-			// send client-left-msg to all remaining clients
+			// send foyer snapshot to all remaining clients
 			if (send_msg)
-				client_chat(-1, -1, msg);
+				client_snapshot(-1, SnapFoyer, msg);
 			
 			break;
 		}
@@ -432,12 +446,25 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 			con_archive[client->uuid] = ar;
 		}
 		
-		// send broadcast message to foyer
-		snprintf(msg, sizeof(msg),
-			"%s (%d) joined foyer",
-			client->info.name, client->id);
 		
-		client_chat(-1, -1, msg);
+		// send welcome message
+		const string welcome_message = config.get("welcome_message");
+		if (welcome_message.length())
+		{
+			snprintf(msg, sizeof(msg),
+				"%s",
+				welcome_message.c_str());
+		
+			client_chat(-1, client->id, msg);
+		}
+		
+		
+		// send foyer snapshot broadcast
+		snprintf(msg, sizeof(msg),
+			"%d %d \"%s\"",
+			SnapFoyerJoin, client->id, client->info.name);
+		
+		client_snapshot(-1, SnapFoyer, msg);
 	}
 	
 	client->state |= SentInfo;
@@ -543,7 +570,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		state = GameStateWaiting;
 	
 	snprintf(msg, sizeof(msg),
-		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d:%d %d:%.2f:%d \"%s\"",
+		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d:%d %d:%d:%d \"%s\"",
 		gid,
 		(int) GameTypeHoldem,
 		game_mode,
@@ -557,7 +584,8 @@ bool send_gameinfo(clientcon *client, int gid)
 		g->getPlayerTimeout(),
 		g->getPlayerStakes(),
 		g->getBlindsStart(),
-		g->getBlindsFactor(), g->getBlindsTime(),
+		int(g->getBlindsFactor() * 10),
+		g->getBlindsTime(),
 		g->getName().c_str());
 	
 	send_msg(client->sock, msg);
@@ -663,11 +691,28 @@ bool client_cmd_request_gamestart(clientcon *client, Tokenizer &t)
 	if (!g)
 		return false;
 	
-	if (g->getOwner() != client->id)
+	if (g->getOwner() != client->id && !(client->state & Authed))
 		return false;
 	
 	g->start();
 	
+	return true;
+}
+
+bool client_cmd_request_gamerestart(clientcon *client, Tokenizer &t)
+{
+	int gid, restart;
+	t >> gid >> restart;
+
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+		return false;
+
+	if (!(client->state & Authed))
+		return false;
+
+	g->setRestart(restart);
+
 	return true;
 }
 
@@ -696,14 +741,18 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		cmderr = !client_cmd_request_serverinfo(client, t);
 	else if (request == "start")
 		cmderr = !client_cmd_request_gamestart(client, t);
+	else if (request == "restart")
+		cmderr = !client_cmd_request_gamerestart(client, t);
 	else
 		cmderr = true;
-
 	
+	// FIXME: temporarily disabled for release 0.0.3
+#if 0
 	if (!cmderr)
 		send_ok(client);
 	else
 		send_err(client);
+#endif
 	
 	return 0;
 }
@@ -952,9 +1001,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		"user_game",
 		10,
 		GameController::SNG,
-		1500*100,
+		1500,
 		30,
-		20*100,
+		20,
 		2.0f,
 		180,
 		"",
@@ -993,7 +1042,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			ginfo.stake = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.stake < 10*100 || ginfo.stake > 1000000*100)
+			if (ginfo.stake < 10 || ginfo.stake > 1000000*100)
 				cmderr = true;
 		}
 		else if (infotype == "timeout" && havearg)
@@ -1014,21 +1063,21 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			ginfo.blinds_start = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.blinds_start < 5*100 || ginfo.blinds_start > 200*100)
+			if (ginfo.blinds_start < 5 || ginfo.blinds_start > 200*100)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_factor" && havearg)
 		{
-			ginfo.blinds_factor = Tokenizer::string2float(infoarg);
+			ginfo.blinds_factor = Tokenizer::string2int(infoarg) / 10.0f;
 			
-			if (ginfo.blinds_factor < 1.0f || ginfo.blinds_factor > 4.0f)
+			if (ginfo.blinds_factor < 1.2f || ginfo.blinds_factor > 4.0f)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_time" && havearg)
 		{
 			ginfo.blinds_time = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.blinds_time < 30 || ginfo.blinds_time > 20*60)
+			if (ginfo.blinds_time < 30 || ginfo.blinds_time > 30*60)
 				cmderr = true;
 		}
 		else if (infotype == "password" && havearg)

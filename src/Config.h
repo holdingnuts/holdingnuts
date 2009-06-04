@@ -40,7 +40,7 @@
 /* time to wait for an action on the non-blocking sockets (in millisecs) */
 #define SERVER_SELECT_TIMEOUT_USEC  150000
 
-/* server testing mode (define to enable) */
+/* server testing mode used in test-programs (define to enable) */
 #undef SERVER_TESTING
 
 

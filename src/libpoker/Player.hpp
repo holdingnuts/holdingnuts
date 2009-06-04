@@ -33,6 +33,7 @@ typedef unsigned int chips_type;
 class Player
 {
 friend class GameController;
+friend class TestCaseGameController;
 
 public:
 	typedef enum {
@@ -69,7 +70,8 @@ public:
 private:
 	int client_id;
 	
-	chips_type stake;
+	chips_type stake;		// currrent stake
+	chips_type stake_before;	// stake before new hand
 	
 	HoleCards holecards;
 	

@@ -31,15 +31,17 @@ config.set("log",			true);			// log into file
 config.set("log_timestamp",		true);			// log with timestamp
 config.set("auth_password",		"");			// server authentication password
 config.set("perm_create_user",		true);			// allow regular user to create games
-config.set("conarchive_expire",		15 * 60);		// stored connection data expiration (seconds)
+config.set("conarchive_expire",		30 * 60);		// stored connection data expiration (seconds)
 config.set("flood_chat_interval",	10);			// flood-protect: interval for measureing (seconds)
 config.set("flood_chat_per_interval",	5);			// flood-protect: count of messages allowed in interval
 config.set("flood_chat_mute",		60);			// flood-protect: mute time (seconds)
+config.set("welcome_message",		"");			// welcome message sent on state info
+
 
 #ifdef DEBUG
 config.set("dbg_testgame_players",	3);		// testgames with X players
 config.set("dbg_testgame_games",	2);		// start X testgames
 config.set("dbg_testgame_timeout",	30);		// player timeout in seconds
-config.set("dbg_testgame_stakes",	1500*100);	// initial player stake
+config.set("dbg_testgame_stakes",	1500);		// initial player stake
 config.set("dbg_stresstest",		false);		// stress-testing the server
 #endif

@@ -29,5 +29,6 @@ using namespace std;
 Player::Player()
 {
 	next_action.valid = false;
+	last_action = Player::None;
 	sitout = false;
 }

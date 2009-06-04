@@ -40,6 +40,12 @@
 #include "Debug.h"
 
 
+// FIXME: have platform independent solution instead of fix value
+#define MAX_PATH_LEN	4096
+
+static char cfg_path[MAX_PATH_LEN + 1] = "";
+
+
 const char* build_mode_string(int mode)
 {
 	static char mode_str[4];
@@ -204,11 +210,21 @@ int sys_chdir(const char *path)
 	return 0;
 }
 
+int sys_set_config_path(const char *path)
+{
+	snprintf(cfg_path, sizeof(cfg_path), "%s", path);
+	return 0;
+}
+
 const char* sys_config_path()
 {
-	static char path[1024];
+	static char path[MAX_PATH_LEN + 1];
 	const char *config_path;
-
+	
+	// use manually set config-directory
+	if (*cfg_path)
+		return cfg_path;
+	
 #if defined(PLATFORM_WINDOWS)
 	config_path = getenv("APPDATA");
 #else
@@ -250,6 +266,8 @@ const char* sys_data_path()
 	
 	for (i=0; i < count; i++)
 	{
+		// FIXME: ~/data could be found if run from $HOME.
+		//        add an additional check for present file/dir in data-dir
 		if (sys_isdir(search_dirs[i]))
 			return search_dirs[i];
 	}

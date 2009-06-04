@@ -162,10 +162,12 @@ int Tokenizer::getNextInt()
 	return string2int(getNext());
 }
 
+#if 0
 float Tokenizer::getNextFloat()
 {
 	return string2float(getNext());
 }
+#endif
 
 bool Tokenizer::popFirst()
 {
@@ -196,11 +198,12 @@ int Tokenizer::string2int(string s, unsigned int base)
 	return strtol(s.c_str(), &ptr, base);
 }
 
+#if 0
 float Tokenizer::string2float(string s)
 {
 	return (float)strtod(s.c_str(), NULL);
 }
-
+#endif
 
 Tokenizer& operator>>(Tokenizer& t, int& i)
 {
@@ -208,11 +211,13 @@ Tokenizer& operator>>(Tokenizer& t, int& i)
 	return t;
 }
 
+#if 0
 Tokenizer& operator>>(Tokenizer& t, float& f)
 {
 	f = t.getNextFloat();
 	return t;
 }
+#endif
 
 Tokenizer& operator>>(Tokenizer& t, string& str)
 {

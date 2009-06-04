@@ -73,20 +73,19 @@ int test_tokenizer()
 	
 	///////////
 	
-	t.parse("Garbage FooBar 1 2 3 5.15");
+	t.parse("Garbage FooBar 1 2 3");
 	
 	int gid, tid, cid;
-	float f;
 	std::string name;
 	
 	// pop first item
 	--t;
 	
 	// read items
-	t >> name >> gid >> tid >> cid >> f;
+	t >> name >> gid >> tid >> cid;
 	
 	
-	cout << "gid:" << gid << " tid:" << tid << " cid:" << cid << " name:" << name << " float:" << f << endl;
+	cout << "gid:" << gid << " tid:" << tid << " cid:" << cid << " name:" << name << endl;
 	
 	return 0;
 }

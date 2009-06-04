@@ -51,12 +51,12 @@ GameController::GameController()
 	max_players = 10;
 	restart = false;
 	
-	player_stakes = 1500*100;
+	player_stakes = 1500;
 	
 	blind.blindrule = BlindByTime;
 	blind.blinds_time = 60 * 4;
 	blind.blinds_factor = 2.0f;
-	blind.amount = 10*100;
+	blind.start = 10;
 	
 	hand_no = 0;
 	
@@ -340,7 +340,7 @@ void GameController::sendTableSnapshot(Table *t)
 			t->seats[t->dealer].seat_no,
 			t->seats[t->sb].seat_no,
 			t->seats[t->bb].seat_no,
-			t->seats[t->cur_player].seat_no,
+			(t->cur_player == -1) ? -1 : (int)t->seats[t->cur_player].seat_no,
 			t->seats[t->last_bet_player].seat_no);
 		sturn = tmp;
 	}
@@ -355,7 +355,7 @@ void GameController::sendTableSnapshot(Table *t)
 	
 	snprintf(msg, sizeof(msg),
 		"%d:%d "           // <state>:<betting-round>
-		"%s "              // <dealer>:<SB>:<BB>:<current>
+		"%s "              // <dealer>:<SB>:<BB>:<current>:<last-bet>
 		"cc:%s "           // <community-cards>
 		"%s "              // seats
 		"%s "              // pots
@@ -368,6 +368,23 @@ void GameController::sendTableSnapshot(Table *t)
 		minimum_bet);
 	
 	snap(t->table_id, SnapTable, msg);
+}
+
+void GameController::sendPlayerShowSnapshot(Table *t, Player *p)
+{
+	vector<Card> allcards;
+	p->holecards.copyCards(&allcards);
+	t->communitycards.copyCards(&allcards);
+	
+	string hsstr;
+	for (vector<Card>::const_iterator e = allcards.begin(); e != allcards.end(); e++)
+		hsstr += string(e->getName()) + string(" ");
+	
+	snprintf(msg, sizeof(msg), "%d %s",
+		p->client_id,
+		hsstr.c_str());
+	
+	snap(t->table_id, SnapPlayerShow, msg);
 }
 
 chips_type GameController::determineMinimumBet(Table *t) const
@@ -462,9 +479,26 @@ void GameController::stateNewRound(Table *t)
 	log_msg("Table", "Hand #%d (gid=%d tid=%d)", hand_no, game_id, t->table_id);
 #endif
 	
+
+#ifndef SERVER_TESTING
 	// fill and shuffle card-deck
 	t->deck.fill();
 	t->deck.shuffle();
+#else
+	// set defined cards for testing
+	if (debug_cards.size())
+	{
+		dbg_msg("deck", "using defined cards");
+		t->deck.empty();
+		t->deck.debugPushCards(&debug_cards);
+	}
+	else
+	{
+		dbg_msg("deck", "using random cards");
+		t->deck.fill();
+		t->deck.shuffle();
+	}
+#endif
 	
 	
 	// reset round-related
@@ -497,6 +531,8 @@ void GameController::stateNewRound(Table *t)
 		
 		p->holecards.clear();
 		p->resetLastAction();
+		
+		p->stake_before = p->stake;	// remember stake before this hand
 	}
 	
 	
@@ -534,6 +570,10 @@ void GameController::stateBlinds(Table *t)
 		{
 			blind.last_blinds_time = time(NULL);
 			blind.amount = (int)(blind.blinds_factor * blind.amount);
+			
+			// send out blinds snapshot
+			snprintf(msg, sizeof(msg), "%d %d %d", SnapGameStateBlinds, blind.amount / 2, blind.amount);
+			snap(t->table_id, SnapGameState, msg);
 		}
 		break;
 	}
@@ -580,6 +620,20 @@ void GameController::stateBlinds(Table *t)
 	Player *p = t->seats[t->cur_player].player;
 	snap(p->client_id, t->table_id, SnapPlayerCurrent);
 #endif
+	
+	// check if there is any more action possible
+	if (t->isAllin())
+	{
+		if ((pBig->stake == 0 && pSmall->stake == 0) ||   // both players are allin
+			(pBig->stake == 0 && t->seats[t->sb].bet >= t->seats[t->bb].bet) ||  // BB is allin, and SB has bet more or equal BB
+			(pSmall->stake == 0))  // SB is allin
+		{
+			dbg_msg("no-more-action", "sb-allin:%s  bb-allin:%s",
+				pSmall->stake ? "no" : "yes",
+				pBig->stake ? "no" : "yes");
+			t->nomoreaction = true;
+		}
+	}
 	
 	t->betround = Table::Preflop;
 	t->scheduleState(Table::Betting, 3);
@@ -647,8 +701,8 @@ void GameController::stateBetting(Table *t)
 				chat(p->client_id, t->table_id, "You cannot bet, there was already a bet! Try raise.");
 			else if (p->next_action.amount < minimum_bet)
 			{
-				snprintf(msg, sizeof(msg), "You cannot bet this amount. Minimum bet is %.2f.",
-					minimum_bet / 100.0f);
+				snprintf(msg, sizeof(msg), "You cannot bet this amount. Minimum bet is %d.",
+					minimum_bet);
 				chat(p->client_id, t->table_id, msg);
 			}
 			else
@@ -669,8 +723,8 @@ void GameController::stateBetting(Table *t)
 			}
 			else if (p->next_action.amount < minimum_bet)
 			{
-				snprintf(msg, sizeof(msg), "You cannot raise this amount. Minimum bet is %.2f.",
-					minimum_bet / 100.0f);
+				snprintf(msg, sizeof(msg), "You cannot raise this amount. Minimum bet is %d.",
+					minimum_bet);
 				chat(p->client_id, t->table_id, msg);
 			}
 			else
@@ -757,7 +811,7 @@ void GameController::stateBetting(Table *t)
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
-			if (action == Player::Allin || amount == p->stake)
+			if (action == Player::Allin || amount >= p->stake)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionAllin, p->client_id, t->seats[t->cur_player].bet);
 			else if (action == Player::Bet)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionBet, p->client_id, t->bet_amount);
@@ -792,7 +846,7 @@ void GameController::stateBetting(Table *t)
 	
 	
 	// is next the player who did the last bet/action? if yes, end this betting round
-	if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
+	if (t->getNextActivePlayer(t->cur_player) == t->last_bet_player)
 	{
 		// collect bets into pot
 		t->collectBets();
@@ -847,6 +901,10 @@ void GameController::stateBetting(Table *t)
 			return;
 		}
 		
+		// send helper-snapshot // FIXME: do this smarter
+		t->cur_player = -1;	// invalidate current player
+		sendTableSnapshot(t);
+		
 		
 		// reset the highest bet-amount
 		t->bet_amount = 0;
@@ -862,8 +920,6 @@ void GameController::stateBetting(Table *t)
 		// first action for next betting round is at this player
 		t->last_bet_player = t->cur_player;
 		
-		sendTableSnapshot(t);
-		
 		t->resetLastPlayerActions();
 		
 		t->scheduleState(Table::BettingEnd, 2);
@@ -878,6 +934,10 @@ void GameController::stateBetting(Table *t)
 		// find next player
 		t->cur_player = t->getNextActivePlayer(t->cur_player);
 		t->timeout_start = time(NULL);
+		
+		// reset current player's last action
+		p = t->seats[t->cur_player].player;
+		p->resetLastAction();
 		
 		t->scheduleState(Table::Betting, 1);
 		sendTableSnapshot(t);
@@ -903,7 +963,13 @@ void GameController::stateAskShow(Table *t)
 	
 	Player *p = t->seats[t->cur_player].player;
 	
-	if (p->next_action.valid)  // has player set an action?
+	if (!p->stake) // player is allin, no option to show/muck
+	{
+		t->seats[t->cur_player].showcards = true;
+		chose_action = true;
+		p->next_action.valid = false;
+	}
+	else if (p->next_action.valid)  // has player set an action?
 	{
 		if (p->next_action.action == Player::Muck)
 		{
@@ -936,6 +1002,9 @@ void GameController::stateAskShow(Table *t)
 			
 			chose_action = true;
 		}
+#else /* SERVER_TESTING */
+		t->seats[t->cur_player].showcards = true;
+		chose_action = true;
 #endif /* SERVER_TESTING */
 	}
 	
@@ -956,7 +1025,7 @@ void GameController::stateAskShow(Table *t)
 	{
 		t->state = Table::AllFolded;
 		
-		sendTableSnapshot(t);
+		//sendTableSnapshot(t);
 	}
 	else
 	{
@@ -964,9 +1033,8 @@ void GameController::stateAskShow(Table *t)
 		if (t->seats[t->cur_player].showcards == false)
 			t->seats[t->cur_player].in_round = false;
 		
-		sendTableSnapshot(t);
 		
-		if (t->getNextActivePlayer(t->cur_player) == (int)t->last_bet_player)
+		if (t->getNextActivePlayer(t->cur_player) == t->last_bet_player)
 		{
 			t->state = Table::Showdown;
 			return;
@@ -977,6 +1045,9 @@ void GameController::stateAskShow(Table *t)
 			t->cur_player = t->getNextActivePlayer(t->cur_player);
 			
 			t->timeout_start = time(NULL);
+			
+			// send update snapshot
+			sendTableSnapshot(t);
 		}
 	}
 }
@@ -986,11 +1057,18 @@ void GameController::stateAllFolded(Table *t)
 	// get last remaining player
 	Player *p = t->seats[t->cur_player].player;
 	
+	// send PlayerShow snapshot if cards were shown
+	if (t->seats[t->cur_player].showcards)
+		sendPlayerShowSnapshot(t, p);
+	
+	
 	p->stake += t->pots[0].amount;
 	t->seats[t->cur_player].bet = t->pots[0].amount;
 	
+	// send pot-win snapshot
 	snprintf(msg, sizeof(msg), "%d %d %d", p->client_id, 0, t->pots[0].amount);
 	snap(t->table_id, SnapWinPot, msg);
+	
 	
 	sendTableSnapshot(t);
 	t->scheduleState(Table::EndRound, 2);
@@ -1001,26 +1079,14 @@ void GameController::stateShowdown(Table *t)
 	// the player who did the last action is first
 	unsigned int showdown_player = t->last_bet_player;
 	
-	// determine and send out hand-strength messages
+	// determine and send out PlayerShow snapshots
 	for (unsigned int i=0; i < t->countActivePlayers(); i++)
 	{
 		if (t->seats[showdown_player].showcards || t->nomoreaction)
 		{
 			Player *p = t->seats[showdown_player].player;
 			
-			vector<Card> allcards;
-			p->holecards.copyCards(&allcards);
-			t->communitycards.copyCards(&allcards);
-			
-			string hsstr;
-			for (vector<Card>::const_iterator e = allcards.begin(); e != allcards.end(); e++)
-				hsstr += string(e->getName()) + string(" ");
-			
-			snprintf(msg, sizeof(msg), "%d %s",
-				p->client_id,
-				hsstr.c_str());
-			
-			snap(t->table_id, SnapPlayerShow, msg);
+			sendPlayerShowSnapshot(t, p);
 		}
 		
 		showdown_player = t->getNextActivePlayer(showdown_player);
@@ -1126,8 +1192,8 @@ void GameController::stateShowdown(Table *t)
 		
 		if (pot->amount > 0)
 		{
-			log_msg("winlist", "error: remaining chips in pot %d: %.2f",
-				i, pot->amount / 100.0f);
+			log_msg("winlist", "error: remaining chips in pot %d: %d",
+				i, pot->amount);
 		}
 	}
 #endif
@@ -1143,7 +1209,9 @@ void GameController::stateShowdown(Table *t)
 
 void GameController::stateEndRound(Table *t)
 {
-	// remove broken players from seats
+	multimap<chips_type,unsigned int> broken_players;
+	
+	// find broken players
 	for (unsigned int i=0; i < 10; i++)
 	{
 		if (!t->seats[i].occupied)
@@ -1152,19 +1220,38 @@ void GameController::stateEndRound(Table *t)
 		Player *p = t->seats[i].player;
 		
 		// player has no stake left
-		if ((int)p->stake == 0)
-		{
-			log_msg("stateEndRound", "removed player %d", p->client_id);
-			
-			snprintf(msg, sizeof(msg), "[%d] broke", p->client_id);
-			chat(t->table_id, msg);
-			
-			t->seats[i].occupied = false;
-		}
+		if (p->stake == 0)
+			broken_players.insert(pair<chips_type,int>(p->stake_before, i));
 	}
+	
+	// remove players in right order: sorted by stake_before
+	// FIXME: how to handle players which had the same stake?
+	for (multimap<chips_type,unsigned int>::iterator n = broken_players.begin(); n != broken_players.end(); n++)
+	{
+		//const chips_type stake_before = n->first;
+		const unsigned int seat_num = n->second;
+		
+		Player *p = t->seats[seat_num].player;
+		
+		
+		// send out player-broke snapshot
+		snprintf(msg, sizeof(msg), "%d %d %d",
+			SnapGameStateBroke,
+			p->client_id,
+			-1 /* FIXME: finish-position */);
+		
+		snap(t->table_id, SnapGameState, msg);
+		
+		
+		// mark seat as unused
+		t->seats[seat_num].occupied = false;
+	}
+	
 	
 	sendTableSnapshot(t);
 	
+	
+	// determine next dealer
 	t->dealer = t->getNextPlayer(t->dealer);
 	
 	t->scheduleState(Table::NewRound, 2);
@@ -1216,7 +1303,7 @@ int GameController::handleTable(Table *t)
 void GameController::start()
 {
 	// at least 2 players needed
-	if (players.size() < 2)
+	if (started || players.size() < 2)
 		return;
 	
 	
@@ -1245,7 +1332,10 @@ void GameController::start()
 			rndseats.push_back(0);
 	}
 	
+	
+#ifndef SERVER_TESTING
 	random_shuffle(rndseats.begin(), rndseats.end());
+#endif
 	
 	bool chose_dealer = false;
 	for (unsigned int i=0; i < rndseats.size(); i++)
@@ -1276,6 +1366,7 @@ void GameController::start()
 	t->state = Table::GameStart;
 	tables[tid] = t;
 	
+	blind.amount = blind.start;
 	blind.last_blinds_time = time(NULL);
 	
 	snprintf(msg, sizeof(msg), "%d", SnapGameStateStart);
@@ -1300,7 +1391,7 @@ int GameController::tick()
 	else if (ended)
 	{
 		// delay before game gets deleted
-		if ((unsigned int) difftime(time(NULL), ended_time) >= 2 * 60)
+		if ((unsigned int) difftime(time(NULL), ended_time) >= 4 * 60)
 		{
 			// remove all players
 			for (players_type::iterator e = players.begin(); e != players.end();)

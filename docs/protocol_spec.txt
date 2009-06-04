@@ -1,85 +1,190 @@
-Protocol specification (client<->server)
-
-################################################################################
-[[SERVER]]
-################################################################################
-
-* protocol-init response:
-PSERVER <version> <client-id> <timestamp>
-
-* client-command responses:
-[<id>] OK [<code>] [<text>]
-[<id>] ERR [<code>] [<text>]
-
-* server messages:
-MSG <from> <sender-name> <message>        # from := { -1 | <client-id> | <game-id>:<table-id> | <gid>:<tid>:<cid> }    # -1 is server
-PLAYERLIST <gid> <client-id> [...]
-CLIENTINFO <client-id> <type>:<value> [...]
-GAMELIST <gid> [...]
-GAMEINFO <gid> <type>:<value> [...]
-SNAP <game-id>:<table-id> <snap-type> [<snap-data> ...]   # snap-type := { SnapGameState | SnapTable | SnapHoleCards }
-NOTICE <notice-type> [<notice-data> ...]  # notice-type := { serverstate }
-PONG
+/* HoldingNuts network protocol specification as EBNF */
 
 
-[Snapshots]
+/* General structure of server and client messages */
+Message = MessageBody  CRLF ;
+MessageBody = MsgName  { S  MsgArg } ;
+MsgName = ? uppercase-characters ? ;
+MsgArg = ( TextSimple | TextQuoted ) ;
+S = ' ' | '\t' ;	/* Space or Tab */
+CRLF =  '\r' '\n' ;	/* CR LF */
+
+
+/* Number definitions */
+INT = ? signed-integer ?
+UINT = ? unsigned-integer ?
+FLOAT = ? single-precision-float ?
+
+/* Text definitions */
+TextSimple = ? character-sequence - ( S | '"' ) ? ;
+TextQuoted = '"'  ? character-sequence - '"' ?  '"' ;
+
+/* Misc definitions */
+ClientId = UINT ;	/* unique client identifier */
+GameId = UINT ;		/* unique game identifier */
+TableId = UINT ;	/* unique table identifier for a specific game */
+
+
+////////////////////////////////////////////////////////////////////////////////
+//// Server messages
+////////////////////////////////////////////////////////////////////////////////
+
+/* Status response to a client request */
+
+[ MessageId  S ]  ( 'OK' | 'ERR' )  [ S  StatusCode ]  [ S  StatusText ] ;
+
+MessageId = UINT ;		/* id the client associated its message with */
+StatusCode = UINT ;		/* error/success code */
+StatusText = TextSimple ;	/* additional information */
+
 ================================================================================
+/* Protocol introduction response */
 
-SnapGameState data:
-	<state> <type>:<value> [...]
-	
-	state := { start }
+'PSERVER'  S  ServerVersion  S  ClientId  S  Timestamp ;
+
+ServerVersion = UINT ;	/* the server version */
+ClientId = UINT ;	/* server-assigned-client-id */
+Timestamp = UINT ;	/* server time as UNIX timestamp */
+
+================================================================================
+/* Chat message */
+
+'MSG'  S  MsgFrom  S  MsgFromName  S  MsgText ;
+
+MsgFrom = (
+	'-1'					/* server */
+	| ClientId				/* client at foyer */
+	| GameId ':' ( '-1' | TableId )		/* game/table message */
+	| GameId ':' TableId ':' ClientId	/* client at table */
+) ;
+MsgFromName = '???' | TextQuoted ;
+MsgText = TextQuoted ;
+
+================================================================================
+/* Game list */
+
+'GAMELIST'  { S  GameId } ;
+
+================================================================================
+/* Game info */
+
+'GAMEINFO'  S  GameId  { S  GameInfoType ':' GameInfoValue } ;
+
+GameInfoType =  ;
+GameInfoValue = TextSimple ;
+
+================================================================================
+/* Player list */
+
+'PLAYERLIST'  S  GameId  { S  ClientId } ;
+
+================================================================================
+/* Player info */
+
+'CLIENTINFO'  S  ClientId  { S  ClientInfoType ':' ClientInfoValue } ;
+
+ClientInfoType = <<FIXME>> ;
+ClientInfoValue = TextSimple ;
+
+================================================================================
+/* Snapshots */
+
+'SNAP'  S  SnapFrom  S  SnapType  { S  SnapInfoType ':' SnapInfoValue } ;
+
+SnapFrom = GameId ':' TableId  |  GameId ':' '-1' ;
+SnapType = SnapGameState | SnapTable | SnapHoleCards | <<FIXME>>;
+SnapInfoType = ? depends-on-SnapType ?
+SnapInfoValue = ? depends-on-SnapInfoType ?
 
 
-SnapTable data:
-	<state>:<betting-round> \
-	<dealer>:<SB>:<BB>:<current>:<last-bet-player> \
-	cc:<community-cards> \
-	s0:<cid>:<flags>:<stake>:<bet>:<exec-action>:<shown-hole-cards> ... \
-	p0:<size> ... \
-	<minimum-bet>
-	
-	flags := { in-round || sitout }
+
+////////////////////////////////////////////////////////////////////////////////
+//// Client messages
+////////////////////////////////////////////////////////////////////////////////
+
+/* Protocol introduction request */
+
+'PCLIENT'  S  ClientVersion  [ S  ClientUUID ] ;
+
+ClientVersion = UINT ;		/* the server version */
+ClientUUID = TextSimple ;	/* unique client identifier */
+
+================================================================================
+/* Client info */
+
+'INFO'  { S  InfoType ':' InfoValue } ;
+
+InfoType = <<FIXME>> ;
+InfoValue = TextSimple ;
 
 
-SnapHoleCards data:
-	<card1>:<card2>
-	
-	card1 | card2 := { "As" ... "2c" }
+================================================================================
+/* Chat message */
+
+'CHAT'  S  MsgTo  S  MsgText ;
+
+MsgFrom = (
+	'-1'				/* to foyer */
+	| ClientId			/* to specific client */
+	| GameId ':' TableId		/* to table */
+) ;
+MsgText = TextQuoted ;
 
 
+================================================================================
+/* Requests */
 
-################################################################################
-[[CLIENT]]
-################################################################################
+'REQUEST'  S  RequestType  [ S  RequestValue ] ;
 
-General syntax:
-
-[<id>] <command> <arguments>
-
-Note:
-	Each command can optionally be prefixed by an <id>.
-	e.g. "12345 AUTH -1 secret"
-	If a command was sent with an <id>, the server sends the same <id> with
-	its response.
-	e.g. "12345 ERR 987 Wrong password"
+RequestType = <<FIXME>> ;
+RequestValue = ? depends-on-RequestType ? ;
 
 
-* protocol-init message:
-PCLIENT <version> [<uuid>]
+================================================================================
+/* Register */
 
-* client commands:
-INFO <type>:<value> [...]      # type := { name | location }
-CHAT <to> <msg>     # to := { -1 | <game-id>:<table-id> | <player-id> }   # -1 is foyer
-REQUEST gamelist
-REQUEST gameinfo <game-id>
-REQUEST clientinfo <client-id> [...]
-REGISTER <game-id> [<password>]   # register to a game
-UNREGISTER <game-id>
-ACTION <game-id> <action> [<amount>]      # action := { check | fold | call | bet | raise | allin | reset | sitout | back }
-SUBSCRIBE <game-id>:<table-id>   # retrieve instant data from table
-UNSUBSCRIBE <game-id>:<table-id>
-CREATE <type>:<value> ...
-AUTH <type> <password>    # type := { -1 | <game-id> }    # -1 is server-auth
-PING
-QUIT [<code>] [<text>]
+'REGISTER'  S  GameId  [ S  Password ] ;
+
+Password = TextSimple ;
+
+
+================================================================================
+/* Unregister */
+
+'UNREGISTER'  S  GameId ;
+
+
+================================================================================
+/* Table action */
+
+'ACTION'  S  GameId  S  ActionType  [ S  Amount ] ;
+
+ActionType = <<FIXME>> ;
+Amount = UINT ;
+
+
+================================================================================
+/* Create a game */
+
+'CREATE'  S  GameId  { S  CreateType ':' CreateValue } ;
+
+CreateType = <<FIXME>> ;
+CreateValue = ? depends-on-CreateType ?
+
+
+================================================================================
+/* Authenticate */
+
+'AUTH'  S  AuthType  S  Password ;
+
+AuthType = ( -1 | GameId ) ;		/* -1 = server auth */
+Password = TextSimple ;
+
+
+================================================================================
+/* Quit request */
+
+'QUIT'  [ S  QuitCode  [ S  QuitReason ]] ;
+
+QuitCode = INT ;
+QuitReason = TextSimple ;

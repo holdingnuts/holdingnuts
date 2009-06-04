@@ -40,6 +40,8 @@
 
 class GameController
 {
+friend class TestCaseGameController;
+
 public:
 	typedef std::map<int,Table*>	tables_type;
 	typedef std::map<int,Player*>	players_type;
@@ -74,8 +76,8 @@ public:
 	void setPlayerTimeout(unsigned int respite) { timeout = respite; };
 	unsigned int getPlayerTimeout() const { return timeout; };
 	
-	void setBlindsStart(chips_type blinds_start) { blind.amount = blinds_start; };
-	chips_type getBlindsStart() const { return blind.amount; };
+	void setBlindsStart(chips_type blinds_start) { blind.start = blinds_start; };
+	chips_type getBlindsStart() const { return blind.start; };
 	void setBlindsFactor(float blinds_factor) { blind.blinds_factor = blinds_factor; };
 	float getBlindsFactor() const { return blind.blinds_factor; };
 	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
@@ -118,9 +120,6 @@ public:
 	
 	int tick();
 	
-#ifdef DEBUG
-	void debugSetPlayerStake(int cid, chips_type stake) { findPlayer(cid)->stake = stake; };
-#endif
 	
 protected:
 	Player* findPlayer(int cid);
@@ -151,6 +150,7 @@ protected:
 	void dealRiver(Table *t);
 	
 	void sendTableSnapshot(Table *t);
+	void sendPlayerShowSnapshot(Table *t, Player *p);
 	
 private:
 	int game_id;
@@ -167,6 +167,7 @@ private:
 	tables_type tables;
 	
 	struct {
+		chips_type start;
 		chips_type amount;
 		BlindRule blindrule;
 		unsigned int blinds_time;  // seconds
@@ -184,6 +185,10 @@ private:
 	
 	std::string name;
 	std::string password;
+	
+#ifdef DEBUG
+	std::vector<Card> debug_cards;
+#endif
 };
 
 #endif /* _GAMECONTROLLER_H */

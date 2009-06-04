@@ -39,7 +39,6 @@
 #include "CommunityCards.hpp"
 #include "GameLogic.hpp"
 
-#include "GameController.hpp"
 
 using namespace std;
 
@@ -252,100 +251,6 @@ int test_winlist1()
 	return 0;
 }
 
-// ****** test: gamecontroller *********
-bool client_chat(int from, int to, const char *msg)
-{
-	log_msg("msg", "%d: %s", to, msg);
-	return true;
-}
-
-bool client_chat(int from_gid, int from_tid, int to, const char *msg)
-{
-	return client_chat(-1, to, msg);
-}
-
-bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *msg)
-{
-	log_msg("snap", "%d: [%d] %s", to, sid, msg);
-	return true;
-}
-
-void do_ticks(GameController *game, unsigned int ticks=30)
-{
-	for (unsigned int i=0; i < ticks; i++)
-		game->tick();
-}
-
-#ifdef DEBUG
-int test_gamecontroller1()
-{
-	GameController game;
-	
-	game.setPlayerMax(4);
-	game.addPlayer(0);
-	game.debugSetPlayerStake(0, 100.0f);
-	game.addPlayer(1);
-	game.debugSetPlayerStake(1, 20.0f);
-	game.addPlayer(2);
-	game.debugSetPlayerStake(2, 50.0f);
-	game.addPlayer(3);
-	game.debugSetPlayerStake(3, 30.0f);
-	
-	do_ticks(&game);  // New round started // 0: You're under the gun!
-	
-	// [Pre-Flop]
-	game.setPlayerAction(3, Player::Allin, 0.0f);
-	do_ticks(&game);  // 1: It's your turn!
-	
-	game.setPlayerAction(0, Player::Call, 0.0f);
-	do_ticks(&game);  // 1: It's your turn!
-	
-	game.setPlayerAction(1, Player::Allin, 0.0f);
-	do_ticks(&game);  // 2: It's your turn!
-	
-	game.setPlayerAction(2, Player::Allin, 0.0f);
-	do_ticks(&game);  // 3: It's your turn!
-	
-	do_ticks(&game);  // p3 is allin, no action
-	
-	game.setPlayerAction(0, Player::Call, 0.0f);
-	
-	do_ticks(&game);  // p1 is allin, no action
-	
-	return 0;
-}
-
-// split pot odd chip test
-int test_gamecontroller2()
-{
-	GameController game;
-	
-	game.setPlayerMax(3);
-	game.addPlayer(0);
-	game.debugSetPlayerStake(0, 111111);
-	game.addPlayer(1);
-	game.debugSetPlayerStake(1, 111111);
-	game.addPlayer(2);
-	game.debugSetPlayerStake(2, 111111);
-	
-	do_ticks(&game);  // New round started // 0: You're under the gun!
-	
-	// [Pre-Flop]
-	game.setPlayerAction(2, Player::Allin, 0.0f);
-	do_ticks(&game);  // 1: It's your turn!
-	
-	game.setPlayerAction(0, Player::Allin, 0.0f);
-	do_ticks(&game);  // 1: It's your turn!
-	
-	game.setPlayerAction(1, Player::Allin, 0.0f);
-	do_ticks(&game);  // 2: It's your turn!
-	
-	
-	do_ticks(&game);  // p3 is allin, no action
-	
-	return 0;
-}
-#endif
 
 int main(void)
 {
@@ -379,13 +284,6 @@ int main(void)
 
 #if 0
 	test_winlist1();
-#endif
-
-#if 0
-#ifdef DEBUG
-	test_gamecontroller1();
-	test_gamecontroller2();
-#endif
 #endif
 
 	return 0;
