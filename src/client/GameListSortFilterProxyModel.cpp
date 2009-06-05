@@ -88,15 +88,18 @@ bool GameListSortFilterProxyModel::filterAcceptsRow(
 	int sourceRow,
 	const QModelIndex& sourceParent) const
 {
-	const QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent); // name
-	const QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent); // gametype + gamemode
-	const QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent); // players (current / max)
-	const QModelIndex index3 = sourceModel()->index(sourceRow, 3, sourceParent); // gamestate
-	const QModelIndex index4 = sourceModel()->index(sourceRow, 4, sourceParent); // password
+	const QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent); // gid
+	const QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent); // name 
+	const QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent); // gametype + gamemode
+	const QModelIndex index3 = sourceModel()->index(sourceRow, 3, sourceParent); // players (current / max)
+	const QModelIndex index4 = sourceModel()->index(sourceRow, 4, sourceParent); // gamestate
+	const QModelIndex index5 = sourceModel()->index(sourceRow, 5, sourceParent); // password
 
-	return (sourceModel()->data(index0).toString().contains(filterRegExp()) &&
-			!filterGameState.contains(sourceModel()->data(index3).toString()) &&
-			!(sourceModel()->data(index4).toBool() && bShowPrivateGames));
+	const bool bRegEx = sourceModel()->data(index1).toString().contains(filterRegExp());
+	const bool bGameStateFilter = !filterGameState.contains(sourceModel()->data(index4).toString());
+	const bool bPrivateGameFilter = !(sourceModel()->data(index5).toBool() && bShowPrivateGames);
+
+	return bRegEx && bGameStateFilter && bPrivateGameFilter;
 }
 
 bool GameListSortFilterProxyModel::playersInRange(int i) const

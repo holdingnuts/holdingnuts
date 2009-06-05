@@ -30,7 +30,8 @@
 GameListTableModel::GameListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
 {
-	strlstHeaderLabels << tr("Name") 
+	strlstHeaderLabels << QString("ID")
+		<< QString("Name") 
 		<< tr("Gametype") 
 		<< tr("Players") 
 		<< tr("State")
@@ -39,9 +40,10 @@ GameListTableModel::GameListTableModel(QObject *parent)
 
 int GameListTableModel::rowCount(const QModelIndex& parent) const
 {
-	Q_UNUSED(parent);
+	if (parent.isValid())	// see qt-tip in doc
+		return 0;
 
-	return datarows.count();
+	return games.size();
 }
 
 int GameListTableModel::columnCount(const QModelIndex& parent) const
@@ -56,24 +58,38 @@ QVariant GameListTableModel::data(const QModelIndex& index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	if (index.row() > datarows.size())
+	if (index.row() >= games.size() || index.row() < 0)
 		return QVariant();
 
-	if (index.column() > datarows.at(index.row()).cols.size())
-	{
-		qDebug() << "GameListTableModel::data() index.column("<<index.column()<<") greater than datarows.column("<<datarows.at(index.row()).cols.size()<<")";
-			return QVariant();
-	}
-
 	if (role == Qt::DisplayRole)
-		return datarows.at(index.row()).cols.at(index.column());
+	{
+		gameinfo_type::const_reference data = games.at(index.row());
+
+		switch (index.column())
+		{
+			case 0:
+				return data.gid;
+			case 1:
+				return data.name;
+			case 2:
+				return data.type;
+			case 3:
+				return data.players;
+			case 4:
+				return data.state;
+			case 5:
+				return data.password;
+			default:
+				qDebug() << "GameListTableModel::data() invalided column ("<<index.column()<<")";
+		}
+	}
 
 	if (
 		role == Qt::DecorationRole && 
-		index.column() == 0 &&
-		datarows.at(index.row()).cols.at(4).toBool())
+		index.column() == 1 &&
+		games.at(index.row()).password)
 			return QVariant(QIcon("gfx/foyer/lock.png"));
-	
+
 	return QVariant();
 }
 
@@ -99,33 +115,47 @@ bool GameListTableModel::setData(
 	const QVariant& value,
 	int role)
 {
-	if (!index.isValid())
+	if (index.isValid() && role == Qt::EditRole)
 	{
-		qDebug() << "GameListTableModel::setData() invalided index= " << index;
-			return false;
+		const int row = index.row();
+
+		gameinfo_type::value_type data = games.value(row);
+
+		switch (index.column())
+		{
+			case 0:
+					data.gid = value.toInt();
+				break;
+			case 1:
+					data.name = value.toString();
+				break;
+			case 2:
+					data.type = value.toString();
+				break;
+			case 3:
+					data.players = value.toString();
+				break;
+			case 4:
+					data.state = value.toString();
+				break;
+			case 5:
+					data.password = value.toBool();
+				break;
+			default:
+			{
+				qDebug() << "GameListTableModel::setData() invalided column ("<<index.column()<<")";
+					return false;
+			}
+		}
+
+		games.replace(row, data);
+
+		emit(dataChanged(index, index));
+
+		return true;
 	}
 
-	if (index.row() > datarows.size())
-	{
-		qDebug() << "GameListTableModel::setData() index.row("<<index.row()<<") greater than datarows.size("<<datarows.size()<<")";
-			return false;
-	}
-
-
-	if (index.column() > datarows.at(index.row()).cols.size())
-	{
-		qDebug() << "GameListTableModel::setData() index.column("<<index.column()<<") greater than datarows.column("<<datarows.at(index.row()).cols.size()<<")";
-			return false;
-	}
-
-	if (role != Qt::EditRole)
-		return false;
-
-	datarows[index.row()].cols.replace(index.column(), value);
-		
-	emit dataChanged(index, index);
-		
-	return true;
+	return false;
 }
 
 bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& index)
@@ -134,17 +164,8 @@ bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& i
 	
 	beginInsertRows(QModelIndex(), position, position + rows - 1);
 
-	dataitem di;
-	di.gid = -1;
-	
-	// name, gametype, players, state
-	for (int j = 0; j < this->columnCount() - 1; ++j)
-		di.cols.insert(j, QString());
-
-	di.cols.insert(this->columnCount() + 0, false);	// password
-
-	for (int i = position; i < (position + rows); ++i)
-		datarows.insert(i, di);
+	for (int row = 0; row < rows; row++)
+		games.insert(position, gameinfo_type::value_type());
 	
 	endInsertRows();
 	
@@ -158,7 +179,7 @@ bool GameListTableModel::removeRows(int position, int rows, const QModelIndex& i
 	beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
 	for (int row = 0; row < rows; ++row)
-		datarows.removeAt(position);
+		games.removeAt(position);
 
 	endRemoveRows();
 
@@ -167,80 +188,69 @@ bool GameListTableModel::removeRows(int position, int rows, const QModelIndex& i
 
 void GameListTableModel::updateValue(int gid, int column, const QVariant& value)
 {
-	if (findRowByGid(gid) == -1)
+	for (int i = 0; i < games.size(); ++i)
 	{
-		insertRow(this->rowCount()); // 0
-
-		datarows[this->rowCount() -1].gid = gid;
+		if (games.at(i).gid == gid)
+		{
+			this->setData(createIndex(i, column), value, Qt::EditRole);
+				return;
+		}
 	}
-	
-	const int row = findRowByGid(gid);
 
-	this->setData(createIndex(row, column, static_cast<quint32>(gid)), value);
-	
-#if 0
-	// why doesn't this work?
-	qDebug() << "id after set:" << this->index(row, column).internalId();
-#endif
+	// gid not found --> add new entry
+	this->insertRows(0, 1, QModelIndex());
+	this->setData(createIndex(0, 0), gid, Qt::EditRole);
+	this->setData(createIndex(0, column), value, Qt::EditRole);
+
+	dump();
 }
 
 void GameListTableModel::updateGameName(int gid, const QString& value)
 {
-	updateValue(gid, 0, value);
+	updateValue(gid, 1, value);
 }
 
 void GameListTableModel::updateGameType(int gid, const QString& value)
 {
-	updateValue(gid, 1, value);
+	updateValue(gid, 2, value);
 }
 
 void GameListTableModel::updatePlayers(int gid, const QString& value)
 {
-	updateValue(gid, 2, value);
+	updateValue(gid, 3, value);
 }
 
 void GameListTableModel::updateGameState(int gid, const QString& value)
 {
-	updateValue(gid, 3, value);
+	updateValue(gid, 4, value);
 }
 
 void GameListTableModel::updatePassword(int gid, bool value)
 {
-	updateValue(gid, 4, value);
+	updateValue(gid, 5, value);
 }
 
 void GameListTableModel::clear()
 {
-	if (!this->rowCount()) return;
-	
-	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
-	datarows.clear();
-	endRemoveRows();
-	
-	reset();
+	games.clear();
 }
 
-#if 1
 int GameListTableModel::findGidByRow(int row) const
 {
-	return datarows.at(row).gid;
-}
-#endif
-
-int GameListTableModel::findRowByGid(int gid) const
-{
-	for (int i = 0; i < rowCount(); ++i)
-		if (datarows.at(i).gid == gid)
-			return i;
-
-	return -1;
+	return games.at(row).gid;
 }
 
 void GameListTableModel::dump() const
 {
 #ifdef DEBUG
+
+	qDebug() << "-----------------";	
+
 	for (int i = 0; i < rowCount(); ++i)
-		qDebug() << "row(" << i << "gid" << datarows.at(i).gid << ") " << datarows.at(i).cols;
+		qDebug() << "row(" << i << ") " << games.at(i).gid << games.at(i).name;
+
+	qDebug() << "-----------------";	
+
 #endif
 }
 
