@@ -983,6 +983,7 @@ bool PClient::addTable(int gid, int tid)
 		table->sitting = true;
 		table->subscribed = true;
 		table->window = new WTable(gid, tid);
+		table->window->setWindowTitle(tr("HoldingNuts Table - [") + game->name + "]");
 		
 		// show table after some delay (give time to retrieve player-info)
 		QTimer::singleShot(2000, table->window, SLOT(slotShow()));

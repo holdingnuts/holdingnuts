@@ -497,7 +497,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setPalette(p);	
 	
 	this->setMinimumSize(640, 480);
-	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
 	
 	// load gui settings
