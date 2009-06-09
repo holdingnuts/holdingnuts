@@ -41,6 +41,7 @@
 #include "DealerButton.hpp"
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
+#include "ChipStake.hpp"
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -298,6 +299,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pTxtHandStrength->setPos(calcHandStrengthPos());
 	m_pTxtHandStrength->setZValue(3);
 	m_pTxtHandStrength->setVisible(config.getBool("ui_show_handstrength"));
+	
+	m_pMainPot = new ChipStake;
+	m_pMainPot->setZValue(3);
+	m_pScene->addItem(m_pMainPot);
 
 	// view
 	m_pView = new QGraphicsView(m_pScene);
@@ -650,7 +655,7 @@ QPointF WTable::calcDealerBtnPos(
 				pt.rx() -= (
 					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
 					m_pDealerButton->sceneBoundingRect().width() + 
-					offset);
+					5 * offset);
 			break;
 		case 3: case 4: case 5:
 				pt.ry() -= (
@@ -659,7 +664,7 @@ QPointF WTable::calcDealerBtnPos(
 					offset);
 			break;
 		case 6: case 7:
-				pt.rx() += (wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + offset);
+				pt.rx() += (wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 6 * offset);
 			break;
 	}
 
@@ -1005,6 +1010,11 @@ void WTable::updatePots()
 	
 	m_pTxtPots->setText(strPots);
 	m_pTxtPots->setPos(calcPotsPos());
+	
+	m_pMainPot->setAmount(snap->pots.at(0));
+	m_pMainPot->setPos(
+		qMin(m_pTxtPots->x(), m_pTxtHandStrength->x()) - 60,
+		m_pTxtPots->y() + 40);
 }
 
 void WTable::updateDealerButton()

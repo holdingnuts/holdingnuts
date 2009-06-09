@@ -75,6 +75,7 @@ class ChatBox;
 class DealerButton;
 class EditableSlider;
 class TimeOut;
+class ChipStake;
 
 class WTable : public QWidget
 {
@@ -191,6 +192,8 @@ private:
 	TimeOut					*m_pTimeout;
 	QGraphicsSimpleTextItem *m_pTxtPots;
 	QGraphicsSimpleTextItem *m_pTxtHandStrength;
+	ChipStake				*m_pMainPot;
+	// TODO: handle side pots
 	
 	// ui
 	ChatBox			*m_pChat;
