@@ -2,6 +2,14 @@ ChangeLog
 =========
 
 
+HoldingNuts 0.0.5 (released on ?? ??? 2009)
+
+  * fixed: don't strip off player name on foyer messages (join/left foyer)
+  * fixed: don't allow players who are allin to muck their cards
+  * fixed: don't allow the dealer-button to be movable by mouse
+  * workaround: set encoding to UTF-8; allows localized chat
+
+
 HoldingNuts 0.0.4 (released on 29 May 2009)
 
   * fixed sending quotes in chat
