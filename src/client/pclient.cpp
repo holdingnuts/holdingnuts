@@ -1550,6 +1550,13 @@ int PClient::init()
 			config.getInt("default_port"));
 	}
 	
+#if 1
+	// temporary fix for localized chat
+	if (config.get("encoding").length())
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForName(
+			config.get("encoding").c_str()));
+#endif
+
 #ifdef DEBUG
 	// automatically register to the game  (auto_connect must be set)
 	if (config.getInt("dbg_register") != -1)

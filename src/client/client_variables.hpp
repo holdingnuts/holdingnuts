@@ -28,6 +28,7 @@ config.set("player_name",	"Unnamed");		// the player name
 config.set("info_location",	"");			// info: geographical location of the player
 config.set("uuid",		"");			// unique ID for re-connect
 config.set("locale",		"");			// language/locale to use
+config.set("encoding",		"");			// temporary fix for localized chat
 config.set("log",		true);			// log to file
 config.set("log_timestamp",	false);			// log with timestamp
 config.set("log_chat",		false);			// include player chat in log
