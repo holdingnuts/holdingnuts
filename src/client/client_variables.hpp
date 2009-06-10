@@ -32,6 +32,7 @@ config.set("log",		true);			// log to file
 config.set("log_timestamp",	false);			// log with timestamp
 config.set("log_chat",		false);			// include player chat in log
 config.set("ui_show_handstrength", 	true);		// display hand strength on table
+config.set("ui_sort_holecards",	false);			// sort holecards descending
 config.set("ui_centralized_view",	true);		// enable centralized table view
 config.set("ui_card_deck",	"default");		// card deck to use
 config.set("ui_echo_password",	true);			// echo password for private games by default

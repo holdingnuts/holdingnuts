@@ -956,7 +956,20 @@ void WTable::updateSeat(unsigned int s)
 				char card1[3], card2[3];
 				strcpy(card1, allcards[0].getName());
 				strcpy(card2, allcards[1].getName());
-				ui_seat->setCards(card1, card2);
+				
+				// display the holecards sorted?
+				if (config.getBool("ui_sort_holecards"))
+				{
+					Card c1(card1), c2(card2);
+					
+					// sort cards descending
+					if (c1 < c2)
+						ui_seat->setCards(card2, card1);
+					else
+						ui_seat->setCards(card1, card2);
+				}
+				else
+					ui_seat->setCards(card1, card2);
 				
 				ui_seat->showBigCards(true);
 			}
