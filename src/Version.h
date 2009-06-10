@@ -27,7 +27,7 @@
 /* version(major,minor,revision) */
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     0
-#define VERSION_REVISION  4
+#define VERSION_REVISION  5
 
 
 /* Example: Version 2.12.123 = 2*100000 + 12*1000 + 123 = 212123 */

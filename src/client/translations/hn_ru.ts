@@ -107,7 +107,7 @@
     </message>
     <message>
         <source>State</source>
-        <translation>Состояние</translation>
+        <translation>Статус</translation>
     </message>
 </context>
 <context>
@@ -142,15 +142,15 @@
     </message>
     <message>
         <source>A new hand (#%1) begins.</source>
-        <translation>Новый игрок (#%1) начал.</translation>
+        <translation>Новая раздача (#%1).</translation>
     </message>
     <message>
         <source>Blinds are now at %1/%2.</source>
-        <translation>Блайнды сейчас %1/%2.</translation>
+        <translation>Блайнды сейчас по %1/%2.</translation>
     </message>
     <message>
         <source>Player %1 broke.</source>
-        <translation>Игрок %1 остался без гроша.</translation>
+        <translation>%1 - банкрот.</translation>
     </message>
     <message>
         <source>Your hole cards: [%1 %2].</source>
@@ -162,7 +162,7 @@
     </message>
     <message>
         <source>The turn: [%1].</source>
-        <translation>Терн: [%1].</translation>
+        <translation>Тёрн: [%1].</translation>
     </message>
     <message>
         <source>The river: [%1].</source>
@@ -170,47 +170,47 @@
     </message>
     <message>
         <source>%1 was folded.</source>
-        <translation>%1 упал.</translation>
+        <translation>%1 упал(а).</translation>
     </message>
     <message>
         <source>%1 folded.</source>
-        <translation>%1 упал.</translation>
+        <translation>%1 упал(а).</translation>
     </message>
     <message>
         <source>%1 was checked.</source>
-        <translation>%1 постучал.</translation>
+        <translation>%1 постучал(а).</translation>
     </message>
     <message>
         <source>%1 checked.</source>
-        <translation>%1 постучал.</translation>
+        <translation>%1 постучал(а).</translation>
     </message>
     <message>
         <source>%1 called %2.</source>
-        <translation>%1 ответил %2.</translation>
+        <translation>%1 ответил(а) %2.</translation>
     </message>
     <message>
         <source>%1 bet to %2.</source>
-        <translation>%1 поставил %2.</translation>
+        <translation>%1 поставил(а) %2.</translation>
     </message>
     <message>
         <source>%1 raised to %2.</source>
-        <translation>%1 поднял %2.</translation>
+        <translation>%1 повысил(а) до %2.</translation>
     </message>
     <message>
         <source>%1 is allin with %2.</source>
-        <translation>%1 пошел ва-банк с %2.</translation>
+        <translation>%1 идет ва-банк с %2.</translation>
     </message>
     <message>
         <source>%1 shows %2.</source>
-        <translation>%1 показал %2.</translation>
+        <translation>%1 показал(а) %2.</translation>
     </message>
     <message>
         <source>%2 (%1) joined foyer.</source>
-        <translation>%2 (%1) зашел в фойе.</translation>
+        <translation>%2 (%1) заглянул(а) в фойе.</translation>
     </message>
     <message>
         <source>%2 (%1) left foyer.</source>
-        <translation>%2 (%1) покинул фойе.</translation>
+        <translation>%2 (%1) покинул(а) фойе.</translation>
     </message>
     <message>
         <source>%1, it&apos;s your turn!</source>
@@ -218,11 +218,11 @@
     </message>
     <message>
         <source>%1 wins pot #%2 with %3.</source>
-        <translation>%1 выиграл банк #%2 с %3.</translation>
+        <translation>%1 выиграл(а) банк #%2 с %3.</translation>
     </message>
     <message>
         <source>%1 receives %3 odd chips of split pot #%2.</source>
-        <translation>%1 получил %3 чипсов из совместного банка #%2.</translation>
+        <translation>%1 получил(а) %3 чипсов из совместного банка #%2.</translation>
     </message>
     <message>
         <source>Protocol error. The remote host does not seem to be a HoldingNuts server.</source>
@@ -271,7 +271,7 @@
     </message>
     <message>
         <source>General</source>
-        <translation>Главное</translation>
+        <translation>Главные</translation>
     </message>
     <message>
         <source>Player info</source>
@@ -291,7 +291,7 @@
     </message>
     <message>
         <source>enabled</source>
-        <translation>включен</translation>
+        <translation>включен(ы)</translation>
     </message>
     <message>
         <source>only on focus</source>
@@ -394,7 +394,7 @@
     <name>WMain</name>
     <message>
         <source>HoldingNuts Foyer</source>
-        <translation>HoldingNuts фойе</translation>
+        <translation>Фойе HoldingNuts</translation>
     </message>
     <message>
         <source>hide started</source>
@@ -582,14 +582,14 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>Welcome</source>
-        <translation>Добро пожаловать</translation>
+        <translation>Добро пожаловать,</translation>
     </message>
 </context>
 <context>
     <name>WTable</name>
     <message>
         <source>&amp;Fold</source>
-        <translation>&amp;Упал</translation>
+        <translation>&amp;Упасть</translation>
     </message>
     <message>
         <source>&amp;Show</source>
@@ -686,7 +686,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>&amp;Bet %1</source>
-        <translation>П&amp;ставить %1</translation>
+        <translation>П&amp;оставить %1</translation>
     </message>
     <message>
         <source>&amp;Allin %1</source>
@@ -718,7 +718,8 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>Side pot %1: %2</source>
-        <translation>Банк игрока %1: %2</translation>
+        <translatorcomment>No proper translation for &quot;side potЭб I used transliteration</translatorcomment>
+        <translation>Сайд-пот %1: %2</translation>
     </message>
     <message>
         <source>%1, it&apos;s your turn!</source>
