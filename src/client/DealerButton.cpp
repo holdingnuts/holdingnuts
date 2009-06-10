@@ -54,7 +54,6 @@ DealerButton::DealerButton()
 	m_animDealerBtn.setTimeLine(&m_tlDealerBtn);
 	
 	this->setZValue(10);
-	this->setFlag(QGraphicsItem::ItemIsMovable);
 }
 
 QRectF DealerButton::boundingRect() const
