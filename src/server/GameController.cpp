@@ -1222,6 +1222,18 @@ void GameController::stateEndRound(Table *t)
 		// player has no stake left
 		if (p->stake == 0)
 			broken_players.insert(pair<chips_type,int>(p->stake_before, i));
+		else
+		{
+			// there is a net win
+			if (p->stake > p->stake_before)
+			{
+				snprintf(msg, sizeof(msg), "%d %d %d",
+					p->client_id,
+					-1,	/* reserved */
+					p->stake - p->stake_before);
+				snap(t->table_id, SnapWinAmount, msg);
+			}
+		}
 	}
 	
 	// remove players in right order: sorted by stake_before

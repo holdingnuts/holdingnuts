@@ -654,6 +654,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 	case SnapPlayerAction:
 		serverCmdSnapPlayerAction(t, gid, tid, tinfo);
 		break;
+	case SnapWinAmount:
 	case SnapWinPot:
 	case SnapOddChips:
 		{
@@ -667,9 +668,13 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			
 			QString smsg;
 			if (snap == SnapWinPot)
-				smsg = QString(tr("%1 wins pot #%2 with %3.")
+				smsg = QString(tr("%1 receives pot #%2 with %3.")
 					.arg(getPlayerName(cid))
 					.arg(poti+1)
+					.arg(amount));
+			else if (snap == SnapWinAmount)
+				smsg = QString(tr("%1 wins %3.")
+					.arg(getPlayerName(cid))
 					.arg(amount));
 			else
 				smsg = QString(tr("%1 receives %3 odd chips of split pot #%2.")

@@ -45,6 +45,7 @@ typedef enum {
 	SnapGameState		= 0x01,
 	SnapTable		= 0x02,
 	SnapCards		= 0x03,
+	SnapWinAmount		= 0x06,
 	SnapWinPot		= 0x07,
 	SnapOddChips		= 0x08,
 	SnapPlayerAction	= 0x0a,
