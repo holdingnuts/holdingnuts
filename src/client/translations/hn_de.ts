@@ -259,12 +259,12 @@
     <message>
         <location filename="../pclient.cpp" line="605"/>
         <source>%2 (%1) joined foyer.</source>
-        <translation>%2 (%1) betritt den Foyer.</translation>
+        <translation>%2 (%1) betritt das Foyer.</translation>
     </message>
     <message>
         <location filename="../pclient.cpp" line="611"/>
         <source>%2 (%1) left foyer.</source>
-        <translation>%2 (%1) verlässt den Foyer.</translation>
+        <translation>%2 (%1) verlässt das Foyer.</translation>
     </message>
     <message>
         <location filename="../pclient.cpp" line="650"/>
