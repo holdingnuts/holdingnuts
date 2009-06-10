@@ -673,7 +673,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 					.arg(poti+1)
 					.arg(amount));
 			else if (snap == SnapWinAmount)
-				smsg = QString(tr("%1 wins %3.")
+				smsg = QString(tr("%1 wins %2.")
 					.arg(getPlayerName(cid))
 					.arg(amount));
 			else

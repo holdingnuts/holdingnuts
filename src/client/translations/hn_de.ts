@@ -113,22 +113,21 @@
 <context>
     <name>GameListTableModel</name>
     <message>
-        <location filename="../GameListTableModel.cpp" line="33"/>
         <source>Name</source>
-        <translation>Name</translation>
+        <translation type="obsolete">Name</translation>
     </message>
     <message>
-        <location filename="../GameListTableModel.cpp" line="34"/>
+        <location filename="../GameListTableModel.cpp" line="35"/>
         <source>Gametype</source>
         <translation>Spieltyp</translation>
     </message>
     <message>
-        <location filename="../GameListTableModel.cpp" line="35"/>
+        <location filename="../GameListTableModel.cpp" line="36"/>
         <source>Players</source>
         <translation>Spieler</translation>
     </message>
     <message>
-        <location filename="../GameListTableModel.cpp" line="36"/>
+        <location filename="../GameListTableModel.cpp" line="37"/>
         <source>State</source>
         <translation>Status</translation>
     </message>
@@ -136,17 +135,17 @@
 <context>
     <name>PClient</name>
     <message>
-        <location filename="../pclient.cpp" line="1004"/>
+        <location filename="../pclient.cpp" line="1010"/>
         <source>Connecting...</source>
         <translation>Verbinde...</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="1310"/>
+        <location filename="../pclient.cpp" line="1316"/>
         <source>Connection closed.</source>
         <translation>Verbindung geschlossen.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="1289"/>
+        <location filename="../pclient.cpp" line="1295"/>
         <source>Connected.</source>
         <translation>Verbunden.</translation>
     </message>
@@ -259,12 +258,12 @@
     <message>
         <location filename="../pclient.cpp" line="605"/>
         <source>%2 (%1) joined foyer.</source>
-        <translation>%2 (%1) betritt den Foyer.</translation>
+        <translation>%2 (%1) betritt das Foyer.</translation>
     </message>
     <message>
         <location filename="../pclient.cpp" line="611"/>
         <source>%2 (%1) left foyer.</source>
-        <translation>%2 (%1) verlässt den Foyer.</translation>
+        <translation>%2 (%1) verlässt das Foyer.</translation>
     </message>
     <message>
         <location filename="../pclient.cpp" line="650"/>
@@ -272,22 +271,40 @@
         <translation>%1, du bist dran!</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="670"/>
-        <source>%1 wins pot #%2 with %3.</source>
-        <translation>%1 gewinnt Pot #%2 mit %3.</translation>
+        <location filename="../pclient.cpp" line="671"/>
+        <source>%1 receives pot #%2 with %3.</source>
+        <translation>%1 erhält Pot #%2 mit %3.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="675"/>
+        <location filename="../pclient.cpp" line="676"/>
+        <source>%1 wins %2.</source>
+        <translation>%1 gewinnt %2.</translation>
+    </message>
+    <message>
+        <source>%1 wins %3.</source>
+        <translation type="obsolete">%1 gewinnt %3.</translation>
+    </message>
+    <message>
+        <source>%1 wins pot #%2 with %3.</source>
+        <translation type="obsolete">%1 gewinnt Pot #%2 mit %3.</translation>
+    </message>
+    <message>
+        <location filename="../pclient.cpp" line="680"/>
         <source>%1 receives %3 odd chips of split pot #%2.</source>
         <translation>%1 erhält %3 unteilbare Chips aus Split pot #%2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="892"/>
+        <location filename="../pclient.cpp" line="897"/>
         <source>Protocol error. The remote host does not seem to be a HoldingNuts server.</source>
         <translation>Protokollfehler. Die Gegenstelle scheint kein HoldingNuts Server zu sein.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="1278"/>
+        <location filename="../pclient.cpp" line="991"/>
+        <source>HoldingNuts Table - [</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../pclient.cpp" line="1284"/>
         <source>Connection error: %1.</source>
         <translation>Verbindungsfehler: %1.</translation>
     </message>
@@ -313,12 +330,12 @@
 <context>
     <name>Seat</name>
     <message>
-        <location filename="../Seat.cpp" line="77"/>
+        <location filename="../Seat.cpp" line="84"/>
         <source>Location: %1</source>
         <translation>Standort: %1</translation>
     </message>
     <message>
-        <location filename="../Seat.cpp" line="74"/>
+        <location filename="../Seat.cpp" line="81"/>
         <source>Name: %1</source>
         <translation>Name: %1</translation>
     </message>
@@ -341,12 +358,12 @@
         <translation>Aussehen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="131"/>
+        <location filename="../SettingsDialog.cpp" line="132"/>
         <source>Player name</source>
         <translation>Spielername</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="122"/>
+        <location filename="../SettingsDialog.cpp" line="123"/>
         <source>UUID</source>
         <translation></translation>
     </message>
@@ -356,58 +373,58 @@
         <translation>Spielerinfo</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="168"/>
+        <location filename="../SettingsDialog.cpp" line="169"/>
         <source>Bring window to top</source>
         <translation>Fenster nach vorne bringen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="189"/>
+        <location filename="../SettingsDialog.cpp" line="190"/>
         <source>Display time in foyer chat</source>
         <translation>Zeit im Foyer-Chat anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="192"/>
+        <location filename="../SettingsDialog.cpp" line="193"/>
         <source>Display join/left messages</source>
         <translation>Betritt/Verlässt Nachrichten anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="195"/>
+        <location filename="../SettingsDialog.cpp" line="196"/>
         <source>Display game states</source>
         <translation>Spielaktionen anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="198"/>
-        <location filename="../SettingsDialog.cpp" line="208"/>
+        <location filename="../SettingsDialog.cpp" line="199"/>
+        <location filename="../SettingsDialog.cpp" line="209"/>
         <source>Display player chat</source>
         <translation>Spieler-Chat anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="202"/>
+        <location filename="../SettingsDialog.cpp" line="203"/>
         <source>Display player actions</source>
         <translation>Spieler-Aktionen anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="205"/>
+        <location filename="../SettingsDialog.cpp" line="206"/>
         <source>Display hole/community cards</source>
         <translation>Hole-/Community-Cards anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="212"/>
+        <location filename="../SettingsDialog.cpp" line="213"/>
         <source>Log to file</source>
         <translation>Log in Datei</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="213"/>
+        <location filename="../SettingsDialog.cpp" line="214"/>
         <source>Foyer chat verbosity</source>
         <translation>Foyer-Chat Ausführlichkeit</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="217"/>
+        <location filename="../SettingsDialog.cpp" line="218"/>
         <source>Table chat verbosity</source>
         <translation>Tisch-Chat Ausführlichkeit</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="120"/>
+        <location filename="../SettingsDialog.cpp" line="121"/>
         <source>Locale</source>
         <translation>Sprache</translation>
     </message>
@@ -422,63 +439,63 @@
         <translation>Automatisch</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="107"/>
+        <location filename="../SettingsDialog.cpp" line="108"/>
         <source>clear</source>
         <translation>löschen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="132"/>
+        <location filename="../SettingsDialog.cpp" line="133"/>
         <source>Location</source>
         <translation>Standort</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="166"/>
+        <location filename="../SettingsDialog.cpp" line="167"/>
         <source>Show strength of hand</source>
         <translation>Handstärke anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="121"/>
+        <location filename="../SettingsDialog.cpp" line="122"/>
         <source>Sounds</source>
         <translation>Klänge</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="90"/>
+        <location filename="../SettingsDialog.cpp" line="91"/>
         <source>only on focus</source>
         <translation>nur bei Fokus</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="88"/>
-        <location filename="../SettingsDialog.cpp" line="176"/>
+        <location filename="../SettingsDialog.cpp" line="89"/>
+        <location filename="../SettingsDialog.cpp" line="177"/>
         <source>enabled</source>
         <translation>aktiviert</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="167"/>
+        <location filename="../SettingsDialog.cpp" line="168"/>
         <source>Centralized table view</source>
         <translation>Zentrische Tischansicht</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="169"/>
+        <location filename="../SettingsDialog.cpp" line="170"/>
         <source>Card deck</source>
         <translation>Kartendeck</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="153"/>
+        <location filename="../SettingsDialog.cpp" line="154"/>
         <source>Default</source>
         <translation>Voreinstellung</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="154"/>
+        <location filename="../SettingsDialog.cpp" line="155"/>
         <source>Classic</source>
         <translation>Klassisch</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="178"/>
+        <location filename="../SettingsDialog.cpp" line="179"/>
         <source>log chat</source>
         <translation>Chat loggen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="104"/>
+        <location filename="../SettingsDialog.cpp" line="105"/>
         <source>generate</source>
         <translation>generieren</translation>
     </message>
@@ -486,7 +503,7 @@
 <context>
     <name>WMain</name>
     <message>
-        <location filename="../WMain.cpp" line="644"/>
+        <location filename="../WMain.cpp" line="647"/>
         <source>Error connecting.</source>
         <translation>Fehler beim Verbinden.</translation>
     </message>
@@ -496,207 +513,207 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="466"/>
+        <location filename="../WMain.cpp" line="469"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="255"/>
+        <location filename="../WMain.cpp" line="258"/>
         <source>&amp;Connect</source>
         <translation>&amp;Verbinden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="259"/>
+        <location filename="../WMain.cpp" line="262"/>
         <source>Cl&amp;ose</source>
         <translation>&amp;Trennen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="187"/>
+        <location filename="../WMain.cpp" line="190"/>
         <source>&amp;Register</source>
         <translation>&amp;Anmelden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="191"/>
+        <location filename="../WMain.cpp" line="194"/>
         <source>&amp;Unregister</source>
         <translation>A&amp;bmelden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="232"/>
+        <location filename="../WMain.cpp" line="235"/>
         <source>Game ID</source>
         <translation>Spiel ID</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="234"/>
+        <location filename="../WMain.cpp" line="237"/>
         <source>Initial stakes</source>
         <translation>Anfänglicher Einsatz</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="335"/>
+        <location filename="../WMain.cpp" line="338"/>
         <source>&amp;Settings</source>
         <translation>&amp;Einstellungen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="366"/>
+        <location filename="../WMain.cpp" line="369"/>
         <source>&amp;About</source>
         <translation>&amp;Über</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="372"/>
+        <location filename="../WMain.cpp" line="375"/>
         <source>&amp;Game</source>
         <translation>&amp;Spiel</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="876"/>
+        <location filename="../WMain.cpp" line="873"/>
         <source>THNL</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="986"/>
+        <location filename="../WMain.cpp" line="983"/>
         <source>Logout</source>
         <translation>Ausloggen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="990"/>
+        <location filename="../WMain.cpp" line="987"/>
         <source>Welcome</source>
         <translation>Willkommen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="336"/>
+        <location filename="../WMain.cpp" line="339"/>
         <source>CTRL+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="367"/>
+        <location filename="../WMain.cpp" line="370"/>
         <source>CTRL+A</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="343"/>
+        <location filename="../WMain.cpp" line="346"/>
         <source>&amp;Test</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="344"/>
+        <location filename="../WMain.cpp" line="347"/>
         <source>CTRL+T</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="263"/>
+        <location filename="../WMain.cpp" line="266"/>
         <source>Server:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="149"/>
+        <location filename="../WMain.cpp" line="152"/>
         <source>hide started</source>
         <translation>verstecke gestartete</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="152"/>
+        <location filename="../WMain.cpp" line="155"/>
         <source>hide private</source>
         <translation>verstecke private</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="195"/>
+        <location filename="../WMain.cpp" line="198"/>
         <source>&amp;Open table</source>
         <translation>Tisch &amp;öffnen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="199"/>
+        <location filename="../WMain.cpp" line="202"/>
         <source>&amp;Start game</source>
         <translation>&amp;Spiel starten</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="236"/>
+        <location filename="../WMain.cpp" line="239"/>
         <source>Player timeout</source>
         <translation>Spieler timeout</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="238"/>
+        <location filename="../WMain.cpp" line="241"/>
         <source>Blinds</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="286"/>
+        <location filename="../WMain.cpp" line="289"/>
         <source>Create own game</source>
         <translation>Eigenes Spiel erstellen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="351"/>
+        <location filename="../WMain.cpp" line="354"/>
         <source>&amp;Quit</source>
         <translation>&amp;Beenden</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="352"/>
+        <location filename="../WMain.cpp" line="355"/>
         <source>CTRL+Q</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="408"/>
+        <location filename="../WMain.cpp" line="411"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="409"/>
+        <location filename="../WMain.cpp" line="412"/>
         <source>Connections</source>
         <translation>Verbindungen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="693"/>
+        <location filename="../WMain.cpp" line="696"/>
         <source>Private game</source>
         <translation>Privates Spiel</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="694"/>
+        <location filename="../WMain.cpp" line="697"/>
         <source>Please enter the game password:</source>
         <translation>Bitte gib das Spielpasswort ein:</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="878"/>
+        <location filename="../WMain.cpp" line="875"/>
         <source>unkown gametype</source>
         <translation>unbekannter Spieltyp</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="887"/>
+        <location filename="../WMain.cpp" line="884"/>
         <source>Cash game</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="889"/>
+        <location filename="../WMain.cpp" line="886"/>
         <source>Tournament</source>
         <translation>Tunier</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="891"/>
+        <location filename="../WMain.cpp" line="888"/>
         <source>Sit&apos;n&apos;Go</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="893"/>
+        <location filename="../WMain.cpp" line="890"/>
         <source>unkown gamemode</source>
         <translation>unbekannter Spielmodus</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="902"/>
+        <location filename="../WMain.cpp" line="899"/>
         <source>Waiting</source>
         <translation>Wartend</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="904"/>
+        <location filename="../WMain.cpp" line="901"/>
         <source>Started</source>
         <translation>Gestartet</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="906"/>
+        <location filename="../WMain.cpp" line="903"/>
         <source>Ended</source>
         <translation>Beendet</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="908"/>
+        <location filename="../WMain.cpp" line="905"/>
         <source>unkown gamestate</source>
         <translation>unbekannter Spielstatus</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="252"/>
+        <location filename="../WMain.cpp" line="255"/>
         <source>The desired server (domain-name or IP) to connect with.
 You can optionally specify a port number.
 Format: &lt;host&gt;[:&lt;port&gt;]</source>
@@ -705,22 +722,22 @@ Du kannst optional eine Port-Nummer angeben.
 Format: &lt;host&gt;[:&lt;port&gt;]</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="359"/>
+        <location filename="../WMain.cpp" line="362"/>
         <source>&amp;Handbook</source>
         <translation>&amp;Handbuch</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="360"/>
+        <location filename="../WMain.cpp" line="363"/>
         <source>CTRL+H</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="373"/>
+        <location filename="../WMain.cpp" line="376"/>
         <source>&amp;Help</source>
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="772"/>
+        <location filename="../WMain.cpp" line="775"/>
         <source>You may need to restart the client for all settings to take effect.</source>
         <translation>Du musst den Client eventuell neustarten, damit alle Einstellungen übernommen werden.</translation>
     </message>
@@ -728,401 +745,396 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
 <context>
     <name>WTable</name>
     <message>
-        <location filename="../WTable.cpp" line="823"/>
+        <location filename="../WTable.cpp" line="827"/>
         <source>Fold</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="500"/>
-        <source>HoldingNuts table</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../WTable.cpp" line="833"/>
+        <location filename="../WTable.cpp" line="837"/>
         <source>Check</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="832"/>
+        <location filename="../WTable.cpp" line="836"/>
         <source>Check/Fold</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1582"/>
+        <location filename="../WTable.cpp" line="1591"/>
         <source>Saved screenshot: %1.</source>
         <translation>Screenshot gespeichert: %1.</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1584"/>
+        <location filename="../WTable.cpp" line="1593"/>
         <source>Unable to save screenshot in %1.</source>
         <translation>Screenshot konnte nicht in %1 gespeichert werden.</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="318"/>
+        <location filename="../WTable.cpp" line="323"/>
         <source>&amp;Fold</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="330"/>
+        <location filename="../WTable.cpp" line="335"/>
         <source>&amp;Show</source>
         <translation>&amp;Zeigen</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="333"/>
+        <location filename="../WTable.cpp" line="338"/>
         <source>&amp;Muck</source>
         <translation>&amp;Verdecken</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="336"/>
+        <location filename="../WTable.cpp" line="341"/>
         <source>I&apos;m bac&amp;k</source>
         <translation>Bin zurüc&amp;k</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="340"/>
+        <location filename="../WTable.cpp" line="345"/>
         <source>Sit&amp;out</source>
         <translation>Ausset&amp;zen</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="349"/>
+        <location filename="../WTable.cpp" line="354"/>
         <source>Min</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="353"/>
+        <location filename="../WTable.cpp" line="358"/>
         <source>1/4</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="357"/>
+        <location filename="../WTable.cpp" line="362"/>
         <source>1/2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="361"/>
+        <location filename="../WTable.cpp" line="366"/>
         <source>3/4</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="365"/>
+        <location filename="../WTable.cpp" line="370"/>
         <source>Pot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="462"/>
+        <location filename="../WTable.cpp" line="467"/>
         <source>Ctrl+F</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="465"/>
+        <location filename="../WTable.cpp" line="470"/>
         <source>Ctrl+C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="468"/>
+        <location filename="../WTable.cpp" line="473"/>
         <source>Ctrl+B</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="471"/>
+        <location filename="../WTable.cpp" line="476"/>
         <source>Ctrl+R</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="474"/>
+        <location filename="../WTable.cpp" line="479"/>
         <source>Ctrl+A</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="478"/>
+        <location filename="../WTable.cpp" line="483"/>
         <source>Ctrl+M</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="481"/>
+        <location filename="../WTable.cpp" line="486"/>
         <source>Ctrl+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="484"/>
+        <location filename="../WTable.cpp" line="489"/>
         <source>Ctrl+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="487"/>
+        <location filename="../WTable.cpp" line="492"/>
         <source>Ctrl+K</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="741"/>
+        <location filename="../WTable.cpp" line="745"/>
         <source>&amp;Call %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="742"/>
-        <location filename="../WTable.cpp" line="753"/>
+        <location filename="../WTable.cpp" line="746"/>
+        <location filename="../WTable.cpp" line="757"/>
         <source>&amp;Raise %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="760"/>
+        <location filename="../WTable.cpp" line="764"/>
         <source>&amp;Bet %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="774"/>
-        <location filename="../WTable.cpp" line="785"/>
+        <location filename="../WTable.cpp" line="778"/>
+        <location filename="../WTable.cpp" line="789"/>
         <source>&amp;Allin %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="826"/>
+        <location filename="../WTable.cpp" line="830"/>
         <source>Allin %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="828"/>
+        <location filename="../WTable.cpp" line="832"/>
         <source>Call %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="749"/>
+        <location filename="../WTable.cpp" line="753"/>
         <source>&amp;Check</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="369"/>
+        <location filename="../WTable.cpp" line="374"/>
         <source>Allin</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="998"/>
+        <location filename="../WTable.cpp" line="1002"/>
         <source>Main pot: %1</source>
         <translation>Haupt-Pot: %1</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1002"/>
+        <location filename="../WTable.cpp" line="1006"/>
         <source>Side pot %1: %2</source>
         <translation>Side-Pot: %1: %2</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1498"/>
+        <location filename="../WTable.cpp" line="1507"/>
         <source>%1, it&apos;s your turn!</source>
         <translation>%1, du bist dran!</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1525"/>
+        <location filename="../WTable.cpp" line="1534"/>
         <source>%1, you have %2 seconds left to respond!</source>
         <translation>%1, du hast %2 Sekunden verbleibend zu reagieren!</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1608"/>
+        <location filename="../WTable.cpp" line="1617"/>
         <source>Spades</source>
         <translation>Pik</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1609"/>
+        <location filename="../WTable.cpp" line="1618"/>
         <source>Hearts</source>
         <translation>Herz</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1610"/>
+        <location filename="../WTable.cpp" line="1619"/>
         <source>Diamonds</source>
         <translation>Karo</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1611"/>
+        <location filename="../WTable.cpp" line="1620"/>
         <source>Clubs</source>
         <translation>Kreuz</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1623"/>
+        <location filename="../WTable.cpp" line="1632"/>
         <source>Deuce</source>
         <translation>Zwei</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1623"/>
+        <location filename="../WTable.cpp" line="1632"/>
         <source>Deuces</source>
         <translation>Zweier</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1624"/>
+        <location filename="../WTable.cpp" line="1633"/>
         <source>Three</source>
         <translation>Drei</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1624"/>
+        <location filename="../WTable.cpp" line="1633"/>
         <source>Threes</source>
         <translation>Dreier</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1625"/>
+        <location filename="../WTable.cpp" line="1634"/>
         <source>Four</source>
         <translation>Vier</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1625"/>
+        <location filename="../WTable.cpp" line="1634"/>
         <source>Fours</source>
         <translation>Vierer</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1626"/>
+        <location filename="../WTable.cpp" line="1635"/>
         <source>Five</source>
         <translation>Fünf</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1626"/>
+        <location filename="../WTable.cpp" line="1635"/>
         <source>Fives</source>
         <translation>Fünfer</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1627"/>
+        <location filename="../WTable.cpp" line="1636"/>
         <source>Six</source>
         <translation>Sechs</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1627"/>
+        <location filename="../WTable.cpp" line="1636"/>
         <source>Sixes</source>
         <translation>Sechser</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1628"/>
+        <location filename="../WTable.cpp" line="1637"/>
         <source>Seven</source>
         <translation>Sieben</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1628"/>
+        <location filename="../WTable.cpp" line="1637"/>
         <source>Sevens</source>
         <translation>Siebener</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1629"/>
+        <location filename="../WTable.cpp" line="1638"/>
         <source>Eight</source>
         <translation>Acht</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1629"/>
+        <location filename="../WTable.cpp" line="1638"/>
         <source>Eights</source>
         <translation>Achter</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1630"/>
+        <location filename="../WTable.cpp" line="1639"/>
         <source>Nine</source>
         <translation>Neun</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1630"/>
+        <location filename="../WTable.cpp" line="1639"/>
         <source>Nines</source>
         <translation>Neuner</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1631"/>
+        <location filename="../WTable.cpp" line="1640"/>
         <source>Ten</source>
         <translation>Zehn</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1631"/>
+        <location filename="../WTable.cpp" line="1640"/>
         <source>Tens</source>
         <translation>Zehner</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1632"/>
+        <location filename="../WTable.cpp" line="1641"/>
         <source>Jack</source>
         <translation>Bube</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1632"/>
+        <location filename="../WTable.cpp" line="1641"/>
         <source>Jacks</source>
         <translation>Buben</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1633"/>
+        <location filename="../WTable.cpp" line="1642"/>
         <source>Queen</source>
         <translation>Dame</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1633"/>
+        <location filename="../WTable.cpp" line="1642"/>
         <source>Queens</source>
         <translation>Damen</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1634"/>
+        <location filename="../WTable.cpp" line="1643"/>
         <source>King</source>
         <translation>König</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1634"/>
+        <location filename="../WTable.cpp" line="1643"/>
         <source>Kings</source>
         <translation>Könige</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1635"/>
+        <location filename="../WTable.cpp" line="1644"/>
         <source>Ace</source>
         <translation>Ass</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1635"/>
+        <location filename="../WTable.cpp" line="1644"/>
         <source>Aces</source>
         <translation>Asse</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1658"/>
+        <location filename="../WTable.cpp" line="1667"/>
         <source>High Card</source>
         <translation>Höchste Karte</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1675"/>
-        <location filename="../WTable.cpp" line="1710"/>
+        <location filename="../WTable.cpp" line="1684"/>
+        <location filename="../WTable.cpp" line="1719"/>
         <source>%1 high</source>
         <translation>%1 hoch</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1662"/>
+        <location filename="../WTable.cpp" line="1671"/>
         <source>One Pair</source>
         <translation>Ein Paar</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1666"/>
+        <location filename="../WTable.cpp" line="1675"/>
         <source>Two Pair</source>
         <translation>Zwei Paare</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1667"/>
-        <location filename="../WTable.cpp" line="1693"/>
+        <location filename="../WTable.cpp" line="1676"/>
+        <location filename="../WTable.cpp" line="1702"/>
         <source>%1 and %2</source>
         <translation>%1 und %2</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1670"/>
+        <location filename="../WTable.cpp" line="1679"/>
         <source>Three Of A Kind</source>
         <translation>Drilling</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1674"/>
+        <location filename="../WTable.cpp" line="1683"/>
         <source>Straight</source>
         <translation>Straße</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1678"/>
+        <location filename="../WTable.cpp" line="1687"/>
         <source>Flush</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1692"/>
+        <location filename="../WTable.cpp" line="1701"/>
         <source>Full House</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1696"/>
+        <location filename="../WTable.cpp" line="1705"/>
         <source>Four Of A Kind</source>
         <translation>Vierling</translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1708"/>
+        <location filename="../WTable.cpp" line="1717"/>
         <source>Straight Flush</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WTable.cpp" line="1703"/>
+        <location filename="../WTable.cpp" line="1712"/>
         <source>Royal Flush</source>
         <translation></translation>
     </message>
