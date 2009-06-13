@@ -71,6 +71,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 		{ "",	tr("Auto-Detect") },
 		{ "de",	"German" },
 		{ "en",	"English" },
+		{ "it", "Italian" },
 		{ "ja", "Japanese" },
 		{ "nl", "Dutch" },
 		{ "ro", "Romanian" },
