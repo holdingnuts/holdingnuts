@@ -963,7 +963,7 @@ void GameController::stateAskShow(Table *t)
 	
 	Player *p = t->seats[t->cur_player].player;
 	
-	if (!p->stake) // player is allin, no option to show/muck
+	if (!p->stake && t->countActivePlayers() > 1) // player went allin and has no option to show/muck
 	{
 		t->seats[t->cur_player].showcards = true;
 		chose_action = true;
