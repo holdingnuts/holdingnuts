@@ -44,26 +44,50 @@ static char msg[1024];
 
 GameController::GameController()
 {
-	game_id = -1;
+	reset();
 	
-	started = false;
-	ended = false;
 	max_players = 10;
 	restart = false;
 	
 	player_stakes = 1500;
 	
-	blind.blindrule = BlindByTime;
 	blind.blinds_time = 60 * 4;
 	blind.blinds_factor = 2.0f;
 	blind.start = 10;
 	
-	hand_no = 0;
-	
-	type = SNG;
-	
 	name = "game";
 	password = "";
+	owner = -1;
+}
+
+GameController::GameController(const GameController& g)
+{
+	reset();
+	
+	setName(g.getName());
+	setRestart(g.getRestart());
+	setOwner(g.getOwner());
+	//setGameType()
+	setPlayerMax(g.getPlayerMax());
+	setPlayerTimeout(g.getPlayerTimeout());
+	setPlayerStakes(g.getPlayerStakes());
+	setBlindsStart(g.getBlindsStart());
+	setBlindsFactor(g.getBlindsFactor());
+	setBlindsTime(g.getBlindsTime());
+	setPassword(g.getPassword());
+}
+
+void GameController::reset()
+{
+	game_id = -1;
+	
+	type = SNG;	// FIXME
+	blind.blindrule = BlindByTime;	// FIXME:
+	
+	started = false;
+	ended = false;
+	
+	hand_no = 0;
 }
 
 bool GameController::addPlayer(int cid)

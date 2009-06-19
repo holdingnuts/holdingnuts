@@ -1416,21 +1416,19 @@ int gameloop()
 	for (games_type::iterator e = games.begin(); e != games.end();)
 	{
 		GameController *g = e->second;
+		
+		// game has been deleted
 		if (g->tick() < 0)
 		{
-			// replicate game if "restart" is set  // FIXME: implement copy-constructor
+			// replicate game if "restart" is set
 			if (g->getRestart())
 			{
 				const int gid = ++gid_counter;
-				GameController *newgame = new GameController();
+				GameController *newgame = new GameController(*g);
 				
+				// set new ID
 				newgame->setGameId(gid);
-				newgame->setName(g->getName());
-				newgame->setRestart(true);
-				newgame->setOwner(g->getOwner());
-				newgame->setPlayerMax(g->getPlayerMax());
-				newgame->setPlayerTimeout(g->getPlayerTimeout());
-				newgame->setPlayerStakes(g->getPlayerStakes());
+				
 				games[gid] = newgame;
 				
 				log_msg("game", "restarted game (old: %d, new: %d)",

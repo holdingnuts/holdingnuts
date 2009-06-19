@@ -67,6 +67,9 @@ public:
 	} LimitRule;
 	
 	GameController();
+	GameController(const GameController& g);
+	
+	void reset();
 	
 	bool setGameId(int gid) { game_id = gid; return true; };
 	int getGameId() const { return game_id; };
@@ -92,6 +95,7 @@ public:
 	bool checkPassword(const std::string &passwd) const { return (!password.length() || password == passwd); };
 	bool hasPassword() const { return password.length(); };
 	bool setPassword(const std::string &str) { password = str; return true; };
+	std::string getPassword() const { return password; };
 	
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() const { return max_players; };
