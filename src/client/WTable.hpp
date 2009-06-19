@@ -170,7 +170,7 @@ private slots:
 	void actionBetsizeHalfPot();
 	void actionBetsizeThreeQuarterPot();
 	void actionBetsizePotsize();
-	void actionBetsizeAllin();
+	void actionBetsizeMaximum();
 
 public slots:
 	void slotShow();
@@ -207,7 +207,7 @@ private:
 	QPushButton		*btnBetsizeHalfPot;
 	QPushButton		*btnBetsizeThreeQuarterPot;
 	QPushButton		*btnBetsizePotsize;
-	QPushButton		*btnBetsizeAllin;
+	QPushButton		*btnBetsizeMaximum;
 	QWidget			*wRaiseBtns;
 	
 	QCheckBox 		*chkAutoFoldCheck;

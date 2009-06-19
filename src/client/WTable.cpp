@@ -371,9 +371,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	btnBetsizePotsize->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizePotsize, SIGNAL(clicked()), this, SLOT(actionBetsizePotsize()));
 
-	btnBetsizeAllin = new QPushButton(tr("Allin"), this);
-	btnBetsizeAllin->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnBetsizeAllin, SIGNAL(clicked()), this, SLOT(actionBetsizeAllin()));
+	btnBetsizeMaximum = new QPushButton(tr("Max"), this);
+	btnBetsizeMaximum->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeMaximum, SIGNAL(clicked()), this, SLOT(actionBetsizeMaximum()));
 
 	QHBoxLayout *lPots = new QHBoxLayout();
 	lPots->addStretch(2); 
@@ -383,7 +383,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lPots->addWidget(btnBetsizeHalfPot, Qt::AlignRight);
 	lPots->addWidget(btnBetsizeThreeQuarterPot, Qt::AlignRight);
 	lPots->addWidget(btnBetsizePotsize, Qt::AlignRight);
-	lPots->addWidget(btnBetsizeAllin, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeMaximum, Qt::AlignRight);
 	
 	wRaiseBtns = new QWidget(this);
 	wRaiseBtns->setLayout(lPots);
@@ -1467,7 +1467,7 @@ void WTable::actionBetsizePotsize()
 	m_pSliderAmount->setValue(currentPot());
 }
 
-void WTable::actionBetsizeAllin()
+void WTable::actionBetsizeMaximum()
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
