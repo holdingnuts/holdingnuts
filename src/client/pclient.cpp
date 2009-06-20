@@ -370,9 +370,12 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	{
 		const unsigned int hand_no = t.getNextInt();
 		
-		// silently drop message if there is no table-info
+		// add table to known table list
 		if (!tinfo)
-			return;
+		{
+			addTable(gid, tid);
+			tinfo = getTableInfo(gid, tid);
+		}
 		
 		tinfo->window->addServerMessage(
 			QString(tr("A new hand (#%1) begins.").arg(hand_no)));
@@ -416,15 +419,8 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	if (type == SnapCardsHole)
 	{
-		bool bUpdateView = true;
-		
 		if (!tinfo)
-		{
-			addTable(gid, tid);
-			tinfo = getTableInfo(gid, tid);
-			
-			bUpdateView = false;
-		}
+			return;
 		
 		HoleCards &h = tinfo->holecards;
 		std::string card1 = t.getNext();
@@ -434,7 +430,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		
 		h.setCards(ch1, ch2);
 		
-		if (bUpdateView && tinfo->window)
+		if (tinfo->window)
 		{
 			if (config.getInt("chat_verbosity_table") & 0x2)
 				tinfo->window->addServerMessage(
