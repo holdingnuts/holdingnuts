@@ -197,7 +197,7 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 		return false;
 	
 	vector<int> client_list;
-	g->getPlayerList(client_list);
+	g->getListenerList(client_list);
 	
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
@@ -576,6 +576,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		game_mode,
 		state,
 		(g->isPlayer(client->id) ? GameInfoRegistered : 0) |
+			(g->isSpectator(client->id) ? GameInfoSubscribed : 0) |
 			(g->hasPassword() ? GameInfoPassword : 0) |
 			(g->getOwner() == client->id ? GameInfoOwner : 0) |
 			(g->getRestart() ? GameInfoRestart : 0),
@@ -792,7 +793,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	}
 	
 	// check for max-games-register limit
-	unsigned int register_limit = config.getInt("max_register_per_player");
+	const unsigned int register_limit = config.getInt("max_register_per_player");
 	unsigned int count = 0;
 	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
 	{
@@ -872,6 +873,114 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 	log_msg("game", "%s (%d) parted game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
+	
+	
+	send_ok(client);
+	
+	return 0;
+}
+
+int client_cmd_subscribe(clientcon *client, Tokenizer &t)
+{
+	if (!t.count())
+	{
+		send_err(client, ErrParameters);
+		return 1;
+	}
+	
+	int gid;
+	t >> gid;
+	
+	string passwd = "";
+	if (t.count() >=2)
+		t >> passwd;
+	
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (g->isSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are already subscribed");
+		return 1;
+	}
+	
+	// check for max-games-subscribe limit
+	const unsigned int subscribe_limit = config.getInt("max_subscribe_per_player");
+	unsigned int count = 0;
+	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
+	{
+		GameController *g = e->second;
+		
+		if (g->isSpectator(client->id))
+		{
+			if (++count == subscribe_limit)
+			{
+				send_err(client, 0 /*FIXME*/, "subscribe limit per player is reached");
+				return 1;
+			}
+		}
+	}
+
+	// check the password
+	if (!g->checkPassword(passwd))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to subscribe, wrong password");
+		return 1;
+	}
+	
+	if (!g->addSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to subscribe");
+		return 1;
+	}
+	
+	
+	log_msg("game", "%s (%d) subscribed game %d",
+		client->info.name, client->id, gid);
+	
+	
+	send_ok(client);
+	
+	return 0;
+}
+
+int client_cmd_unsubscribe(clientcon *client, Tokenizer &t)
+{
+	if (!t.count())
+	{
+		send_err(client, ErrParameters);
+		return 1;
+	}
+	
+	int gid;
+	t >> gid;
+	
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (!g->isSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are not subscribed");
+		return 1;
+	}
+	
+	if (!g->removeSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to unsubscribe");
+		return 1;
+	}
+	
+	
+	log_msg("game", "%s (%d) unsubscribed game %d",
+		client->info.name, client->id, gid);
 	
 	
 	send_ok(client);
@@ -1132,8 +1241,8 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 	
 	if (t.count() >= 2 && config.get("auth_password").length())
 	{
-		int type = t.getNextInt();
-		string passwd = t.getNext();
+		const int type = t.getNextInt();
+		const string passwd = t.getNext();
 		
 		// -1 is server-auth
 		if (type == -1)
@@ -1249,6 +1358,10 @@ int client_execute(clientcon *client, const char *cmd)
 		return client_cmd_register(client, t);
 	else if (command == "UNREGISTER")
 		return client_cmd_unregister(client, t);
+	else if (command == "SUBSCRIBE")
+		return client_cmd_subscribe(client, t);
+	else if (command == "UNSUBSCRIBE")
+		return client_cmd_unsubscribe(client, t);
 	else if (command == "ACTION")
 		return client_cmd_action(client, t);
 	else if (command == "CREATE")

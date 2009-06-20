@@ -100,6 +100,7 @@ typedef enum {
 	GameInfoPassword	= 0x02,
 	GameInfoRestart		= 0x04,
 	GameInfoOwner		= 0x08,
+	GameInfoSubscribed	= 0x10,
 } gameinfo_flags;
 
 typedef enum {

@@ -145,6 +145,39 @@ bool GameController::isPlayer(int cid) const
 	return true;
 }
 
+bool GameController::addSpectator(int cid)
+{
+	// is the client already a spectator?
+	if (isSpectator(cid))
+		return false;
+	
+	spectators.insert(cid);
+	
+	return true;
+}
+
+bool GameController::removeSpectator(int cid)
+{
+	spectators_type::iterator it = spectators.find(cid);
+	
+	if (it == spectators.end())
+		return false;
+	
+	spectators.erase(it);
+	
+	return true;
+}
+
+bool GameController::isSpectator(int cid) const
+{
+	spectators_type::const_iterator it = spectators.find(cid);
+	
+	if (it == spectators.end())
+		return false;
+	
+	return true;
+}
+
 Player* GameController::findPlayer(int cid)
 {
 	players_type::const_iterator it = players.find(cid);
@@ -184,6 +217,19 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 	return true;
 }
 
+bool GameController::getListenerList(vector<int> &client_list) const
+{
+	client_list.clear();
+	
+	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
+		client_list.push_back(e->first);
+	
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_list.push_back(*e);
+	
+	return true;
+}
+
 void GameController::selectNewOwner()
 {
 	players_type::const_iterator e = players.begin();
@@ -195,8 +241,13 @@ void GameController::selectNewOwner()
 
 void GameController::chat(int tid, const char* msg)
 {
+	// players
 	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
 		client_chat(game_id, tid, e->first, msg);
+	
+	// spectators
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_chat(game_id, tid, *e, msg);
 }
 
 void GameController::chat(int cid, int tid, const char* msg)
@@ -206,8 +257,13 @@ void GameController::chat(int cid, int tid, const char* msg)
 
 void GameController::snap(int tid, int sid, const char* msg)
 {
+	// players
 	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
 		client_snapshot(game_id, tid, e->first, sid, msg);
+	
+	// spectators
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_snapshot(game_id, tid, *e, sid, msg);
 }
 
 void GameController::snap(int cid, int tid, int sid, const char* msg)

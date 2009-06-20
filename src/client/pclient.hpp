@@ -80,6 +80,8 @@ typedef std::map<int,tableinfo>		tables_type;
 typedef struct {
 	//! \brief local player registered state
  	bool			registered;
+	//! \brief local player subscribed state
+ 	bool			subscribed;
 	//! \brief name of the game
 	QString			name;
 	//! \brief gametype
@@ -157,7 +159,7 @@ public:
 	
 	bool doSetAction(int gid, Player::PlayerAction action, chips_type amount=0);
 	
-	void doRegister(int gid, bool bRegister=true, const QString& password="");
+	void doRegister(int gid, bool bRegister=true, bool subscription=false, const QString& password="");
 	void doStartGame(int gid);
 	
 #if 0

@@ -75,7 +75,7 @@ public:
 	static QString getGamestateString(gamestate state);
 	
 protected:
-	void doRegister(bool bRegister);
+	void doRegister(bool bRegister, bool subscription);
 	
 	void updateWelcomeLabel();
 	void updateGameinfo(int gid);
@@ -90,6 +90,8 @@ private slots:
 	
 	void actionRegister();
 	void actionUnregister();
+	void actionSubscribe();
+	void actionUnsubscribe();
 	void actionOpenTable();
 	void actionCreateGame();
 	void actionStartGame();
@@ -173,11 +175,15 @@ private:
 	//! \brief Create new game
 	QPushButton		*btnCreateGame;
 	
-	//! \brief Register to a gamelist
+	//! \brief Register to a game
 	QPushButton		*btnRegister;
-	
-	//! \brief Un-register a gamelist
+	//! \brief Un-register a game
 	QPushButton		*btnUnregister;
+	
+	//! \brief Subscribe to a game
+	QPushButton		*btnSubscribe;
+	//! \brief Un-subscribe a game
+	QPushButton		*btnUnsubscribe;
 	
 	QPushButton		*btnOpenTable;
 	QPushButton		*btnStartGame;

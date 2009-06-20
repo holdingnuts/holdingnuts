@@ -370,9 +370,12 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	{
 		const unsigned int hand_no = t.getNextInt();
 		
-		// silently drop message if there is no table-info
+		// add this table to known tables list
 		if (!tinfo)
-			return;
+		{
+			addTable(gid, tid);
+			tinfo = getTableInfo(gid, tid);
+		}
 		
 		tinfo->window->addServerMessage(
 			QString(tr("A new hand (#%1) begins.").arg(hand_no)));
@@ -416,15 +419,8 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	
 	if (type == SnapCardsHole)
 	{
-		bool bUpdateView = true;
-		
 		if (!tinfo)
-		{
-			addTable(gid, tid);
-			tinfo = getTableInfo(gid, tid);
-			
-			bUpdateView = false;
-		}
+			return;
 		
 		HoleCards &h = tinfo->holecards;
 		std::string card1 = t.getNext();
@@ -434,7 +430,7 @@ void PClient::serverCmdSnapCards(Tokenizer &t, int gid, int tid, tableinfo* tinf
 		
 		h.setCards(ch1, ch2);
 		
-		if (bUpdateView && tinfo->window)
+		if (tinfo->window)
 		{
 			if (config.getInt("chat_verbosity_table") & 0x2)
 				tinfo->window->addServerMessage(
@@ -801,6 +797,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	unsigned int flags = it.getNextInt();
 	gi->registered = flags & GameInfoRegistered;
+	gi->subscribed = flags & GameInfoSubscribed;
 	gi->password = flags & GameInfoPassword;
 	gi->owner = flags & GameInfoOwner;
 	
@@ -1027,18 +1024,28 @@ void PClient::doClose()
 	tcpSocket->close();
 }
 
-void PClient::doRegister(int gid, bool bRegister, const QString& password)
+void PClient::doRegister(int gid, bool bRegister, bool subscription, const QString& password)
 {
 	char msg[1024];
 	
 	if (!connected)
 		return;
 	
-	if (bRegister)
-		snprintf(msg, sizeof(msg), "REGISTER %d %s", gid, password.toStdString().c_str());
+	if (!subscription)
+	{
+		if (bRegister)
+			snprintf(msg, sizeof(msg), "REGISTER %d %s", gid, password.toStdString().c_str());
+		else
+			snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
+	}
 	else
-		snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
-		
+	{
+		if (bRegister)
+			snprintf(msg, sizeof(msg), "SUBSCRIBE %d %s", gid, password.toStdString().c_str());
+		else
+			snprintf(msg, sizeof(msg), "UNSUBSCRIBE %d", gid);
+	}
+	
 	netSendMsg(msg);
 }
 

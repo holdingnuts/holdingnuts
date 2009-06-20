@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <ctime>
 
@@ -45,6 +46,7 @@ friend class TestCaseGameController;
 public:
 	typedef std::map<int,Table*>	tables_type;
 	typedef std::map<int,Player*>	players_type;
+	typedef std::set<int>		spectators_type;
 	
 	typedef enum {
 		RingGame,   // Cash game
@@ -100,7 +102,9 @@ public:
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() const { return max_players; };
 	unsigned int getPlayerCount() const { return players.size(); };
+	
 	bool getPlayerList(std::vector<int> &client_list) const;
+	bool getListenerList(std::vector<int> &client_list) const;
 	
 	void setRestart(bool bRestart) { restart = bRestart; };
 	bool getRestart() const { return restart; };
@@ -111,6 +115,10 @@ public:
 	bool addPlayer(int cid);
 	bool removePlayer(int cid);
 	bool isPlayer(int cid) const;
+	
+	bool addSpectator(int cid);
+	bool removeSpectator(int cid);
+	bool isSpectator(int cid) const;
 	
 	void setOwner(int cid) { owner = cid; };
 	int getOwner() const { return owner; };
@@ -167,8 +175,9 @@ private:
 	chips_type player_stakes;
 	unsigned int timeout;
 	
-	players_type players;
-	tables_type tables;
+	players_type		players;
+	spectators_type		spectators;
+	tables_type		tables;
 	
 	struct {
 		chips_type start;

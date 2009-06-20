@@ -195,6 +195,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnUnregister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
 	
+	btnSubscribe = new QPushButton(tr("&Subscribe"), this);
+	btnSubscribe->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnSubscribe, SIGNAL(clicked()), this, SLOT(actionSubscribe()));
+	
+	btnUnsubscribe = new QPushButton(tr("Unsu&bscribe"), this);
+	btnUnsubscribe->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnUnsubscribe, SIGNAL(clicked()), this, SLOT(actionUnsubscribe()));
+	
 	btnOpenTable = new QPushButton(tr("&Open table"), this);
 	btnOpenTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnOpenTable, SIGNAL(clicked()), this, SLOT(actionOpenTable()));
@@ -209,6 +217,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	
 	QHBoxLayout *lGameActions = new QHBoxLayout();
+	lGameActions->addWidget(btnSubscribe);
+	lGameActions->addWidget(btnUnsubscribe);
 	lGameActions->addWidget(btnOpenTable);
 	lGameActions->addWidget(btnStartGame);
 	
@@ -673,7 +683,7 @@ void WMain::actionTest()
 #endif
 }
 
-void WMain::doRegister(bool bRegister)
+void WMain::doRegister(bool bRegister, bool subscription)
 {
 	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
 	
@@ -700,7 +710,7 @@ void WMain::doRegister(bool bRegister)
 				return;
 		}
 		
-		((PClient*)qApp)->doRegister(gid, bRegister, password);
+		((PClient*)qApp)->doRegister(gid, bRegister, subscription, password);
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
 	}
@@ -708,12 +718,22 @@ void WMain::doRegister(bool bRegister)
 
 void WMain::actionRegister()
 {
-	doRegister(true);
+	doRegister(true, false);
 }
 
 void WMain::actionUnregister()
 {
-	doRegister(false);
+	doRegister(false, false);
+}
+
+void WMain::actionSubscribe()
+{
+	doRegister(true, true);
+}
+
+void WMain::actionUnsubscribe()
+{
+	doRegister(false, true);
 }
 
 void WMain::actionOpenTable()
@@ -1004,6 +1024,9 @@ void WMain::updateGameinfo(int gid)
 		btnRegister->setEnabled(false);
 		btnUnregister->setEnabled(false);
 		
+		btnSubscribe->setVisible(false);
+		btnUnsubscribe->setVisible(false);
+		
 		btnOpenTable->setVisible(false);
 		btnStartGame->setVisible(false);
 		
@@ -1030,7 +1053,12 @@ void WMain::updateGameinfo(int gid)
 	btnRegister->setEnabled(!gi->registered && gi->state == GameStateWaiting);
 	btnUnregister->setEnabled(gi->registered && gi->state == GameStateWaiting);
 	
-	btnOpenTable->setVisible(gi->registered && gi->state != GameStateWaiting);
+	btnSubscribe->setEnabled(!gi->registered && !gi->subscribed);
+	btnSubscribe->setVisible(!gi->registered);
+	btnUnsubscribe->setEnabled(!gi->registered && gi->subscribed);
+	btnUnsubscribe->setVisible(!gi->registered);
+	
+	btnOpenTable->setVisible((gi->registered || gi->subscribed) && gi->state != GameStateWaiting);
 	btnStartGame->setVisible(gi->registered &&
 		gi->owner &&
 		gi->players_count >= 2 &&
