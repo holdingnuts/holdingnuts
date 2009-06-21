@@ -169,7 +169,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	
 	QFormLayout *formAppearance = new QFormLayout;
 	formAppearance->addRow(tr("Show strength of hand"), checkHandStrength);
-	formAppearance->addRow(tr("Sort holecards (descending)"), checkSortHolecards);
+	formAppearance->addRow(tr("Sort hole cards (descending)"), checkSortHolecards);
 	formAppearance->addRow(tr("Centralized table view"), checkCentralView);
 	formAppearance->addRow(tr("Bring window to top"), checkBringToTop);
 	formAppearance->addRow(tr("Card deck"), comboCarddeck);
