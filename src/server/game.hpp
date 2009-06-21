@@ -98,8 +98,18 @@ typedef std::vector<clientcon>	clients_type;
 //! \brief Type for list of archived client connection information
 typedef std::map<std::string,clientcon_archive>	clientconar_type;
 
+//! \brief Server stats
+typedef struct {
+	time_t		server_started;
+	unsigned int	clients_connected;
+	unsigned int	clients_introduced;
+	unsigned int	clients_incompatible;
+	unsigned int	games_created;
+	
+} server_stats;
 
 // used by pserver.cpp
+int gameinit();
 int gameloop();
 clients_type& get_client_vector();
 bool client_add(socktype sock, sockaddr_in *saddr);

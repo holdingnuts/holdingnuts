@@ -54,6 +54,8 @@ static unsigned int cid_counter = 0;
 static clientconar_type con_archive;
 static time_t last_conarchive_cleanup = 0;   // last time scan
 
+static server_stats stats;
+
 
 GameController* get_game_by_id(int gid)
 {
@@ -285,6 +287,10 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	
 	clients.push_back(client);
 	
+	
+	// update stats
+	stats.clients_connected++;
+	
 	return true;
 }
 
@@ -350,6 +356,10 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		send_err(client, ErrWrongVersion, "The client version is too old."
 			"Please update your HoldingNuts client to a more recent version.");
 		client_remove(client->sock);
+		
+		
+		// update stats
+		stats.clients_incompatible++;
 	}
 	else
 	{
@@ -359,6 +369,10 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		
 		client->version = version;
 		client->state |= Introduced;
+		
+		// update stats
+		stats.clients_introduced++;
+		
 		
 		snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
 		
@@ -673,10 +687,16 @@ bool client_cmd_request_playerlist(clientcon *client, Tokenizer &t)
 
 bool client_cmd_request_serverinfo(clientcon *client, Tokenizer &t)
 {
-	snprintf(msg, sizeof(msg), "SERVERINFO %d:%d:%d",
-		(int) clients.size(),
-		(int) con_archive.size(),
-		(int) games.size());
+	snprintf(msg, sizeof(msg), "SERVERINFO "
+		"%d:%d %d:%d %d:%d %d:%d %d:%d %d:%d %d:%d %d:%d",
+		StatsServerStarted,		(unsigned int) stats.server_started,
+		StatsClientsConnected,		(unsigned int) stats.clients_connected,
+		StatsClientsIntroduced,		(unsigned int) stats.clients_introduced,
+		StatsClientsIncompatible,	(unsigned int) stats.clients_incompatible,
+		StatsGamesCreated,		(unsigned int) stats.games_created,
+		StatsClientCount,		(unsigned int) clients.size(),
+		StatsGamesCount,		(unsigned int) games.size(),
+		StatsConarchiveCount,		(unsigned int) con_archive.size());
 	
 	send_msg(client->sock, msg);
 	
@@ -1220,6 +1240,10 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 			client->info.name, client->id, gid);
 		
 		
+		// update stats
+		stats.games_created++;
+		
+		
 		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
 		{
 			clientcon *client = &(*e);
@@ -1489,8 +1513,12 @@ void remove_expired_conar_entries()
 	}
 }
 
-int gameloop()
+int gameinit()
 {
+	// initialize server stats struct
+	memset(&stats, 0, sizeof(server_stats));
+	stats.server_started = time(NULL);
+
 #ifdef DEBUG
 	// initially add games for debugging purpose
 	if (!games.size())
@@ -1519,8 +1547,12 @@ int gameloop()
 		}
 	}
 #endif
-	
-	
+
+	return 0;
+}
+
+int gameloop()
+{
 	// handle all games
 	for (games_type::iterator e = games.begin(); e != games.end();)
 	{

@@ -113,4 +113,15 @@ typedef enum {
 	ErrNoPermission = 0x100,
 } cmderror;
 
+typedef enum {
+	StatsServerStarted		= 0x05,
+	StatsClientsConnected		= 0x10,
+	StatsClientsIntroduced		= 0x11,
+	StatsClientsIncompatible	= 0x12,
+	StatsGamesCreated		= 0x20,
+	StatsClientCount		= 0x100,
+	StatsGamesCount			= 0x101,
+	StatsConarchiveCount		= 0x120,
+} stats_codes;
+
 #endif /* _PROTOCOL_H */

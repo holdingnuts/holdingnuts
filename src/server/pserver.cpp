@@ -267,6 +267,8 @@ int main(int argc, char **argv)
 	
 	network_init();
 	
+	gameinit();
+	
 	mainloop();
 	
 	network_shutdown();
