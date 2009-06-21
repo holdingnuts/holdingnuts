@@ -728,9 +728,12 @@ void WMain::actionOpenTable()
 		
 		tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, 0 /* FIXME */);
 		
-		// silently drop message if there is no table-info
+		// drop message and display notice if there is no table-info
 		if (!tinfo)
+		{
+			addLog(tr("The table will be opened on the next hand."));
 			return;
+		}
 		
 		tinfo->window->show();
 	}

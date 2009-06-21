@@ -136,17 +136,17 @@
 <context>
     <name>PClient</name>
     <message>
-        <location filename="../pclient.cpp" line="1004"/>
+        <location filename="../pclient.cpp" line="1000"/>
         <source>Connecting...</source>
         <translation>Verbinde...</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="1310"/>
+        <location filename="../pclient.cpp" line="1306"/>
         <source>Connection closed.</source>
         <translation>Verbindung geschlossen.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="1289"/>
+        <location filename="../pclient.cpp" line="1285"/>
         <source>Connected.</source>
         <translation>Verbunden.</translation>
     </message>
@@ -177,117 +177,117 @@
         <translation>Spiel (%1) wurde beendet.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="378"/>
+        <location filename="../pclient.cpp" line="381"/>
         <source>A new hand (#%1) begins.</source>
         <translation>Eine neue Hand (#%1) beginnt.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="390"/>
+        <location filename="../pclient.cpp" line="393"/>
         <source>Blinds are now at %1/%2.</source>
         <translation>Blinds sind nun bei %1/%2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="405"/>
+        <location filename="../pclient.cpp" line="408"/>
         <source>Player %1 broke.</source>
         <translation>Spieler %1 ist ausgeschieden.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="441"/>
+        <location filename="../pclient.cpp" line="437"/>
         <source>Your hole cards: [%1 %2].</source>
         <translation>Deine Holecards: [%1 %2].</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="467"/>
+        <location filename="../pclient.cpp" line="463"/>
         <source>The flop: [%1 %2 %3].</source>
         <translation>Der Flop: [%1 %2 %3].</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="473"/>
+        <location filename="../pclient.cpp" line="469"/>
         <source>The turn: [%1].</source>
         <translation>Der Turn: [%1].</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="477"/>
+        <location filename="../pclient.cpp" line="473"/>
         <source>The river: [%1].</source>
         <translation>Der River: [%1].</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="507"/>
+        <location filename="../pclient.cpp" line="503"/>
         <source>%1 was folded.</source>
         <translation>%1 wurde gefoldet.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="509"/>
+        <location filename="../pclient.cpp" line="505"/>
         <source>%1 folded.</source>
         <translation>%1 foldet.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="516"/>
+        <location filename="../pclient.cpp" line="512"/>
         <source>%1 was checked.</source>
         <translation>%1 wurde gecheckt.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="518"/>
+        <location filename="../pclient.cpp" line="514"/>
         <source>%1 checked.</source>
         <translation>%1 checkt.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="533"/>
+        <location filename="../pclient.cpp" line="529"/>
         <source>%1 called %2.</source>
         <translation>%1 callt %2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="541"/>
+        <location filename="../pclient.cpp" line="537"/>
         <source>%1 bet to %2.</source>
         <translation>%1 setzt auf %2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="547"/>
+        <location filename="../pclient.cpp" line="543"/>
         <source>%1 raised to %2.</source>
         <translation>%1 erhöht auf %2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="553"/>
+        <location filename="../pclient.cpp" line="549"/>
         <source>%1 is allin with %2.</source>
         <translation>%1 ist Allin mit %2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="592"/>
+        <location filename="../pclient.cpp" line="588"/>
         <source>%1 shows %2.</source>
         <translation>%1 zeigt %2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="605"/>
+        <location filename="../pclient.cpp" line="601"/>
         <source>%2 (%1) joined foyer.</source>
         <translation>%2 (%1) betritt das Foyer.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="611"/>
+        <location filename="../pclient.cpp" line="607"/>
         <source>%2 (%1) left foyer.</source>
         <translation>%2 (%1) verlässt das Foyer.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="650"/>
+        <location filename="../pclient.cpp" line="646"/>
         <source>%1, it&apos;s your turn!</source>
         <translation>%1, du bist dran!</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="670"/>
+        <location filename="../pclient.cpp" line="666"/>
         <source>%1 wins pot #%2 with %3.</source>
         <translation>%1 gewinnt Pot #%2 mit %3.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="675"/>
+        <location filename="../pclient.cpp" line="671"/>
         <source>%1 receives %3 odd chips of split pot #%2.</source>
         <translation>%1 erhält %3 unteilbare Chips aus Split pot #%2.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="892"/>
+        <location filename="../pclient.cpp" line="888"/>
         <source>Protocol error. The remote host does not seem to be a HoldingNuts server.</source>
         <translation>Protokollfehler. Die Gegenstelle scheint kein HoldingNuts Server zu sein.</translation>
     </message>
     <message>
-        <location filename="../pclient.cpp" line="1278"/>
+        <location filename="../pclient.cpp" line="1274"/>
         <source>Connection error: %1.</source>
         <translation>Verbindungsfehler: %1.</translation>
     </message>
@@ -341,12 +341,12 @@
         <translation>Aussehen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="131"/>
+        <location filename="../SettingsDialog.cpp" line="133"/>
         <source>Player name</source>
         <translation>Spielername</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="122"/>
+        <location filename="../SettingsDialog.cpp" line="124"/>
         <source>UUID</source>
         <translation></translation>
     </message>
@@ -356,58 +356,58 @@
         <translation>Spielerinfo</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="168"/>
+        <location filename="../SettingsDialog.cpp" line="170"/>
         <source>Bring window to top</source>
         <translation>Fenster nach vorne bringen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="189"/>
+        <location filename="../SettingsDialog.cpp" line="191"/>
         <source>Display time in foyer chat</source>
         <translation>Zeit im Foyer-Chat anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="192"/>
+        <location filename="../SettingsDialog.cpp" line="194"/>
         <source>Display join/left messages</source>
         <translation>Betritt/Verlässt Nachrichten anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="195"/>
+        <location filename="../SettingsDialog.cpp" line="197"/>
         <source>Display game states</source>
         <translation>Spielaktionen anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="198"/>
-        <location filename="../SettingsDialog.cpp" line="208"/>
+        <location filename="../SettingsDialog.cpp" line="200"/>
+        <location filename="../SettingsDialog.cpp" line="210"/>
         <source>Display player chat</source>
         <translation>Spieler-Chat anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="202"/>
+        <location filename="../SettingsDialog.cpp" line="204"/>
         <source>Display player actions</source>
         <translation>Spieler-Aktionen anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="205"/>
+        <location filename="../SettingsDialog.cpp" line="207"/>
         <source>Display hole/community cards</source>
         <translation>Hole-/Community-Cards anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="212"/>
+        <location filename="../SettingsDialog.cpp" line="214"/>
         <source>Log to file</source>
         <translation>Log in Datei</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="213"/>
+        <location filename="../SettingsDialog.cpp" line="215"/>
         <source>Foyer chat verbosity</source>
         <translation>Foyer-Chat Ausführlichkeit</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="217"/>
+        <location filename="../SettingsDialog.cpp" line="219"/>
         <source>Table chat verbosity</source>
         <translation>Tisch-Chat Ausführlichkeit</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="120"/>
+        <location filename="../SettingsDialog.cpp" line="122"/>
         <source>Locale</source>
         <translation>Sprache</translation>
     </message>
@@ -422,63 +422,63 @@
         <translation>Automatisch</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="107"/>
+        <location filename="../SettingsDialog.cpp" line="109"/>
         <source>clear</source>
         <translation>löschen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="132"/>
+        <location filename="../SettingsDialog.cpp" line="134"/>
         <source>Location</source>
         <translation>Standort</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="166"/>
+        <location filename="../SettingsDialog.cpp" line="168"/>
         <source>Show strength of hand</source>
         <translation>Handstärke anzeigen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="121"/>
+        <location filename="../SettingsDialog.cpp" line="123"/>
         <source>Sounds</source>
         <translation>Klänge</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="90"/>
+        <location filename="../SettingsDialog.cpp" line="92"/>
         <source>only on focus</source>
         <translation>nur bei Fokus</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="88"/>
-        <location filename="../SettingsDialog.cpp" line="176"/>
+        <location filename="../SettingsDialog.cpp" line="90"/>
+        <location filename="../SettingsDialog.cpp" line="178"/>
         <source>enabled</source>
         <translation>aktiviert</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="167"/>
+        <location filename="../SettingsDialog.cpp" line="169"/>
         <source>Centralized table view</source>
         <translation>Zentrische Tischansicht</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="169"/>
+        <location filename="../SettingsDialog.cpp" line="171"/>
         <source>Card deck</source>
         <translation>Kartendeck</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="153"/>
+        <location filename="../SettingsDialog.cpp" line="155"/>
         <source>Default</source>
         <translation>Voreinstellung</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="154"/>
+        <location filename="../SettingsDialog.cpp" line="156"/>
         <source>Classic</source>
         <translation>Klassisch</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="178"/>
+        <location filename="../SettingsDialog.cpp" line="180"/>
         <source>log chat</source>
         <translation>Chat loggen</translation>
     </message>
     <message>
-        <location filename="../SettingsDialog.cpp" line="104"/>
+        <location filename="../SettingsDialog.cpp" line="106"/>
         <source>generate</source>
         <translation>generieren</translation>
     </message>
@@ -546,17 +546,17 @@
         <translation>&amp;Spiel</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="876"/>
+        <location filename="../WMain.cpp" line="879"/>
         <source>THNL</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="986"/>
+        <location filename="../WMain.cpp" line="989"/>
         <source>Logout</source>
         <translation>Ausloggen</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="990"/>
+        <location filename="../WMain.cpp" line="993"/>
         <source>Welcome</source>
         <translation>Willkommen</translation>
     </message>
@@ -651,47 +651,52 @@
         <translation>Bitte gib das Spielpasswort ein:</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="878"/>
+        <location filename="../WMain.cpp" line="734"/>
+        <source>The table will be opened on the next hand.</source>
+        <translation>Der Tisch wird mit der nächsten Hand geöffnet.</translation>
+    </message>
+    <message>
+        <location filename="../WMain.cpp" line="881"/>
         <source>unkown gametype</source>
         <translation>unbekannter Spieltyp</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="887"/>
+        <location filename="../WMain.cpp" line="890"/>
         <source>Cash game</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="889"/>
+        <location filename="../WMain.cpp" line="892"/>
         <source>Tournament</source>
         <translation>Tunier</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="891"/>
+        <location filename="../WMain.cpp" line="894"/>
         <source>Sit&apos;n&apos;Go</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="893"/>
+        <location filename="../WMain.cpp" line="896"/>
         <source>unkown gamemode</source>
         <translation>unbekannter Spielmodus</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="902"/>
+        <location filename="../WMain.cpp" line="905"/>
         <source>Waiting</source>
         <translation>Wartend</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="904"/>
+        <location filename="../WMain.cpp" line="907"/>
         <source>Started</source>
         <translation>Gestartet</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="906"/>
+        <location filename="../WMain.cpp" line="909"/>
         <source>Ended</source>
         <translation>Beendet</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="908"/>
+        <location filename="../WMain.cpp" line="911"/>
         <source>unkown gamestate</source>
         <translation>unbekannter Spielstatus</translation>
     </message>
@@ -720,7 +725,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="../WMain.cpp" line="772"/>
+        <location filename="../WMain.cpp" line="775"/>
         <source>You may need to restart the client for all settings to take effect.</source>
         <translation>Du musst den Client eventuell neustarten, damit alle Einstellungen übernommen werden.</translation>
     </message>
