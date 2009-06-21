@@ -18,29 +18,29 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
 #include "Chip.hpp"
-#include "Jeton.hpp"
-#include "ChipStake.hpp"
+#include "ChipStack.hpp"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
 
-ChipStake::ChipStake(QGraphicsItem* parent)
+ChipStack::ChipStack(QGraphicsItem* parent)
 :	QGraphicsItem(parent)
 { }
 
-QRectF ChipStake::boundingRect() const
+QRectF ChipStack::boundingRect() const
 {
 	QTransform m = this->transform();
 	
 	return m.mapRect(childrenBoundingRect());
 }
 
-void ChipStake::paint(
+void ChipStack::paint(
 	QPainter* painter,
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget)
@@ -59,9 +59,13 @@ chips_type calc(chips_type amount, chips_type value, unsigned& num)
 	return amount % value;
 }
 
-void ChipStake::setAmount(chips_type amount)
+void ChipStack::setAmount(chips_type amount)
 {
 	clear();
+
+	// display amount as tooltip, too
+	setToolTip(QString("%1").arg(amount));
+
 
 	unsigned num_red = 0;
 	unsigned num_blue = 0;
@@ -72,38 +76,32 @@ void ChipStake::setAmount(chips_type amount)
 	unsigned num_grey = 0;
 	unsigned num_yellow = 0;
 
-	// jetons
+	// chips
 	amount = calc(amount, 20000, num_yellow);
 	amount = calc(amount,  5000, num_grey);
 	amount = calc(amount,  1000, num_orange);
 	amount = calc(amount,   500, num_magenta);
-	// chips
 	amount = calc(amount,   100, num_black);
 	amount = calc(amount,    25, num_green);
 	amount = calc(amount,    10, num_blue);
 	amount = calc(amount,     5, num_red);
-	// remain is white
+	// remaining chips are white
 	
-	qreal posy = 0;
-	qreal posz = 0;
+	qreal posx = 5;
 
-	// add jetons
-	addJetons(num_magenta, Qt::magenta, posy, posz);
-	addJetons(num_orange, QColor(255,165,0), posy, posz);
-	addJetons(num_grey, Qt::lightGray, posy, posz);
-	addJetons(num_yellow, Qt::yellow, posy, posz);
-	
-	if (posy < 0)
-		posy -= 35;
-	
-	addChips(amount, Qt::white, posy, posz);
-	addChips(num_red, Qt::red, posy, posz);
-	addChips(num_blue, Qt::blue, posy, posz);
-	addChips(num_green, Qt::green, posy, posz);
-	addChips(num_black, Qt::darkGray, posy, posz);
+	// add chips
+	addChips(amount, Qt::white, posx);
+	addChips(num_red, Qt::red, posx);
+	addChips(num_blue, Qt::blue, posx);
+	addChips(num_green, Qt::green, posx);
+	addChips(num_black, Qt::darkGray, posx);
+	addChips(num_magenta, Qt::magenta, posx);
+	addChips(num_orange, QColor(255,165,0), posx);
+	addChips(num_grey, Qt::lightGray, posx);
+	addChips(num_yellow, Qt::yellow, posx);
 }
 
-void ChipStake::clear()
+void ChipStack::clear()
 {
 	QList<QGraphicsItem*> lst = childItems();
 	QList<QGraphicsItem*>::iterator it;
@@ -112,8 +110,11 @@ void ChipStake::clear()
 		scene()->removeItem(*it);
 }
 
-void ChipStake::addChips(unsigned num, const QColor& c, qreal& y, qreal& z)
+void ChipStack::addChips(unsigned num, const QColor& c, qreal& x)
 {
+	qreal y = 0;
+	qreal z = 0;
+	
 	for (unsigned i = 0; i < num; ++i)
 	{
 		Chip* p = new Chip(c, this);
@@ -121,22 +122,11 @@ void ChipStake::addChips(unsigned num, const QColor& c, qreal& y, qreal& z)
 		y -= 8;
 		z += 1;
 		
-		p->setPos(5, y);
+		p->setPos(x, y);
 		p->setZValue(z);
 	}
-}
-
-void ChipStake::addJetons(unsigned num, const QColor& c, qreal& y, qreal& z)
-{
-	for (unsigned i = 0; i < num; ++i)
-	{
-		Jeton* p = new Jeton(c, this);
-		
-		y -= 8;
-		z += 1;
-		
-		p->setPos(0, y);
-		p->setZValue(z);
-	}
+	
+	if (num)
+		x += 30;
 }
 

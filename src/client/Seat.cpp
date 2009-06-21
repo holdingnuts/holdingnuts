@@ -25,7 +25,7 @@
 #include "SeatImages.hpp"
 #include "Debug.h"
 #include "ConfigParser.hpp"
-#include "ChipStake.hpp"
+#include "ChipStack.hpp"
 
 #include <QPainter>
 #include <QFont>
@@ -53,7 +53,7 @@ Seat::Seat(unsigned int id, QWidget *parent)
 	m_yPosSmallCards(0)
 {
 	m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
-	m_pChipStake = new ChipStake(this);
+	m_pChipStack = new ChipStack(this);
 	
 	this->setZValue(8);
 	
@@ -129,7 +129,7 @@ void Seat::setAction(Player::PlayerAction action, chips_type amount)
 	else
 		m_strAmount.clear();
 		
-	m_pChipStake->setAmount(amount);
+	m_pChipStack->setAmount(amount);
 }
 
 void Seat::setWin(chips_type amount)
@@ -308,10 +308,10 @@ void Seat::paint(
 	qreal csx_pos = 0;
 	qreal csy_pos = 0;
 	
-	calcChipStakePos(csx_pos, csy_pos, m_fmInSeat.width(m_strAmount));
+	calcChipStackPos(csx_pos, csy_pos, m_fmInSeat.width(m_strAmount));
 
-	m_pChipStake->setPos(csx_pos, csy_pos);
-	m_pChipStake->update();
+	m_pChipStack->setPos(csx_pos, csy_pos);
+	m_pChipStack->update();
 
 	// big-cards
 	if (m_bBigCards)
@@ -422,7 +422,7 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 	}
 }
 
-void Seat::calcChipStakePos(qreal& x, qreal& y, int txt_width) const
+void Seat::calcChipStackPos(qreal& x, qreal& y, int txt_width) const
 {
 	//		8	9	0
 	//	 7			   1

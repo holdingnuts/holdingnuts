@@ -31,7 +31,7 @@
 
 #include "Player.hpp"
 
-class ChipStake;
+class ChipStack;
 
 class Seat : public QObject, public QGraphicsItem
 {
@@ -71,7 +71,7 @@ public:
 private:
 	void calcSCardPos(qreal& x, qreal& y) const;
 	void calcBetTextPos(qreal& x, qreal& y, int txt_width) const;
-	void calcChipStakePos(qreal& x, qreal& y, int txt_width) const;
+	void calcChipStackPos(qreal& x, qreal& y, int txt_width) const;
 	
 	void chopName();
 	
@@ -111,7 +111,7 @@ private:
 	//! \brief display small-cards
 	bool					m_bBigCards;
 	//! \brief
-	ChipStake				*m_pChipStake;
+	ChipStack				*m_pChipStack;
 	//! \brief X Position from small Cards
 	qreal					m_xPosSmallCards;
 	//! \brief Y Position from small Cards

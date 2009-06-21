@@ -18,35 +18,37 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
-#include "Jeton.hpp"
+#ifndef _HOLDING_NUTS_CHIP_STACK_H
+#define _HOLDING_NUTS_CHIP_STACK_H
 
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
-#include <QGraphicsScene>
+#include "Player.hpp"
 
-Jeton::Jeton(const QColor& c, QGraphicsItem* parent)
-:	QGraphicsItem(parent),
-	m_Color(c)
-{ }
+#include <QGraphicsItem>
 
-QRectF Jeton::boundingRect() const
+class ChipStack : public QObject, public QGraphicsItem
 {
-	QRectF rc(0, 0, 40, 30);
-	QTransform m = this->transform();
+	Q_OBJECT
+
+public:
+	ChipStack(QGraphicsItem* parent = 0);
+
+	QRectF boundingRect() const;
+
+	void paint(
+		QPainter* painter,
+		const QStyleOptionGraphicsItem* option,
+		QWidget* widget);
+		
+	void setAmount(chips_type amount);
 	
-	return m.mapRect(rc);
-}
+	void clear();
 
-void Jeton::paint(
-	QPainter* painter,
-	const QStyleOptionGraphicsItem* option,
-	QWidget* widget)
-{
-	painter->save();
-		painter->setBrush(m_Color);
-		painter->drawRoundedRect(0, -15, 40, 30, 8, 8);
-	painter->restore();	
-}
+private:
+	void addChips(unsigned num, const QColor& c, qreal& x);
+};
+
+#endif /* _HOLDING_NUTS_CHIP_STACK_H */

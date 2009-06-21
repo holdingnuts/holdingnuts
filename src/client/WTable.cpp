@@ -41,7 +41,7 @@
 #include "DealerButton.hpp"
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
-#include "ChipStake.hpp"
+#include "ChipStack.hpp"
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -300,7 +300,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pTxtHandStrength->setZValue(3);
 	m_pTxtHandStrength->setVisible(config.getBool("ui_show_handstrength"));
 	
-	m_pMainPot = new ChipStake;
+	m_pMainPot = new ChipStack;
 	m_pMainPot->setZValue(3);
 	m_pScene->addItem(m_pMainPot);
 
