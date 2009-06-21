@@ -1592,7 +1592,7 @@ void WTable::actionChat(QString msg)
 void WTable::playSound(unsigned int id) const
 {
 #ifndef NOAUDIO
-	if (!config.getBool("sound") || (config.getBool("sound_focus") && !isActiveWindow()))
+	if (!config.getBool("sound") || isHidden() || (config.getBool("sound_focus") && !isActiveWindow()))
 		return;
 	
 	audio_play(id);
