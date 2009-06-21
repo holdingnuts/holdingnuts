@@ -377,16 +377,16 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 					client->id = it->second.id;
 					use_prev_cid = true;
 					
-					dbg_msg("uuid", "(%d) using previous cid (%d) for uuid '%s'", client->sock, client->id, client->uuid);
+					log_msg("uuid", "(%d) using previous cid (%d) for uuid '%s'", client->sock, client->id, client->uuid);
 				}
 				else
 				{
-					dbg_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
+					log_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
 					client->uuid[0] = '\0';    // client is not allowed to use this uuid
 				}
 			}
 			else
-				dbg_msg("uuid", "(%d) reserving uuid '%s'", client->sock, client->uuid);
+				log_msg("uuid", "(%d) reserving uuid '%s'", client->sock, client->uuid);
 		}
 		
 		if (!use_prev_cid)
@@ -822,15 +822,10 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	}
 	
 	
-	snprintf(msg, sizeof(msg),
-		"%s (%d) joined game %d (%d/%d)",
+	log_msg("game", "%s (%d) joined game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
-	log_msg("game", "%s", msg);
-#if 0
-	client_chat(-1, -1, msg);
-#endif
 	
 	send_ok(client);
 	
@@ -874,15 +869,10 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 	}
 	
 	
-	snprintf(msg, sizeof(msg),
-		"%s (%d) parted game %d (%d/%d)",
+	log_msg("game", "%s (%d) parted game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
-	log_msg("game", "%s", msg);
-#if 0
-	client_chat(-1, -1, msg);
-#endif
 	
 	send_ok(client);
 	
@@ -1116,10 +1106,10 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		
 		send_ok(client);
 		
-#if 0
-		snprintf(msg, sizeof(msg), "Your game '%d' has been created.", gid);
-		client_chat(-1, client->id, msg);
-#endif
+		
+		log_msg("game", "%s (%d) created game %d",
+			client->info.name, client->id, gid);
+		
 		
 		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
 		{
@@ -1159,8 +1149,10 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 	
 	if (!cmderr)
 	{
+		log_msg("auth", "%s (%d) has been authed",
+			client->info.name, client->id);
+	
 		send_ok(client);
-		
 	}
 	else
 		send_err(client, 0, "auth failed");
@@ -1193,6 +1185,10 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 			const string varvalue = t.getNext();
 			
 			config.set(varname, varvalue);
+			
+			log_msg("config", "%s (%d) set var '%s' to '%s'",
+				client->info.name, client->id,
+				varname.c_str(), varvalue.c_str());
 		}
 		else
 			cmderr = true;
@@ -1203,7 +1199,7 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 	if (!cmderr)
 		send_ok(client);
 	else
-		send_err(client, 0, "auth failed");
+		send_err(client, 0, "config request failed");
 	
 	return 0;
 }
@@ -1436,8 +1432,8 @@ int gameloop()
 				log_msg("game", "restarted game (old: %d, new: %d)",
 					g->getGameId(), newgame->getGameId());
 			}
-			
-			log_msg("game", "game %d has been deleted", g->getGameId());
+			else
+				log_msg("game", "deleting game %d", g->getGameId());
 			
 			delete g;
 			games.erase(e++);
