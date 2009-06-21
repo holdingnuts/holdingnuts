@@ -89,10 +89,12 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	connect(lblWelcome, SIGNAL(linkActivated(const QString&)), this, SLOT(actionClose()));
 	lblServerTime = new QLabel(this);
 	
+	lblServerStats = new QLabel(this);
+	
 	QVBoxLayout *lHeaderLabels = new QVBoxLayout;
 	lHeaderLabels->addWidget(lblWelcome, 99, Qt::AlignVCenter);
 	lHeaderLabels->addWidget(lblServerTime, 1, Qt::AlignBottom);
-	
+	lHeaderLabels->addWidget(lblServerStats, 1, Qt::AlignVCenter);
 	
 	QLabel *lblLogo = new QLabel(this);
 	lblLogo->setPixmap(QPixmap(":res/hn_logo_wide.png"));
@@ -394,6 +396,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	timerSelectedGameUpdate = new QTimer(this);
 	connect(timerSelectedGameUpdate, SIGNAL(timeout()), this, SLOT(actionSelectedGameUpdate()));
 	
+	// server stats update timer
+	timerServerStatsUpdate = new QTimer(this);
+	connect(timerServerStatsUpdate, SIGNAL(timeout()), qApp, SLOT(requestServerStats()));
+	
 	// current selected game update timer
 	timerServerTimeUpdate= new QTimer(this);
 	connect(timerServerTimeUpdate, SIGNAL(timeout()), this, SLOT(updateServerTimeLabel()));
@@ -501,8 +507,9 @@ void WMain::updateConnectionStatus()
 		btnClose->setEnabled(true);
 		cbSrvAddr->setEnabled(false);
 		
-		// setup timers for gamelist update, select-game update, server-time update
+		// setup timers for gamelist update, select-game update, server-stats, server-time update
 		timerGamelistUpdate->start(60*1000);
+		timerServerStatsUpdate->start(3*60*1000);
 		timerSelectedGameUpdate->start(15*1000);
 		timerServerTimeUpdate->start(1000);
 		
@@ -521,10 +528,13 @@ void WMain::updateConnectionStatus()
 		modelPlayerList->clear();
 		
 		timerGamelistUpdate->stop();
+		timerServerStatsUpdate->stop();
 		timerSelectedGameUpdate->stop();
 		timerServerTimeUpdate->stop();
 		
 		wConnection->setVisible(true);
+		
+		updateServerStatsLabel();
 	}
 	
 	m_pChat->setEnabled(is_connected);
@@ -1079,6 +1089,19 @@ void WMain::updateServerTimeLabel()
 	}
 	else
 		lblServerTime->clear();
+}
+
+void WMain::updateServerStatsLabel(unsigned int client_count, unsigned int games_count)
+{
+	const bool is_connected = ((PClient*)qApp)->isConnected();
+	
+	if (is_connected)
+	{
+		lblServerStats->setText("<qt><i>" + tr("%1 players, %2 games")
+			.arg(client_count).arg(games_count) + "</i></qt>");
+	}
+	else
+		lblServerStats->clear();
 }
 
 void WMain::writeServerlist() const

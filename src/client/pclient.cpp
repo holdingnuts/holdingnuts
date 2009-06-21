@@ -52,7 +52,7 @@ ConfigParser config;
 // server command PSERVER <version> <client-id> <time>
 void PClient::serverCmdPserver(Tokenizer &t)
 {
-	const unsigned int version = t.getNextInt();
+	srv.version = t.getNextInt();
 	srv.cid = t.getNextInt();
 	
 	const unsigned int time_remote = t.getNextInt();
@@ -61,23 +61,23 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	srv.introduced = true;
 		
 	wMain->addLog(tr("Server running version %1.%2.%3. Your client ID is %4.")
-			  .arg(VERSION_GETMAJOR(version))
-			  .arg(VERSION_GETMINOR(version))
-			  .arg(VERSION_GETREVISION(version))
+			  .arg(VERSION_GETMAJOR(srv.version))
+			  .arg(VERSION_GETMINOR(srv.version))
+			  .arg(VERSION_GETREVISION(srv.version))
 			  .arg(srv.cid));
 	
 	
 	// there is a newer version available
-	if (version > VERSION)
+	if (srv.version > VERSION)
 	{
 		const QString sversion =
 			tr("There is a newer version of HoldingNuts available (at least %1.%2.%3)")
-				.arg(VERSION_GETMAJOR(version))
-				.arg(VERSION_GETMINOR(version))
-				.arg(VERSION_GETREVISION(version));
+				.arg(VERSION_GETMAJOR(srv.version))
+				.arg(VERSION_GETMINOR(srv.version))
+				.arg(VERSION_GETREVISION(srv.version));
 		wMain->addServerMessage(sversion);
 	}
-	else if (version < VERSION_COMPAT)
+	else if (srv.version < VERSION_COMPAT)
 	{
 		QMessageBox::critical(wMain, tr("Error"),
 			tr("The version of the server isn't compatible anymore "
@@ -100,6 +100,9 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	// request initial game-list and start update-timer
 	requestGamelist();
+	
+	// request initial server stats
+	requestServerStats();
 }
 
 // server command ERR [<code>] [<text>]
@@ -847,6 +850,37 @@ void PClient::serverCmdGamelist(Tokenizer &t)
 	wMain->notifyGamelist();
 }
 
+void PClient::serverCmdServerinfo(Tokenizer &t)
+{
+	std::string spair;
+	
+	int clients_count = -1;
+	int games_count = -1;
+	
+	while (t.getNext(spair))
+	{
+		Tokenizer ti(":");
+		ti.parse(spair);
+		
+		const unsigned int code = ti.getNextInt();
+		const unsigned int value = ti.getNextInt();
+		
+		switch (code)
+		{
+		case StatsClientCount:
+			clients_count = value;
+			break;
+		case StatsGamesCount:
+			games_count = value;
+			break;
+		}
+	}
+	
+	// update the server stats label if valid response
+	if (clients_count != -1 && games_count != -1)
+		wMain->updateServerStatsLabel(clients_count, games_count);
+}
+
 int PClient::serverExecute(const char *cmd)
 {
 	Tokenizer t(" ");
@@ -915,6 +949,8 @@ int PClient::serverExecute(const char *cmd)
 		serverCmdGameinfo(t);
 	else if (command == "GAMELIST")
 		serverCmdGamelist(t);
+	else if (command == "SERVERINFO")
+		serverCmdServerinfo(t);
 
 	return 0;
 }
@@ -1362,6 +1398,12 @@ void PClient::requestGamelist()
 {
 	// query gamelist
 	netSendMsg("REQUEST gamelist");
+}
+
+void PClient::requestServerStats()
+{
+	// query server stats
+	netSendMsg("REQUEST serverinfo");
 }
 
 bool PClient::isGameInList(int gid)

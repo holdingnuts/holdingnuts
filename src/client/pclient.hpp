@@ -50,6 +50,8 @@
 #include "WTable.hpp"
 
 typedef struct {
+	unsigned int version;
+	
 	char msgbuf[1024*256];
 	int buflen;
 	int last_msgid;
@@ -218,12 +220,16 @@ private:
 	void serverCmdClientinfo(Tokenizer &t);
 	void serverCmdGameinfo(Tokenizer &t);
 	void serverCmdGamelist(Tokenizer &t);
+	void serverCmdServerinfo(Tokenizer &t);
 	
 	bool addTable(int gid, int tid);
 
 public slots:
 	//! \brief query gamelist from Server
 	void requestGamelist();
+	
+	//! \brief request server stats
+	void requestServerStats();
 	
 private slots:
 	void netRead();

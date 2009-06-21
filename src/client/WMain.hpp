@@ -62,6 +62,8 @@ public:
 	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();
 	
+	void updateServerStatsLabel(unsigned int client_count=0, unsigned int games_count=0);
+	
 	void notifyGameinfo(int gid);
 	void notifyGamelist();
 
@@ -123,6 +125,8 @@ private:
 	QLabel			*lblWelcome;
 	//! \brief Label in header displaying the server time
 	QLabel 			*lblServerTime;
+	//! \brief Label in header displaying the server stats
+	QLabel 			*lblServerStats;
 	
 	//! \brief Combobox server adress
 	QComboBox		*cbSrvAddr;
@@ -193,6 +197,9 @@ private:
 	
 	//! \brief Timer for updating the selected game
 	QTimer			*timerSelectedGameUpdate;
+	
+	//! \brief Timer for updating the server stats
+	QTimer			*timerServerStatsUpdate;
 	
 	//! \brief Timer for updating the server timerGamelistUpdate
 	QTimer			*timerServerTimeUpdate;
