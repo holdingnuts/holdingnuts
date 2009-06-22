@@ -93,8 +93,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	QVBoxLayout *lHeaderLabels = new QVBoxLayout;
 	lHeaderLabels->addWidget(lblWelcome, 99, Qt::AlignVCenter);
+	lHeaderLabels->addWidget(lblServerStats, 1, Qt::AlignBottom);
 	lHeaderLabels->addWidget(lblServerTime, 1, Qt::AlignBottom);
-	lHeaderLabels->addWidget(lblServerStats, 1, Qt::AlignVCenter);
 	
 	QLabel *lblLogo = new QLabel(this);
 	lblLogo->setPixmap(QPixmap(":res/hn_logo_wide.png"));
@@ -1085,7 +1085,9 @@ void WMain::updateServerTimeLabel()
 	if (is_connected)
 	{
 		const QDateTime timeServer = ((PClient*)qApp)->getServerTime();
-		lblServerTime->setText(timeServer.toString("dddd, yyyy-MM-dd, hh:mm:ss"));
+		lblServerTime->setText("<qt><span style=\"font-size: small\">" +
+			timeServer.toString("dddd, yyyy-MM-dd, hh:mm:ss") +
+			"</span></qt>");
 	}
 	else
 		lblServerTime->clear();
@@ -1097,8 +1099,11 @@ void WMain::updateServerStatsLabel(unsigned int client_count, unsigned int games
 	
 	if (is_connected)
 	{
-		lblServerStats->setText("<qt><i>" + tr("%1 players, %2 games")
-			.arg(client_count).arg(games_count) + "</i></qt>");
+		lblServerStats->setText(
+			"<qt><span style=\"color: #333333; font-style: italic\">" +
+			tr("%1 player(s), %2 game(s)")
+				.arg(client_count).arg(games_count) +
+			"</span></qt>");
 	}
 	else
 		lblServerStats->clear();
