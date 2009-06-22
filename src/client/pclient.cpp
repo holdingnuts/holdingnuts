@@ -857,6 +857,12 @@ void PClient::serverCmdServerinfo(Tokenizer &t)
 	int clients_count = -1;
 	int games_count = -1;
 	
+#if 1
+	// legacy: older versions use incompatible syntax
+	if (t.count() < 2)
+		return;
+#endif
+	
 	while (t.getNext(spair))
 	{
 		Tokenizer ti(":");
