@@ -72,8 +72,8 @@ typedef struct {
 	
 	//! \brief Client info sent by client
 	struct {
-		char name[64];
-		char location[32];
+		char name[20+1];
+		char location[30+1];
 	} info;
 	
 	//! \brief Flood-protection: time client sent last chat-message
