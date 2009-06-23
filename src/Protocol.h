@@ -45,6 +45,7 @@ typedef enum {
 	SnapGameState		= 0x01,
 	SnapTable		= 0x02,
 	SnapCards		= 0x03,
+	SnapWinAmount		= 0x06,
 	SnapWinPot		= 0x07,
 	SnapOddChips		= 0x08,
 	SnapPlayerAction	= 0x0a,
@@ -99,6 +100,7 @@ typedef enum {
 	GameInfoPassword	= 0x02,
 	GameInfoRestart		= 0x04,
 	GameInfoOwner		= 0x08,
+	GameInfoSubscribed	= 0x10,
 } gameinfo_flags;
 
 typedef enum {
@@ -110,5 +112,16 @@ typedef enum {
 	ErrMaxConnectionsPerIP = 0x11,
 	ErrNoPermission = 0x100,
 } cmderror;
+
+typedef enum {
+	StatsServerStarted		= 0x05,
+	StatsClientsConnected		= 0x10,
+	StatsClientsIntroduced		= 0x11,
+	StatsClientsIncompatible	= 0x12,
+	StatsGamesCreated		= 0x20,
+	StatsClientCount		= 0x100,
+	StatsGamesCount			= 0x101,
+	StatsConarchiveCount		= 0x120,
+} stats_codes;
 
 #endif /* _PROTOCOL_H */

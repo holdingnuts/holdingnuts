@@ -54,6 +54,8 @@ static unsigned int cid_counter = 0;
 static clientconar_type con_archive;
 static time_t last_conarchive_cleanup = 0;   // last time scan
 
+static server_stats stats;
+
 
 GameController* get_game_by_id(int gid)
 {
@@ -197,7 +199,7 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 		return false;
 	
 	vector<int> client_list;
-	g->getPlayerList(client_list);
+	g->getListenerList(client_list);
 	
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
@@ -285,6 +287,10 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	
 	clients.push_back(client);
 	
+	
+	// update stats
+	stats.clients_connected++;
+	
 	return true;
 }
 
@@ -350,6 +356,10 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		send_err(client, ErrWrongVersion, "The client version is too old."
 			"Please update your HoldingNuts client to a more recent version.");
 		client_remove(client->sock);
+		
+		
+		// update stats
+		stats.clients_incompatible++;
 	}
 	else
 	{
@@ -359,6 +369,10 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		
 		client->version = version;
 		client->state |= Introduced;
+		
+		// update stats
+		stats.clients_introduced++;
+		
 		
 		snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
 		
@@ -377,16 +391,16 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 					client->id = it->second.id;
 					use_prev_cid = true;
 					
-					dbg_msg("uuid", "(%d) using previous cid (%d) for uuid '%s'", client->sock, client->id, client->uuid);
+					log_msg("uuid", "(%d) using previous cid (%d) for uuid '%s'", client->sock, client->id, client->uuid);
 				}
 				else
 				{
-					dbg_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
+					log_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
 					client->uuid[0] = '\0';    // client is not allowed to use this uuid
 				}
 			}
 			else
-				dbg_msg("uuid", "(%d) reserving uuid '%s'", client->sock, client->uuid);
+				log_msg("uuid", "(%d) reserving uuid '%s'", client->sock, client->uuid);
 		}
 		
 		if (!use_prev_cid)
@@ -576,6 +590,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		game_mode,
 		state,
 		(g->isPlayer(client->id) ? GameInfoRegistered : 0) |
+			(g->isSpectator(client->id) ? GameInfoSubscribed : 0) |
 			(g->hasPassword() ? GameInfoPassword : 0) |
 			(g->getOwner() == client->id ? GameInfoOwner : 0) |
 			(g->getRestart() ? GameInfoRestart : 0),
@@ -672,10 +687,16 @@ bool client_cmd_request_playerlist(clientcon *client, Tokenizer &t)
 
 bool client_cmd_request_serverinfo(clientcon *client, Tokenizer &t)
 {
-	snprintf(msg, sizeof(msg), "SERVERINFO %d:%d:%d",
-		(int) clients.size(),
-		(int) con_archive.size(),
-		(int) games.size());
+	snprintf(msg, sizeof(msg), "SERVERINFO "
+		"%d:%d %d:%d %d:%d %d:%d %d:%d %d:%d %d:%d %d:%d",
+		StatsServerStarted,		(unsigned int) stats.server_started,
+		StatsClientsConnected,		(unsigned int) stats.clients_connected,
+		StatsClientsIntroduced,		(unsigned int) stats.clients_introduced,
+		StatsClientsIncompatible,	(unsigned int) stats.clients_incompatible,
+		StatsGamesCreated,		(unsigned int) stats.games_created,
+		StatsClientCount,		(unsigned int) clients.size(),
+		StatsGamesCount,		(unsigned int) games.size(),
+		StatsConarchiveCount,		(unsigned int) con_archive.size());
 	
 	send_msg(client->sock, msg);
 	
@@ -792,7 +813,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	}
 	
 	// check for max-games-register limit
-	unsigned int register_limit = config.getInt("max_register_per_player");
+	const unsigned int register_limit = config.getInt("max_register_per_player");
 	unsigned int count = 0;
 	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
 	{
@@ -822,15 +843,10 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	}
 	
 	
-	snprintf(msg, sizeof(msg),
-		"%s (%d) joined game %d (%d/%d)",
+	log_msg("game", "%s (%d) joined game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
-	log_msg("game", "%s", msg);
-#if 0
-	client_chat(-1, -1, msg);
-#endif
 	
 	send_ok(client);
 	
@@ -874,15 +890,118 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 	}
 	
 	
-	snprintf(msg, sizeof(msg),
-		"%s (%d) parted game %d (%d/%d)",
+	log_msg("game", "%s (%d) parted game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
 	
-	log_msg("game", "%s", msg);
-#if 0
-	client_chat(-1, -1, msg);
-#endif
+	
+	send_ok(client);
+	
+	return 0;
+}
+
+int client_cmd_subscribe(clientcon *client, Tokenizer &t)
+{
+	if (!t.count())
+	{
+		send_err(client, ErrParameters);
+		return 1;
+	}
+	
+	int gid;
+	t >> gid;
+	
+	string passwd = "";
+	if (t.count() >=2)
+		t >> passwd;
+	
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (g->isSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are already subscribed");
+		return 1;
+	}
+	
+	// check for max-games-subscribe limit
+	const unsigned int subscribe_limit = config.getInt("max_subscribe_per_player");
+	unsigned int count = 0;
+	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
+	{
+		GameController *g = e->second;
+		
+		if (g->isSpectator(client->id))
+		{
+			if (++count == subscribe_limit)
+			{
+				send_err(client, 0 /*FIXME*/, "subscribe limit per player is reached");
+				return 1;
+			}
+		}
+	}
+
+	// check the password
+	if (!g->checkPassword(passwd))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to subscribe, wrong password");
+		return 1;
+	}
+	
+	if (!g->addSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to subscribe");
+		return 1;
+	}
+	
+	
+	log_msg("game", "%s (%d) subscribed game %d",
+		client->info.name, client->id, gid);
+	
+	
+	send_ok(client);
+	
+	return 0;
+}
+
+int client_cmd_unsubscribe(clientcon *client, Tokenizer &t)
+{
+	if (!t.count())
+	{
+		send_err(client, ErrParameters);
+		return 1;
+	}
+	
+	int gid;
+	t >> gid;
+	
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (!g->isSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are not subscribed");
+		return 1;
+	}
+	
+	if (!g->removeSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to unsubscribe");
+		return 1;
+	}
+	
+	
+	log_msg("game", "%s (%d) unsubscribed game %d",
+		client->info.name, client->id, gid);
+	
 	
 	send_ok(client);
 	
@@ -1116,10 +1235,14 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		
 		send_ok(client);
 		
-#if 0
-		snprintf(msg, sizeof(msg), "Your game '%d' has been created.", gid);
-		client_chat(-1, client->id, msg);
-#endif
+		
+		log_msg("game", "%s (%d) created game %d",
+			client->info.name, client->id, gid);
+		
+		
+		// update stats
+		stats.games_created++;
+		
 		
 		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
 		{
@@ -1142,8 +1265,8 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 	
 	if (t.count() >= 2 && config.get("auth_password").length())
 	{
-		int type = t.getNextInt();
-		string passwd = t.getNext();
+		const int type = t.getNextInt();
+		const string passwd = t.getNext();
 		
 		// -1 is server-auth
 		if (type == -1)
@@ -1159,8 +1282,10 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 	
 	if (!cmderr)
 	{
+		log_msg("auth", "%s (%d) has been authed",
+			client->info.name, client->id);
+	
 		send_ok(client);
-		
 	}
 	else
 		send_err(client, 0, "auth failed");
@@ -1193,6 +1318,10 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 			const string varvalue = t.getNext();
 			
 			config.set(varname, varvalue);
+			
+			log_msg("config", "%s (%d) set var '%s' to '%s'",
+				client->info.name, client->id,
+				varname.c_str(), varvalue.c_str());
 		}
 		else
 			cmderr = true;
@@ -1203,7 +1332,7 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 	if (!cmderr)
 		send_ok(client);
 	else
-		send_err(client, 0, "auth failed");
+		send_err(client, 0, "config request failed");
 	
 	return 0;
 }
@@ -1253,6 +1382,10 @@ int client_execute(clientcon *client, const char *cmd)
 		return client_cmd_register(client, t);
 	else if (command == "UNREGISTER")
 		return client_cmd_unregister(client, t);
+	else if (command == "SUBSCRIBE")
+		return client_cmd_subscribe(client, t);
+	else if (command == "UNSUBSCRIBE")
+		return client_cmd_unsubscribe(client, t);
 	else if (command == "ACTION")
 		return client_cmd_action(client, t);
 	else if (command == "CREATE")
@@ -1380,8 +1513,12 @@ void remove_expired_conar_entries()
 	}
 }
 
-int gameloop()
+int gameinit()
 {
+	// initialize server stats struct
+	memset(&stats, 0, sizeof(server_stats));
+	stats.server_started = time(NULL);
+
 #ifdef DEBUG
 	// initially add games for debugging purpose
 	if (!games.size())
@@ -1410,34 +1547,36 @@ int gameloop()
 		}
 	}
 #endif
-	
-	
+
+	return 0;
+}
+
+int gameloop()
+{
 	// handle all games
 	for (games_type::iterator e = games.begin(); e != games.end();)
 	{
 		GameController *g = e->second;
+		
+		// game has been deleted
 		if (g->tick() < 0)
 		{
-			// replicate game if "restart" is set  // FIXME: implement copy-constructor
+			// replicate game if "restart" is set
 			if (g->getRestart())
 			{
 				const int gid = ++gid_counter;
-				GameController *newgame = new GameController();
+				GameController *newgame = new GameController(*g);
 				
+				// set new ID
 				newgame->setGameId(gid);
-				newgame->setName(g->getName());
-				newgame->setRestart(true);
-				newgame->setOwner(g->getOwner());
-				newgame->setPlayerMax(g->getPlayerMax());
-				newgame->setPlayerTimeout(g->getPlayerTimeout());
-				newgame->setPlayerStakes(g->getPlayerStakes());
+				
 				games[gid] = newgame;
 				
 				log_msg("game", "restarted game (old: %d, new: %d)",
 					g->getGameId(), newgame->getGameId());
 			}
-			
-			log_msg("game", "game %d has been deleted", g->getGameId());
+			else
+				log_msg("game", "deleting game %d", g->getGameId());
 			
 			delete g;
 			games.erase(e++);

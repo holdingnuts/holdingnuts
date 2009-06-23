@@ -42,6 +42,7 @@
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
 #include "PlayerListTableModel.hpp"
+#include "ChipStack.hpp"
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -301,6 +302,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pTxtHandStrength->setPos(calcHandStrengthPos());
 	m_pTxtHandStrength->setZValue(3);
 	m_pTxtHandStrength->setVisible(config.getBool("ui_show_handstrength"));
+	
+	m_pMainPot = new ChipStack;
+	m_pMainPot->setZValue(3);
+	m_pScene->addItem(m_pMainPot);
 
 	// view
 	m_pView = new QGraphicsView(m_pScene);
@@ -369,9 +374,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	btnBetsizePotsize->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizePotsize, SIGNAL(clicked()), this, SLOT(actionBetsizePotsize()));
 
-	btnBetsizeAllin = new QPushButton(tr("Allin"), this);
-	btnBetsizeAllin->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnBetsizeAllin, SIGNAL(clicked()), this, SLOT(actionBetsizeAllin()));
+	btnBetsizeMaximum = new QPushButton(tr("Max"), this);
+	btnBetsizeMaximum->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeMaximum, SIGNAL(clicked()), this, SLOT(actionBetsizeMaximum()));
 
 	QHBoxLayout *lPots = new QHBoxLayout();
 	lPots->addStretch(2); 
@@ -381,7 +386,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lPots->addWidget(btnBetsizeHalfPot, Qt::AlignRight);
 	lPots->addWidget(btnBetsizeThreeQuarterPot, Qt::AlignRight);
 	lPots->addWidget(btnBetsizePotsize, Qt::AlignRight);
-	lPots->addWidget(btnBetsizeAllin, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeMaximum, Qt::AlignRight);
 	
 	wRaiseBtns = new QWidget(this);
 	wRaiseBtns->setLayout(lPots);
@@ -509,7 +514,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setPalette(p);	
 	
 	this->setMinimumSize(640, 480);
-	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
 	
 	// load gui settings
@@ -663,7 +667,7 @@ QPointF WTable::calcDealerBtnPos(
 				pt.rx() -= (
 					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
 					m_pDealerButton->sceneBoundingRect().width() + 
-					offset);
+					5 * offset);
 			break;
 		case 3: case 4: case 5:
 				pt.ry() -= (
@@ -672,7 +676,7 @@ QPointF WTable::calcDealerBtnPos(
 					offset);
 			break;
 		case 6: case 7:
-				pt.rx() += (wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + offset);
+				pt.rx() += (wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 6 * offset);
 			break;
 	}
 
@@ -955,7 +959,20 @@ void WTable::updateSeat(unsigned int s)
 				char card1[3], card2[3];
 				strcpy(card1, allcards[0].getName());
 				strcpy(card2, allcards[1].getName());
-				ui_seat->setCards(card1, card2);
+				
+				// display the holecards sorted?
+				if (config.getBool("ui_sort_holecards"))
+				{
+					Card c1(card1), c2(card2);
+					
+					// sort cards descending
+					if (c1 < c2)
+						ui_seat->setCards(card2, card1);
+					else
+						ui_seat->setCards(card1, card2);
+				}
+				else
+					ui_seat->setCards(card1, card2);
 				
 				ui_seat->showBigCards(true);
 			}
@@ -1009,6 +1026,11 @@ void WTable::updatePots()
 	
 	m_pTxtPots->setText(strPots);
 	m_pTxtPots->setPos(calcPotsPos());
+	
+	m_pMainPot->setAmount(snap->pots.at(0));
+	m_pMainPot->setPos(
+		qMin(m_pTxtPots->x(), m_pTxtHandStrength->x()) - 60,
+		m_pTxtPots->y() + 40);
 }
 
 void WTable::updateDealerButton()
@@ -1448,7 +1470,7 @@ void WTable::actionBetsizePotsize()
 	m_pSliderAmount->setValue(currentPot());
 }
 
-void WTable::actionBetsizeAllin()
+void WTable::actionBetsizeMaximum()
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
@@ -1595,7 +1617,7 @@ void WTable::actionChat(QString msg)
 void WTable::playSound(unsigned int id) const
 {
 #ifndef NOAUDIO
-	if (!config.getBool("sound") || (config.getBool("sound_focus") && !isActiveWindow()))
+	if (!config.getBool("sound") || isHidden() || (config.getBool("sound_focus") && !isActiveWindow()))
 		return;
 	
 	audio_play(id);

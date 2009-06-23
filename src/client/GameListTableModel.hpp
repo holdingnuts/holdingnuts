@@ -73,27 +73,42 @@ public:
 	void clear();
 
 	//! \brief translation methods (gid<->row)
-#if 1
 	int findGidByRow(int row) const;
-#endif
-	int findRowByGid(int gid) const;
 	
 	void dump() const;
 
 private:
 	QStringList				strlstHeaderLabels;
-	
-	struct dataitem{
+
+	struct gameinfo
+	{
+		//! \brief Default c-tor
+		gameinfo()
+		:	gid(-1),
+			name("???"),
+			type("???"),
+			players("???"),
+			state("???"),
+			password(false)
+		{ }
+		
+		//! \brief ID; ColumnIndex 0
 		int			gid;
-		// row[n,0] == name
-		// row[n,1] == type
-		// row[n,2] == players
-		// row[n,3] == state
-		// row[n,4] == password
-		QList<QVariant>		cols;
+		//! \brief name of the Game; ColumnIndex 1
+		QString		name;
+		//! \brief
+		QString		type;
+		//! \brief
+		QString		players;
+		//! \brief
+		QString		state;
+		//! \brief
+		bool		password;
 	};
+
+	typedef QList<gameinfo>		gameinfo_type;
 	
-	QList<dataitem>		datarows;
+	gameinfo_type				games;
 };
 
 #endif	/* _HOLDING_NUTS_GAME_LIST_TABLE_MODEL_H */

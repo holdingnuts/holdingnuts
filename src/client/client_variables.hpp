@@ -28,10 +28,12 @@ config.set("player_name",	"Unnamed");		// the player name
 config.set("info_location",	"");			// info: geographical location of the player
 config.set("uuid",		"");			// unique ID for re-connect
 config.set("locale",		"");			// language/locale to use
+config.set("encoding",		"UTF-8");		// temporary fix for localized chat
 config.set("log",		true);			// log to file
 config.set("log_timestamp",	false);			// log with timestamp
 config.set("log_chat",		false);			// include player chat in log
 config.set("ui_show_handstrength", 	true);		// display hand strength on table
+config.set("ui_sort_holecards",	false);			// sort holecards descending
 config.set("ui_centralized_view",	true);		// enable centralized table view
 config.set("ui_card_deck",	"default");		// card deck to use
 config.set("ui_echo_password",	true);			// echo password for private games by default

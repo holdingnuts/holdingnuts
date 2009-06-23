@@ -95,10 +95,12 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	connect(lblWelcome, SIGNAL(linkActivated(const QString&)), this, SLOT(actionClose()));
 	lblServerTime = new QLabel(this);
 	
+	lblServerStats = new QLabel(this);
+	
 	QVBoxLayout *lHeaderLabels = new QVBoxLayout;
 	lHeaderLabels->addWidget(lblWelcome, 99, Qt::AlignVCenter);
+	lHeaderLabels->addWidget(lblServerStats, 1, Qt::AlignBottom);
 	lHeaderLabels->addWidget(lblServerTime, 1, Qt::AlignBottom);
-	
 	
 	QLabel *lblLogo = new QLabel(this);
 	lblLogo->setPixmap(QPixmap(":res/hn_logo_wide.png"));
@@ -115,7 +117,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// sort and filter proxy model
 	proxyModelGameList = new GameListSortFilterProxyModel(this);
 	proxyModelGameList->setSourceModel(modelGameList);
-	proxyModelGameList->setDynamicSortFilter(true);
+//	proxyModelGameList->setDynamicSortFilter(true);
 			
 	// view game
 	viewGameList = new QTableView(this);
@@ -126,7 +128,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewGameList->setSortingEnabled(false);   // FIXME: disabled till issues solved
+	viewGameList->setSortingEnabled(true);
 	
 #if 0
 	QFont font = viewGameList->font();
@@ -134,11 +136,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setFont(font);
 #endif
 	viewGameList->setModel(proxyModelGameList);
-	viewGameList->setColumnWidth(0, 200);	// name
-	viewGameList->setColumnWidth(1, 90);	// type
-	viewGameList->setColumnWidth(2, 50);	// players
-	viewGameList->setColumnWidth(3, 50);	// state
-	viewGameList->setColumnHidden(4, true);
+	viewGameList->setColumnWidth(1, 200);	// name
+	viewGameList->setColumnWidth(2, 90);	// type
+	viewGameList->setColumnWidth(3, 50);	// players
+	viewGameList->setColumnWidth(4, 50);	// state
+#ifndef DEBUG
+	viewGameList->setColumnHidden(0, true);	// gid
+	viewGameList->setColumnHidden(5, true);	// password
+#endif
 
 	connect(
 		viewGameList->selectionModel(),
@@ -204,6 +209,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnUnregister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
 	
+	btnSubscribe = new QPushButton(tr("&Subscribe"), this);
+	btnSubscribe->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnSubscribe, SIGNAL(clicked()), this, SLOT(actionSubscribe()));
+	
+	btnUnsubscribe = new QPushButton(tr("Unsu&bscribe"), this);
+	btnUnsubscribe->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnUnsubscribe, SIGNAL(clicked()), this, SLOT(actionUnsubscribe()));
+	
 	btnOpenTable = new QPushButton(tr("&Open table"), this);
 	btnOpenTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnOpenTable, SIGNAL(clicked()), this, SLOT(actionOpenTable()));
@@ -218,6 +231,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	
 	QHBoxLayout *lGameActions = new QHBoxLayout();
+	lGameActions->addWidget(btnSubscribe);
+	lGameActions->addWidget(btnUnsubscribe);
 	lGameActions->addWidget(btnOpenTable);
 	lGameActions->addWidget(btnStartGame);
 	
@@ -401,6 +416,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	timerSelectedGameUpdate = new QTimer(this);
 	connect(timerSelectedGameUpdate, SIGNAL(timeout()), this, SLOT(actionSelectedGameUpdate()));
 	
+	// server stats update timer
+	timerServerStatsUpdate = new QTimer(this);
+	connect(timerServerStatsUpdate, SIGNAL(timeout()), qApp, SLOT(requestServerStats()));
+	
 	// current selected game update timer
 	timerServerTimeUpdate= new QTimer(this);
 	connect(timerServerTimeUpdate, SIGNAL(timeout()), this, SLOT(updateServerTimeLabel()));
@@ -508,8 +527,9 @@ void WMain::updateConnectionStatus()
 		btnClose->setEnabled(true);
 		cbSrvAddr->setEnabled(false);
 		
-		// setup timers for gamelist update, select-game update, server-time update
+		// setup timers for gamelist update, select-game update, server-stats, server-time update
 		timerGamelistUpdate->start(60*1000);
+		timerServerStatsUpdate->start(3*60*1000);
 		timerSelectedGameUpdate->start(15*1000);
 		timerServerTimeUpdate->start(1000);
 		
@@ -527,10 +547,13 @@ void WMain::updateConnectionStatus()
 		modelGameList->clear();
 		
 		timerGamelistUpdate->stop();
+		timerServerStatsUpdate->stop();
 		timerSelectedGameUpdate->stop();
 		timerServerTimeUpdate->stop();
 		
 		wConnection->setVisible(true);
+		
+		updateServerStatsLabel();
 	}
 	
 	m_pChat->setEnabled(is_connected);
@@ -670,7 +693,7 @@ void WMain::actionTest()
 #endif
 }
 
-void WMain::doRegister(bool bRegister)
+void WMain::doRegister(bool bRegister, bool subscription)
 {
 	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
 	
@@ -697,7 +720,7 @@ void WMain::doRegister(bool bRegister)
 				return;
 		}
 		
-		((PClient*)qApp)->doRegister(gid, bRegister, password);
+		((PClient*)qApp)->doRegister(gid, bRegister, subscription, password);
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
 	}
@@ -705,12 +728,22 @@ void WMain::doRegister(bool bRegister)
 
 void WMain::actionRegister()
 {
-	doRegister(true);
+	doRegister(true, false);
 }
 
 void WMain::actionUnregister()
 {
-	doRegister(false);
+	doRegister(false, false);
+}
+
+void WMain::actionSubscribe()
+{
+	doRegister(true, true);
+}
+
+void WMain::actionUnsubscribe()
+{
+	doRegister(false, true);
 }
 
 void WMain::actionOpenTable()
@@ -728,9 +761,12 @@ void WMain::actionOpenTable()
 		
 		tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, 0 /* FIXME */);
 		
-		// silently drop message if there is no table-info
+		// drop message and display notice if there is no table-info
 		if (!tinfo)
+		{
+			addLog(tr("The table will be opened on the next hand."));
 			return;
+		}
 		
 		tinfo->window->show();
 	}
@@ -824,12 +860,6 @@ void WMain::gameListSelectionChanged(
 	{
 		const int selected_row = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
-		
-		/*
-		dbg_msg("gameListSelectionChanged", "selected-row:%d gid:%d",
-			selected_row,
-			gid);
-		*/
 		
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
@@ -1007,6 +1037,9 @@ void WMain::updateGameinfo(int gid)
 		btnRegister->setEnabled(false);
 		btnUnregister->setEnabled(false);
 		
+		btnSubscribe->setVisible(false);
+		btnUnsubscribe->setVisible(false);
+		
 		btnOpenTable->setVisible(false);
 		btnStartGame->setVisible(false);
 		
@@ -1033,7 +1066,12 @@ void WMain::updateGameinfo(int gid)
 	btnRegister->setEnabled(!gi->registered && gi->state == GameStateWaiting);
 	btnUnregister->setEnabled(gi->registered && gi->state == GameStateWaiting);
 	
-	btnOpenTable->setVisible(gi->registered && gi->state != GameStateWaiting);
+	btnSubscribe->setEnabled(!gi->registered && !gi->subscribed);
+	btnSubscribe->setVisible(!gi->registered);
+	btnUnsubscribe->setEnabled(!gi->registered && gi->subscribed);
+	btnUnsubscribe->setVisible(!gi->registered);
+	
+	btnOpenTable->setVisible((gi->registered || gi->subscribed) && gi->state != GameStateWaiting);
 	btnStartGame->setVisible(gi->registered &&
 		gi->owner &&
 		gi->players_count >= 2 &&
@@ -1047,10 +1085,28 @@ void WMain::updateServerTimeLabel()
 	if (is_connected)
 	{
 		const QDateTime timeServer = ((PClient*)qApp)->getServerTime();
-		lblServerTime->setText(timeServer.toString("dddd, yyyy-MM-dd, hh:mm:ss"));
+		lblServerTime->setText("<qt><span style=\"font-size: small\">" +
+			timeServer.toString("dddd, yyyy-MM-dd, hh:mm:ss") +
+			"</span></qt>");
 	}
 	else
 		lblServerTime->clear();
+}
+
+void WMain::updateServerStatsLabel(unsigned int client_count, unsigned int games_count)
+{
+	const bool is_connected = ((PClient*)qApp)->isConnected();
+	
+	if (is_connected)
+	{
+		lblServerStats->setText(
+			"<qt><span style=\"color: #333333; font-style: italic\">" +
+			tr("%1 player(s), %2 game(s)")
+				.arg(client_count).arg(games_count) +
+			"</span></qt>");
+	}
+	else
+		lblServerStats->clear();
 }
 
 void WMain::writeServerlist() const

@@ -50,6 +50,8 @@
 #include "WTable.hpp"
 
 typedef struct {
+	unsigned int version;
+	
 	char msgbuf[1024*256];
 	int buflen;
 	int last_msgid;
@@ -74,6 +76,8 @@ typedef std::map<int,tableinfo>		tables_type;
 typedef struct {
 	//! \brief local player registered state
  	bool			registered;
+	//! \brief local player subscribed state
+ 	bool			subscribed;
 	//! \brief name of the game
 	QString			name;
 	//! \brief gametype
@@ -151,7 +155,7 @@ public:
 	
 	bool doSetAction(int gid, Player::PlayerAction action, chips_type amount=0);
 	
-	void doRegister(int gid, bool bRegister=true, const QString& password="");
+	void doRegister(int gid, bool bRegister=true, bool subscription=false, const QString& password="");
 	void doStartGame(int gid);
 	
 #if 0
@@ -214,12 +218,16 @@ private:
 	void serverCmdClientinfo(Tokenizer &t);
 	void serverCmdGameinfo(Tokenizer &t);
 	void serverCmdGamelist(Tokenizer &t);
+	void serverCmdServerinfo(Tokenizer &t);
 	
 	bool addTable(int gid, int tid);
 
 public slots:
 	//! \brief query gamelist from Server
 	void requestGamelist();
+	
+	//! \brief request server stats
+	void requestServerStats();
 	
 private slots:
 	void netRead();

@@ -44,26 +44,50 @@ static char msg[1024];
 
 GameController::GameController()
 {
-	game_id = -1;
+	reset();
 	
-	started = false;
-	ended = false;
 	max_players = 10;
 	restart = false;
 	
 	player_stakes = 1500;
 	
-	blind.blindrule = BlindByTime;
 	blind.blinds_time = 60 * 4;
 	blind.blinds_factor = 2.0f;
 	blind.start = 10;
 	
-	hand_no = 0;
-	
-	type = SNG;
-	
 	name = "game";
 	password = "";
+	owner = -1;
+}
+
+GameController::GameController(const GameController& g)
+{
+	reset();
+	
+	setName(g.getName());
+	setRestart(g.getRestart());
+	setOwner(g.getOwner());
+	//setGameType()
+	setPlayerMax(g.getPlayerMax());
+	setPlayerTimeout(g.getPlayerTimeout());
+	setPlayerStakes(g.getPlayerStakes());
+	setBlindsStart(g.getBlindsStart());
+	setBlindsFactor(g.getBlindsFactor());
+	setBlindsTime(g.getBlindsTime());
+	setPassword(g.getPassword());
+}
+
+void GameController::reset()
+{
+	game_id = -1;
+	
+	type = SNG;	// FIXME
+	blind.blindrule = BlindByTime;	// FIXME:
+	
+	started = false;
+	ended = false;
+	
+	hand_no = 0;
 }
 
 bool GameController::addPlayer(int cid)
@@ -121,6 +145,39 @@ bool GameController::isPlayer(int cid) const
 	return true;
 }
 
+bool GameController::addSpectator(int cid)
+{
+	// is the client already a spectator?
+	if (isSpectator(cid))
+		return false;
+	
+	spectators.insert(cid);
+	
+	return true;
+}
+
+bool GameController::removeSpectator(int cid)
+{
+	spectators_type::iterator it = spectators.find(cid);
+	
+	if (it == spectators.end())
+		return false;
+	
+	spectators.erase(it);
+	
+	return true;
+}
+
+bool GameController::isSpectator(int cid) const
+{
+	spectators_type::const_iterator it = spectators.find(cid);
+	
+	if (it == spectators.end())
+		return false;
+	
+	return true;
+}
+
 Player* GameController::findPlayer(int cid)
 {
 	players_type::const_iterator it = players.find(cid);
@@ -160,6 +217,19 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 	return true;
 }
 
+bool GameController::getListenerList(vector<int> &client_list) const
+{
+	client_list.clear();
+	
+	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
+		client_list.push_back(e->first);
+	
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_list.push_back(*e);
+	
+	return true;
+}
+
 void GameController::selectNewOwner()
 {
 	players_type::const_iterator e = players.begin();
@@ -171,8 +241,13 @@ void GameController::selectNewOwner()
 
 void GameController::chat(int tid, const char* msg)
 {
+	// players
 	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
 		client_chat(game_id, tid, e->first, msg);
+	
+	// spectators
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_chat(game_id, tid, *e, msg);
 }
 
 void GameController::chat(int cid, int tid, const char* msg)
@@ -182,8 +257,13 @@ void GameController::chat(int cid, int tid, const char* msg)
 
 void GameController::snap(int tid, int sid, const char* msg)
 {
+	// players
 	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
 		client_snapshot(game_id, tid, e->first, sid, msg);
+	
+	// spectators
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_snapshot(game_id, tid, *e, sid, msg);
 }
 
 void GameController::snap(int cid, int tid, int sid, const char* msg)
@@ -963,7 +1043,7 @@ void GameController::stateAskShow(Table *t)
 	
 	Player *p = t->seats[t->cur_player].player;
 	
-	if (!p->stake) // player is allin, no option to show/muck
+	if (!p->stake && t->countActivePlayers() > 1) // player went allin and has no option to show/muck
 	{
 		t->seats[t->cur_player].showcards = true;
 		chose_action = true;
@@ -1222,6 +1302,18 @@ void GameController::stateEndRound(Table *t)
 		// player has no stake left
 		if (p->stake == 0)
 			broken_players.insert(pair<chips_type,int>(p->stake_before, i));
+		else
+		{
+			// there is a net win
+			if (p->stake > p->stake_before)
+			{
+				snprintf(msg, sizeof(msg), "%d %d %d",
+					p->client_id,
+					-1,	/* reserved */
+					p->stake - p->stake_before);
+				snap(t->table_id, SnapWinAmount, msg);
+			}
+		}
 	}
 	
 	// remove players in right order: sorted by stake_before
