@@ -127,7 +127,10 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	
 	// --- tabPlayerinfo ---
 	editPlayerName = new QLineEdit(QString::fromStdString(cfg->get("player_name")), tabPlayerinfo);
+	editPlayerName->setMaxLength(20);
+
 	editPlayerLocation = new QLineEdit(QString::fromStdString(cfg->get("info_location")), tabPlayerinfo);
+	editPlayerLocation->setMaxLength(30);
 
 	QFormLayout *formPlayerinfo = new QFormLayout;
 	formPlayerinfo->addRow(tr("Player name"), editPlayerName);
