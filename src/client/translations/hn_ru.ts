@@ -584,6 +584,10 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
         <source>Welcome</source>
         <translation>Добро пожаловать,</translation>
     </message>
+    <message>
+        <source>The table will be opened on the next hand.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WTable</name>

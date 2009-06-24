@@ -602,6 +602,10 @@ Format: &lt;host&gt;[:&lt;port&gt;]</translation>
         <source>Connections</source>
         <translation>Conexiuni</translation>
     </message>
+    <message>
+        <source>The table will be opened on the next hand.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WTable</name>

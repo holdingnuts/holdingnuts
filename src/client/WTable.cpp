@@ -1004,7 +1004,8 @@ void WTable::updatePots()
 		}
 	}
 	
-	m_pTxtPots->setText(strPots);
+	m_pTxtPots->setText(QString("%1").arg(currentPot()));
+	m_pTxtPots->setToolTip(strPots);
 	m_pTxtPots->setPos(calcPotsPos());
 }
 

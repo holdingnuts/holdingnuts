@@ -43,7 +43,55 @@
     </message>
     <message>
         <source>Max. Players</source>
-        <translation>Max. Spelers</translation>
+        <translation type="obsolete">Max. Spelers</translation>
+    </message>
+    <message>
+        <source>Game type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Game mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Players</source>
+        <translation type="unfinished">Spelers</translation>
+    </message>
+    <message>
+        <source>Max. players</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blinds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Starting blinds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Raise factor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Raise time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Private game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password protected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -103,6 +151,102 @@
         <source>Protocol error. The remote host does not seem to be a HoldingNuts server.</source>
         <translation>Protocol fout. Het blijkt dat de aangeweze computer niet een geldige HoldingNuts server is.</translation>
     </message>
+    <message>
+        <source>Server running version %1.%2.%3. Your client ID is %4.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished">Fout</translation>
+    </message>
+    <message>
+        <source>The version of the server isn&apos;t compatible anymore with this client version. Please either use an older client version or request the server admin to update the server version.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A new hand (#%1) begins.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blinds are now at %1/%2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Player %1 broke.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your hole cards: [%1 %2].</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The flop: [%1 %2 %3].</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The turn: [%1].</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The river: [%1].</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 was folded.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 folded.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 was checked.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 checked.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 called %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 bet to %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 raised to %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 is allin with %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 shows %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%2 (%1) joined foyer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%2 (%1) left foyer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1, it&apos;s your turn!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 wins pot #%2 with %3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 receives %3 odd chips of split pot #%2.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PlayerListTableModel</name>
@@ -116,6 +260,10 @@
     <message>
         <source>Location: %1</source>
         <translation>Plaats: %1</translation>
+    </message>
+    <message>
+        <source>Name: %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -198,6 +346,54 @@
         <source>Classic</source>
         <translation>Klassiek</translation>
     </message>
+    <message>
+        <source>Log and chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Centralized table view</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bring window to top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display time in foyer chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display join/left messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display game states</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display player chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display player actions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display hole/community cards</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Foyer chat verbosity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Table chat verbosity</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WMain</name>
@@ -207,7 +403,7 @@
     </message>
     <message>
         <source>Game name filter:</source>
-        <translation>Spelnaam filter:</translation>
+        <translation type="obsolete">Spelnaam filter:</translation>
     </message>
     <message>
         <source>&amp;Register</source>
@@ -354,8 +550,52 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
         <translation>Welkom</translation>
     </message>
     <message>
-        <source>offline</source>
-        <translation></translation>
+        <source>hide started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>hide private</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Open table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Start game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Player timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blinds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">Naam</translation>
+    </message>
+    <message>
+        <source>Connections</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Private game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Please enter the game password:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The table will be opened on the next hand.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Logout</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -515,6 +755,166 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     <message>
         <source>Unable to save screenshot in %1.</source>
         <translation>Onmogelijk om schermfoto te bewaren in %1.</translation>
+    </message>
+    <message>
+        <source>Min</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>1/4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>1/2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>3/4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Allin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1, it&apos;s your turn!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1, you have %2 seconds left to respond!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Spades</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hearts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Diamonds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clubs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deuce</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deuces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Three</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Threes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Four</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fours</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Five</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fives</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Six</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sixes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Seven</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sevens</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Eight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Eights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nine</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ten</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tens</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Jack</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Jacks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Queen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Queens</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>King</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Kings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ace</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Aces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 and %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 high</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
