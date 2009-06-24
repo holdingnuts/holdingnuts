@@ -996,10 +996,13 @@ void WTable::updatePots()
 	chips_type pot_sum = 0;
 	if (snap->pots.at(0) > 0)
 	{
+		pot_sum += snap->pots.at(0);
+		
 		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
 		for (unsigned int t = 1; t < snap->pots.size(); ++t)
 		{
 			pot_sum += snap->pots.at(t);
+			
 			strPots.append(
 				QString("  " + tr("Side pot %1: %2")
 					.arg(t).arg(snap->pots.at(t))));
