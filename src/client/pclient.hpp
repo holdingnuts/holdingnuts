@@ -64,12 +64,6 @@ typedef struct {
 } servercon;
 
 typedef struct {
-	QString name;
-	QString location;
-} playerinfo;
-
-
-typedef struct {
 	bool sitting;
 	bool subscribed;
 	table_snapshot snap;
@@ -120,8 +114,6 @@ typedef struct {
 typedef std::vector<int>		gamelist_type;
 // map<gid, gameinfo>
 typedef std::map<int,gameinfo>		games_type;
-// map<cid, playerinfo>
-typedef std::map<int,playerinfo>	players_type;
 
 
 typedef struct {
@@ -137,6 +129,8 @@ typedef struct {
 
 
 class QDateTime;
+class PlayerListTableModel;
+
 
 class PClient : public QApplication
 {
@@ -170,11 +164,12 @@ public:
 	bool isGameInList(int gid);
 	gameinfo* getGameInfo(int gid);
 	tableinfo* getTableInfo(int gid, int tid);
-	playerinfo* getPlayerInfo(int cid);
-	QString getPlayerName(int cid);
 	int getMyCId();
 	
 	WMain* getMainWnd() const { return wMain; };
+
+	PlayerListTableModel* playerList() const { return modelPlayerList; }
+	
 	bool isTableWindowRemaining();
 	
 	//! \brief query playerlist from Server
@@ -197,9 +192,12 @@ private:
 	
 private:
 	servercon		srv;
-	players_type		players;
 	games_type		games;
 	gamelist_type		gamelist;
+	
+	//! \brief MVC Model
+	PlayerListTableModel	*modelPlayerList;
+	
 private:	
 	int netSendMsg(const char *msg);
 	

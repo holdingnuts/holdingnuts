@@ -41,6 +41,7 @@
 #include "DealerButton.hpp"
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
+#include "PlayerListTableModel.hpp"
 #include "ChipStack.hpp"
 
 #ifndef NOAUDIO
@@ -64,6 +65,8 @@
 #include <QMenu>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QCompleter>
+#include <QListView>
 
 using namespace std;
 
@@ -447,10 +450,19 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblActions->setScaledContents(true);
 	lblActions->setFixedSize(450, 90);
 	lblActions->setLayout(stlayActions);
+	
+	QListView *popupView = new QListView;
+	popupView->setModelColumn(1);
+	
+	QCompleter *cmpChat = new QCompleter(((PClient*)qApp)->playerList(), this);
+	cmpChat->setPopup(popupView);
+	cmpChat->setCompletionRole(Qt::DisplayRole);
+	cmpChat->setCompletionColumn(((PClient*)qApp)->playerList()->nameColumn());
 
 	m_pChat	= new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->setFixedHeight(150);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
+	m_pChat->setCompleter(cmpChat);
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 	QGridLayout *mainLayout = new QGridLayout(this);
@@ -890,18 +902,9 @@ void WTable::updateSeat(unsigned int s)
 	{
 		ui_seat->setStake(seat->stake);
 		ui_seat->setSitout(seat->sitout);
-		
-		
-		const int cid = seat->client_id;
-		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
-		
-		// check if playerinfo is available
-		if (pinfo)
-			ui_seat->setInfo(pinfo->name,
-						pinfo->location);
-		else
-			ui_seat->setInfo(((PClient*)qApp)->getPlayerName(cid), "");
-		
+		ui_seat->setInfo(
+			((PClient*)qApp)->playerList()->name(seat->client_id),
+			((PClient*)qApp)->playerList()->location(seat->client_id));
 		
 		if (snap->state > Table::ElectDealer)
 		{
@@ -1518,7 +1521,7 @@ void WTable::slotFirstReminder(int seatnr)
 		
 	addServerMessage(
 		QString(tr("%1, it's your turn!")
-			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))));
+			.arg(((PClient*)qApp)->playerList()->name(seat->client_id))));
 }
 
 void WTable::slotSecondReminder(int seatnr)
@@ -1545,7 +1548,7 @@ void WTable::slotSecondReminder(int seatnr)
 		
 	addServerMessage(
 		QString(tr("%1, you have %2 seconds left to respond!")
-			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))
+			.arg(((PClient*)qApp)->playerList()->name(seat->client_id))
 			.arg(ginfo->player_timeout - ginfo->player_timeout / 4 * 3)));
 
 	// additionally play sound

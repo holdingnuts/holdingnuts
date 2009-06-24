@@ -30,6 +30,7 @@
 class QLineEdit;
 class QTextEdit;
 class QPushButton;
+class QCompleter;
 
 class ChatBox : public QWidget
 {
@@ -50,13 +51,14 @@ public:
 	void addMessage(const QString &msg, const QString &from = "", const QColor &color = Qt::black);
 	void addMessage(const QString &msg, const QColor &color = Qt::black);
 	
-	void setFontPointSize(int size);
-	int fontPointSize() const;	
-
 	void showChatBtn(bool bShow);
 	void showTime(bool bShow);
 
+	void setFontPointSize(int size);
 	void setEnabled(bool enable);
+	void setCompleter(QCompleter *completer);
+	
+	int fontPointSize() const;
 
 	bool hasInputFocus() const;
 
@@ -67,6 +69,10 @@ protected:
 
 private slots:
 	void actionChat();
+	
+	void textEdited(const QString& text);
+
+	void insertCompletion(const QString &completion);
 
 signals:
      void dispatchedMessage(QString msg);
@@ -77,6 +83,8 @@ private:
 	QTextEdit		*m_pEditChatLog;
 	//! \brief send message button, default is hidden
 	QPushButton		*m_pSendMsg;
+	//! \brief Playername Completer
+	QCompleter		*m_pCompleter;
 	//! \brief shows human-readable Timestamp 
 	bool			m_bShowTime;
 };

@@ -29,8 +29,9 @@
 #include "CreateGameDialog.hpp"
 #include "AboutDialog.hpp"
 #include "GameListTableModel.hpp"
-#include "PlayerListTableModel.hpp"
 #include "GameListSortFilterProxyModel.hpp"
+#include "PlayerListTableModel.hpp"
+#include "PlayerListSortFilterProxyModel.hpp"
 
 #include "Config.h"
 #include "Debug.h"
@@ -56,6 +57,11 @@
 #include <QUrl>
 #include <QInputDialog>
 #include <QComboBox>
+#include <QCompleter>
+#include <QCheckBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QListView>
 #include <QStandardItemModel>
 #include <QGridLayout>
 #include <QCheckBox>
@@ -151,10 +157,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	filterPatternGame = new QLineEdit(this);
 	filterPatternGame->hide();
 	
-	chkHideStartedGames = new QCheckBox(tr("hide started"), this);
+	chkHideStartedGames = new QCheckBox(tr("hide started Games"), this);
 	connect(chkHideStartedGames, SIGNAL(stateChanged(int)), this, SLOT(filterHideStartedGames(int)));
 	
-	chkHidePrivateGames = new QCheckBox(tr("hide private"), this);
+	chkHidePrivateGames = new QCheckBox(tr("hide private Games"), this);
 	connect(chkHidePrivateGames, SIGNAL(stateChanged(int)), this, SLOT(filterHidePrivateGames(int)));
 
 	QHBoxLayout *lGameFilter = new QHBoxLayout();
@@ -169,20 +175,26 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 		this,
 		SLOT(gameFilterChanged()));
 
-	// model player
-	modelPlayerList = new PlayerListTableModel(this);
+	// sort and filter proxy model
+	proxyModelPlayerList = new PlayerListSortFilterProxyModel(this);
+	proxyModelPlayerList->setSourceModel(((PClient*)qApp)->playerList());
+	proxyModelPlayerList->setDynamicSortFilter(true);
 
 	// view player
 	viewPlayerList = new QTableView(this);
 	viewPlayerList->setShowGrid(false);
-	viewPlayerList->horizontalHeader()->hide();	// TODO: enable if required
 	viewPlayerList->horizontalHeader()->setHighlightSections(false);
 	viewPlayerList->verticalHeader()->hide();
 	viewPlayerList->verticalHeader()->setHighlightSections(false);
 	viewPlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewPlayerList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewPlayerList->setModel(modelPlayerList);
-	
+	viewPlayerList->setModel(proxyModelPlayerList);
+#ifndef DEBUG
+	// hide cid and admin column if debug is disabled
+	viewPlayerList->setColumnHidden(0, true);
+	viewPlayerList->setColumnHidden(1, true);
+#endif
+
 	// container widget
 	wGameFilter = new QWidget(this);
 	wGameFilter->setLayout(lGameFilter);
@@ -288,11 +300,19 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// container widget
 	wConnection = new QWidget(this);
 	wConnection->setLayout(lConnect);
+
+	QListView *popupView = new QListView;
+	popupView->setModelColumn(1);
 	
-	
+	QCompleter *cmpChat = new QCompleter(((PClient*)qApp)->playerList(), this);
+	cmpChat->setPopup(popupView);
+	cmpChat->setCompletionRole(Qt::DisplayRole);
+	cmpChat->setCompletionColumn(((PClient*)qApp)->playerList()->nameColumn());
+
 	// the foyer chat box
 	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
+	m_pChat->setCompleter(cmpChat);
 	m_pChat->showTime((config.getInt("chat_verbosity_foyer") & 0x1));
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
@@ -525,7 +545,6 @@ void WMain::updateConnectionStatus()
 		cbSrvAddr->setEnabled(true);
 		
 		modelGameList->clear();
-		modelPlayerList->clear();
 		
 		timerGamelistUpdate->stop();
 		timerServerStatsUpdate->stop();
@@ -560,17 +579,10 @@ void WMain::updateConnectionStatus()
 	else
 		updateGameinfo(-1);
 }
-
+/*
 void WMain::notifyPlayerinfo(int cid)
 {
 	//dbg_msg("DEBUG", "notify playerinfo <%d>", cid);
-
-#if 0
-	const playerinfo *player = ((PClient*)qApp)->getPlayerInfo(cid);
-	
-	if (!player)
-		return;
-#endif
 
 	// FIXME: update the model only if cid is element of selected game;
 	//		and update only the needed items like in gamelistmodel
@@ -606,27 +618,15 @@ void WMain::notifyPlayerlist(int gid)
 
 void WMain::updatePlayerList(int gid)
 {
-	modelPlayerList->clear();
-
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(gid);
 	
 	if (!ginfo)
 		return;
-	
-	for (unsigned int i = 0; i < ginfo->players.size(); ++i)
-	{
-		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(ginfo->players[i]);
-			
-		if (pinfo)
-			modelPlayerList->updatePlayerName(i, pinfo->name);
-		else
-			modelPlayerList->updatePlayerName(i,
-				QString("??? (%1)").arg(ginfo->players[i]));
-	}
-	
+
+	proxyModelPlayerList->filterListCid(QVector<int>::fromStdVector(ginfo->players));
 	viewPlayerList->resizeRowsToContents(); 
 }
-
+*/
 void WMain::actionConnect()
 {
 	if (!cbSrvAddr->lineEdit()->text().length() || ((PClient*)qApp)->isConnected())

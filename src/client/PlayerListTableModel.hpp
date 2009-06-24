@@ -52,29 +52,60 @@ public:
 	bool insertRows(
 		int position,
 		int rows,
-		const QModelIndex &index = QModelIndex());
-		
-	bool appendRows(
+		const QModelIndex& index = QModelIndex());
+
+	bool removeRows(
+		int position,
 		int rows,
-		const QModelIndex &index = QModelIndex());
+		const QModelIndex& index = QModelIndex());
 
 	//! \brief 
 	//! \param value
-	void updateRow(int row, const QStringList& value);
+	void updateValue(int cid, int column, const QVariant& value);
 
-	void updateValue(int row, int column, const QString& value);
+	void updatePlayerAdmin(int cid, bool value);
+	void updatePlayerName(int cid, const QString& value);
+	void updatePlayerLocation(int cid, const QString& value);
 
-	void updatePlayerName(int row, const QString& value);
+	QString getPlayerName(int cid) const;
+	QString getLocation(int cid) const;
 
-	//! \brief clear's the list
+	QString name(int cid) const;
+	QString location(int cid) const;
+
+	bool containsId(int cid) const;
+
+	unsigned nameColumn() const;
+
 	void clear();
 
 	void dump();
 
 private:
 	QStringList				strlstHeaderLabels;
+
+	struct playerinfo
+	{
+		//! \brief Default c-tor
+		playerinfo()
+		:	cid(-1),
+			name("???"),
+			location("")
+		{ }
+		
+		//! \brief ID; ColumnIndex 0
+		int			cid;
+		//! \brief Admin of Games; ColumnIndex 1 
+		QList<int>	admin;
+		//! \brief Playername; ColumnIndex 2
+		QString		name;
+		//! \brief Player Location; ColumnIndex 3
+		QString		location;
+	};
+
+	typedef QList<playerinfo>	players_type;
 	
-	QList<QStringList>		lstRows; // QStringList == row[n,0], row[n,1],... 
+	players_type				players;
 };
 
 #endif	/* _HOLDING_NUTS_GAME_LIST_TABLE_MODEL_H */

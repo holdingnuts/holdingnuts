@@ -55,7 +55,7 @@ QT4_ADD_RESOURCES(QtApp_RCC_SRCS ${QtApp_RCCS})
 QT4_WRAP_CPP (
 	sources_MOC
 	pclient.hpp WMain.hpp SettingsDialog.hpp CreateGameDialog.hpp
-	AboutDialog.hpp GameListTableModel.hpp PlayerListTableModel.hpp GameListSortFilterProxyModel.hpp
+	AboutDialog.hpp GameListTableModel.hpp PlayerListTableModel.hpp GameListSortFilterProxyModel.hpp PlayerListSortFilterProxyModel.hpp
 	WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp
 	Chip.hpp ChipStack.hpp
 )
@@ -65,7 +65,7 @@ add_executable (
 	WIN32    # when building for windows: do not show the console window
 	pclient.cpp ${aux_obj}
 	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp
-	GameListTableModel.cpp PlayerListTableModel.cpp GameListSortFilterProxyModel.cpp
+	GameListTableModel.cpp PlayerListTableModel.cpp GameListSortFilterProxyModel.cpp PlayerListSortFilterProxyModel.cpp
 	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
 	Chip.cpp ChipStack.cpp
 	${aux_src}

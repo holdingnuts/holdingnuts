@@ -101,7 +101,7 @@ QVariant GameListTableModel::headerData(
 	if (role != Qt::DisplayRole)
 		return QVariant();
 
-	if (section >= this->columnCount())
+	if (section >= this->columnCount() || section < 0)
 		return QVariant();
 
 	if (orientation == Qt::Horizontal)

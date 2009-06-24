@@ -30,6 +30,7 @@
 #include "Table.hpp"   // needed for reading snapshots // FIXME: should be all in protocol.h
 
 #include "pclient.hpp"
+#include "PlayerListTableModel.hpp"
 
 #include <cstdlib>
 #include <cstdio>
@@ -168,7 +169,7 @@ void PClient::serverCmdMsg(Tokenizer &t)
 		while(rx.indexIn(qchatmsg) != -1)
 		{
 			const int mcid = rx.cap(1).toInt();
-			const QString name = getPlayerName(mcid);
+			const QString name = modelPlayerList->name(mcid);
 			
 			qchatmsg.replace(rx, name);
 		}
@@ -401,7 +402,7 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	{
 		const int cid = t.getNextInt();
 		const int position = t.getNextInt();
-		const QString player_name = getPlayerName(cid);
+		const QString player_name = modelPlayerList->getPlayerName(cid);
 		
 		// silently drop message if there is no table-info
 		if (!tinfo)
@@ -492,7 +493,7 @@ void PClient::serverCmdSnapPlayerAction(Tokenizer &t, int gid, int tid, tableinf
 	const snap_playeraction_type type = (snap_playeraction_type) t.getNextInt();
 	const unsigned int cid = t.getNextInt();
 	
-	const QString player_name = getPlayerName(cid);
+	const QString player_name = modelPlayerList->name(cid);
 	
 	QString smsg;
 	if (type == SnapPlayerActionFolded || type == SnapPlayerActionChecked)
@@ -570,7 +571,7 @@ void PClient::serverCmdSnapPlayerShow(Tokenizer &t, int gid, int tid, tableinfo*
 	
 	unsigned int cid = t.getNextInt();
 	
-	const QString player_name = getPlayerName(cid);
+	const QString player_name = modelPlayerList->name(cid);
 	
 	std::vector<Card> allcards;
 	
@@ -647,7 +648,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 #if 0
 		tinfo->window->addServerMessage(
 			QString(tr("%1, it's your turn!")
-				.arg(getPlayerName(srv.cid))));
+				.arg(modelPlayerList->name(srv.cid))));
 #endif
 		break;
 	case SnapPlayerAction:
@@ -668,16 +669,16 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			QString smsg;
 			if (snap == SnapWinPot)
 				smsg = QString(tr("%1 receives pot #%2 with %3.")
-					.arg(getPlayerName(cid))
+					.arg(modelPlayerList->name(cid))
 					.arg(poti+1)
 					.arg(amount));
 			else if (snap == SnapWinAmount)
 				smsg = QString(tr("%1 wins %2.")
-					.arg(getPlayerName(cid))
+					.arg(modelPlayerList->name(cid))
 					.arg(amount));
 			else
 				smsg = QString(tr("%1 receives %3 odd chips of split pot #%2.")
-					.arg(getPlayerName(cid))
+					.arg(modelPlayerList->name(cid))
 					.arg(poti+1)
 					.arg(amount));
 			
@@ -724,8 +725,8 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 		git->second.players.push_back(cid);
 		
 		// skip this client for the request... if we already know him
-		if (getPlayerInfo(cid))
-				continue;
+//		if (getPlayerInfo(cid))
+//				continue;
 		
 		sreq_clean += token + " ";
 	}
@@ -737,15 +738,16 @@ void PClient::serverCmdPlayerlist(Tokenizer &t)
 		netSendMsg(msg);
 	}
 	
-	wMain->notifyPlayerlist(gid);
+	wMain->playerListFilter()->filterListCid(
+		QVector<int>::fromStdVector(git->second.players));
 }
 
 // server command CLIENTINFO <client-id> <type>:<value> [...]
 void PClient::serverCmdClientinfo(Tokenizer &t)
 {
+	Q_ASSERT_X(modelPlayerList, Q_FUNC_INFO, "invalid modelPlayerList pointer");
+
 	const int cid = t.getNextInt();
-	
-	playerinfo pi;
 	
 	std::string sinfo;
 	while (t.getNext(sinfo))
@@ -757,17 +759,10 @@ void PClient::serverCmdClientinfo(Tokenizer &t)
 		std::string ivalue = it.getNext();
 		
 		if (itype == "name")
-			pi.name = QString::fromStdString(ivalue);
+			modelPlayerList->updatePlayerName(cid, QString::fromStdString(ivalue));
 		else if (itype == "location")
-			pi.location = QString::fromStdString(ivalue);
+			modelPlayerList->updatePlayerLocation(cid, QString::fromStdString(ivalue));
 	}
-	
-	//update_player_info(&pi);
-	players[cid] = pi;
-	
-	Q_ASSERT_X(wMain, Q_FUNC_INFO, "invalid mainwindow pointer");
-	
-	wMain->notifyPlayerinfo(cid);
 }
 
 // server command GAMEINFO <gid> <type>:<value> [...]
@@ -803,6 +798,8 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->subscribed = flags & GameInfoSubscribed;
 	gi->password = flags & GameInfoPassword;
 	gi->owner = flags & GameInfoOwner;
+	
+	qDebug() << "[" << getMyCId() << "]" << gid << "owner" << gi->owner;
 	
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
@@ -1228,26 +1225,6 @@ tableinfo* PClient::getTableInfo(int gid, int tid)
 		return 0;
 }
 
-playerinfo* PClient::getPlayerInfo(int cid)
-{
-	if (players.find(cid) != players.end())
-		return &(players[cid]);
-	else
-		return 0;
-}
-
-QString PClient::getPlayerName(int cid)
-{
-	const playerinfo* pi = getPlayerInfo(cid);
-	QString player_name;
-	if (!pi)
-		player_name = QString("??? (%1)").arg(cid);
-	else
-		player_name = pi->name;
-	
-	return player_name;
-}
-
 int PClient::getMyCId()
 {
 	return srv.cid;
@@ -1386,7 +1363,7 @@ void PClient::netDisconnected()
 		}
 	}
 	
-	players.clear();
+	modelPlayerList->clear();
 	games.clear();
 	gamelist.clear();
 }
@@ -1482,6 +1459,8 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	QCoreApplication::setOrganizationDomain("www.holdingnuts.net");
 	QCoreApplication::setApplicationName(CONFIG_APPNAME);
 	
+	// model player
+	modelPlayerList = new PlayerListTableModel;
 	
 	// use config-directory set on command-line
 	if (argc >= 3 && (argv[1][0] == '-' && argv[1][1] == 'c'))

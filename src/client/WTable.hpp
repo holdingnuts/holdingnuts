@@ -25,6 +25,18 @@
 #ifndef _WTABLE_H
 #define _WTABLE_H
 
+#include <vector>
+
+#include <QLineEdit>
+#include <QLabel>
+#include <QTextEdit>
+#include <QButtonGroup>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QPalette>
+#include <QGraphicsView>
+#include <QGraphicsItemAnimation>
+
 #include "Card.hpp"
 #include "HoleCards.hpp"
 #include "CommunityCards.hpp"
@@ -32,8 +44,6 @@
 #include "Table.hpp"
 #include "Player.hpp"
 #include "Seat.hpp"
-
-#include <vector>
 
 typedef struct {
 	bool valid;
