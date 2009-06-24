@@ -258,7 +258,8 @@ unsigned PlayerListTableModel::nameColumn() const { return 2; }
 
 void PlayerListTableModel::clear()
 {
-	players.clear();
+	if (rowCount() > 0)
+		removeRows(0, rowCount());
 }
 
 void PlayerListTableModel::dump()

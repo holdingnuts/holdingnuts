@@ -232,7 +232,8 @@ void GameListTableModel::updatePassword(int gid, bool value)
 
 void GameListTableModel::clear()
 {
-	games.clear();
+	if (rowCount() > 0)
+		removeRows(0, rowCount());
 }
 
 int GameListTableModel::findGidByRow(int row) const
