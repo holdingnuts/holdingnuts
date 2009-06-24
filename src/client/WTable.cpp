@@ -993,18 +993,26 @@ void WTable::updatePots()
 	
 	
 	QString strPots;
+	chips_type pot_sum = 0;
 	if (snap->pots.at(0) > 0)
 	{
 		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
 		for (unsigned int t = 1; t < snap->pots.size(); ++t)
 		{
+			pot_sum += snap->pots.at(t);
 			strPots.append(
 				QString("  " + tr("Side pot %1: %2")
 					.arg(t).arg(snap->pots.at(t))));
 		}
 	}
 	
-	m_pTxtPots->setText(QString("%1").arg(currentPot()));
+	QString strPotSum;
+	if (snap->state <= Table::Betting && currentPot() > 0)
+		strPotSum = QString("%1").arg(currentPot());
+	else if (pot_sum > 0)
+		strPotSum = QString("%1").arg(pot_sum);
+	
+	m_pTxtPots->setText(strPotSum);
 	m_pTxtPots->setToolTip(strPots);
 	m_pTxtPots->setPos(calcPotsPos());
 }
