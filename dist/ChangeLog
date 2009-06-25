@@ -2,12 +2,21 @@ ChangeLog
 =========
 
 
-HoldingNuts 0.0.5 (released on ?? ??? 2009)
+HoldingNuts 0.0.5 (released on 26 Jun 2009)
 
   * fixed: don't strip off player name on foyer messages (join/left foyer)
   * fixed: don't allow players who are allin to muck their cards
   * fixed: don't allow the dealer-button to be movable by mouse
   * workaround: set encoding to UTF-8; allows localized chat
+  * new translations: Russian, Italian
+  * improved re-connect feature (re-initialization on new round)
+  * added log messages for some more events
+  * fixed (on Windows): omit playing sounds if table window is hidden
+  * added notice for waiting for the table to open
+  * limit length of nickname and player info
+  * update display of pot after each bet:
+    * summarize all pots and bets instead of showing single pots
+    * detailed information about the pot is shown as tooltip window
 
 
 HoldingNuts 0.0.4 (released on 29 May 2009)
