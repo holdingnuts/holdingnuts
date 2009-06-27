@@ -13,21 +13,21 @@
     </message>
     <message>
         <source>Licensed under the GPLv3</source>
-        <translation>Ontwikkelt onder de GPLv3 vergunning</translation>
+        <translation>Licentie is de GPLv3</translation>
     </message>
 </context>
 <context>
     <name>ChatBox</name>
     <message>
         <source>Chat</source>
-        <translation></translation>
+        <translation>Chat</translation>
     </message>
 </context>
 <context>
     <name>CreateGameDialog</name>
     <message>
         <source>Create game</source>
-        <translation>Nieuw spel</translation>
+        <translation>Spel maken</translation>
     </message>
     <message>
         <source>General</source>
@@ -35,22 +35,70 @@
     </message>
     <message>
         <source>Game name</source>
-        <translation>Spel type</translation>
+        <translation>Spelnaam</translation>
     </message>
     <message>
         <source>Initial stake</source>
-        <translation>Begin-aantal</translation>
+        <translation>Beginaantal</translation>
     </message>
     <message>
         <source>Max. Players</source>
-        <translation>Max. Spelers</translation>
+        <translation type="obsolete">Max. Spelers</translation>
+    </message>
+    <message>
+        <source>Game type</source>
+        <translation>Speltype</translation>
+    </message>
+    <message>
+        <source>Game mode</source>
+        <translation>Spelmodus</translation>
+    </message>
+    <message>
+        <source>Players</source>
+        <translation>Spelers</translation>
+    </message>
+    <message>
+        <source>Max. players</source>
+        <translation>Max. spelers</translation>
+    </message>
+    <message>
+        <source>Timeout</source>
+        <translation>Time-out</translation>
+    </message>
+    <message>
+        <source>Blinds</source>
+        <translation>Blinds</translation>
+    </message>
+    <message>
+        <source>Starting blinds</source>
+        <translation>Startblinds</translation>
+    </message>
+    <message>
+        <source>Raise factor</source>
+        <translation>Verhoogfactor</translation>
+    </message>
+    <message>
+        <source>Raise time</source>
+        <translation>Verhoogtijd</translation>
+    </message>
+    <message>
+        <source>Private game</source>
+        <translation>Privéspel</translation>
+    </message>
+    <message>
+        <source>Password protected</source>
+        <translation>Beschermd met wachtwoord</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Wachtwoord</translation>
     </message>
 </context>
 <context>
     <name>GameListTableModel</name>
     <message>
         <source>Name</source>
-        <translation>Naam</translation>
+        <translation type="obsolete">Naam</translation>
     </message>
     <message>
         <source>Gametype</source>
@@ -62,7 +110,7 @@
     </message>
     <message>
         <source>State</source>
-        <translation>Staat</translation>
+        <translation>Status</translation>
     </message>
 </context>
 <context>
@@ -73,19 +121,19 @@
     </message>
     <message>
         <source>The version of this client isn&apos;t compatible anymore with the server. Please download a recent version.</source>
-        <translation>De versie van uw klant kan niet meer met de server gebruikt worden. Download a.u.b. een nieuwere versie.</translation>
+        <translation>Deze clientversie is niet meer compatibel met de server. Download een nieuwere versie.</translation>
     </message>
     <message>
         <source>Game (%1) has been started.</source>
-        <translation>Spel (%1) is begonnen.</translation>
+        <translation>Spel (%1) is gestart.</translation>
     </message>
     <message>
         <source>Game (%1) has been ended.</source>
-        <translation>Spel (%1) is beëindigt.</translation>
+        <translation>Spel (%1) is beëindigd.</translation>
     </message>
     <message>
         <source>Connecting...</source>
-        <translation>Verbinding bezig...</translation>
+        <translation>Verbinding maken...</translation>
     </message>
     <message>
         <source>Connection error: %1.</source>
@@ -101,7 +149,111 @@
     </message>
     <message>
         <source>Protocol error. The remote host does not seem to be a HoldingNuts server.</source>
-        <translation>Protocol fout. Het blijkt dat de aangeweze computer niet een geldige HoldingNuts server is.</translation>
+        <translation>Protocolfout. De aangewezen computer lijkt geen geldige HoldingNuts server te zijn.</translation>
+    </message>
+    <message>
+        <source>Server running version %1.%2.%3. Your client ID is %4.</source>
+        <translation>De serverversie is %1.%2.%3. Uw client-ID is %4.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Fout</translation>
+    </message>
+    <message>
+        <source>The version of the server isn&apos;t compatible anymore with this client version. Please either use an older client version or request the server admin to update the server version.</source>
+        <translation>De serverversie is niet meer compatibel met deze clientversie. Gebruik een oudere clientversie of vraag de serveradmin om een nieuwe serverversie te installeren.</translation>
+    </message>
+    <message>
+        <source>A new hand (#%1) begins.</source>
+        <translation>Een nieuwe hand (#%1) begint.</translation>
+    </message>
+    <message>
+        <source>Blinds are now at %1/%2.</source>
+        <translation>De blinds zijn nu %1/%2.</translation>
+    </message>
+    <message>
+        <source>Player %1 broke.</source>
+        <translation>Speler %1 is blut.</translation>
+    </message>
+    <message>
+        <source>Your hole cards: [%1 %2].</source>
+        <translation>Uw holekaarten: [%1 %2].</translation>
+    </message>
+    <message>
+        <source>The flop: [%1 %2 %3].</source>
+        <translation>De flop: [%1 %2 %3].</translation>
+    </message>
+    <message>
+        <source>The turn: [%1].</source>
+        <translation>De turn: [%1].</translation>
+    </message>
+    <message>
+        <source>The river: [%1].</source>
+        <translation>De river: [%1].</translation>
+    </message>
+    <message>
+        <source>%1 was folded.</source>
+        <translation>%1 is gefold.</translation>
+    </message>
+    <message>
+        <source>%1 folded.</source>
+        <translation>%1 heeft gefold.</translation>
+    </message>
+    <message>
+        <source>%1 was checked.</source>
+        <translation>%1 is gecheckt.</translation>
+    </message>
+    <message>
+        <source>%1 checked.</source>
+        <translation>%1 heeft gecheckt.</translation>
+    </message>
+    <message>
+        <source>%1 called %2.</source>
+        <translation>%1 heeft %2 gecalld.</translation>
+    </message>
+    <message>
+        <source>%1 bet to %2.</source>
+        <translation>%1 heeft gebet naar %2.</translation>
+    </message>
+    <message>
+        <source>%1 raised to %2.</source>
+        <translation>%1 heeft geraiset naar %2.</translation>
+    </message>
+    <message>
+        <source>%1 is allin with %2.</source>
+        <translation>%1 is all-in met %2.</translation>
+    </message>
+    <message>
+        <source>%1 shows %2.</source>
+        <translation>%1 laat %2 zien.</translation>
+    </message>
+    <message>
+        <source>%2 (%1) joined foyer.</source>
+        <translation>%2 (%1) is nu in de foyer.</translation>
+    </message>
+    <message>
+        <source>%2 (%1) left foyer.</source>
+        <translation>%2 (%1) is nu uit de foyer.</translation>
+    </message>
+    <message>
+        <source>%1, it&apos;s your turn!</source>
+        <translation>%1, uw beurt.</translation>
+    </message>
+    <message>
+        <source>%1 receives pot #%2 with %3.</source>
+        <translation>%1 krijgt pot #%2 met %3.</translation>
+    </message>
+    <message>
+        <source>%1 wins %2.</source>
+        <translation>%1 wint %2.</translation>
+    </message>
+    <message>
+        <source>%1 receives %3 odd chips of split pot #%2.</source>
+        <translation>%1 ontvangt %3 onverdeelbare fiches van split pot #%2.</translation>
+    </message>
+    <message>
+        <source>HoldingNuts Table - [</source>
+        <translation>HoldingNuts-tafel - [</translation>
     </message>
 </context>
 <context>
@@ -110,12 +262,28 @@
         <source>Name</source>
         <translation>Naam</translation>
     </message>
+    <message>
+        <source>ID</source>
+        <translation>ID</translation>
+    </message>
+    <message>
+        <source>Admin</source>
+        <translation>Admin</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Locatie</translation>
+    </message>
 </context>
 <context>
     <name>Seat</name>
     <message>
         <source>Location: %1</source>
-        <translation>Plaats: %1</translation>
+        <translation>Locatie: %1</translation>
+    </message>
+    <message>
+        <source>Name: %1</source>
+        <translation>Naam: %1</translation>
     </message>
 </context>
 <context>
@@ -130,7 +298,7 @@
     </message>
     <message>
         <source>Player info</source>
-        <translation>Speler gegevens</translation>
+        <translation>Spelerinfo</translation>
     </message>
     <message>
         <source>Appearance</source>
@@ -138,12 +306,11 @@
     </message>
     <message>
         <source>Log to file</source>
-        <translation>Logboek
-</translation>
+        <translation>Logbestand maken</translation>
     </message>
     <message>
         <source>enabled</source>
-        <translation>Aan</translation>
+        <translation>aan</translation>
     </message>
     <message>
         <source>log chat</source>
@@ -151,12 +318,11 @@
     </message>
     <message>
         <source>Locale</source>
-        <translation>Taal
-</translation>
+        <translation>Taal</translation>
     </message>
     <message>
         <source>Auto-Detect</source>
-        <translation>Automatisch-Ontdekken</translation>
+        <translation>Automatisch-detecteren</translation>
     </message>
     <message>
         <source>Sounds</source>
@@ -164,15 +330,15 @@
     </message>
     <message>
         <source>only on focus</source>
-        <translation>Alleen op focus</translation>
+        <translation>Alleen bij focus</translation>
     </message>
     <message>
         <source>UUID</source>
-        <translation></translation>
+        <translation>UUID</translation>
     </message>
     <message>
         <source>generate</source>
-        <translation>Creëren</translation>
+        <translation>genereren</translation>
     </message>
     <message>
         <source>Player name</source>
@@ -180,15 +346,15 @@
     </message>
     <message>
         <source>Location</source>
-        <translation>Plaats</translation>
+        <translation>Locatie</translation>
     </message>
     <message>
         <source>Show strength of hand</source>
-        <translation>Kaarten laten zien</translation>
+        <translation>Laten zien hoe sterk de hand is</translation>
     </message>
     <message>
         <source>Card deck</source>
-        <translation>Kaart-type</translation>
+        <translation>Kaarttype</translation>
     </message>
     <message>
         <source>Default</source>
@@ -197,6 +363,58 @@
     <message>
         <source>Classic</source>
         <translation>Klassiek</translation>
+    </message>
+    <message>
+        <source>Log and chat</source>
+        <translation>Loggen en chatten</translation>
+    </message>
+    <message>
+        <source>clear</source>
+        <translation>leegmaken</translation>
+    </message>
+    <message>
+        <source>Sort hole cards (descending)</source>
+        <translation>Holekaarten sorteren (aflopend)</translation>
+    </message>
+    <message>
+        <source>Centralized table view</source>
+        <translation>Centrale tafelweergave</translation>
+    </message>
+    <message>
+        <source>Bring window to top</source>
+        <translation>Venster omhoog brengen</translation>
+    </message>
+    <message>
+        <source>Display time in foyer chat</source>
+        <translation>Tijd weergeven in foyerchat</translation>
+    </message>
+    <message>
+        <source>Display join/left messages</source>
+        <translation>In-/uitberichten weergeven</translation>
+    </message>
+    <message>
+        <source>Display game states</source>
+        <translation>Spelstatussen weergeven</translation>
+    </message>
+    <message>
+        <source>Display player chat</source>
+        <translation>Spelerchat weergeven</translation>
+    </message>
+    <message>
+        <source>Display player actions</source>
+        <translation>Speleracties weergeven</translation>
+    </message>
+    <message>
+        <source>Display hole/community cards</source>
+        <translation>Hole-/communitykaarten weergeven</translation>
+    </message>
+    <message>
+        <source>Foyer chat verbosity</source>
+        <translation>Uitgebreidheid van foyerchat</translation>
+    </message>
+    <message>
+        <source>Table chat verbosity</source>
+        <translation>Uitgebreidheid van tafelchat</translation>
     </message>
 </context>
 <context>
@@ -207,7 +425,7 @@
     </message>
     <message>
         <source>Game name filter:</source>
-        <translation>Spelnaam filter:</translation>
+        <translation type="obsolete">Spelnaam filter:</translation>
     </message>
     <message>
         <source>&amp;Register</source>
@@ -223,15 +441,15 @@
     </message>
     <message>
         <source>Initial stakes</source>
-        <translation>Begin-aantal</translation>
+        <translation>Beginaantal</translation>
     </message>
     <message>
         <source>The desired server (domain-name or IP) to connect with.
 You can optionally specify a port number.
 Format: &lt;host&gt;[:&lt;port&gt;]</source>
-        <translation>De gewenste server (domein-naam of IP) waar mee u wilt verbinden.
-Als u wenst kunt u een poort nummer toewijzen.
-Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
+        <translation>De gewenste server (domeinnaam of IP) waarmee u wilt verbinden.
+Het is mogelijk om een poortnummer op te geven.
+Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>&amp;Connect</source>
@@ -247,27 +465,27 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Create own game</source>
-        <translation>Eigen spel creëren</translation>
+        <translation>Eigen spel maken</translation>
     </message>
     <message>
         <source>&amp;Settings</source>
-        <translation>&amp;Instellingen</translation>
+        <translation>Ins&amp;tellingen</translation>
     </message>
     <message>
         <source>CTRL+S</source>
-        <translation></translation>
+        <translation>CTRL+S</translation>
     </message>
     <message>
         <source>&amp;Test</source>
-        <translation></translation>
+        <translation>&amp;Test</translation>
     </message>
     <message>
         <source>CTRL+T</source>
-        <translation></translation>
+        <translation>CTRL+T</translation>
     </message>
     <message>
         <source>&amp;Quit</source>
-        <translation>S&amp;luiten</translation>
+        <translation>Afs&amp;luiten</translation>
     </message>
     <message>
         <source>CTRL+Q</source>
@@ -275,11 +493,11 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>&amp;Handbook</source>
-        <translation>Ge&amp;bruikersgids</translation>
+        <translation>&amp;Handleiding</translation>
     </message>
     <message>
         <source>CTRL+H</source>
-        <translation></translation>
+        <translation>CTRL+H</translation>
     </message>
     <message>
         <source>&amp;About</source>
@@ -287,7 +505,7 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>CTRL+A</source>
-        <translation></translation>
+        <translation>CTRL+A</translation>
     </message>
     <message>
         <source>&amp;Game</source>
@@ -295,7 +513,7 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation>Hul&amp;p</translation>
+        <translation>Hel&amp;p</translation>
     </message>
     <message>
         <source>Error</source>
@@ -307,19 +525,19 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>You may need to restart the client for all settings to take effect.</source>
-        <translation>U zult de klant waarschijnlijk opnieuw moeten starten om alle gewijzigde instelligen te bevestigen.</translation>
+        <translation>De client moet mogelijk opnieuw worden gestart om alle gewijzigde instelligen te effectueren.</translation>
     </message>
     <message>
         <source>THNL</source>
-        <translation></translation>
+        <translation>THNL</translation>
     </message>
     <message>
         <source>unkown gametype</source>
-        <translation>ongeldige speltype</translation>
+        <translation>onbekend speltype</translation>
     </message>
     <message>
         <source>Cash game</source>
-        <translation>Contant spel</translation>
+        <translation>Cashspel</translation>
     </message>
     <message>
         <source>Tournament</source>
@@ -327,11 +545,11 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Sit&apos;n&apos;Go</source>
-        <translation>Zit&apos;n&apos;Go</translation>
+        <translation>Zitten-meedoen</translation>
     </message>
     <message>
         <source>unkown gamemode</source>
-        <translation>ongeldige spelmode</translation>
+        <translation>onbekende spelmodus</translation>
     </message>
     <message>
         <source>Waiting</source>
@@ -339,38 +557,94 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Started</source>
-        <translation>Begonnen</translation>
+        <translation>Gestart</translation>
     </message>
     <message>
         <source>Ended</source>
-        <translation>Beëindigt</translation>
+        <translation>Beëindigd</translation>
     </message>
     <message>
         <source>unkown gamestate</source>
-        <translation>ongeldige spelstaat</translation>
+        <translation>onbekende spelstatus</translation>
     </message>
     <message>
         <source>Welcome</source>
         <translation>Welkom</translation>
     </message>
     <message>
-        <source>offline</source>
-        <translation></translation>
+        <source>hide started Games</source>
+        <translation>gestarte spellen verbergen</translation>
+    </message>
+    <message>
+        <source>hide private Games</source>
+        <translation>privéspellen verbergen</translation>
+    </message>
+    <message>
+        <source>&amp;Subscribe</source>
+        <translation>&amp;Aanmelden</translation>
+    </message>
+    <message>
+        <source>Unsu&amp;bscribe</source>
+        <translation>Af&amp;melden</translation>
+    </message>
+    <message>
+        <source>&amp;Open table</source>
+        <translation>Tafel &amp;openen</translation>
+    </message>
+    <message>
+        <source>&amp;Start game</source>
+        <translation>Sp&amp;el starten</translation>
+    </message>
+    <message>
+        <source>Player timeout</source>
+        <translation>Spelertime-out</translation>
+    </message>
+    <message>
+        <source>Blinds</source>
+        <translation>Blinds</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Naam</translation>
+    </message>
+    <message>
+        <source>Connections</source>
+        <translation>Verbindingen</translation>
+    </message>
+    <message>
+        <source>Private game</source>
+        <translation>Privéspel</translation>
+    </message>
+    <message>
+        <source>Please enter the game password:</source>
+        <translation>Voer het spelwachtwoord in:</translation>
+    </message>
+    <message>
+        <source>The table will be opened on the next hand.</source>
+        <translation>De tafel wordt geopend bij de volgende hand.</translation>
+    </message>
+    <message>
+        <source>Logout</source>
+        <translation>Uitloggen</translation>
+    </message>
+    <message>
+        <source>%1 player(s), %2 game(s)</source>
+        <translation>%1 speler(s), %2 spel(len)</translation>
     </message>
 </context>
 <context>
     <name>WTable</name>
     <message>
         <source>&amp;Fold</source>
-        <translation></translation>
+        <translation>&amp;Fold</translation>
     </message>
     <message>
         <source>&amp;Show</source>
-        <translation></translation>
+        <translation>&amp;Laat zien</translation>
     </message>
     <message>
         <source>&amp;Muck</source>
-        <translation></translation>
+        <translation>&amp;Muck</translation>
     </message>
     <message>
         <source>I&apos;m bac&amp;k</source>
@@ -378,63 +652,63 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Sit&amp;out</source>
-        <translation>Ni&amp;et meespelen</translation>
+        <translation>Ni&amp;et meedoen</translation>
     </message>
     <message>
         <source>Ctrl+F</source>
-        <translation></translation>
+        <translation>Ctrl+F</translation>
     </message>
     <message>
         <source>Ctrl+C</source>
-        <translation></translation>
+        <translation>Ctrl+C</translation>
     </message>
     <message>
         <source>Ctrl+B</source>
-        <translation></translation>
+        <translation>Ctrl+B</translation>
     </message>
     <message>
         <source>Ctrl+R</source>
-        <translation></translation>
+        <translation>Ctrl+R</translation>
     </message>
     <message>
         <source>Ctrl+A</source>
-        <translation></translation>
+        <translation>Ctrl+A</translation>
     </message>
     <message>
         <source>Ctrl+M</source>
-        <translation></translation>
+        <translation>Ctrl+M</translation>
     </message>
     <message>
         <source>Ctrl+S</source>
-        <translation></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <source>Ctrl+O</source>
-        <translation></translation>
+        <translation>Ctrl+O</translation>
     </message>
     <message>
         <source>Ctrl+K</source>
-        <translation></translation>
+        <translation>Ctrl+K</translation>
     </message>
     <message>
         <source>HoldingNuts table</source>
-        <translation>HoldingNuts tafel</translation>
+        <translation type="obsolete">HoldingNuts tafel</translation>
     </message>
     <message>
         <source>&amp;Call %1</source>
-        <translation></translation>
+        <translation>&amp;Call %1</translation>
     </message>
     <message>
         <source>&amp;Raise %1</source>
-        <translation>&amp;Verhogen %1</translation>
+        <translation>&amp;Raise %1</translation>
     </message>
     <message>
         <source>&amp;Check</source>
-        <translation></translation>
+        <translation>&amp;Check</translation>
     </message>
     <message>
         <source>&amp;Bet %1</source>
-        <translation>&amp;Gok %1</translation>
+        <translation>&amp;Bet %1</translation>
     </message>
     <message>
         <source>&amp;Allin %1</source>
@@ -442,7 +716,7 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Fold</source>
-        <translation></translation>
+        <translation>Fold</translation>
     </message>
     <message>
         <source>Allin %1</source>
@@ -450,55 +724,55 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Call %1</source>
-        <translation></translation>
+        <translation>Call %1</translation>
     </message>
     <message>
         <source>Check/Fold</source>
-        <translation></translation>
+        <translation>Check/fold</translation>
     </message>
     <message>
         <source>Check</source>
-        <translation></translation>
+        <translation>Check</translation>
     </message>
     <message>
         <source>Main pot: %1</source>
-        <translation>Hoofd-pot: %1</translation>
+        <translation>Hoofdpot: %1</translation>
     </message>
     <message>
         <source>Side pot %1: %2</source>
-        <translation>Zij-pot %1: %2</translation>
+        <translation>Sidepot %1: %2</translation>
     </message>
     <message>
         <source>High Card</source>
-        <translation></translation>
+        <translation>High Card</translation>
     </message>
     <message>
         <source>One Pair</source>
-        <translation></translation>
+        <translation>One Pair</translation>
     </message>
     <message>
         <source>Two Pair</source>
-        <translation></translation>
+        <translation>Two Pair</translation>
     </message>
     <message>
         <source>Three Of A Kind</source>
-        <translation></translation>
+        <translation>Three Of A Kind</translation>
     </message>
     <message>
         <source>Straight</source>
-        <translation></translation>
+        <translation>Straight</translation>
     </message>
     <message>
         <source>Flush</source>
-        <translation></translation>
+        <translation>Flush</translation>
     </message>
     <message>
         <source>Full House</source>
-        <translation></translation>
+        <translation>Full House</translation>
     </message>
     <message>
         <source>Four Of A Kind</source>
-        <translation></translation>
+        <translation>Four Of A Kind</translation>
     </message>
     <message>
         <source>Royal Flush</source>
@@ -510,11 +784,171 @@ Formaat: &lt;server&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Saved screenshot: %1.</source>
-        <translation>Schermfoto bewaren: %1.</translation>
+        <translation>Schermfoto opgeslagen: %1.</translation>
     </message>
     <message>
         <source>Unable to save screenshot in %1.</source>
-        <translation>Onmogelijk om schermfoto te bewaren in %1.</translation>
+        <translation>Kan schermfoto niet opslaan in %1.</translation>
+    </message>
+    <message>
+        <source>Min</source>
+        <translation>Min</translation>
+    </message>
+    <message>
+        <source>1/4</source>
+        <translation>1/4</translation>
+    </message>
+    <message>
+        <source>1/2</source>
+        <translation>1/2</translation>
+    </message>
+    <message>
+        <source>3/4</source>
+        <translation>3/4</translation>
+    </message>
+    <message>
+        <source>Pot</source>
+        <translation>Pot</translation>
+    </message>
+    <message>
+        <source>Max</source>
+        <translation>Max</translation>
+    </message>
+    <message>
+        <source>%1, it&apos;s your turn!</source>
+        <translation>%1, uw beurt.</translation>
+    </message>
+    <message>
+        <source>%1, you have %2 seconds left to respond!</source>
+        <translation>%1, u heeft nog %2 seconden voor uw antwoord.</translation>
+    </message>
+    <message>
+        <source>Spades</source>
+        <translation>Schoppen</translation>
+    </message>
+    <message>
+        <source>Hearts</source>
+        <translation>Harten</translation>
+    </message>
+    <message>
+        <source>Diamonds</source>
+        <translation>Ruiten</translation>
+    </message>
+    <message>
+        <source>Clubs</source>
+        <translation>Klaveren</translation>
+    </message>
+    <message>
+        <source>Deuce</source>
+        <translation>Twee</translation>
+    </message>
+    <message>
+        <source>Deuces</source>
+        <translation>Tweeëen</translation>
+    </message>
+    <message>
+        <source>Three</source>
+        <translation>Drie</translation>
+    </message>
+    <message>
+        <source>Threes</source>
+        <translation>Drieën</translation>
+    </message>
+    <message>
+        <source>Four</source>
+        <translation>Vier</translation>
+    </message>
+    <message>
+        <source>Fours</source>
+        <translation>Vieren</translation>
+    </message>
+    <message>
+        <source>Five</source>
+        <translation>Vijf</translation>
+    </message>
+    <message>
+        <source>Fives</source>
+        <translation>Vijven</translation>
+    </message>
+    <message>
+        <source>Six</source>
+        <translation>Zes</translation>
+    </message>
+    <message>
+        <source>Sixes</source>
+        <translation>Zessen</translation>
+    </message>
+    <message>
+        <source>Seven</source>
+        <translation>Zeven</translation>
+    </message>
+    <message>
+        <source>Sevens</source>
+        <translation>Zevens</translation>
+    </message>
+    <message>
+        <source>Eight</source>
+        <translation>Acht</translation>
+    </message>
+    <message>
+        <source>Eights</source>
+        <translation>Achten</translation>
+    </message>
+    <message>
+        <source>Nine</source>
+        <translation>Negen</translation>
+    </message>
+    <message>
+        <source>Nines</source>
+        <translation>Negens</translation>
+    </message>
+    <message>
+        <source>Ten</source>
+        <translation>Tien</translation>
+    </message>
+    <message>
+        <source>Tens</source>
+        <translation>Tienen</translation>
+    </message>
+    <message>
+        <source>Jack</source>
+        <translation>Boer</translation>
+    </message>
+    <message>
+        <source>Jacks</source>
+        <translation>Boeren</translation>
+    </message>
+    <message>
+        <source>Queen</source>
+        <translation>Vrouw</translation>
+    </message>
+    <message>
+        <source>Queens</source>
+        <translation>Vrouwen</translation>
+    </message>
+    <message>
+        <source>King</source>
+        <translation>Heer</translation>
+    </message>
+    <message>
+        <source>Kings</source>
+        <translation>Heren</translation>
+    </message>
+    <message>
+        <source>Ace</source>
+        <translation>Aas</translation>
+    </message>
+    <message>
+        <source>Aces</source>
+        <translation>Azen</translation>
+    </message>
+    <message>
+        <source>%1 and %2</source>
+        <translation>%1 en %2</translation>
+    </message>
+    <message>
+        <source>%1 high</source>
+        <translation>%1 hoog</translation>
     </message>
 </context>
 </TS>
