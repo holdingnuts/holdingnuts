@@ -128,9 +128,7 @@ protected:
 	QPointF calcTimeoutPos(unsigned int nSeatID) const;
 	QPointF calcHandStrengthPos() const;
 	QPointF calcPotsPos() const;
-	QPointF calcDealerBtnPos(
-		unsigned int nSeatID, 
-		int offset = 20) const;
+	QPointF calcDealerBtnPos(unsigned int nSeatID) const;
 	
 	void doSitout(bool bSitout);
 

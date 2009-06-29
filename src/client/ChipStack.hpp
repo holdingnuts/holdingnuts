@@ -48,7 +48,11 @@ public:
 	void clear();
 
 private:
-	void addChips(unsigned num, const QColor& c, qreal& x);
+	void addChips(
+		unsigned num,
+		const QImage& img,
+		qreal& x,
+		qreal& y);
 };
 
 #endif /* _HOLDING_NUTS_CHIP_STACK_H */

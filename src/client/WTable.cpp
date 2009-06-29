@@ -279,7 +279,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		m_pScene->addItem(wseats[i]);
 		
 		// calculate dealer button pos
-		m_ptDealerBtn[i] = calcDealerBtnPos(i, 10);
+		m_ptDealerBtn[i] = calcDealerBtnPos(i);
 	}
 
 	Seat::setInSeatFont(QFont("Arial", 18,  QFont::Bold));
@@ -626,7 +626,7 @@ QPointF WTable::calcHandStrengthPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtHandStrength->text()) / 2),
-		220 + fm.height());
+		230 + fm.height());
 }
 
 QPointF WTable::calcPotsPos() const
@@ -639,12 +639,10 @@ QPointF WTable::calcPotsPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2),
-		220);
+		230);
 }
 
-QPointF WTable::calcDealerBtnPos(
-	unsigned int nSeatID, 
-	int offset) const
+QPointF WTable::calcDealerBtnPos(unsigned int nSeatID) const
 {
 	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalid Seat Number");
 	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
@@ -661,22 +659,30 @@ QPointF WTable::calcDealerBtnPos(
 	switch (nSeatID)
 	{
 		case 0: case 8: case 9:
-				pt.ry() += (wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + offset);
+				pt.ry() += (wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 30);
 			break;
-		case 1: case 2:
+		case 1:
 				pt.rx() -= (
 					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
 					m_pDealerButton->sceneBoundingRect().width() + 
-					5 * offset);
+					30);
+			break;
+		case 2:
+				pt.rx() -= (
+					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
+					m_pDealerButton->sceneBoundingRect().width() + 
+					30);
+				pt.ry() -= 40;	
 			break;
 		case 3: case 4: case 5:
 				pt.ry() -= (
 					wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 
-					m_pDealerButton->sceneBoundingRect().height() + 
-					offset);
+					m_pDealerButton->sceneBoundingRect().height() +
+					10);
+				pt.rx() -= 30;
 			break;
 		case 6: case 7:
-				pt.rx() += (wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 6 * offset);
+				pt.rx() += wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 20;
 			break;
 	}
 
@@ -1771,7 +1777,11 @@ void WTable::showDebugTable()
 	{
 		wseats[i]->setAction(
 			Player::PlayerAction(qrand() % Player::Sitout),
-			(qrand() % 100 + 1) * 100);
+			(qrand() % 30000 + 1));
+		wseats[i]->setInfo(
+			QString::fromStdString(config.get("player_name")),
+			QString::fromStdString(config.get("info_location")));
+		wseats[i]->setStake(10000);
 		wseats[i]->setValid(true);
 		wseats[i]->setSitout(bool(qrand()%2));
 		wseats[i]->showBigCards(true);

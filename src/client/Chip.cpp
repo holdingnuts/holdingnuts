@@ -27,14 +27,16 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
 
-Chip::Chip(const QColor& c, QGraphicsItem* parent)
+Chip::Chip(const QImage& img, QGraphicsItem* parent)
 :	QGraphicsItem(parent),
-	m_Color(c)
+	m_pImage(&img)
 { }
 
 QRectF Chip::boundingRect() const
 {
-	QRectF rc(0, 0, 30, 20);
+	Q_ASSERT_X(m_pImage, Q_FUNC_INFO, "invalid image pointer");
+
+	QRectF rc(0, 0, m_pImage->width(), m_pImage->height());
 	QTransform m = this->transform();
 	
 	return m.mapRect(rc);
@@ -45,8 +47,11 @@ void Chip::paint(
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget)
 {
+	Q_ASSERT_X(m_pImage, Q_FUNC_INFO, "invalid image pointer");
+
 	painter->save();
-		painter->setBrush(m_Color);
-		painter->drawEllipse(0, 0, 30, 20);
-	painter->restore();	
+	painter->drawImage(
+		QRectF(0, 0, m_pImage->width(), m_pImage->height()),
+		*m_pImage);
+	painter->restore();
 }

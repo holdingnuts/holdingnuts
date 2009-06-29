@@ -25,14 +25,14 @@
 #define _HOLDING_NUTS_CHIP_H
 
 #include <QGraphicsItem>
-#include <QColor>
+#include <QImage>
 
 class Chip : public QObject, public QGraphicsItem
 {
 	Q_OBJECT
 
 public:
-	Chip(const QColor& c, QGraphicsItem* parent);
+	Chip(const QImage& img, QGraphicsItem* parent);
 
 	QRectF boundingRect() const;
 
@@ -42,8 +42,8 @@ public:
 		QWidget* widget);
 
 private:
-	//! \brief Chip Color
-	QColor		m_Color;
+	//! \brief
+	const QImage	*m_pImage;
 };
 
 #endif /* _HOLDING_NUTS_CHIP_H */

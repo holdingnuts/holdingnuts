@@ -46,59 +46,52 @@ void ChipStack::paint(
 	QWidget* widget)
 { }
 
-chips_type calc(chips_type amount, chips_type value, unsigned& num)
+unsigned calc(chips_type& amount, chips_type value)
 {
 	if (amount < value)
-	{
-		num = 0;
-		return amount;
-	}
-		
-	num = abs(amount / value);
+		return 0;
 
-	return amount % value;
+	unsigned num = abs(amount / value);
+	amount = amount % value;
+
+	return num;
 }
 
 void ChipStack::setAmount(chips_type amount)
 {
 	clear();
+	
+	// load images
+	static const QImage imgJeton1("gfx/table/jeton_1.png");
+	static const QImage imgJeton5("gfx/table/jeton_5.png");
+	static const QImage imgJeton10("gfx/table/jeton_10.png");
+	static const QImage imgJeton25("gfx/table/jeton_25.png");
+	static const QImage imgJeton100("gfx/table/jeton_100.png");
+	static const QImage imgJeton500("gfx/table/jeton_500.png");
+	static const QImage imgJeton1000("gfx/table/jeton_1000.png");
+	static const QImage imgJeton5000("gfx/table/jeton_5000.png");
+	static const QImage imgJeton25000("gfx/table/jeton_25000.png");
 
 	// display amount as tooltip, too
 	setToolTip(QString("%1").arg(amount));
 
+	qreal posx = 0;
+	qreal posy = 0;
 
-	unsigned num_red = 0;
-	unsigned num_blue = 0;
-	unsigned num_green = 0;
-	unsigned num_black = 0;
-	unsigned num_magenta = 0;
-	unsigned num_orange = 0;
-	unsigned num_grey = 0;
-	unsigned num_yellow = 0;
+	// big to small
+	addChips(calc(amount, 25000), imgJeton25000, posx, posy);
+	addChips(calc(amount, 5000),  imgJeton5000, posx, posy);
+	addChips(calc(amount, 1000),  imgJeton1000, posx, posy);
+	addChips(calc(amount, 500),   imgJeton500, posx, posy);
+	addChips(calc(amount, 100),   imgJeton100, posx, posy);
 
-	// chips
-	amount = calc(amount, 20000, num_yellow);
-	amount = calc(amount,  5000, num_grey);
-	amount = calc(amount,  1000, num_orange);
-	amount = calc(amount,   500, num_magenta);
-	amount = calc(amount,   100, num_black);
-	amount = calc(amount,    25, num_green);
-	amount = calc(amount,    10, num_blue);
-	amount = calc(amount,     5, num_red);
-	// remaining chips are white
-	
-	qreal posx = 5;
+	posy -= 30;
+	posx =  17; // 33*0.5
 
-	// add chips
-	addChips(amount, Qt::white, posx);
-	addChips(num_red, Qt::red, posx);
-	addChips(num_blue, Qt::blue, posx);
-	addChips(num_green, Qt::green, posx);
-	addChips(num_black, Qt::darkGray, posx);
-	addChips(num_magenta, Qt::magenta, posx);
-	addChips(num_orange, QColor(255,165,0), posx);
-	addChips(num_grey, Qt::lightGray, posx);
-	addChips(num_yellow, Qt::yellow, posx);
+	addChips(calc(amount, 25), imgJeton25, posx, posy);
+	addChips(calc(amount, 10), imgJeton10, posx, posy);
+	addChips(calc(amount, 5),  imgJeton5, posx, posy);
+	addChips(amount,           imgJeton1, posx, posy); // remain is white
 }
 
 void ChipStack::clear()
@@ -110,14 +103,18 @@ void ChipStack::clear()
 		scene()->removeItem(*it);
 }
 
-void ChipStack::addChips(unsigned num, const QColor& c, qreal& x)
+void ChipStack::addChips(
+	unsigned num,
+	const QImage& img,
+	qreal& x,
+	qreal& y)
 {
-	qreal y = 0;
-	qreal z = 0;
+	const qreal save_y = y;
+	qreal z = 5;
 	
 	for (unsigned i = 0; i < num; ++i)
 	{
-		Chip* p = new Chip(c, this);
+		Chip* p = new Chip(img, this);
 		
 		y -= 8;
 		z += 1;
@@ -126,7 +123,8 @@ void ChipStack::addChips(unsigned num, const QColor& c, qreal& x)
 		p->setZValue(z);
 	}
 	
-	if (num)
-		x += 30;
-}
+	if (num > 0)
+		x += 32;
 
+	y = save_y;
+}
