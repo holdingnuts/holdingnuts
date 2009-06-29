@@ -1453,12 +1453,13 @@ void GameController::start()
 	{
 		const unsigned int place = placement[place_row][place_idx];
 		Table::Seat *seat = &(t->seats[place]);
+		const Player *p = *it;
 		
-		dbg_msg("placing", "place=%d player=%x",
-			place, (unsigned int)*it);
+		dbg_msg("placing", "place_row=%d place_idx=%d place=%d player=%d",
+			place_row, place_idx, place, p->client_id);
 		
 		seat->occupied = true;
-		seat->player = *it;
+		seat->player = (Player*)p;
 		
 		// FIXME: implement choosing dealer correctly
 		if (!chose_dealer)
