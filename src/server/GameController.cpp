@@ -1410,49 +1410,65 @@ void GameController::start()
 	
 	memset(t->seats, 0, sizeof(Table::Seat) * 10);
 	
-	// place players randomly at table
-	vector<Player*> rndseats;
-	players_type::const_iterator e = players.begin();
-	for (unsigned int i=0; i < 10; i++)
-	{
-		if (e != players.end())
-		{
-			rndseats.push_back(e->second);
-			e++;
-		}
-		else
-			rndseats.push_back(0);
-	}
 	
+	// place players at table
+	vector<Player*> rndseats;
+	
+	for (players_type::const_iterator e = players.begin(); e != players.end(); ++e)
+		rndseats.push_back(e->second);
 	
 #ifndef SERVER_TESTING
 	random_shuffle(rndseats.begin(), rndseats.end());
 #endif
 	
-	bool chose_dealer = false;
-	for (unsigned int i=0; i < rndseats.size(); i++)
+	for (unsigned int i=0; i < 10; i++)
 	{
-		Table::Seat seat;
-		memset(&seat, 0, sizeof(Table::Seat));
+		Table::Seat *seat = &(t->seats[i]);
 		
-		seat.seat_no = i;
-		
-		if (rndseats[i])
-		{
-			seat.occupied = true;
-			seat.player = rndseats[i];
-			
-			if (!chose_dealer)
-			{
-				t->dealer = i;
-				chose_dealer = true;
-			}
-		}
-		else
-			seat.occupied = false;
-		
-		t->seats[i] = seat;
+		seat->seat_no = i;
+		seat->occupied = false;
 	}
+	
+	
+	bool chose_dealer = false;
+	
+	const int placement[10][10] = {
+		{ 4 },					//  1 player
+		{ 4, 9 },				//  2 players
+		{ 4, 8, 0 },				//  3 players
+		{ 3, 5, 8, 0 },				//  4 players
+		{ 4, 6, 8, 0, 2 },			//  5 players
+		{ 1, 2, 4, 6, 7, 9 },			//  6 players
+		{ 4, 6, 2, 7, 1, 8, 0 },		//  7 players
+		{ 1, 2, 3, 5, 6, 7, 8, 0 },		//  8 players
+		{ 4, 6, 2, 7, 1, 8, 0, 5, 3 },		//  9 players
+		{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }	// 10 players
+	};
+	
+	const unsigned int place_row = players.size() - 1;
+	unsigned int place_idx = 0;
+	vector<Player*>::const_iterator it = rndseats.begin();
+	
+	do
+	{
+		const unsigned int place = placement[place_row][place_idx];
+		Table::Seat *seat = &(t->seats[place]);
+		
+		dbg_msg("placing", "place=%d player=%x",
+			place, (unsigned int)*it);
+		
+		seat->occupied = true;
+		seat->player = *it;
+		
+		// FIXME: implement choosing dealer correctly
+		if (!chose_dealer)
+		{
+			t->dealer = place;
+			chose_dealer = true;
+		}
+		
+		it++;
+	} while (++place_idx <= place_row);
 	
 	
 	t->state = Table::GameStart;
