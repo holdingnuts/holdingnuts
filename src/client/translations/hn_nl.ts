@@ -13,7 +13,7 @@
     </message>
     <message>
         <source>Licensed under the GPLv3</source>
-        <translation>Licentie is de GPLv3</translation>
+        <translation>De licentie is de GPLv3</translation>
     </message>
 </context>
 <context>
@@ -39,7 +39,7 @@
     </message>
     <message>
         <source>Initial stake</source>
-        <translation>Beginaantal</translation>
+        <translation>Beginstack</translation>
     </message>
     <message>
         <source>Max. Players</source>
@@ -129,7 +129,7 @@
     </message>
     <message>
         <source>Game (%1) has been ended.</source>
-        <translation>Spel (%1) is beëindigd.</translation>
+        <translation>Spel (%1) is geëindigd.</translation>
     </message>
     <message>
         <source>Connecting...</source>
@@ -302,7 +302,7 @@
     </message>
     <message>
         <source>Appearance</source>
-        <translation>Uiterlijk</translation>
+        <translation>Beeld</translation>
     </message>
     <message>
         <source>Log to file</source>
@@ -370,7 +370,7 @@
     </message>
     <message>
         <source>clear</source>
-        <translation>leegmaken</translation>
+        <translation>wissen</translation>
     </message>
     <message>
         <source>Sort hole cards (descending)</source>
@@ -437,17 +437,17 @@
     </message>
     <message>
         <source>Game ID</source>
-        <translation>Spel ID</translation>
+        <translation>Spel-ID</translation>
     </message>
     <message>
         <source>Initial stakes</source>
-        <translation>Beginaantal</translation>
+        <translation>Beginstacks</translation>
     </message>
     <message>
         <source>The desired server (domain-name or IP) to connect with.
 You can optionally specify a port number.
 Format: &lt;host&gt;[:&lt;port&gt;]</source>
-        <translation>De gewenste server (domeinnaam of IP) waarmee u wilt verbinden.
+        <translation>De server (domeinnaam of IP) waarmee u wilt verbinden.
 Het is mogelijk om een poortnummer op te geven.
 Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
@@ -485,7 +485,7 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>&amp;Quit</source>
-        <translation>Afs&amp;luiten</translation>
+        <translation>&amp;Afsluiten</translation>
     </message>
     <message>
         <source>CTRL+Q</source>
@@ -493,7 +493,7 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>&amp;Handbook</source>
-        <translation>&amp;Handleiding</translation>
+        <translation>Han&amp;dleiding</translation>
     </message>
     <message>
         <source>CTRL+H</source>
@@ -513,7 +513,7 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation>Hel&amp;p</translation>
+        <translation>&amp;Help</translation>
     </message>
     <message>
         <source>Error</source>
@@ -545,7 +545,7 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Sit&apos;n&apos;Go</source>
-        <translation>Zitten-meedoen</translation>
+        <translation>Zitten-gaan</translation>
     </message>
     <message>
         <source>unkown gamemode</source>
@@ -561,7 +561,7 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Ended</source>
-        <translation>Beëindigd</translation>
+        <translation>Geëindigd</translation>
     </message>
     <message>
         <source>unkown gamestate</source>
@@ -581,11 +581,11 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>&amp;Subscribe</source>
-        <translation>&amp;Aanmelden</translation>
+        <translation>I&amp;nschrijven</translation>
     </message>
     <message>
         <source>Unsu&amp;bscribe</source>
-        <translation>Af&amp;melden</translation>
+        <translation>&amp;Uitschrijven</translation>
     </message>
     <message>
         <source>&amp;Open table</source>

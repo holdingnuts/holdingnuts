@@ -31,7 +31,7 @@ GameListTableModel::GameListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
 {
 	strlstHeaderLabels << QString("ID")
-		<< QString("Name") 
+		<< tr("Name") 
 		<< tr("Gametype") 
 		<< tr("Players") 
 		<< tr("State")

@@ -905,7 +905,7 @@ QString WMain::getGametypeString(gametype type)
 		case GameTypeHoldem:
 			return QString(tr("THNL"));
 		default:
-			return QString(tr("unkown gametype"));
+			return QString(tr("unknown gametype"));
 	}
 }
 
@@ -920,7 +920,7 @@ QString WMain::getGamemodeString(gamemode mode)
 		case GameModeSNG:
 			return QString(tr("Sit'n'Go"));
 		default:
-			return QString(tr("unkown gamemode"));
+			return QString(tr("unknown gamemode"));
 	}
 }
 
@@ -935,7 +935,7 @@ QString WMain::getGamestateString(gamestate state)
 		case GameStateEnded:
 			return QString(tr("Ended"));
 		default:
-			return QString(tr("unkown gamestate"));
+			return QString(tr("unknown gamestate"));
 	}
 }
 

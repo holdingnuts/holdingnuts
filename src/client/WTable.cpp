@@ -175,7 +175,7 @@ QDebug operator << (QDebug s, const Player::PlayerAction& p)
 				s << "Back";
 			break;
 		default:
-			s << "unkown";
+			s << "unknown";
 	}
 	return s;
 }
