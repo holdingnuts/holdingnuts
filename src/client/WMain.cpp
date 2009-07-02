@@ -861,8 +861,16 @@ void WMain::gameListSelectionChanged(
 		const int selected_row = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
 		
-		((PClient*)qApp)->requestGameinfo(gid);
-		((PClient*)qApp)->requestPlayerlist(gid);
+		// ??? ((PClient*)qApp)->requestGameinfo(gid);
+		// ??? ((PClient*)qApp)->requestPlayerlist(gid);
+		
+		const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(gid);
+
+		if (ginfo)
+			proxyModelPlayerList->filterListCid(
+				QVector<int>::fromStdVector(ginfo->players));
+		else
+			proxyModelPlayerList->filterListCid(QVector<int>());
 		
 		updateGameinfo(gid);
 	}
@@ -981,6 +989,7 @@ void WMain::notifyGamelist()
 	}
 }
 
+// timer update
 void WMain::actionSelectedGameUpdate()
 {
 #if 0
