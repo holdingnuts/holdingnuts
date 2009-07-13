@@ -55,6 +55,15 @@ if (ENABLE_DEBUG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DDEBUG=1)
 endif (ENABLE_DEBUG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
 
+if (ENABLE_CRYPT)
+	# GnuTLS
+	include (FindGnutls)
+	include_directories(${GNUTLS_INCLUDE_DIR})
+	LIST (APPEND aux_lib ${GNUTLS_LIBRARIES})
+else (ENABLE_CRYPT)
+	add_definitions (-DNOCRYPT=1)
+endif (ENABLE_CRYPT)
+
 
 # compiled in data-dir path
 if (CMAKE_DATA_PATH)

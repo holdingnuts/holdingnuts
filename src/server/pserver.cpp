@@ -32,6 +32,10 @@
 
 #include <vector>
 
+#if !defined(NOCRYPT)
+# include <gnutls/gnutls.h>
+#endif
+
 #include "Config.h"
 #include "Platform.h"
 #include "Debug.h"
