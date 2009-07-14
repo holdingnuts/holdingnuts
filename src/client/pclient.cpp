@@ -88,9 +88,9 @@ extern "C" int gcry_qmutex_unlock(void** priv)
 }
 
 struct gcry_thread_cbs gcry_threads_qt = {
-GCRY_THREAD_OPTION_USER, gcry_qthread_init, gcry_qmutex_init,
-gcry_qmutex_destroy, gcry_qmutex_lock, gcry_qmutex_unlock,
-NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+	GCRY_THREAD_OPTION_USER, gcry_qthread_init, gcry_qmutex_init,
+	gcry_qmutex_destroy, gcry_qmutex_lock, gcry_qmutex_unlock,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 
 extern "C" ssize_t gnutls_qt_pull(gnutls_transport_ptr_t transPtr, void* buf, size_t len)
@@ -99,8 +99,8 @@ extern "C" ssize_t gnutls_qt_pull(gnutls_transport_ptr_t transPtr, void* buf, si
 	#if 1
 	if (!sock->bytesAvailable())
 	{
-		if (!sock->waitForReadyRead(-1))
-			dbg_msg("gnutls_qt_pull", "waiting for read: %s",  sock->errorString().toStdString().c_str());
+		sock->waitForReadyRead();
+			//dbg_msg("gnutls_qt_pull", "waiting for read: %s",  sock->errorString().toStdString().c_str());
 	}
 	#endif
 	
@@ -1334,7 +1334,7 @@ void PClient::netRead()
 	{
 		// return early if there's nothing to read
 		//if ((bytes = tcpSocket->read(buf, sizeof(buf))) <= 0)
-		if ((bytes == gnutls_record_recv(srv.tls_session, buf, /*(size_t)tcpSocket->bytesAvailable()*/ sizeof(buf))) <= 0)
+		if ((bytes = gnutls_record_recv(srv.tls_session, buf, /*(size_t)tcpSocket->bytesAvailable()*/ sizeof(buf))) <= 0)
 			return;
 		
 		//log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
@@ -1448,7 +1448,9 @@ void PClient::netConnected()
 		return;
 	}
 	
-#if 0
+	connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(netRead()));
+	
+#if 1
 	// send protocol introduction
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "PCLIENT %d %s",
@@ -1562,7 +1564,7 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	connecting = false;
 	
 	tcpSocket = new QTcpSocket(this);
-	connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(netRead()));
+//	connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(netRead()));
 	connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
 		this, SLOT(netError(QAbstractSocket::SocketError)));
 	connect(tcpSocket, SIGNAL(connected()), this, SLOT(netConnected()));
