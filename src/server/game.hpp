@@ -29,6 +29,10 @@
 #include <string>
 #include <ctime>
 
+#if !defined(NOCRYPT)
+# include <gnutls/gnutls.h>
+#endif
+
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"
@@ -58,6 +62,12 @@ typedef struct {
 	unsigned int	version;
 	//! \brief Unique connection-identifier chosen by client
 	char uuid[37];  // 16*2 + 4 sep + \0 = 37
+	
+#if !defined(NOCRYPT)
+	//! \brief GnuTLS session
+	gnutls_session_t tls_session;
+	bool  handshaked;
+#endif
 	
 	//! \brief Receive-buffer for client messages
 	char	msgbuf[1024];

@@ -50,6 +50,37 @@ using namespace std;
 
 ConfigParser config;
 
+#if !defined(NOCRYPT)
+
+#define DH_BITS 1024
+
+/* These are global */
+gnutls_anon_server_credentials_t anoncred;
+
+
+static gnutls_dh_params_t dh_params;
+
+static int
+generate_dh_params (void)
+{
+
+  /* Generate Diffie-Hellman parameters - for use with DHE
+   * kx algorithms. These should be discarded and regenerated
+   * once a day, once a week or once a month. Depending on the
+   * security requirements.
+   */
+  gnutls_dh_params_init (&dh_params);
+  gnutls_dh_params_generate2 (dh_params, DH_BITS);
+
+  return 0;
+}
+
+void gnutls_log_function(int level, const char* logmsg)
+{
+	dbg_msg("gnutls", "%d: %s", level, logmsg);
+}
+#endif /* !defined(NOCRYPT) */
+
 socktype fdset_get_descriptor(fd_set *fds)
 {
         socktype i = 0;
@@ -271,7 +302,31 @@ int main(int argc, char **argv)
 	
 	network_init();
 	
+#if !defined(NOCRYPT)
+	// init gnutls
+	log_msg("main", "Initializing GnuTLS...");
+	
+	gnutls_global_init();
+	
+#ifdef DEBUG
+	gnutls_global_set_log_function(gnutls_log_function);
+	gnutls_global_set_log_level(9);
+#endif
+	
+	gnutls_anon_allocate_server_credentials(&anoncred);
+	generate_dh_params();
+	gnutls_anon_set_server_dh_params(anoncred, dh_params);
+#endif /* !defined(NOCRYPT) */
+	
+	
 	mainloop();
+	
+	
+#if !defined(NOCRYPT)
+	// de-init gnutls
+	gnutls_anon_free_server_credentials(anoncred);
+	gnutls_global_deinit();
+#endif /* !defined(NOCRYPT) */
 	
 	network_shutdown();
 	

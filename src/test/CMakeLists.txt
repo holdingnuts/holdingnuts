@@ -30,3 +30,8 @@ target_link_libraries(simulator Poker)
 add_executable (systest system.cpp)
 target_link_libraries(systest System SysAccess)
 
+# GnuTLS anon client example
+if (ENABLE_CRYPT)
+	add_executable(gnutls_client_anon gnutls_client_anon.c)
+	target_link_libraries(gnutls_client_anon ${aux_lib})
+endif (ENABLE_CRYPT)
