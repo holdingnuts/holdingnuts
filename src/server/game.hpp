@@ -41,6 +41,12 @@
 #include "GameController.hpp"
 
 
+#if !defined(NOCRYPT)
+// Diffie-Hellman bits
+# define DH_BITS 1024
+#endif
+
+
 //! \brief Client connection states
 typedef enum {
 	Connected = 0x01,

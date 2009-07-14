@@ -56,39 +56,37 @@ static time_t last_conarchive_cleanup = 0;   // last time scan
 
 
 
-#define DH_BITS 1024
-
-/* These are global */
 extern gnutls_anon_server_credentials_t anoncred;
 
+// anonymous credentials
 static gnutls_session_t initialize_tls_session(void)
 {
-  gnutls_session_t session;
+	gnutls_session_t session;
 
-  gnutls_init (&session, GNUTLS_SERVER);
+	gnutls_init (&session, GNUTLS_SERVER);
 
-  gnutls_priority_set_direct (session, "NORMAL:+ANON-DH", NULL);
+	gnutls_priority_set_direct (session, "NORMAL:+ANON-DH", NULL);
 
-  gnutls_credentials_set (session, GNUTLS_CRD_ANON, anoncred);
+	gnutls_credentials_set (session, GNUTLS_CRD_ANON, anoncred);
 
-  gnutls_dh_set_prime_bits (session, DH_BITS);
+	gnutls_dh_set_prime_bits (session, DH_BITS);
 
-  return session;
+	return session;
 }
 
 ssize_t gnutls_socket_push(gnutls_transport_ptr_t transPtr, const void* buf, size_t len)
 {
 	socktype sock = *((socktype*) transPtr);
-	ssize_t bytes = socket_write(sock, buf, len); // FIXME:len
-	dbg_msg("gnutls_socket_push", "sock:%d len:%d bytes:%d", sock, len, bytes);
+	ssize_t bytes = socket_write(sock, buf, len);
+	dbg_msg("gnutls_socket_push", "sock:%d len:%d bytes:%d", (int)sock, (int)len, (int)bytes);
 	return bytes;
 }
 
 ssize_t gnutls_socket_pull(gnutls_transport_ptr_t transPtr, void* buf, size_t len)
 {
 	socktype sock = *((socktype*) transPtr);
-	ssize_t bytes = socket_read(sock, buf, len); // FIXME:len
-	dbg_msg("gnutls_socket_pull", "sock:%d len:%d bytes:%d", sock, len, bytes);
+	ssize_t bytes = socket_read(sock, buf, len);
+	dbg_msg("gnutls_socket_pull", "sock:%d len:%d bytes:%d", (int)sock, (int)len, (int)bytes);
 	return bytes;
 }
 
@@ -127,6 +125,7 @@ clientcon* get_client_by_id(int cid)
 
 int send_msg(socktype sock, const char *message)
 {
+	// FIXME: send_msg(client, ...)
 	clientcon* toclient = get_client_by_sock(sock);
 	if (!toclient)
 	{
@@ -333,34 +332,34 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	// set initial state
 	cit->state |= Connected;
 	
+	
+	// initialize a news tls session
 	cit->tls_session = initialize_tls_session();
+	
+	// register callbacks
 	gnutls_transport_set_ptr(cit->tls_session, (gnutls_transport_ptr_t)&(cit->sock));
 	gnutls_transport_set_pull_function(cit->tls_session, gnutls_socket_pull);
 	gnutls_transport_set_push_function(cit->tls_session, gnutls_socket_push);
+	
+	// do not handle our socket as socket
 	gnutls_transport_set_lowat(cit->tls_session, 0);
-	/*
-	const int ret = gnutls_handshake(cit->tls_session);
-	if (ret == GNUTLS_E_AGAIN)
-		dbg_msg("client_add", "handshake E_AGAIN");
-	else if (ret == GNUTLS_E_INTERRUPTED)
-		dbg_msg("client_add", "handshake E_AGAIN");
-	else if (ret == GNUTLS_E_GOT_APPLICATION_DATA)
-		dbg_msg("client_add", "handshake GNUTLS_E_GOT_APPLICATION_DATA");
-	else if (ret == GNUTLS_E_WARNING_ALERT_RECEIVED)
-		dbg_msg("client_add", "handshake GNUTLS_E_WARNING_ALERT_RECEIVED");
-	else if (ret < 0)
-		dbg_msg("client_add", "handshake other error");
-	*/
+	
 	return true;
 }
 
 bool client_remove(socktype sock)
 {
+	// FIXME: get_client_by_sock
 	for (clients_type::iterator client = clients.begin(); client != clients.end(); client++)
 	{
 		if (client->sock == sock)
 		{
+			// send close alert
+			gnutls_bye(client->tls_session, GNUTLS_SHUT_WR  /*GNUTLS_SHUT_RDWR*/);
+
 			socket_close(client->sock);
+			
+			gnutls_deinit(client->tls_session);
 			
 			bool send_msg = false;
 			if (client->state & SentInfo)
@@ -1389,8 +1388,6 @@ int client_parsebuffer(clientcon *client)
 
 int client_handle(socktype sock)
 {
-	dbg_msg("gnutls_", "client_handle");
-
 	char buf[1024];
 	int bytes;
 	
@@ -1407,7 +1404,7 @@ int client_handle(socktype sock)
 	
 	if (!client->handshaked)
 	{
-		dbg_msg("gnutls_", "resuming handshake");
+		dbg_msg("client_handle", "resuming handshake");
 			
 		const int ret = gnutls_handshake(client->tls_session);
 		if (ret == GNUTLS_E_AGAIN)
@@ -1417,7 +1414,7 @@ int client_handle(socktype sock)
 		}
 		else if (ret == GNUTLS_E_INTERRUPTED)
 		{
-			dbg_msg("client_add", "handshake E_AGAIN");
+			dbg_msg("client_add", "handshake E_INTERRUPTED");
 			return 111;
 		}
 		else if (ret == GNUTLS_E_GOT_APPLICATION_DATA)
@@ -1433,7 +1430,7 @@ int client_handle(socktype sock)
 		else if (ret < 0)
 		{
 			dbg_msg("client_add", "handshake other error: %d", ret);
-			return 111;
+			return -123;
 		}
 		else
 		{
@@ -1446,6 +1443,8 @@ int client_handle(socktype sock)
 	// return early on client close/error
 	//if ((bytes = socket_read(sock, buf, sizeof(buf))) <= 0)
 	bytes = gnutls_record_recv(client->tls_session, buf, sizeof(buf));
+	
+	dbg_msg("client_handle", "bytes received: %d", bytes);
 	
 	if (bytes == GNUTLS_E_INTERRUPTED || bytes == GNUTLS_E_AGAIN)
 	{

@@ -50,20 +50,15 @@ using namespace std;
 
 ConfigParser config;
 
+
 #if !defined(NOCRYPT)
-
-#define DH_BITS 1024
-
 /* These are global */
 gnutls_anon_server_credentials_t anoncred;
-
-
 static gnutls_dh_params_t dh_params;
 
-static int
-generate_dh_params (void)
+// FIXME: recall this function after some time
+static int generate_dh_params (void)
 {
-
   /* Generate Diffie-Hellman parameters - for use with DHE
    * kx algorithms. These should be discarded and regenerated
    * once a day, once a week or once a month. Depending on the
@@ -309,9 +304,10 @@ int main(int argc, char **argv)
 	gnutls_global_init();
 	
 #ifdef DEBUG
+	// verbose logging
 	gnutls_global_set_log_function(gnutls_log_function);
 	gnutls_global_set_log_level(9);
-#endif
+#endif /* ifdef DEBUG */
 	
 	gnutls_anon_allocate_server_credentials(&anoncred);
 	generate_dh_params();

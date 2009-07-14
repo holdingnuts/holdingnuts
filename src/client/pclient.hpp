@@ -36,6 +36,10 @@
 #include <QDir>
 #include <QRegExp>
 
+#if !defined(NOCRYPT)
+# include <gnutls/gnutls.h>
+#endif
+
 #include "Tokenizer.hpp"
 
 #include "Card.hpp"
@@ -59,6 +63,10 @@ typedef struct {
 	bool introduced;   // PCLIENT->PSERVER sequence success
 	
 	uint time_remote_delta;
+
+#if !defined(NOCRYPT)
+	gnutls_session_t tls_session;
+#endif
 } servercon;
 
 typedef struct {

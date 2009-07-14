@@ -45,8 +45,91 @@
 #endif
 #include "data.h"
 
+#if !defined(NOCRYPT)
+# include <gnutls/gnutls.h>
+# include <gcrypt.h>
+#endif
 
 ConfigParser config;
+
+
+
+#if !defined(NOCRYPT)
+
+void gnutls_log_function(int level, const char* logmsg)
+{
+	dbg_msg("gnutls", "%d: %s", level, logmsg);
+}
+
+
+extern "C" int gcry_qthread_init() 
+{
+	return 0;
+}
+extern "C" int gcry_qmutex_init(void** priv)
+{
+	*priv = (void*)(new QMutex());
+	return 0;
+}
+extern "C" int gcry_qmutex_destroy(void** priv)
+{
+	delete (QMutex*)(*priv);
+	return 0;
+}
+extern "C" int gcry_qmutex_lock(void** priv)
+{
+	((QMutex*)(*priv))->lock();
+	return 0;
+}
+extern "C" int gcry_qmutex_unlock(void** priv)
+{
+	((QMutex*)(*priv))->unlock();
+	return 0;
+}
+
+struct gcry_thread_cbs gcry_threads_qt = {
+GCRY_THREAD_OPTION_USER, gcry_qthread_init, gcry_qmutex_init,
+gcry_qmutex_destroy, gcry_qmutex_lock, gcry_qmutex_unlock,
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+
+extern "C" ssize_t gnutls_qt_pull(gnutls_transport_ptr_t transPtr, void* buf, size_t len)
+{
+	QTcpSocket* sock = (QTcpSocket*)transPtr;
+	#if 1
+	if (!sock->bytesAvailable())
+	{
+		if (!sock->waitForReadyRead(-1))
+			dbg_msg("gnutls_qt_pull", "waiting for read: %s",  sock->errorString().toStdString().c_str());
+	}
+	#endif
+	
+	int ret = sock->read((char*)buf, (qint64)len);
+	
+	dbg_msg("gnutls_qt_pull", "len:%d bytes:%d", (int)len, (int)ret);
+	
+	if (ret == -1)
+		dbg_msg("gnutls_qt_pull", "waiting for read: %s",  sock->errorString().toStdString().c_str());
+	
+	return ret;
+}
+
+extern "C" ssize_t gnutls_qt_push(gnutls_transport_ptr_t transPtr, const void* data, size_t len)
+{
+	QTcpSocket* sock = (QTcpSocket*)transPtr;
+	int ret = sock->write((const char*)data, (qint64)len);
+	
+	dbg_msg("gnutls_qt_push", "len:%d bytes:%d", (int)len, (int)ret);
+	
+	#if 1
+	if (ret == -1 || (sock->bytesToWrite() && !sock->waitForBytesWritten(-1)))
+		dbg_msg("gnutls_qt_push", "waiting for read: %s",  sock->errorString().toStdString().c_str());
+	#endif
+	
+	return ret;
+}
+
+#endif /* !defined(NOCRYPT) */
 
 
 // server command PSERVER <version> <client-id> <time>
@@ -1231,7 +1314,8 @@ int PClient::netSendMsg(const char *msg)
 		dbg_msg("netSendMsg", "req= %s", msg);
 #endif
 	
-	const int bytes = tcpSocket->write(buf, len);
+	const int bytes = gnutls_record_send(srv.tls_session, buf, len);
+	//const int bytes = tcpSocket->write(buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
 	
@@ -1249,7 +1333,8 @@ void PClient::netRead()
 	do
 	{
 		// return early if there's nothing to read
-		if ((bytes = tcpSocket->read(buf, sizeof(buf))) <= 0)
+		//if ((bytes = tcpSocket->read(buf, sizeof(buf))) <= 0)
+		if ((bytes == gnutls_record_recv(srv.tls_session, buf, /*(size_t)tcpSocket->bytesAvailable()*/ sizeof(buf))) <= 0)
 			return;
 		
 		//log_msg("connectsock", "(%d) DATA len=%d", sock, bytes);
@@ -1294,7 +1379,76 @@ void PClient::netConnected()
 	connecting = false;
 	
 	wMain->updateConnectionStatus();
+	 
 	
+	gnutls_anon_client_credentials_t anoncred;
+	gnutls_anon_allocate_client_credentials (&anoncred);
+
+
+	gnutls_init (&srv.tls_session, GNUTLS_CLIENT);
+
+	gnutls_priority_set_direct (srv.tls_session, "PERFORMANCE:+ANON-DH:!ARCFOUR-128", NULL);
+
+	gnutls_credentials_set (srv.tls_session, GNUTLS_CRD_ANON, anoncred);
+	
+	gnutls_transport_set_ptr(srv.tls_session, (gnutls_transport_ptr_t)tcpSocket);
+	gnutls_transport_set_pull_function(srv.tls_session, gnutls_qt_pull);
+	gnutls_transport_set_push_function(srv.tls_session, gnutls_qt_push);
+	gnutls_transport_set_lowat(srv.tls_session, 0);
+	
+	
+
+	int ret;
+	do {
+		dbg_msg("-------", "---------------");
+		
+		ret = gnutls_handshake(srv.tls_session);
+		
+		if (ret == GNUTLS_E_AGAIN)
+		{
+			dbg_msg("client_add", "handshake E_AGAIN");
+			
+		}
+		else if (ret == GNUTLS_E_INTERRUPTED)
+		{
+			dbg_msg("client_add", "handshake GNUTLS_E_INTERRUPTED");
+		
+		}
+		else if (ret == GNUTLS_E_GOT_APPLICATION_DATA)
+		{
+			dbg_msg("client_add", "handshake GNUTLS_E_GOT_APPLICATION_DATA");
+		
+		}
+		else if (ret == GNUTLS_E_WARNING_ALERT_RECEIVED)
+		{
+			dbg_msg("client_add", "handshake GNUTLS_E_WARNING_ALERT_RECEIVED");
+		
+		}
+		else if (ret < 0)
+		{
+			dbg_msg("client_add", "handshake other error: %d", ret);
+			
+		}
+		else
+		{
+			dbg_msg("client_add", "handshake OK");
+			
+		}
+		dbg_msg("-------", "---------------");
+	} while (ret == GNUTLS_E_AGAIN || ret == GNUTLS_E_INTERRUPTED);
+	
+	
+
+		
+	if(ret < 0) {
+		log_msg("netConnected", "TLS Handshake failed with error: %s", gnutls_strerror(ret));
+		gnutls_bye(srv.tls_session, GNUTLS_SHUT_RDWR);
+		tcpSocket->close();
+		gnutls_deinit(srv.tls_session);
+		return;
+	}
+	
+#if 0
 	// send protocol introduction
 	char msg[1024];
 	snprintf(msg, sizeof(msg), "PCLIENT %d %s",
@@ -1302,6 +1456,7 @@ void PClient::netConnected()
 		config.get("uuid").c_str());
 	
 	netSendMsg(msg);
+#endif
 }
 
 void PClient::netDisconnected()
@@ -1598,6 +1753,25 @@ int main(int argc, char **argv)
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
 		VERSIONSTR_SVN,
 		qVersion());
+	
+	
+	// thread safeness
+	gcry_control(GCRYCTL_SET_THREAD_CBS, &gcry_threads_qt);
+
+	
+#if !defined(NOCRYPT)
+	// init gnutls
+	log_msg("main", "Initializing GnuTLS...");
+	
+	gnutls_global_init();
+	
+#ifdef DEBUG
+	// verbose logging
+	gnutls_global_set_log_function(gnutls_log_function);
+	gnutls_global_set_log_level(9);
+#endif /* ifdef DEBUG */
+
+#endif /* !defined(NOCRYPT) */
 	
 	
 	// the app instance
