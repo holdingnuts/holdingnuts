@@ -37,8 +37,8 @@
 /* max pending connections for listening socket */
 #define SERVER_LISTEN_BACKLOG  3
 
-/* time to wait for an action on the non-blocking sockets (in millisecs) */
-#define SERVER_SELECT_TIMEOUT_USEC  150000
+/* time to wait for an action on the non-blocking sockets (in u-secs) */
+#define SERVER_SELECT_TIMEOUT_USEC  150 * 1000
 
 /* server testing mode used in test-programs (define to enable) */
 #undef SERVER_TESTING
