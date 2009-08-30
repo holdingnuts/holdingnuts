@@ -32,8 +32,8 @@
 
 #include <vector>
 
-#ifndef NOSQLITE                                                                   
-#include <sqlite3.h>                                                           
+#ifndef NOSQLITE
+#include <sqlite3.h>
 #endif
 
 #include "Config.h"
@@ -49,7 +49,10 @@
 using namespace std;
 
 ConfigParser config;
+
+#ifndef NOSQLITE
 sqlite3 *db;
+#endif /* !NOSQLITE */
 
 socktype fdset_get_descriptor(fd_set *fds)
 {
@@ -221,16 +224,7 @@ bool config_load()
 	return true;
 }
 
-
-static int callback(void *NotUsed, int argc, char **argv, char **azColName){
-  int i;
-  for(i=0; i<argc; i++){
-    printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-  }
-  printf("\n");
-  return 0;
-}
-
+#ifndef NOSQLITE
 int database_init()
 {
 	char *zErrMsg = 0;
@@ -249,7 +243,9 @@ int database_init()
 	}
 	
 	/* create tables if not already present */
-	rc = sqlite3_exec(db, "CREATE table scores (UUID varchar(50) NOT NULL PRIMARY KEY, rating INT NOT NULL);", callback, 0, &zErrMsg);
+	const char q[] = "CREATE TABLE players "
+		"(uuid varchar(50) NOT NULL PRIMARY KEY, gamecount INT NOT NULL, rating INT NOT NULL);";
+	rc = sqlite3_exec(db, q, 0, 0, &zErrMsg);
 	if (rc != SQLITE_OK)
 	{
 		log_msg("sqlite", "%s", zErrMsg);
@@ -258,6 +254,7 @@ int database_init()
 	
 	return 0;
 }
+#endif /* !NOSQLITE */
 
 int main(int argc, char **argv)
 {
@@ -310,13 +307,17 @@ int main(int argc, char **argv)
 	
 	network_init();
 
+#ifndef NOSQLITE
 	database_init();
+#endif /* !NOSQLITE */
 	
 	gameinit();
 	
 	mainloop();
 	
+#ifndef NOSQLITE
 	sqlite3_close(db);
+#endif /* !NOSQLITE */
 	
 	network_shutdown();
 	
