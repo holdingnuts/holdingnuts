@@ -60,6 +60,9 @@ static time_t last_conarchive_cleanup = 0;   // last time scan
 
 static server_stats stats;
 
+#ifndef NOSQLITE
+extern sqlite3 *db;
+#endif
 
 GameController* get_game_by_id(int gid)
 {
@@ -840,7 +843,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 		return 1;
 	}
 	
-	if (!g->addPlayer(client->id))
+	if (!g->addPlayer(client->id, client->uuid))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to register");
 		return 1;
@@ -1227,7 +1230,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		g->setPlayerMax(ginfo.max_players);
 		g->setPlayerTimeout(ginfo.timeout);
 		g->setPlayerStakes(ginfo.stake);
-		g->addPlayer(client->id);
+		g->addPlayer(client->id, client->uuid);
 		g->setOwner(client->id);
 		g->setName(ginfo.name);
 		g->setBlindsStart(ginfo.blinds_start);
@@ -1551,8 +1554,96 @@ int gameinit()
 		}
 	}
 #endif
-
+	
 	return 0;
+}
+
+#ifndef NOSQLITE
+void update_scores(const GameController *g)
+{
+	vector<string> uuid_list;
+	g->getFinishList(uuid_list);
+
+	for (unsigned int u=0; u < uuid_list.size(); u++)
+	{
+		string &uuid = uuid_list[u];
+		log_msg("finish", "%s finished @ #%d",
+			uuid.c_str(), g->getPlayerCount() - u);
+		
+		if (!uuid.length())
+			continue;
+	
+		char **result;
+		char *zErrMsg;
+		int nrow, ncol;
+
+		char *q = sqlite3_mprintf("SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
+		
+		int rc = sqlite3_get_table(
+			db,              /* An open database */
+			q,       /* SQL to be executed */
+			&result,       /* Result written to a char *[]  that this points to */
+			&nrow,             /* Number of result rows written here */
+			&ncol,          /* Number of result columns written here */
+			&zErrMsg          /* Error msg written here */
+			);
+		
+		sqlite3_free(q);
+		
+		if (rc != SQLITE_OK)
+		{
+			log_msg("sqlite", "%s", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+		else
+		{
+			if (!nrow)	// insert new row
+			{
+				log_msg("SQL", "no rows, inserting...");
+				
+				char *q2 = sqlite3_mprintf("INSERT INTO players "
+					"(uuid,gamecount,rating) VALUES('%q',%d,%d);",
+						uuid.c_str(), 1, 1500);
+				rc = sqlite3_exec(db, q2, 0, 0, &zErrMsg);
+				if (rc != SQLITE_OK)
+				{
+					log_msg("sqlite", "%s", zErrMsg);
+					sqlite3_free(zErrMsg);
+				}
+				
+				sqlite3_free(q2);
+			}
+			else		// update row
+			{
+				for (int i=0; i < ncol; i++)
+					log_msg("SQL", "col: %s", result[i]);
+				for (int i=0; i < ncol*nrow; i++)
+					log_msg("SQL", "row: %s", result[ncol+i]);
+				
+				int gamecount = atoi(result[ncol+1]);
+				int rating = atoi(result[ncol+2]);
+				
+				log_msg("RATING", "uuid=%s  count=%d  rating=%d",
+					uuid.c_str(), gamecount, rating);
+				
+				char *q2 = sqlite3_mprintf("UPDATE players "
+					"SET gamecount = gamecount + 1, rating = %d "
+					"WHERE uuid = '%q';",
+						2000, uuid.c_str());
+				rc = sqlite3_exec(db, q2, 0, 0, &zErrMsg);
+				if (rc != SQLITE_OK)
+				{
+					log_msg("sqlite", "%s", zErrMsg);
+					sqlite3_free(zErrMsg);
+				}
+				
+				sqlite3_free(q2);
+			}
+		}
+		
+		sqlite3_free_table(result);
+	}
+#endif /* !NOSQLITE */
 }
 
 int gameloop()
@@ -1563,7 +1654,8 @@ int gameloop()
 		GameController *g = e->second;
 		
 		// game has been deleted
-		if (g->tick() < 0)
+		int rc = g->tick();
+		if (rc < 0)
 		{
 			// replicate game if "restart" is set
 			if (g->getRestart())
@@ -1584,6 +1676,16 @@ int gameloop()
 			
 			delete g;
 			games.erase(e++);
+		}
+		else if (rc == 1 && !g->isFinished())  // game has ended (but not deleted)
+		{
+			g->setFinished();
+			
+#ifndef NOSQLITE
+			update_scores(g);
+#endif /* !NOSQLITE */
+			
+			++e;
 		}
 		else
 			++e;

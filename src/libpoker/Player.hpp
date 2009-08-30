@@ -24,10 +24,12 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <string>
+
 #include "HoleCards.hpp"
 
-
 typedef unsigned int chips_type;
+
 
 
 class Player
@@ -67,8 +69,12 @@ public:
 	
 	void resetLastAction() { last_action = Player::None; }
 	
+	
 private:
 	int client_id;
+	
+	// FIXME:
+	std::string uuid;	/* copy of uuid needed */
 	
 	chips_type stake;		// currrent stake
 	chips_type stake_before;	// stake before new hand
