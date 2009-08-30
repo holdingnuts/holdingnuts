@@ -25,6 +25,10 @@
 #include <cstdlib>
 #include <cstring>
 
+#ifndef NOSQLITE
+#include <sqlite3.h>
+#endif
+
 #include "Config.h"
 #include "Platform.h"
 #include "Network.h"

@@ -6,6 +6,7 @@ project (HOLDINGNUTS)
 option (ENABLE_CLIENT	"Configure for client"		On)
 option (ENABLE_AUDIO	"Configure client with audio"	On)
 option (ENABLE_SERVER	"Configure for server"		On)
+option (ENABLE_SQLITE   "Configure for sqlite"          On)
 option (ENABLE_TEST	"Configure for test-utils"	Off)
 option (ENABLE_DEBUG	"Configure for debug-build"	Off)
 
@@ -22,6 +23,8 @@ IF (in_source)
 ENDIF (in_source)
 
 ################################################################################
+
+SET( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
 
 # Doxygen documentation
 if (BUILD_DOCUMENTATION)

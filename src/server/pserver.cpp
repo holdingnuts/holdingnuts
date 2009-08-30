@@ -32,6 +32,10 @@
 
 #include <vector>
 
+#ifndef NOSQLITE                                                                   
+#include <sqlite3.h>                                                           
+#endif
+
 #include "Config.h"
 #include "Platform.h"
 #include "Debug.h"
@@ -45,6 +49,7 @@
 using namespace std;
 
 ConfigParser config;
+sqlite3 *db;
 
 socktype fdset_get_descriptor(fd_set *fds)
 {
@@ -216,6 +221,44 @@ bool config_load()
 	return true;
 }
 
+
+static int callback(void *NotUsed, int argc, char **argv, char **azColName){
+  int i;
+  for(i=0; i<argc; i++){
+    printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+  }
+  printf("\n");
+  return 0;
+}
+
+int database_init()
+{
+	char *zErrMsg = 0;
+	int rc;
+	
+	char dbfile[1024];
+	snprintf(dbfile, sizeof(dbfile), "%s/server.db", sys_config_path());;
+
+	/* open sqlite database */
+	rc = sqlite3_open(dbfile, &db);
+	if (rc)
+	{
+		log_msg("sqlite", "Can't open database: %s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return -1;
+	}
+	
+	/* create tables if not already present */
+	rc = sqlite3_exec(db, "CREATE table scores (UUID varchar(50) NOT NULL PRIMARY KEY, rating INT NOT NULL);", callback, 0, &zErrMsg);
+	if (rc != SQLITE_OK)
+	{
+		log_msg("sqlite", "%s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	log_set(stdout, 0);
@@ -266,10 +309,14 @@ int main(int argc, char **argv)
 	
 	
 	network_init();
+
+	database_init();
 	
 	gameinit();
 	
 	mainloop();
+	
+	sqlite3_close(db);
 	
 	network_shutdown();
 	

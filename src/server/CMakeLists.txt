@@ -27,6 +27,13 @@ IF (WIN32)
 	ENDIF (MINGW)
 ENDIF (WIN32)
 
+if (ENABLE_SQLITE)
+       include (FindSQLITE3)
+       include_directories(${SQLITE3_INCLUDE_DIR})
+       LIST (APPEND aux_lib ${SQLITE3_LIBRARIES})
+else (ENABLE_SQLITE)
+       add_definitions (-DNOSQLITE=1)
+endif (ENABLE_SQLITE)
 
 add_executable (holdingnuts-server
 	pserver.cpp ${aux_obj}
