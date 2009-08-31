@@ -744,6 +744,55 @@ bool client_cmd_request_gamerestart(clientcon *client, Tokenizer &t)
 	return true;
 }
 
+bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
+{
+#ifndef NOSQLITE
+	char **result;
+	char *zErrMsg;
+	int nrow, ncol;
+	
+	char *q = sqlite3_mprintf("SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", client->uuid);
+	
+	int rc = sqlite3_get_table(
+		db,              /* An open database */
+		q,       /* SQL to be executed */
+		&result,       /* Result written to a char *[]  that this points to */
+		&nrow,             /* Number of result rows written here */
+		&ncol,          /* Number of result columns written here */
+		&zErrMsg          /* Error msg written here */
+		);
+	
+	sqlite3_free(q);
+	
+	if (rc != SQLITE_OK)
+	{
+		dbg_msg("sqlite", "%s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	else
+	{
+		if (!nrow)
+			client_chat(-1, client->id, "no stats present yet");
+		else
+		{
+			const int gamecount = atoi(result[ncol+1]);
+			const int score = atoi(result[ncol+2]);
+		
+			snprintf(msg, sizeof(msg), "gamecount=%d score=%d",
+					  gamecount, score);
+			
+			client_chat(-1, client->id, msg);
+		}
+	}
+	
+	sqlite3_free_table(result);
+	
+#else /* !NOSQLITE */
+	client_chat(-1, client->id, "not linked against sqlite; stats not available");
+#endif /* !NOSQLITE */
+	return true;
+}
+
 int client_cmd_request(clientcon *client, Tokenizer &t)
 {
 	if (!t.count())
@@ -771,6 +820,8 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		cmderr = !client_cmd_request_gamestart(client, t);
 	else if (request == "restart")
 		cmderr = !client_cmd_request_gamerestart(client, t);
+	else if (request == "playerstats")
+		cmderr = !client_cmd_request_playerstats(client, t);
 	else
 		cmderr = true;
 	
@@ -1545,7 +1596,7 @@ int gameinit()
 			if (config.getBool("dbg_stresstest") && i > 10)
 			{
 				for (int j=0; j < config.getInt("dbg_testgame_players"); j++)
-					g->addPlayer(j*1000 + i);
+					g->addPlayer(j*1000 + i, "DEBUG");
 			}
 			
 			games[gid] = g;
@@ -1559,6 +1610,109 @@ int gameinit()
 }
 
 #ifndef NOSQLITE
+/*
+Example:
+- Score is 500 (max=1000, min=1)
+- 9 players, 3rd place
+==================================
+ 9   8   7   6   5   4  [3]  2   1      // place
+-  -  -  -  -  -  -  -  -  -  -  -
+ 1   2   3   4   5   6  [7]  8   9      // inverted place  (1=#9 and 9=#1)
+--+---+---+---+---+---+---+---+---
+-4  -3  -2  -1   0   1  [2]  3   4      // result
+==================================
+<-- neg.  -->    N   <--  pos. -->      // -4 to -1 negative; 0 neutral; 1 to 4 positive
+                     {- divisor -}
+
+(( ratio=0.50 | diff=15 | inv_place=7 | offset=5 divisor=4 | result=2 ))
+
+
+inv_place := 9 - 3 + 1                 // = 7
+offset := (9 + 1) / 2                  // = 5
+divisor := 5 - 1                       // = 4.0
+result := 7 - 5                        // = 2
+ratio := 500 / 1000                    // = 0.5
+max_diff := 1000 * 0.125               // = 125
+tmp_score := (125 * 0.5) * (2 / 4.0)   // = 31
+score := 500 + 31                      // = 531
+*/
+
+
+unsigned int calc_score(unsigned int score, unsigned int num_players, unsigned int place)
+{
+	const unsigned int min_score = 1;
+	const unsigned int max_score = 1000;
+	
+	const float diff_ratio = 1 / 8.0f;
+	
+	// invert place value (e.g. 10 players => 1 = #10 and 10 = #1)
+	const unsigned int inv_place = num_players - place + 1;
+
+	
+	int result;
+	unsigned int offset = 0, divisor;
+	
+	if (num_players == 2)	// special case
+	{
+		result = (inv_place == 1) ? -1 : 1;
+		divisor = 1;
+	}
+	else
+	{
+		if (num_players % 2)  // is odd
+		{
+			offset = (num_players + 1) / 2;
+			divisor = offset - 1;
+		}
+		else
+		{
+			offset = (num_players / 2) + 1;
+			
+			// case 1 (win):   -3 -2 -1  0 [1  2]
+			// case 2 (lose): [-3 -2 -1] 0  1  2
+			divisor = (inv_place - offset > 0) ? (num_players / 2) - 1 : num_players / 2;
+		}
+		
+		result = inv_place - offset;
+	}
+	
+	
+	// ratio of score to max_score
+	float ratio = ((float)score / (float)max_score);
+	
+	// on win invert ratio => win_ratio
+	if (result > 0)
+		ratio = 1.0f - ratio;
+	
+	// prevent ratio getting too small
+	if (ratio < 0.01f)
+		ratio = 0.01f;
+	
+	// max. value to add/substract
+	const float max_diff = max_score * diff_ratio;    
+	
+	// actual score to add/substract
+	int tmp_score = (max_diff * ratio) * (result / (float)divisor);
+
+
+	dbg_msg("score", "old_score=%d | ratio=%.2f | diff=%d | inv_place=%d | o=%d d=%d | result=%d\n",
+		score, ratio, tmp_score, inv_place, offset, divisor, result);
+	
+	
+	// update score
+	score += tmp_score;
+
+	
+	// check if score within margin
+	if (score > max_score)
+		score = max_score;
+	else if (score < min_score)
+		score = min_score;
+
+	return score;
+}
+
+
 void update_scores(const GameController *g)
 {
 	vector<string> uuid_list;
@@ -1567,9 +1721,10 @@ void update_scores(const GameController *g)
 	for (unsigned int u=0; u < uuid_list.size(); u++)
 	{
 		string &uuid = uuid_list[u];
-		log_msg("finish", "%s finished @ #%d",
+		dbg_msg("finish", "%s finished @ #%d",
 			uuid.c_str(), g->getPlayerCount() - u);
 		
+		// skip empty UUID
 		if (!uuid.length())
 			continue;
 	
@@ -1592,14 +1747,14 @@ void update_scores(const GameController *g)
 		
 		if (rc != SQLITE_OK)
 		{
-			log_msg("sqlite", "%s", zErrMsg);
+			dbg_msg("sqlite", "%s", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
 		else
 		{
 			if (!nrow)	// insert new row
 			{
-				log_msg("SQL", "no rows, inserting...");
+				dbg_msg("SQL", "no rows, inserting...");
 				
 				char *q2 = sqlite3_mprintf("INSERT INTO players "
 					"(uuid,gamecount,rating) VALUES('%q',%d,%d);",
@@ -1620,16 +1775,17 @@ void update_scores(const GameController *g)
 				for (int i=0; i < ncol*nrow; i++)
 					log_msg("SQL", "row: %s", result[ncol+i]);
 				
-				int gamecount = atoi(result[ncol+1]);
-				int rating = atoi(result[ncol+2]);
+				//const int gamecount = atoi(result[ncol+1]);
+				const int old_score = atoi(result[ncol+2]);
+				const int new_score = calc_score(old_score, g->getPlayerCount(), g->getPlayerCount() - u);
 				
-				log_msg("RATING", "uuid=%s  count=%d  rating=%d",
-					uuid.c_str(), gamecount, rating);
+				dbg_msg("RATING", "uuid=%s  old_score=%d  new_score=%d",
+					uuid.c_str(), old_score, new_score);
 				
 				char *q2 = sqlite3_mprintf("UPDATE players "
 					"SET gamecount = gamecount + 1, rating = %d "
-					"WHERE uuid = '%q';",
-						2000, uuid.c_str());
+					"WHERE uuid = '%q';", new_score, uuid.c_str());
+				
 				rc = sqlite3_exec(db, q2, 0, 0, &zErrMsg);
 				if (rc != SQLITE_OK)
 				{
@@ -1643,8 +1799,8 @@ void update_scores(const GameController *g)
 		
 		sqlite3_free_table(result);
 	}
-#endif /* !NOSQLITE */
 }
+#endif /* !NOSQLITE */
 
 int gameloop()
 {

@@ -178,7 +178,7 @@ bool TestHeadsup::run()
 	for (unsigned int i=0; i < players_count; i++)
 	{
 		player *pl = &(players[i]);
-		game->addPlayer(pl->id);
+		game->addPlayer(pl->id, "gc_test");
 		setPlayerStake(pl->id, pl->stake);
 	}
 	
