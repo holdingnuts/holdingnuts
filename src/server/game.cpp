@@ -1720,9 +1720,10 @@ void update_scores(const GameController *g)
 
 	for (unsigned int u=0; u < uuid_list.size(); u++)
 	{
-		string &uuid = uuid_list[u];
+		const string &uuid = uuid_list[u];
+		const int place = g->getPlayerCount() - u;
 		dbg_msg("finish", "%s finished @ #%d",
-			uuid.c_str(), g->getPlayerCount() - u);
+			uuid.c_str(), place);
 		
 		// skip empty UUID
 		if (!uuid.length())
@@ -1756,9 +1757,10 @@ void update_scores(const GameController *g)
 			{
 				dbg_msg("SQL", "no rows, inserting...");
 				
+				const int initial_score = 500;
 				char *q2 = sqlite3_mprintf("INSERT INTO players "
 					"(uuid,gamecount,rating) VALUES('%q',%d,%d);",
-						uuid.c_str(), 1, 1500);
+						uuid.c_str(), 1, calc_score(initial_score, g->getPlayerCount(), place));
 				rc = sqlite3_exec(db, q2, 0, 0, &zErrMsg);
 				if (rc != SQLITE_OK)
 				{
@@ -1777,7 +1779,7 @@ void update_scores(const GameController *g)
 				
 				//const int gamecount = atoi(result[ncol+1]);
 				const int old_score = atoi(result[ncol+2]);
-				const int new_score = calc_score(old_score, g->getPlayerCount(), g->getPlayerCount() - u);
+				const int new_score = calc_score(old_score, g->getPlayerCount(), place);
 				
 				dbg_msg("RATING", "uuid=%s  old_score=%d  new_score=%d",
 					uuid.c_str(), old_score, new_score);
