@@ -30,3 +30,7 @@ target_link_libraries(simulator Poker)
 add_executable (systest system.cpp)
 target_link_libraries(systest System SysAccess)
 
+if (ENABLE_SQLITE)
+	add_executable (dbtest dbtest.cpp)
+	target_link_libraries(dbtest Database ${aux_lib})
+endif (ENABLE_SQLITE)

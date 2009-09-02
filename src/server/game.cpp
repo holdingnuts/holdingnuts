@@ -26,7 +26,7 @@
 #include <cstring>
 
 #ifndef NOSQLITE
-#include <sqlite3.h>
+#include "Database.hpp"
 #endif
 
 #include "Config.h"
@@ -61,7 +61,7 @@ static time_t last_conarchive_cleanup = 0;   // last time scan
 static server_stats stats;
 
 #ifndef NOSQLITE
-extern sqlite3 *db;
+extern Database *db;
 #endif
 
 GameController* get_game_by_id(int gid)
@@ -747,36 +747,21 @@ bool client_cmd_request_gamerestart(clientcon *client, Tokenizer &t)
 bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
 {
 #ifndef NOSQLITE
-	char **result;
-	char *zErrMsg;
-	int nrow, ncol;
+	int rc;
+	QueryResult *result;
 	
-	char *q = sqlite3_mprintf("SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", client->uuid);
+	rc = db->query(&result, "SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", client->uuid);
 	
-	int rc = sqlite3_get_table(
-		db,              /* An open database */
-		q,       /* SQL to be executed */
-		&result,       /* Result written to a char *[]  that this points to */
-		&nrow,             /* Number of result rows written here */
-		&ncol,          /* Number of result columns written here */
-		&zErrMsg          /* Error msg written here */
-		);
-	
-	sqlite3_free(q);
-	
-	if (rc != SQLITE_OK)
-	{
-		dbg_msg("sqlite", "%s", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
+	if (rc)
+		dbg_msg("sqlite", "Query error");
 	else
 	{
-		if (!nrow)
+		if (!result->numRows())
 			client_chat(-1, client->id, "no stats present yet");
 		else
 		{
-			const int gamecount = atoi(result[ncol+1]);
-			const int score = atoi(result[ncol+2]);
+			const int gamecount = atoi(result->getRow(1,0));
+			const int score = atoi(result->getRow(2,0));
 		
 			snprintf(msg, sizeof(msg), "gamecount=%d score=%d",
 					  gamecount, score);
@@ -784,8 +769,6 @@ bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
 			client_chat(-1, client->id, msg);
 		}
 	}
-	
-	sqlite3_free_table(result);
 	
 #else /* !NOSQLITE */
 	client_chat(-1, client->id, "not linked against sqlite; stats not available");
@@ -1728,78 +1711,48 @@ void update_scores(const GameController *g)
 		// skip empty UUID
 		if (!uuid.length())
 			continue;
-	
-		char **result;
-		char *zErrMsg;
-		int nrow, ncol;
-
-		char *q = sqlite3_mprintf("SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
 		
-		int rc = sqlite3_get_table(
-			db,              /* An open database */
-			q,       /* SQL to be executed */
-			&result,       /* Result written to a char *[]  that this points to */
-			&nrow,             /* Number of result rows written here */
-			&ncol,          /* Number of result columns written here */
-			&zErrMsg          /* Error msg written here */
-			);
+		int rc;
+		QueryResult *result;
 		
-		sqlite3_free(q);
+		rc = db->query(&result, "SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
 		
-		if (rc != SQLITE_OK)
-		{
-			dbg_msg("sqlite", "%s", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}
+		if (rc)
+			dbg_msg("sqlite", "Query error");
 		else
 		{
-			if (!nrow)	// insert new row
+			if (!result->numRows())	// insert new row
 			{
 				dbg_msg("SQL", "no rows, inserting...");
 				
 				const int initial_score = 500;
-				char *q2 = sqlite3_mprintf("INSERT INTO players "
+				rc = db->query("INSERT INTO players "
 					"(uuid,gamecount,rating) VALUES('%q',%d,%d);",
 						uuid.c_str(), 1, calc_score(initial_score, g->getPlayerCount(), place));
-				rc = sqlite3_exec(db, q2, 0, 0, &zErrMsg);
-				if (rc != SQLITE_OK)
-				{
-					log_msg("sqlite", "%s", zErrMsg);
-					sqlite3_free(zErrMsg);
-				}
 				
-				sqlite3_free(q2);
+				if (rc)
+					dbg_msg("sqlite", "Query error");
 			}
 			else		// update row
 			{
-				for (int i=0; i < ncol; i++)
-					log_msg("SQL", "col: %s", result[i]);
-				for (int i=0; i < ncol*nrow; i++)
-					log_msg("SQL", "row: %s", result[ncol+i]);
-				
-				//const int gamecount = atoi(result[ncol+1]);
-				const int old_score = atoi(result[ncol+2]);
+				//const int gamecount = atoi(result->getRow(1,0));
+				const int old_score = atoi(result->getRow(2,0));
 				const int new_score = calc_score(old_score, g->getPlayerCount(), place);
 				
 				dbg_msg("RATING", "uuid=%s  old_score=%d  new_score=%d",
 					uuid.c_str(), old_score, new_score);
 				
-				char *q2 = sqlite3_mprintf("UPDATE players "
+				rc = db->query("UPDATE players "
 					"SET gamecount = gamecount + 1, rating = %d "
 					"WHERE uuid = '%q';", new_score, uuid.c_str());
 				
-				rc = sqlite3_exec(db, q2, 0, 0, &zErrMsg);
-				if (rc != SQLITE_OK)
-				{
-					log_msg("sqlite", "%s", zErrMsg);
-					sqlite3_free(zErrMsg);
-				}
-				
-				sqlite3_free(q2);
+				if (rc)
+					dbg_msg("sqlite", "Query error");
 			}
 		}
 		
-		sqlite3_free_table(result);
+		if (result)
+			delete result;
 	}
 }
 #endif /* !NOSQLITE */

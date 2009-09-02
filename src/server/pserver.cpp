@@ -33,7 +33,7 @@
 #include <vector>
 
 #ifndef NOSQLITE
-#include <sqlite3.h>
+#include "Database.hpp"
 #endif
 
 #include "Config.h"
@@ -51,7 +51,7 @@ using namespace std;
 ConfigParser config;
 
 #ifndef NOSQLITE
-sqlite3 *db;
+Database *db;
 #endif /* !NOSQLITE */
 
 socktype fdset_get_descriptor(fd_set *fds)
@@ -227,30 +227,29 @@ bool config_load()
 #ifndef NOSQLITE
 int database_init()
 {
-	char *zErrMsg = 0;
 	int rc;
 	
 	char dbfile[1024];
 	snprintf(dbfile, sizeof(dbfile), "%s/server.db", sys_config_path());;
 
 	/* open sqlite database */
-	rc = sqlite3_open(dbfile, &db);
-	if (rc)
+	db = new Database();
+	
+	if (db->open(dbfile))
 	{
-		log_msg("sqlite", "Can't open database: %s", sqlite3_errmsg(db));
-		sqlite3_close(db);
-		return -1;
+		log_msg("sqlite", "Error opening database");
+		return 1;
 	}
 	
 	/* create tables if not already present */
 	const char q[] = "CREATE TABLE players "
 		"(uuid varchar(50) NOT NULL PRIMARY KEY, gamecount INT NOT NULL, rating INT NOT NULL);";
-	rc = sqlite3_exec(db, q, 0, 0, &zErrMsg);
-	if (rc != SQLITE_OK)
-	{
-		log_msg("sqlite", "%s", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
+	
+	QueryResult *result;
+	rc = db->query(&result, q);
+	
+	if (result)
+		delete result;
 	
 	return 0;
 }
@@ -316,9 +315,9 @@ int main(int argc, char **argv)
 	mainloop();
 	
 #ifndef NOSQLITE
-	sqlite3_close(db);
+	delete db;
 #endif /* !NOSQLITE */
-	
+
 	network_shutdown();
 	
 	
