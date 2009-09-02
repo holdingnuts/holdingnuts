@@ -23,7 +23,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <sqlite3.h>
 
 #include "Database.hpp"
 

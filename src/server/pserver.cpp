@@ -227,8 +227,6 @@ bool config_load()
 #ifndef NOSQLITE
 int database_init()
 {
-	int rc;
-	
 	char dbfile[1024];
 	snprintf(dbfile, sizeof(dbfile), "%s/server.db", sys_config_path());;
 
@@ -245,11 +243,7 @@ int database_init()
 	const char q[] = "CREATE TABLE players "
 		"(uuid varchar(50) NOT NULL PRIMARY KEY, gamecount INT NOT NULL, rating INT NOT NULL);";
 	
-	QueryResult *result;
-	rc = db->query(&result, q);
-	
-	if (result)
-		delete result;
+	db->query(q);
 	
 	return 0;
 }
