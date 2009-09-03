@@ -127,6 +127,15 @@ int Database::query(QueryResult **qr, const char *q, ...)
 	return rc;
 }
 
+void Database::freeQueryResult(QueryResult **qr)
+{
+	if (qr)
+		return;
+	
+	delete qr;
+	qr = 0;
+}
+
 QueryResult::QueryResult(char **result, int nrow, int ncol)
 {
 	this->result = result;

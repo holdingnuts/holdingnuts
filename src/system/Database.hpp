@@ -34,7 +34,6 @@ class QueryResult
 friend class Database;
 
 public:
-	~QueryResult();
 	int numCols() const { return ncol; };
 	int numRows() const { return nrow; };
 	const char *getRow(int col, int row);
@@ -42,6 +41,7 @@ public:
 	
 private:
 	QueryResult(char **result, int nrow, int ncol);
+	~QueryResult();
 	char **result;
 	int nrow, ncol;
 };
@@ -56,6 +56,8 @@ public:
 	int open(const char *filename);
 	int query(const char *q, ...);
 	int query(QueryResult **qr, const char *q, ...);
+	
+	void freeQueryResult(QueryResult **qr);
 	
 private:
 	sqlite3 *db;

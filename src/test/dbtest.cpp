@@ -38,13 +38,11 @@ int main(int argc, char **argv)
 	QueryResult *result;
 	int rc;
 	rc = db.query(&result, "CREATE TABLE test (id INT NOT NULL PRIMARY KEY, value INT NOT NULL);");
-	if (result)
-		delete result;
+	db.freeQueryResult(&result);
 	
 	rc = db.query(&result,  "INSERT INTO test (id,value) VALUES (1,99999);"
 				"INSERT INTO test (id,value) VALUES (2,12345);");
-	if (result)
-		delete result;
+	db.freeQueryResult(&result);
 	
 	rc = db.query(&result, "SELECT * FROM test;");
 	
@@ -54,8 +52,7 @@ int main(int argc, char **argv)
 	for (int i=0; i < result->numRows(); i++)
 		printf("row %d=%s\n", i, result->getRow(1, i));
 	
-	if (result)
-		delete result;
+	db.freeQueryResult(&result);
 	
 	return 0;
 }

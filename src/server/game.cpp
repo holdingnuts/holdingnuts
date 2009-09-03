@@ -747,10 +747,15 @@ bool client_cmd_request_gamerestart(clientcon *client, Tokenizer &t)
 bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
 {
 #ifndef NOSQLITE
+	// skip if UUID empty
+	if (client->uuid[0] == '\0')
+		return true;
+	
 	int rc;
 	QueryResult *result;
 	
-	rc = db->query(&result, "SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", client->uuid);
+	// inquire gamec
+	rc = db->query(&result, "SELECT gamecount,ranking FROM players WHERE uuid = '%q' LIMIT 1;", client->uuid);
 	
 	if (rc)
 		dbg_msg("sqlite", "Query error");
@@ -760,8 +765,8 @@ bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
 			client_chat(-1, client->id, "no stats present yet");
 		else
 		{
-			const int gamecount = atoi(result->getRow(1,0));
-			const int score = atoi(result->getRow(2,0));
+			const int gamecount = atoi(result->getRow(0,0));
+			const int score = atoi(result->getRow(1,0));
 		
 			snprintf(msg, sizeof(msg), "gamecount=%d score=%d",
 					  gamecount, score);
@@ -1554,44 +1559,6 @@ void remove_expired_conar_entries()
 	}
 }
 
-int gameinit()
-{
-	// initialize server stats struct
-	memset(&stats, 0, sizeof(server_stats));
-	stats.server_started = time(NULL);
-
-#ifdef DEBUG
-	// initially add games for debugging purpose
-	if (!games.size())
-	{
-		for (int i=0; i < config.getInt("dbg_testgame_games"); i++)
-		{
-			GameController *g = new GameController();
-			const int gid = i;
-			g->setGameId(gid);
-			g->setName("test game");
-			g->setRestart(true);
-			g->setOwner(-1);
-			g->setPlayerMax(config.getInt("dbg_testgame_players"));
-			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
-			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
-			
-			if (config.getBool("dbg_stresstest") && i > 10)
-			{
-				for (int j=0; j < config.getInt("dbg_testgame_players"); j++)
-					g->addPlayer(j*1000 + i, "DEBUG");
-			}
-			
-			games[gid] = g;
-			
-			gid_counter++;
-		}
-	}
-#endif
-	
-	return 0;
-}
-
 #ifndef NOSQLITE
 /*
 Example:
@@ -1618,6 +1585,28 @@ ratio := 500 / 1000                    // = 0.5
 max_diff := 1000 * 0.125               // = 125
 tmp_score := (125 * 0.5) * (2 / 4.0)   // = 31
 score := 500 + 31                      // = 531
+
+
+
+Example:
+- Score is 800 (max=1000, min=1)
+- 8 players, 8th place
+==============================
+ [8] 7   6   5   4   3   2   1      // place
+  -  -  -  -  -  -  -  -  -  -
+ [1] 2   3   4   5   6   7   8      // inverted place  (1=#8 and 8=#1)
+--+---+---+---+---+---+---+---
+[-4]-3  -2  -1   0   1   2   3      // result
+==============================
+<--neg.-->   N   <--  pos. -->      // -4 to -1 negative; 0 neutral; 1 to 3 positive
+{-  divisor  -}     {-divisor-}
+div. for lose       div. for win
+
+
+old_score=800
+ratio=0.80 | diff=-133 | inv_place=1 | o=5 d=3 | result=-4
+new_score=667
+
 */
 
 
@@ -1678,8 +1667,8 @@ unsigned int calc_score(unsigned int score, unsigned int num_players, unsigned i
 	int tmp_score = (max_diff * ratio) * (result / (float)divisor);
 
 
-	dbg_msg("score", "old_score=%d | ratio=%.2f | diff=%d | inv_place=%d | o=%d d=%d | result=%d\n",
-		score, ratio, tmp_score, inv_place, offset, divisor, result);
+	dbg_msg("score", "old_score=%d | ratio=%.2f | diff=%d | inv_place=%d | o=%d d=%d | result=%d | new_score=%d",
+		score, ratio, tmp_score, inv_place, offset, divisor, result, score + tmp_score);
 	
 	
 	// update score
@@ -1715,7 +1704,7 @@ void update_scores(const GameController *g)
 		int rc;
 		QueryResult *result;
 		
-		rc = db->query(&result, "SELECT * FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
+		rc = db->query(&result, "SELECT gamecount,ranking FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
 		
 		if (rc)
 			dbg_msg("sqlite", "Query error");
@@ -1727,7 +1716,7 @@ void update_scores(const GameController *g)
 				
 				const int initial_score = 500;
 				rc = db->query("INSERT INTO players "
-					"(uuid,gamecount,rating) VALUES('%q',%d,%d);",
+					"(uuid,gamecount,ranking) VALUES('%q',%d,%d);",
 						uuid.c_str(), 1, calc_score(initial_score, g->getPlayerCount(), place));
 				
 				if (rc)
@@ -1735,15 +1724,15 @@ void update_scores(const GameController *g)
 			}
 			else		// update row
 			{
-				//const int gamecount = atoi(result->getRow(1,0));
-				const int old_score = atoi(result->getRow(2,0));
+				//const int gamecount = atoi(result->getRow(0,0));
+				const int old_score = atoi(result->getRow(1,0));
 				const int new_score = calc_score(old_score, g->getPlayerCount(), place);
 				
 				dbg_msg("RATING", "uuid=%s  old_score=%d  new_score=%d",
 					uuid.c_str(), old_score, new_score);
 				
 				rc = db->query("UPDATE players "
-					"SET gamecount = gamecount + 1, rating = %d "
+					"SET gamecount = gamecount + 1, ranking = %d "
 					"WHERE uuid = '%q';", new_score, uuid.c_str());
 				
 				if (rc)
@@ -1751,11 +1740,48 @@ void update_scores(const GameController *g)
 			}
 		}
 		
-		if (result)
-			delete result;
+		db->freeQueryResult(&result);
 	}
 }
 #endif /* !NOSQLITE */
+
+int gameinit()
+{
+	// initialize server stats struct
+	memset(&stats, 0, sizeof(server_stats));
+	stats.server_started = time(NULL);
+
+#ifdef DEBUG
+	// initially add games for debugging purpose
+	if (!games.size())
+	{
+		for (int i=0; i < config.getInt("dbg_testgame_games"); i++)
+		{
+			GameController *g = new GameController();
+			const int gid = i;
+			g->setGameId(gid);
+			g->setName("test game");
+			g->setRestart(true);
+			g->setOwner(-1);
+			g->setPlayerMax(config.getInt("dbg_testgame_players"));
+			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
+			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
+			
+			if (config.getBool("dbg_stresstest") && i > 10)
+			{
+				for (int j=0; j < config.getInt("dbg_testgame_players"); j++)
+					g->addPlayer(j*1000 + i, "DEBUG");
+			}
+			
+			games[gid] = g;
+			
+			gid_counter++;
+		}
+	}
+#endif
+	
+	return 0;
+}
 
 int gameloop()
 {

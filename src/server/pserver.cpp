@@ -241,7 +241,7 @@ int database_init()
 	
 	/* create tables if not already present */
 	const char q[] = "CREATE TABLE players "
-		"(uuid varchar(50) NOT NULL PRIMARY KEY, gamecount INT NOT NULL, rating INT NOT NULL);";
+		"(uuid varchar(50) NOT NULL PRIMARY KEY, gamecount INT NOT NULL, ranking INT NOT NULL);";
 	
 	db->query(q);
 	
