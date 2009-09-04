@@ -397,6 +397,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 				{
 					log_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
 					client->uuid[0] = '\0';    // client is not allowed to use this uuid
+					client_chat(-1, client->id, "Warning: UUID is already in use.");
 				}
 			}
 			else
