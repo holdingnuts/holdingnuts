@@ -1161,9 +1161,6 @@ void PClient::chatAll(const QString& text)
 		return;
 
 	QString strMsg = "CHAT -1 " + text.simplified();
-	
-	if (!config.getBool("chat_console"))
-		strMsg.replace("\"", "\\\"");
 
 	netSendMsg(strMsg.toStdString().c_str());
 }
@@ -1175,9 +1172,6 @@ void PClient::chat(const QString& text, int gid, int tid)
 
 	QString strMsg = QString("CHAT %1:%2 %3")
 		.arg(gid).arg(tid).arg(text.simplified());
-	
-	if (!config.getBool("chat_console"))
-		strMsg.replace("\"", "\\\"");
 
 	netSendMsg(strMsg.toStdString().c_str());
 }

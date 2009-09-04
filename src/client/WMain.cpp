@@ -845,7 +845,18 @@ void WMain::actionChat(QString msg)
 	// send raw to server if first char is '/'
 	if (config.getBool("chat_console") && msg.at(0) == QChar('/'))
 	{
-		((PClient*)qApp)->sendDebugMsg(msg.mid(1));
+		QString strMsg = msg.mid(1);
+		
+		if (!strMsg.length())
+			return;
+		
+		int space = strMsg.indexOf(' ');
+		if (space == -1)
+			strMsg = strMsg.toUpper();
+		else
+			strMsg = strMsg.left(space).toUpper() + strMsg.mid(space);
+		
+		((PClient*)qApp)->sendDebugMsg(strMsg);
 		return;
 	}
 
