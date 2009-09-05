@@ -41,7 +41,7 @@ ChatBox::ChatBox(
 	int nTextLogHeight,
 	QWidget *parent) : QWidget(parent), m_pCompleter(0), m_bShowTime(false)
 {
-	m_pEditChat = new QLineEdit(this);
+	m_pEditChat = new HistoryLineEdit(this);
 	m_pEditChat->setMaxLength(200);
 
 	connect(m_pEditChat, SIGNAL(returnPressed()), this, SLOT(actionChat()));
@@ -196,6 +196,8 @@ void ChatBox::actionChat()
 	{
 		emit dispatchedMessage(m_pEditChat->text());
 		
+		m_pEditChat->addHistory();
+		
 		m_pEditChat->clear();
 		m_pEditChat->setFocus();
 	}
@@ -229,4 +231,50 @@ void ChatBox::insertCompletion(const QString& completion)
 	m_pEditChat->insert(completion);
 	
 	m_pCompleter->popup()->hide();
+}
+
+
+
+HistoryLineEdit::HistoryLineEdit(QWidget *parent) : QLineEdit(parent), history_idx(-1)
+{
+
+}
+
+void HistoryLineEdit::keyPressEvent(QKeyEvent * qke)
+{
+	if (qke->key() == Qt::Key_Up)
+	{
+		qke->accept();
+		
+		if (history_idx + 1 < history.count())
+		{
+			history_idx++;
+			this->setText(history.at(history.count() - history_idx - 1));
+		}
+	}
+	else if (qke->key() == Qt::Key_Down)
+	{
+		qke->accept();
+		
+		if (history_idx -1 >= 0)
+		{
+			history_idx--;
+			this->setText(history.at(history.count() - history_idx - 1));
+		}
+	}
+	else
+		QLineEdit::keyPressEvent(qke);
+}
+
+void HistoryLineEdit::addHistory()
+{
+	const int max_history = 20;
+	
+	history.enqueue(text());
+	
+	if (history.count() > max_history)
+		history.dequeue();
+	
+	// reset index
+	history_idx = -1;
 }
