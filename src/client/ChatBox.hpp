@@ -106,10 +106,6 @@ protected:
 	HistoryLineEdit();
 	void keyPressEvent( QKeyEvent * qke );
 
-	
-signals:
-	void arrowPressed(bool up);
-
 private:
 	QQueue<QString> history;
 	int history_idx;
