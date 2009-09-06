@@ -67,13 +67,16 @@ public:
 	chips_type getStake() const { return stake; };
 	int getClientId() const { return client_id; };
 	
+	const std::string& getPlayerUUID() const { return uuid; };
+	
 	void resetLastAction() { last_action = Player::None; }
 	
 	
 private:
 	int client_id;
 	
-	// FIXME:
+	// NOTE: redundant data because clients can disconnect
+	std::string name;
 	std::string uuid;	/* copy of uuid needed */
 	
 	chips_type stake;		// currrent stake

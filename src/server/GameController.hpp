@@ -48,7 +48,7 @@ public:
 	typedef std::map<int,Player*>	players_type;
 	typedef std::set<int>		spectators_type;
 	
-	typedef std::vector<std::string>	finish_list_type;
+	typedef std::vector<Player*>	finish_list_type;
 	
 	typedef enum {
 		RingGame,   // Cash game
@@ -108,7 +108,7 @@ public:
 	
 	bool getPlayerList(std::vector<int> &client_list) const;
 	bool getListenerList(std::vector<int> &client_list) const;
-	void getFinishList(std::vector<std::string> &uuid_list) const;
+	void getFinishList(std::vector<Player*> &player_list) const;
 	
 	void setRestart(bool bRestart) { restart = bRestart; };
 	bool getRestart() const { return restart; };

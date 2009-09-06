@@ -128,7 +128,8 @@ bool GameController::addPlayer(int cid, const std::string &uuid)
 	p->client_id = cid;
 	p->stake = player_stakes;
 	
-	// save a copy of the UUID (player might disconnect)
+	// save a copy of the name and UUID (player might disconnect)
+	p->name = name;
 	p->uuid = uuid;
 	
 	players[cid] = p;
@@ -259,10 +260,10 @@ bool GameController::getListenerList(vector<int> &client_list) const
 	return true;
 }
 
-void GameController::getFinishList(vector<string> &uuid_list) const
+void GameController::getFinishList(vector<Player*> &player_list) const
 {
 	for (finish_list_type::const_iterator e = finish_list.begin(); e != finish_list.end(); e++)
-		uuid_list.push_back(*e);
+		player_list.push_back(*e);
 }
 
 void GameController::selectNewOwner()
@@ -1361,7 +1362,7 @@ void GameController::stateEndRound(Table *t)
 		Player *p = t->seats[seat_num].player;
 		
 		// save finish position
-		finish_list.push_back(p->uuid);
+		finish_list.push_back(p);
 		
 		// send out player-broke snapshot
 		snprintf(msg, sizeof(msg), "%d %d %d",
@@ -1566,13 +1567,12 @@ int GameController::tick()
 				for (unsigned int i=0; i < 10; ++i)
 					if (t->seats[i].occupied)
 					{
-						Player *p = t->seats[i].player;
-						finish_list.push_back(p->uuid);
+						finish_list.push_back(t->seats[i].player);
 						break;
 					}
 #ifdef DEBUG
 				for (int i = finish_list.size() - 1; i >= 0 ; --i)
-					log_msg("finish", "%s finished #%d", finish_list[i].c_str(), getPlayerCount() - i);
+					log_msg("finish", "%s finished #%d", finish_list[i]->uuid.c_str(), getPlayerCount() - i);
 #endif
 			}
 			

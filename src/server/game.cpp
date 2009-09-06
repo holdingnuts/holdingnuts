@@ -749,7 +749,7 @@ bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
 #ifndef NOSQLITE
 	// skip if UUID empty
 	if (client->uuid[0] == '\0')
-		return true;
+		return false;
 	
 	int rc;
 	QueryResult *result;
@@ -758,7 +758,10 @@ bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
 	rc = db->query(&result, "SELECT gamecount,ranking FROM players WHERE uuid = '%q' LIMIT 1;", client->uuid);
 	
 	if (rc)
+	{
 		dbg_msg("sqlite", "Query error");
+		return false;
+	}
 	else
 	{
 		if (!result->numRows())
@@ -777,6 +780,60 @@ bool client_cmd_request_playerstats(clientcon *client, Tokenizer &t)
 	
 #else /* !NOSQLITE */
 	client_chat(-1, client->id, "not linked against sqlite; stats not available");
+#endif /* !NOSQLITE */
+	return true;
+}
+
+bool client_cmd_request_ranking(clientcon *client, Tokenizer &t)
+{
+#ifndef NOSQLITE
+	if (!(client->state & Authed))
+		return false;
+	
+	int rc;
+	QueryResult *result;
+	
+	// inquire ranking
+	rc = db->query(&result, "SELECT uuid,name,gamecount,ranking FROM players ORDER BY ranking DESC LIMIT 10;");
+	
+	if (rc)
+	{
+		dbg_msg("sqlite", "Query error");
+		return false;
+	}
+	else
+	{
+		if (!result->numRows())
+			client_chat(-1, client->id, "no stats present yet");
+		else
+		{
+			for (int i=0; i < result->numRows(); i++)
+			{
+				const string uuid = result->getRow(0,i);
+				const string name = result->getRow(1,i);
+				const int gamecount = atoi(result->getRow(2,i));
+				const int score = atoi(result->getRow(3,i));
+			
+#ifdef DEBUG
+				snprintf(msg, sizeof(msg), "#%d uuid=%s name=%s gamecount=%d score=%d",
+						i+1, uuid.c_str(), name.c_str(), gamecount, score);
+#endif
+				
+				snprintf(msg, sizeof(msg), "PLAYERSTATS "
+					"%d:%s %d:\"%s\" %d:%d %d:%d %d:%d",
+					PlayerStatsUUID,		uuid.c_str(),
+					PlayerStatsName,		name.c_str(),
+					PlayerStatsPosition,		i + 1,
+					PlayerStatsRanking,		score,
+					PlayerStatsGameCount,		gamecount);
+				
+				send_msg(client->sock, msg);
+			}
+		}
+	}
+	
+#else /* !NOSQLITE */
+	client_chat(-1, client->id, "not linked against sqlite; ranking not available");
 #endif /* !NOSQLITE */
 	return true;
 }
@@ -810,6 +867,8 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		cmderr = !client_cmd_request_gamerestart(client, t);
 	else if (request == "playerstats")
 		cmderr = !client_cmd_request_playerstats(client, t);
+	else if (request == "ranking")
+		cmderr = !client_cmd_request_ranking(client, t);
 	else
 		cmderr = true;
 	
@@ -1687,12 +1746,13 @@ unsigned int calc_score(unsigned int score, unsigned int num_players, unsigned i
 
 void update_scores(const GameController *g)
 {
-	vector<string> uuid_list;
-	g->getFinishList(uuid_list);
+	vector<Player*> player_list;
+	g->getFinishList(player_list);
 
-	for (unsigned int u=0; u < uuid_list.size(); u++)
+	for (unsigned int u=0; u < player_list.size(); u++)
 	{
-		const string &uuid = uuid_list[u];
+		const Player* player = player_list[u];
+		const string &uuid = player->getPlayerUUID();
 		const int place = g->getPlayerCount() - u;
 		dbg_msg("finish", "%s finished @ #%d",
 			uuid.c_str(), place);
@@ -1704,36 +1764,52 @@ void update_scores(const GameController *g)
 		int rc;
 		QueryResult *result;
 		
-		rc = db->query(&result, "SELECT gamecount,ranking FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
+		rc = db->query(&result, "SELECT ranking FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
 		
 		if (rc)
 			dbg_msg("sqlite", "Query error");
 		else
 		{
+			const clientcon *client = get_client_by_id(player->getClientId());
+			std::string player_name = "__unknown__";
+			
+			// use either stored or current player name
+			if (client)
+				player_name = client->info.name;
+			
+			
 			if (!result->numRows())	// insert new row
 			{
 				dbg_msg("SQL", "no rows, inserting...");
 				
 				const int initial_score = 500;
 				rc = db->query("INSERT INTO players "
-					"(uuid,gamecount,ranking) VALUES('%q',%d,%d);",
-						uuid.c_str(), 1, calc_score(initial_score, g->getPlayerCount(), place));
+					"(uuid,name,t_lastgame,gamecount,ranking) VALUES('%q','%q',datetime('now'),%d,%d);",
+						uuid.c_str(), player_name.c_str(),
+						1, calc_score(initial_score, g->getPlayerCount(), place));
 				
 				if (rc)
 					dbg_msg("sqlite", "Query error");
 			}
 			else		// update row
 			{
-				//const int gamecount = atoi(result->getRow(0,0));
-				const int old_score = atoi(result->getRow(1,0));
+				const int old_score = atoi(result->getRow(0,0));
 				const int new_score = calc_score(old_score, g->getPlayerCount(), place);
 				
 				dbg_msg("RATING", "uuid=%s  old_score=%d  new_score=%d",
 					uuid.c_str(), old_score, new_score);
 				
+				// update player name only if client is connected
+				char *q_setname;
+				if (client)
+					q_setname = db->createQueryString("name = '%q',", player_name.c_str());
+				
 				rc = db->query("UPDATE players "
-					"SET gamecount = gamecount + 1, ranking = %d "
-					"WHERE uuid = '%q';", new_score, uuid.c_str());
+					"SET %s t_lastgame = datetime('now'), gamecount = gamecount + 1, ranking = %d "
+					"WHERE uuid = '%q';", (client) ? q_setname : "", new_score, uuid.c_str());
+				
+				if (client)
+					db->freeQueryString(q_setname);
 				
 				if (rc)
 					dbg_msg("sqlite", "Query error");
@@ -1750,6 +1826,14 @@ int gameinit()
 	// initialize server stats struct
 	memset(&stats, 0, sizeof(server_stats));
 	stats.server_started = time(NULL);
+	
+	
+	/* create tables if not already present */
+	const char q[] = "CREATE TABLE players "
+		"(uuid varchar(50) NOT NULL PRIMARY KEY, name varchar(50), t_lastgame DATE NOT NULL, gamecount INT NOT NULL, ranking INT NOT NULL);";
+	
+	db->query(q);
+	
 
 #ifdef DEBUG
 	// initially add games for debugging purpose

@@ -69,14 +69,14 @@ int Database::query(const char *q, ...)
 	char *zErrMsg;
 	
 	va_start(args, q);
-	char *qstr = sqlite3_vmprintf(q, args);
+	char *qstr = createQueryString(q, args);
 	va_end(args);
 	
 	fprintf(stderr, "Query= %s\n", qstr);
 	
 	int rc = sqlite3_exec(db, qstr, 0, 0, &zErrMsg);
 	
-	sqlite3_free(qstr);
+	freeQueryString(qstr);
 	
 	if (rc != SQLITE_OK)
 	{
@@ -99,7 +99,7 @@ int Database::query(QueryResult **qr, const char *q, ...)
 	int nrow, ncol;
 	
 	va_start(args, q);
-	char *qstr = sqlite3_vmprintf(q, args);
+	char *qstr = createQueryString(q, args);
 	va_end(args);
 	
 	fprintf(stderr, "Query= %s\n", qstr);
@@ -113,7 +113,7 @@ int Database::query(QueryResult **qr, const char *q, ...)
 		&zErrMsg          /* Error msg written here */
 		);
 	
-	sqlite3_free(qstr);
+	freeQueryString(qstr);
 	
 	if (rc != SQLITE_OK)
 	{
@@ -134,6 +134,23 @@ void Database::freeQueryResult(QueryResult **qr)
 	
 	delete qr;
 	qr = 0;
+}
+
+char* Database::createQueryString(const char *q, ...)
+{
+	va_list args;
+	char *qstr;
+	
+	va_start(args, q);
+	qstr = sqlite3_vmprintf(q, args);
+	va_end(args);
+	
+	return qstr;
+}
+
+void Database::freeQueryString(char *q)
+{
+	sqlite3_free(q);
 }
 
 QueryResult::QueryResult(char **result, int nrow, int ncol)

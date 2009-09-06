@@ -59,6 +59,9 @@ public:
 	
 	void freeQueryResult(QueryResult **qr);
 	
+	char* createQueryString(const char *q, ...);
+	void freeQueryString(char *q);
+	
 private:
 	sqlite3 *db;
 	

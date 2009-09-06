@@ -239,12 +239,6 @@ int database_init()
 		return 1;
 	}
 	
-	/* create tables if not already present */
-	const char q[] = "CREATE TABLE players "
-		"(uuid varchar(50) NOT NULL PRIMARY KEY, gamecount INT NOT NULL, ranking INT NOT NULL);";
-	
-	db->query(q);
-	
 	return 0;
 }
 #endif /* !NOSQLITE */
@@ -301,7 +295,11 @@ int main(int argc, char **argv)
 	network_init();
 
 #ifndef NOSQLITE
-	database_init();
+	if (database_init())
+	{
+		log_msg("sqlite", "Error initializing database handle");
+		return 1;
+	}
 #endif /* !NOSQLITE */
 	
 	gameinit();
