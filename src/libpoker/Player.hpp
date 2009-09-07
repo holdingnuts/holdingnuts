@@ -75,8 +75,7 @@ public:
 private:
 	int client_id;
 	
-	// NOTE: redundant data because clients can disconnect
-	std::string name;
+	// NOTE: redundant information here, because client may disconnect
 	std::string uuid;	/* copy of uuid needed */
 	
 	chips_type stake;		// currrent stake

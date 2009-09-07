@@ -128,8 +128,7 @@ bool GameController::addPlayer(int cid, const std::string &uuid)
 	p->client_id = cid;
 	p->stake = player_stakes;
 	
-	// save a copy of the name and UUID (player might disconnect)
-	p->name = name;
+	// save a copy of the UUID (player might disconnect)
 	p->uuid = uuid;
 	
 	players[cid] = p;
@@ -1570,10 +1569,6 @@ int GameController::tick()
 						finish_list.push_back(t->seats[i].player);
 						break;
 					}
-#ifdef DEBUG
-				for (int i = finish_list.size() - 1; i >= 0 ; --i)
-					log_msg("finish", "%s finished #%d", finish_list[i]->uuid.c_str(), getPlayerCount() - i);
-#endif
 			}
 			
 			delete t;
