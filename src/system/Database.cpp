@@ -22,8 +22,9 @@
 
 
 #include <stdarg.h>
-#include <cstdio>
+
 #include "Database.hpp"
+#include "Debug.h"
 
 using namespace std;
 
@@ -51,7 +52,7 @@ int Database::open(const char *filename)
 	rc = sqlite3_open(filename, &db);
 	if (rc)
 	{
-		fprintf(stderr, "sqlite: Can't open database: %s\n", sqlite3_errmsg(db));
+		dbg_msg("sqlite", "Error: Can't open database: %s", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		db = 0;
 	}
@@ -72,7 +73,7 @@ int Database::query(const char *q, ...)
 	char *qstr = sqlite3_vmprintf(q, args);
 	va_end(args);
 	
-	fprintf(stderr, "Query= %s\n", qstr);
+	dbg_msg("sqlite", "query= %s", qstr);
 	
 	int rc = sqlite3_exec(db, qstr, 0, 0, &zErrMsg);
 	
@@ -80,7 +81,7 @@ int Database::query(const char *q, ...)
 	
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "sqlite: %s\n", zErrMsg);
+		dbg_msg("sqlite", "Error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
 	
@@ -102,7 +103,7 @@ int Database::query(QueryResult **qr, const char *q, ...)
 	char *qstr = sqlite3_vmprintf(q, args);
 	va_end(args);
 	
-	fprintf(stderr, "Query= %s\n", qstr);
+	dbg_msg("sqlite", "query= %s", qstr);
 	
 	int rc = sqlite3_get_table(
 		db,              /* An open database */
@@ -117,7 +118,7 @@ int Database::query(QueryResult **qr, const char *q, ...)
 	
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "sqlite: %s\n", zErrMsg);
+		dbg_msg("sqlite", "Error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);
 		*qr = 0;
 	}

@@ -385,6 +385,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		
 		// re-assign cid if this client was previously connected (and cid isn't already connected)
 		bool use_prev_cid = false;
+		bool uuid_inuse = false;
 		
 		if (uuid.length())
 		{
@@ -404,7 +405,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 				{
 					log_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
 					client->uuid[0] = '\0';    // client is not allowed to use this uuid
-					client_chat(-1, client->id, "Warning: UUID is already in use.");
+					uuid_inuse = true;
 				}
 			}
 			else
@@ -426,6 +427,11 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 			(unsigned int) time(NULL));
 			
 		send_msg(client->sock, msg);
+		
+		
+		// send warning if UUID is already in use
+		if (uuid_inuse)
+			client_chat(-1, client->id, "Warning: UUID is already in use.");
 	}
 	
 	return 0;
@@ -1749,12 +1755,16 @@ void update_scores(const GameController *g)
 {
 	vector<Player*> player_list;
 	g->getFinishList(player_list);
-
+	
+	bool query_error = false;
+	int rc = db->query("BEGIN TRANSACTION;");
+	
 	for (unsigned int u=0; u < player_list.size(); u++)
 	{
 		const Player* player = player_list[u];
 		const string &uuid = player->getPlayerUUID();
 		const int place = g->getPlayerCount() - u;
+		
 		dbg_msg("finish", "%s finished @ #%d",
 			uuid.c_str(), place);
 		
@@ -1762,13 +1772,15 @@ void update_scores(const GameController *g)
 		if (!uuid.length())
 			continue;
 		
-		int rc;
 		QueryResult *result;
-		
 		rc = db->query(&result, "SELECT ranking FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
 		
 		if (rc)
-			dbg_msg("sqlite", "Query error");
+		{
+			query_error = true;
+			db->freeQueryResult(&result);
+			break;
+		}
 		else
 		{
 			const clientcon *client = get_client_by_id(player->getClientId());
@@ -1790,7 +1802,11 @@ void update_scores(const GameController *g)
 						1, calc_score(initial_score, g->getPlayerCount(), place));
 				
 				if (rc)
-					dbg_msg("sqlite", "Query error");
+				{
+					query_error = true;
+					db->freeQueryResult(&result);
+					break;
+				}
 			}
 			else		// update row
 			{
@@ -1813,12 +1829,21 @@ void update_scores(const GameController *g)
 					db->freeQueryString(q_setname);
 				
 				if (rc)
-					dbg_msg("sqlite", "Query error");
+				{
+					query_error = true;
+					db->freeQueryResult(&result);
+					break;
+				}
 			}
 		}
 		
 		db->freeQueryResult(&result);
 	}
+	
+	if (!query_error)
+		rc = db->query("COMMIT;");
+	else
+		rc = db->query("ROLLBACK;");
 }
 #endif /* !NOSQLITE */
 
@@ -1830,11 +1855,10 @@ int gameinit()
 	
 	
 #ifndef NOSQLITE
-	/* create tables if not already present */
-	const char q[] = "CREATE TABLE players "
-		"(uuid varchar(50) NOT NULL PRIMARY KEY, name varchar(50), t_lastgame DATE NOT NULL, gamecount INT NOT NULL, ranking INT NOT NULL);";
-	
-	db->query(q);
+	/* create players table if not already exists */
+	db->query("CREATE TABLE IF NOT EXISTS players "
+		"(uuid varchar(50) NOT NULL PRIMARY KEY, name varchar(50), "
+		"t_lastgame DATE NOT NULL, gamecount INT NOT NULL, ranking INT NOT NULL);");
 #endif /* NOSQLITE */
 	
 	
