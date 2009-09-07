@@ -1723,7 +1723,7 @@ unsigned int calc_score(unsigned int score, unsigned int num_players, unsigned i
 	const float max_diff = max_score * diff_ratio;    
 	
 	// actual score to add/substract
-	int tmp_score = (max_diff * ratio) * (result / (float)divisor);
+	int tmp_score = (int)((max_diff * ratio) * (result / (float)divisor));
 
 
 	dbg_msg("score", "old_score=%d | ratio=%.2f | diff=%d | inv_place=%d | o=%d d=%d | result=%d | new_score=%d",
