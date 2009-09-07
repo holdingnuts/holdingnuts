@@ -1828,13 +1828,15 @@ int gameinit()
 	stats.server_started = time(NULL);
 	
 	
+#ifndef NOSQLITE
 	/* create tables if not already present */
 	const char q[] = "CREATE TABLE players "
 		"(uuid varchar(50) NOT NULL PRIMARY KEY, name varchar(50), t_lastgame DATE NOT NULL, gamecount INT NOT NULL, ranking INT NOT NULL);";
 	
 	db->query(q);
+#endif /* NOSQLITE */
 	
-
+	
 #ifdef DEBUG
 	// initially add games for debugging purpose
 	if (!games.size())
