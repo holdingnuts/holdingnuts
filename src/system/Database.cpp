@@ -69,14 +69,14 @@ int Database::query(const char *q, ...)
 	char *zErrMsg;
 	
 	va_start(args, q);
-	char *qstr = createQueryString(q, args);
+	char *qstr = sqlite3_vmprintf(q, args);
 	va_end(args);
 	
 	fprintf(stderr, "Query= %s\n", qstr);
 	
 	int rc = sqlite3_exec(db, qstr, 0, 0, &zErrMsg);
 	
-	freeQueryString(qstr);
+	sqlite3_free(qstr);
 	
 	if (rc != SQLITE_OK)
 	{
@@ -99,7 +99,7 @@ int Database::query(QueryResult **qr, const char *q, ...)
 	int nrow, ncol;
 	
 	va_start(args, q);
-	char *qstr = createQueryString(q, args);
+	char *qstr = sqlite3_vmprintf(q, args);
 	va_end(args);
 	
 	fprintf(stderr, "Query= %s\n", qstr);
@@ -113,7 +113,7 @@ int Database::query(QueryResult **qr, const char *q, ...)
 		&zErrMsg          /* Error msg written here */
 		);
 	
-	freeQueryString(qstr);
+	sqlite3_free(qstr);
 	
 	if (rc != SQLITE_OK)
 	{
