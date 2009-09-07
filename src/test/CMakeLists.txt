@@ -6,6 +6,11 @@ include_directories (
 	${HOLDINGNUTS_SOURCE_DIR}/src/test
 	
 )
+
+if (ENABLE_SQLITE)
+	include_directories(${SQLITE3_INCLUDE_DIR})
+endif (ENABLE_SQLITE)
+
 link_directories(
 	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
@@ -32,5 +37,5 @@ target_link_libraries(systest System SysAccess)
 
 if (ENABLE_SQLITE)
 	add_executable (dbtest dbtest.cpp)
-	target_link_libraries(dbtest Database ${aux_lib})
+	target_link_libraries(dbtest Database ${SQLITE3_LIBRARIES})
 endif (ENABLE_SQLITE)

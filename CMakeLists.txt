@@ -24,7 +24,8 @@ ENDIF (in_source)
 
 ################################################################################
 
-SET( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
+# declare path for own CMake modules
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # Doxygen documentation
 if (BUILD_DOCUMENTATION)
