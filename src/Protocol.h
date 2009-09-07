@@ -122,6 +122,14 @@ typedef enum {
 	StatsClientCount		= 0x100,
 	StatsGamesCount			= 0x101,
 	StatsConarchiveCount		= 0x120,
-} stats_codes;
+} serverstats_codes;
+
+typedef enum {
+	PlayerStatsUUID			= 0x1,
+	PlayerStatsName			= 0x2,
+	PlayerStatsPosition		= 0x10,
+	PlayerStatsRanking		= 0x11,
+	PlayerStatsGameCount		= 0x12,
+} playerstats_codes;
 
 #endif /* _PROTOCOL_H */

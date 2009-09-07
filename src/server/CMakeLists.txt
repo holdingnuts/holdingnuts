@@ -4,6 +4,11 @@ include_directories (
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
 	${HOLDINGNUTS_SOURCE_DIR}/src/server
 )
+
+if (ENABLE_SQLITE)
+	include_directories(${SQLITE3_INCLUDE_DIR})
+endif (ENABLE_SQLITE)
+
 link_directories(
 	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
@@ -26,6 +31,12 @@ IF (WIN32)
 		# FIXME: use VC resource compiler rc.exe
 	ENDIF (MINGW)
 ENDIF (WIN32)
+
+
+if (ENABLE_SQLITE)
+       LIST (APPEND aux_lib Database)
+       LIST (APPEND aux_lib ${SQLITE3_LIBRARIES})
+endif (ENABLE_SQLITE)
 
 
 add_executable (holdingnuts-server

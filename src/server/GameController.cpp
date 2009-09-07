@@ -77,6 +77,16 @@ GameController::GameController(const GameController& g)
 	setPassword(g.getPassword());
 }
 
+GameController::~GameController()
+{
+	// remove all players
+	for (players_type::iterator e = players.begin(); e != players.end();)
+	{
+		delete e->second;
+		players.erase(e++);
+	}
+}
+
 void GameController::reset()
 {
 	game_id = -1;
@@ -86,11 +96,25 @@ void GameController::reset()
 	
 	started = false;
 	ended = false;
+	finished = false;
 	
 	hand_no = 0;
+	
+	// remove all players
+	for (players_type::iterator e = players.begin(); e != players.end();)
+	{
+		delete e->second;
+		players.erase(e++);
+	}
+	
+	// remove all spectators
+	spectators.clear();
+	
+	// clear finish list
+	finish_list.clear();
 }
 
-bool GameController::addPlayer(int cid)
+bool GameController::addPlayer(int cid, const std::string &uuid)
 {
 	// is the game already started or full?
 	if (started || players.size() == max_players)
@@ -103,6 +127,9 @@ bool GameController::addPlayer(int cid)
 	Player *p = new Player;
 	p->client_id = cid;
 	p->stake = player_stakes;
+	
+	// save a copy of the UUID (player might disconnect)
+	p->uuid = uuid;
 	
 	players[cid] = p;
 	
@@ -124,6 +151,8 @@ bool GameController::removePlayer(int cid)
 	bool bIsOwner = false;
 	if (owner == cid)
 		bIsOwner = true;
+	
+	delete it->second;
 	
 	players.erase(it);
 	
@@ -228,6 +257,12 @@ bool GameController::getListenerList(vector<int> &client_list) const
 		client_list.push_back(*e);
 	
 	return true;
+}
+
+void GameController::getFinishList(vector<Player*> &player_list) const
+{
+	for (finish_list_type::const_iterator e = finish_list.begin(); e != finish_list.end(); e++)
+		player_list.push_back(*e);
 }
 
 void GameController::selectNewOwner()
@@ -1325,12 +1360,14 @@ void GameController::stateEndRound(Table *t)
 		
 		Player *p = t->seats[seat_num].player;
 		
+		// save finish position
+		finish_list.push_back(p);
 		
 		// send out player-broke snapshot
 		snprintf(msg, sizeof(msg), "%d %d %d",
 			SnapGameStateBroke,
 			p->client_id,
-			-1 /* FIXME: finish-position */);
+			getPlayerCount() - (int)finish_list.size() + 1);
 		
 		snap(t->table_id, SnapGameState, msg);
 		
@@ -1502,14 +1539,10 @@ int GameController::tick()
 		// delay before game gets deleted
 		if ((unsigned int) difftime(time(NULL), ended_time) >= 4 * 60)
 		{
-			// remove all players
-			for (players_type::iterator e = players.begin(); e != players.end();)
-				players.erase(e++);
-			
 			return -1;
 		}
 		else
-			return 0;
+			return 1;
 	}
 	
 	// handle all tables
@@ -1520,7 +1553,7 @@ int GameController::tick()
 		// table closed?
 		if (handleTable(t) < 0)
 		{
-			// is this the last table?
+			// is this the last table?  /* FIXME: very very dirty */
 			if (tables.size() == 1)
 			{
 				ended = true;
@@ -1528,6 +1561,14 @@ int GameController::tick()
 				
 				snprintf(msg, sizeof(msg), "%d", SnapGameStateEnd);
 				snap(-1, SnapGameState, msg);
+				
+				// push back last remaining player to finish_list
+				for (unsigned int i=0; i < 10; ++i)
+					if (t->seats[i].occupied)
+					{
+						finish_list.push_back(t->seats[i].player);
+						break;
+					}
 			}
 			
 			delete t;

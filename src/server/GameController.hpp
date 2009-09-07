@@ -48,6 +48,8 @@ public:
 	typedef std::map<int,Player*>	players_type;
 	typedef std::set<int>		spectators_type;
 	
+	typedef std::vector<Player*>	finish_list_type;
+	
 	typedef enum {
 		RingGame,   // Cash game
 		FreezeOut,  // Tournament
@@ -70,6 +72,7 @@ public:
 	
 	GameController();
 	GameController(const GameController& g);
+	~GameController();
 	
 	void reset();
 	
@@ -105,6 +108,7 @@ public:
 	
 	bool getPlayerList(std::vector<int> &client_list) const;
 	bool getListenerList(std::vector<int> &client_list) const;
+	void getFinishList(std::vector<Player*> &player_list) const;
 	
 	void setRestart(bool bRestart) { restart = bRestart; };
 	bool getRestart() const { return restart; };
@@ -112,7 +116,10 @@ public:
 	bool isStarted() const { return started; };
 	bool isEnded() const { return ended; };
 	
-	bool addPlayer(int cid);
+	bool isFinished() const { return finished; };
+	void setFinished() { finished = true; };
+	
+	bool addPlayer(int cid, const std::string &uuid);
 	bool removePlayer(int cid);
 	bool isPlayer(int cid) const;
 	
@@ -195,6 +202,9 @@ private:
 	
 	bool ended;
 	time_t ended_time;
+	
+	bool finished;
+	finish_list_type finish_list;
 	
 	std::string name;
 	std::string password;

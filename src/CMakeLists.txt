@@ -77,6 +77,13 @@ set (CMAKE_SKIP_BUILD_RPATH true)
 
 # libraries
 add_subdirectory (libpoker)
+
+if (ENABLE_SQLITE)
+       include (FindSQLITE3)
+else (ENABLE_SQLITE)
+       add_definitions (-DNOSQLITE=1)
+endif (ENABLE_SQLITE)
+
 add_subdirectory (system)
 
 # the server
