@@ -24,10 +24,13 @@
 
 #include "Chip.hpp"
 #include "ChipStack.hpp"
+#include "ConfigParser.hpp"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
+
+extern ConfigParser config;
 
 ChipStack::ChipStack(QGraphicsItem* parent)
 :	QGraphicsItem(parent)
@@ -44,7 +47,17 @@ void ChipStack::paint(
 	QPainter* painter,
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget)
-{ }
+{
+#ifdef DEBUG	
+	if (config.getBool("dbg_bbox"))
+	{
+		painter->save();
+		painter->setPen(Qt::cyan);
+		painter->drawRect(this->boundingRect());
+		painter->restore();	
+	}
+#endif
+}
 
 unsigned calc(chips_type& amount, chips_type value)
 {

@@ -127,8 +127,9 @@ protected:
 	QPointF calcCCardsPos(unsigned int nCard) const;
 	QPointF calcTimeoutPos(unsigned int nSeatID) const;
 	QPointF calcHandStrengthPos() const;
-	QPointF calcPotsPos() const;
+	QPointF calcTxtPotsPos() const;
 	QPointF calcDealerBtnPos(unsigned int nSeatID) const;
+	void calcPotsPos();
 	
 	void doSitout(bool bSitout);
 
@@ -200,8 +201,7 @@ private:
 	TimeOut					*m_pTimeout;
 	QGraphicsSimpleTextItem *m_pTxtPots;
 	QGraphicsSimpleTextItem *m_pTxtHandStrength;
-	ChipStack				*m_pMainPot;
-	// TODO: handle side pots
+	ChipStack				*m_Pots[8];
 	
 	// ui
 	ChatBox			*m_pChat;
@@ -228,10 +228,7 @@ private:
 	int				m_nNoAction;
 	int				m_nSitoutActions;
 	
-	chips_type			m_autocall_amount;
-	
-	// precomputed dealerbtn positions
-	QPointF			m_ptDealerBtn[10];
+	chips_type		m_autocall_amount;
 	
 	// shortcuts
 	QShortcut		*shortcutFold;
@@ -243,6 +240,15 @@ private:
 	QShortcut		*shortcutShow;
 	QShortcut		*shortcutSitout;
 	QShortcut		*shortcutBack;
+	
+	// 
+	QSizeF			sizeCommunityCards;
+	
+	qreal			posYCommunityCards;
+	qreal			posYTxtPots;
+	qreal			posYPots;
+	// precomputed dealerbtn positions
+	QPointF			m_ptDealerBtn[10];
 };
 
 #endif /* _WTABLE_H */

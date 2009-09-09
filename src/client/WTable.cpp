@@ -226,7 +226,11 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 :	QWidget(parent),
 	m_nGid(gid),
 	m_nTid(tid),
-	m_pImgTable(0)
+	m_pImgTable(0),
+	sizeCommunityCards(120, 170),
+	posYCommunityCards(360),
+	posYTxtPots(290),
+	posYPots(270)
 {
 	//setAttribute(Qt::WA_DeleteOnClose); // FIXME: implement correctly
 
@@ -259,11 +263,16 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	for (unsigned int j = 0; j < 5; j++)
 	{
 		m_CommunityCards[j] = new QGraphicsPixmapItem(
-			QPixmap(QString("gfx/deck/%1/blank.png")
+				QPixmap(QString("gfx/deck/%1/blank.png")
 				.arg(QString::fromStdString(config.get("ui_card_deck")))));
 
+		const QRectF& rc = m_CommunityCards[j]->boundingRect();
+
 		m_CommunityCards[j]->setTransformationMode(Qt::SmoothTransformation);
-		m_CommunityCards[j]->scale(1.1, 1.1);
+		// fixed size for any kind of cardsets
+		m_CommunityCards[j]->scale(
+				sizeCommunityCards.width() / rc.width(),
+				sizeCommunityCards.height() / rc.height());
 		m_CommunityCards[j]->setZValue(5.0);
 		m_CommunityCards[j]->setPos(calcCCardsPos(j));
 		m_CommunityCards[j]->hide();
@@ -293,7 +302,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	const QPointF ptCenter = m_pImgTable->boundingRect().center();
 	
 	m_pTxtPots = m_pScene->addSimpleText("Main pot: 0", font);
-	m_pTxtPots->setPos(calcPotsPos());
+	m_pTxtPots->setPos(calcTxtPotsPos());
 	m_pTxtPots->setZValue(3);
 	
 	font.setBold(false);
@@ -302,10 +311,14 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pTxtHandStrength->setPos(calcHandStrengthPos());
 	m_pTxtHandStrength->setZValue(3);
 	m_pTxtHandStrength->setVisible(config.getBool("ui_show_handstrength"));
-	
-	m_pMainPot = new ChipStack;
-	m_pMainPot->setZValue(3);
-	m_pScene->addItem(m_pMainPot);
+
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+	{
+		m_Pots[t] = new ChipStack;
+		m_Pots[t]->setZValue(6);
+
+		m_pScene->addItem(m_Pots[t]);
+	}
 
 	// view
 	m_pView = new QGraphicsView(m_pScene);
@@ -599,7 +612,7 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 
 	return QPointF(
 		((m_pScene->width() - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
-		m_pScene->height() * 0.375);
+		posYCommunityCards);
 }
 
 QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
@@ -626,10 +639,10 @@ QPointF WTable::calcHandStrengthPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtHandStrength->text()) / 2),
-		230 + fm.height());
+		posYTxtPots + fm.height());
 }
 
-QPointF WTable::calcPotsPos() const
+QPointF WTable::calcTxtPotsPos() const
 {
 	Q_ASSERT_X(m_pTxtPots, Q_FUNC_INFO, "bad text pots pointer");
 	Q_ASSERT_X(m_pImgTable, Q_FUNC_INFO, "bad table image pointer");
@@ -639,7 +652,7 @@ QPointF WTable::calcPotsPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2),
-		230);
+		posYTxtPots);
 }
 
 QPointF WTable::calcDealerBtnPos(unsigned int nSeatID) const
@@ -659,13 +672,15 @@ QPointF WTable::calcDealerBtnPos(unsigned int nSeatID) const
 	switch (nSeatID)
 	{
 		case 0: case 8: case 9:
-				pt.ry() += (wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 30);
+				pt.ry() += (wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 20);
+				pt.rx() += 10;
 			break;
 		case 1:
 				pt.rx() -= (
 					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
 					m_pDealerButton->sceneBoundingRect().width() + 
 					30);
+				pt.ry() += 70;
 			break;
 		case 2:
 				pt.rx() -= (
@@ -681,12 +696,42 @@ QPointF WTable::calcDealerBtnPos(unsigned int nSeatID) const
 					10);
 				pt.rx() -= 30;
 			break;
-		case 6: case 7:
+		case 6:
 				pt.rx() += wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 20;
+			break;
+		case 7:
+				pt.rx() += wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 20;
+				pt.ry() += 70;
 			break;
 	}
 
 	return pt;
+}
+
+void WTable::calcPotsPos()
+{
+	static const qreal space = 5;
+
+	qreal wholePotsWidth;
+
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+	{
+		if (m_Pots[t]->isVisible())
+			wholePotsWidth += m_Pots[t]->boundingRect().width() + space;
+	}
+	
+	qreal xStart = m_pImgTable->boundingRect().center().x() - (wholePotsWidth * 0.5);
+	
+	// place the pots on the table
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+	{
+		if (m_Pots[t]->isVisible())
+		{
+			m_Pots[t]->setPos(xStart, posYPots);
+		
+			xStart += m_Pots[t]->boundingRect().width() + space;
+		}
+	}
 }
 
 void WTable::evaluateActions(const table_snapshot *snap)
@@ -1017,6 +1062,8 @@ void WTable::updatePots()
 	const table_snapshot *snap = &(tinfo->snap);
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 	
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+		m_Pots[t]->hide();
 	
 	QString strPots;
 	chips_type pot_sum = 0;
@@ -1032,6 +1079,9 @@ void WTable::updatePots()
 			strPots.append(
 				QString("  " + tr("Side pot %1: %2")
 					.arg(t).arg(snap->pots.at(t))));
+					
+			m_Pots[t]->setAmount(snap->pots.at(t));
+			m_Pots[t]->show();
 		}
 	}
 	
@@ -1043,12 +1093,12 @@ void WTable::updatePots()
 	
 	m_pTxtPots->setText(strPotSum);
 	m_pTxtPots->setToolTip(strPots);
-	m_pTxtPots->setPos(calcPotsPos());
+	m_pTxtPots->setPos(calcTxtPotsPos());
 	
-	m_pMainPot->setAmount(snap->pots.at(0));
-	m_pMainPot->setPos(
-		qMin(m_pTxtPots->x(), m_pTxtHandStrength->x()) - 60,
-		m_pTxtPots->y() + 40);
+	m_Pots[0]->setAmount(snap->pots.at(0));
+	m_Pots[0]->show();
+	// 
+	calcPotsPos();
 }
 
 void WTable::updateDealerButton()
@@ -1794,6 +1844,12 @@ void WTable::showDebugTable()
 
 		m_pScene->addItem(dealerBtn[i]);	
 	}
+	
+	// mainpot and sidepots
+//	for (unsigned int t = 0; t < qrand() % (sizeof(m_Pots) / sizeof(m_Pots[0])) + 1; t++)
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+		m_Pots[t]->setAmount(qrand() % 30000 + 1);
+	calcPotsPos();
 	
 	// timeout
 	m_pTimeout->setPos(calcTimeoutPos(0));

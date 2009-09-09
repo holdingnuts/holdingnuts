@@ -456,7 +456,7 @@ void Seat::calcChipStackPos(qreal& x, qreal& y, int txt_width) const
 			break;
 		case 8: case 9: case 0:
 				x = 70;
-				y = 165;
+				y = 158;
 			break;
 		case 6: case 7:
 				x = sx_card * 1.6;
