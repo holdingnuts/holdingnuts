@@ -34,6 +34,7 @@
 #include <QAbstractItemView>
 #include <QDebug>
 #include <QTime>
+#include <QTimer>
 
 
 ChatBox::ChatBox(
@@ -203,6 +204,11 @@ void ChatBox::actionChat()
 	}
 }
 
+void ChatBox::popupCompleter()
+{
+	m_pCompleter->complete();
+}
+
 void ChatBox::textEdited(const QString& text)
 {
 	const QString completionPrefix = text.section(' ', -1);
@@ -213,13 +219,14 @@ void ChatBox::textEdited(const QString& text)
 	if (completionPrefix != m_pCompleter->completionPrefix())
 	{
 		m_pCompleter->setCompletionPrefix(completionPrefix);
+		
 		m_pCompleter->popup()->setCurrentIndex(
 			m_pCompleter->completionModel()->index(
 				0,
 				m_pCompleter->completionColumn()));
 	}
 	
-	m_pCompleter->complete();
+	QTimer::singleShot(750, this, SLOT(popupCompleter()));
 }
 
 void ChatBox::insertCompletion(const QString& completion)

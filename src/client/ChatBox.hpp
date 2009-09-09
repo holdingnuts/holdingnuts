@@ -76,6 +76,7 @@ private slots:
 	void textEdited(const QString& text);
 
 	void insertCompletion(const QString &completion);
+	void popupCompleter();
 
 signals:
      void dispatchedMessage(QString msg);
