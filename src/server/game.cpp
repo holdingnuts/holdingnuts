@@ -104,8 +104,10 @@ int send_msg(socktype sock, const char *message)
 	const int bytes = socket_write(sock, buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
+	// FIXME: handle client-dead case
 	if (len != bytes)
-		log_msg("clientsock", "(%d) warning: not all bytes written (%d != %d)", sock, len, bytes);
+		dbg_msg("clientsock", "(%d) warning: not all bytes written (%d != %d).",
+			sock, len, bytes);
 	
 	return bytes;
 }
@@ -1435,6 +1437,17 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 				client->info.name, client->id,
 				varname.c_str(), varvalue.c_str());
 		}
+		else if (action == "save")
+		{
+			char cfgfile[1024];
+			snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
+			
+			// update config-version and save config
+			config.set("version", VERSION);
+			config.save(cfgfile);
+			
+			client_chat(-1, client->id, "Config saved");
+		}
 		else
 			cmderr = true;
 	}
@@ -1817,7 +1830,7 @@ void update_scores(const GameController *g)
 					uuid.c_str(), old_score, new_score);
 				
 				// update player name only if client is connected
-				char *q_setname;
+				char *q_setname = 0;	// Note: mingw32 compiler warning if not set to 0
 				if (client)
 					q_setname = db->createQueryString("name = '%q',", player_name.c_str());
 				
@@ -1843,7 +1856,10 @@ void update_scores(const GameController *g)
 	if (!query_error)
 		rc = db->query("COMMIT;");
 	else
+	{
 		rc = db->query("ROLLBACK;");
+		log_msg("update_scores", "There was an error during transaction. Rolling back.");
+	}
 }
 #endif /* !NOSQLITE */
 
