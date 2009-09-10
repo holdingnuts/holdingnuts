@@ -799,7 +799,8 @@ void WMain::actionSettings()
 	if (dialogSettings.exec() != QDialog::Accepted)
 		return;
 	
-	// save the settings
+	// update config-version and save the config
+	config.set("version", VERSION);
 	config.save(cfgfile);
 	
 	// updates
