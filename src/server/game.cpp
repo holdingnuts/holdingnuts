@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 
 #ifndef NOSQLITE
 #include "Database.hpp"
@@ -1697,11 +1698,11 @@ unsigned int calc_score(unsigned int score, unsigned int num_players, unsigned i
 	const float diff_ratio = 1 / 8.0f;
 	
 	// invert place value (e.g. 10 players => 1 = #10 and 10 = #1)
-	const unsigned int inv_place = num_players - place + 1;
+	const int inv_place = num_players - place + 1;
 
 	
 	int result;
-	unsigned int offset = 0, divisor;
+	int offset = 0, divisor;
 	
 	if (num_players == 2)	// special case
 	{
@@ -1740,12 +1741,11 @@ unsigned int calc_score(unsigned int score, unsigned int num_players, unsigned i
 		ratio = 0.01f;
 	
 	// max. value to add/substract
-	const float max_diff = max_score * diff_ratio;    
+	const float max_diff = max_score * diff_ratio;
 	
 	// actual score to add/substract
-	int tmp_score = (int)((max_diff * ratio) * (result / (float)divisor));
-
-
+	int tmp_score = (int) ceil((max_diff * ratio) * (result / (float)divisor));
+		
 	dbg_msg("score", "old_score=%d | ratio=%.2f | diff=%d | inv_place=%d | o=%d d=%d | result=%d | new_score=%d",
 		score, ratio, tmp_score, inv_place, offset, divisor, result, score + tmp_score);
 	
