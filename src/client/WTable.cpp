@@ -712,7 +712,7 @@ void WTable::calcPotsPos()
 {
 	static const qreal space = 5;
 
-	qreal wholePotsWidth;
+	qreal wholePotsWidth = 0;
 
 	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
 	{
