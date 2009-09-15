@@ -66,7 +66,10 @@ void Seat::setValid(bool valid)
 	m_bValid = valid;
 	
 	if (!valid)
+	{
 		this->setToolTip(QString());	// unset tooltip
+		m_pChipStack->hide();
+	}
 }
 
 void Seat::setInfo(const QString& name, const QString& location)
