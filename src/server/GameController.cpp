@@ -926,7 +926,7 @@ void GameController::stateBetting(Table *t)
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
-			if (action == Player::Allin || amount >= p->stake)
+			if (action == Player::Allin || p->stake == 0)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionAllin, p->client_id, t->seats[t->cur_player].bet);
 			else if (action == Player::Bet)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionBet, p->client_id, t->bet_amount);
