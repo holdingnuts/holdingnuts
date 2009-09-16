@@ -24,4 +24,4 @@ else
     export LD_LIBRARY_PATH="$GAMEDIR/$LIBDIR"
 fi
  
-./holdingnuts $@
+./holdingnuts "$@"
