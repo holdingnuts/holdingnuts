@@ -30,6 +30,7 @@ config.set("uuid",		"");			// unique ID for re-connect
 config.set("locale",		"");			// language/locale to use
 config.set("encoding",		"UTF-8");		// temporary fix for localized chat
 config.set("log",		true);			// log to file
+config.set("log_append",	false);			// append to log file instead of overwriting
 config.set("log_timestamp",	false);			// log with timestamp
 config.set("log_chat",		false);			// include player chat in log
 config.set("ui_show_handstrength", 	true);		// display hand strength on table

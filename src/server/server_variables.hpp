@@ -29,6 +29,7 @@ config.set("max_register_per_player",	2);			// limit for register per player
 config.set("max_subscribe_per_player",	2);			// limit for subscribe per player
 config.set("max_create_per_player",	2);			// limit for create per player
 config.set("log",			true);			// log into file
+config.set("log_append",		false);			// append to log file instead of overwriting
 config.set("log_timestamp",		true);			// log with timestamp
 config.set("auth_password",		"");			// server authentication password
 config.set("perm_create_user",		true);			// allow regular user to create games

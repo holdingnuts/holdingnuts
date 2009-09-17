@@ -1655,7 +1655,9 @@ int main(int argc, char **argv)
 	{
 		char logfile[1024];
 		snprintf(logfile, sizeof(logfile), "%s/client.log", sys_config_path());
-		fplog = file_open(logfile, mode_write);
+		fplog = file_open(logfile, config.getBool("log_append")
+				? mode_append
+				: mode_write);
 		
 		// log destination
 		log_set(stdout, fplog);
