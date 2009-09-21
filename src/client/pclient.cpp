@@ -812,7 +812,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	it.parse(sblinds);
 	
 	gi->blinds_start = it.getNextInt();
-	gi->blinds_factor = it.getNextInt() / 10.0f;
+	gi->blinds_factor = it.getNextInt() / 10.0;
 	gi->blinds_time = it.getNextInt();
 	
 	

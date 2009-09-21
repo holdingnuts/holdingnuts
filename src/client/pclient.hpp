@@ -103,7 +103,7 @@ typedef struct {
 	//! \brief starting blinds
 	chips_type	blinds_start;
 	//! \brief blinds raise factor
-	float		blinds_factor;
+	double		blinds_factor;
 	//! \brief blinds raise time
 	unsigned int	blinds_time;
 	//! \brief known tables
