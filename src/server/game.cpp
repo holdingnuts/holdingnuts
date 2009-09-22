@@ -616,7 +616,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		g->getPlayerTimeout(),
 		g->getPlayerStakes(),
 		g->getBlindsStart(),
-		int(g->getBlindsFactor() * 10),
+		g->getBlindsFactor(),
 		g->getBlindsTime(),
 		g->getName().c_str());
 	
@@ -1227,7 +1227,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		chips_type stake;
 		unsigned int timeout;
 		chips_type blinds_start;
-		float blinds_factor;
+		unsigned int blinds_factor;
 		unsigned int blinds_time;
 		string password;
 		bool restart;
@@ -1238,7 +1238,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		1500,
 		30,
 		20,
-		2.0f,
+		20,
 		180,
 		"",
 		false,
@@ -1302,9 +1302,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		}
 		else if (infotype == "blinds_factor" && havearg)
 		{
-			ginfo.blinds_factor = Tokenizer::string2int(infoarg) / 10.0f;
+			ginfo.blinds_factor = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.blinds_factor < 1.2f || ginfo.blinds_factor > 4.0f)
+			if (ginfo.blinds_factor < 12 || ginfo.blinds_factor > 40)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_time" && havearg)

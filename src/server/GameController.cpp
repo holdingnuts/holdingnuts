@@ -52,7 +52,7 @@ GameController::GameController()
 	player_stakes = 1500;
 	
 	blind.blinds_time = 60 * 4;
-	blind.blinds_factor = 2.0f;
+	blind.blinds_factor = 20;
 	blind.start = 10;
 	
 	name = "game";
@@ -684,7 +684,7 @@ void GameController::stateBlinds(Table *t)
 		if (difftime(time(NULL), blind.last_blinds_time) > blind.blinds_time)
 		{
 			blind.last_blinds_time = time(NULL);
-			blind.amount = (int)(blind.blinds_factor * blind.amount);
+			blind.amount = (blind.blinds_factor * blind.amount) / 10;
 			
 			// send out blinds snapshot
 			snprintf(msg, sizeof(msg), "%d %d %d", SnapGameStateBlinds, blind.amount / 2, blind.amount);

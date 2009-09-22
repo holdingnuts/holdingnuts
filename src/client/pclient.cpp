@@ -1187,7 +1187,7 @@ bool PClient::createGame(gamecreate *createinfo)
 		createinfo->stake,
 		createinfo->timeout,
 		createinfo->blinds_start,
-		int(createinfo->blinds_factor * 10),
+		int(createinfo->blinds_factor * 10 + .05),
 		createinfo->blinds_time,
 		createinfo->password.simplified().toStdString().c_str(),
 		createinfo->name.simplified().toStdString().c_str());

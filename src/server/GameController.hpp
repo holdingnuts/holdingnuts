@@ -86,8 +86,8 @@ public:
 	
 	void setBlindsStart(chips_type blinds_start) { blind.start = blinds_start; };
 	chips_type getBlindsStart() const { return blind.start; };
-	void setBlindsFactor(float blinds_factor) { blind.blinds_factor = blinds_factor; };
-	float getBlindsFactor() const { return blind.blinds_factor; };
+	void setBlindsFactor(unsigned int blinds_factor) { blind.blinds_factor = blinds_factor; };
+	unsigned int getBlindsFactor() const { return blind.blinds_factor; };
 	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
 	unsigned int getBlindsTime() const { return blind.blinds_time; };
 	
@@ -192,7 +192,7 @@ private:
 		BlindRule blindrule;
 		unsigned int blinds_time;  // seconds
 		time_t last_blinds_time;
-		float blinds_factor;
+		unsigned int blinds_factor;
 	} blind;
 	
 	unsigned int hand_no;
