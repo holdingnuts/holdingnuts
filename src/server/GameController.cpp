@@ -124,6 +124,10 @@ bool GameController::addPlayer(int cid, const std::string &uuid)
 	if (isPlayer(cid))
 		return false;
 	
+	// remove from spectators list as we would receive the snapshots twice
+	if (isSpectator(cid))
+		removeSpectator(cid);
+	
 	Player *p = new Player;
 	p->client_id = cid;
 	p->stake = player_stakes;
@@ -176,8 +180,8 @@ bool GameController::isPlayer(int cid) const
 
 bool GameController::addSpectator(int cid)
 {
-	// is the client already a spectator?
-	if (isSpectator(cid))
+	// is the client already a spectator (or a player)?
+	if (isSpectator(cid) || isPlayer(cid))
 		return false;
 	
 	spectators.insert(cid);
