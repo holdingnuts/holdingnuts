@@ -354,13 +354,34 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnMuck = new QPushButton(tr("&Muck"), this);
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
+	
+	/* Persistent actions on the right, e.g. Sitout/Back, "Muck losing hands" */
 	QPushButton *btnBack = new QPushButton(tr("I'm bac&k"), this);
-	btnBack->setFixedWidth(actionbtn_width);
+	btnBack->setFixedSize(actionbtn_width, 25);
 	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
 	
 	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
-	btnSitout->setFixedWidth(actionbtn_width);
+	btnSitout->setFixedSize(actionbtn_width, 25);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
+	
+	stlayPersistentActions = new QStackedLayout();
+	m_nSitout = stlayPersistentActions->addWidget(btnSitout);
+	m_nBack = stlayPersistentActions->addWidget(btnBack);
+	
+	QCheckBox *chkAutoMuck = new QCheckBox(tr("Muck losing\nhands"), this);
+	chkAutoMuck->setFont(QFont("Arial", 8));
+	chkAutoMuck->setEnabled(false);	// FIXME: implement me...
+	
+	QVBoxLayout *layPersistentActions = new QVBoxLayout();
+	layPersistentActions->addLayout(stlayPersistentActions);
+	layPersistentActions->addWidget(chkAutoMuck, 0, Qt::AlignCenter);
+	
+	lblPersistentActions = new QLabel(this);
+	lblPersistentActions->setPixmap(QPixmap("gfx/table/actions.png"));
+	lblPersistentActions->setScaledContents(true);
+	lblPersistentActions->setFixedSize(120, 90);
+	lblPersistentActions->setLayout(layPersistentActions);
+	
 	
 	
 	// bet shortcuts
@@ -431,32 +452,25 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	QVBoxLayout *lPreActions = new QVBoxLayout();
 	lPreActions->addLayout(lPreActionsAuto);
-	lPreActions->addWidget(btnSitout, 0, Qt::AlignRight);   // FIXME: display outside StackedLayout
 	
 	QHBoxLayout *lPostActions = new QHBoxLayout();
 	lPostActions->addWidget(btnMuck);
 	lPostActions->addWidget(btnShow);
-	
-	QHBoxLayout *lSitoutActions = new QHBoxLayout();
-	lSitoutActions->addWidget(btnBack);
 	
 	stlayActions = new QStackedLayout();
 	QWidget *pageActions = new QWidget(this);
 	QWidget *pagePreActions = new QWidget(this);
 	QWidget *pagePostActions = new QWidget(this);
 	QWidget *pageNoActions = new QWidget(this);
-	QWidget *pageSitoutActions = new QWidget(this);
 	
 	pageActions->setLayout(lActions);
 	pagePreActions->setLayout(lPreActions);
 	pagePostActions->setLayout(lPostActions);
-	pageSitoutActions->setLayout(lSitoutActions);
 	
 	m_nActions = stlayActions->addWidget(pageActions);
 	m_nPreActions = stlayActions->addWidget(pagePreActions);
 	m_nPostActions = stlayActions->addWidget(pagePostActions);
 	m_nNoAction = stlayActions->addWidget(pageNoActions);
-	m_nSitoutActions = stlayActions->addWidget(pageSitoutActions);
 	
 	QLabel *lblActions = new QLabel(this);
 	lblActions->setPixmap(QPixmap("gfx/table/actions.png"));
@@ -480,9 +494,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	QGridLayout *mainLayout = new QGridLayout(this);
 
-	mainLayout->addWidget(m_pView, 0, 0, 1, 5);
+	mainLayout->addWidget(m_pView, 0, 0, 1, 7);
 	mainLayout->addWidget(m_pChat, 1, 0);
 	mainLayout->addWidget(lblActions, 1, 3);
+	mainLayout->addWidget(lblPersistentActions, 1, 5);
 	mainLayout->setColumnStretch(2, 2);
 	mainLayout->setColumnStretch(4, 2);
 
@@ -553,6 +568,7 @@ WTable::~WTable()
 		delete wseats[i];
 		
 	delete stlayActions;
+	delete stlayPersistentActions;
 }
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
@@ -740,8 +756,11 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	if (snap->my_seat == -1)
 	{
 		stlayActions->setCurrentIndex(m_nNoAction);
+		lblPersistentActions->setEnabled(false);
 		return;
 	}
+	else
+		lblPersistentActions->setEnabled(true);
 	
 	
 	const seatinfo *s = &(snap->seats[snap->my_seat]);
@@ -765,7 +784,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	// evaluate available actions
 	if (s->sitout)
 	{
-		stlayActions->setCurrentIndex(m_nSitoutActions);
+		stlayActions->setCurrentIndex(m_nNoAction);
 	}
 	else if (!s->in_round ||
 		!(snap->state == Table::Blinds ||
@@ -904,6 +923,13 @@ void WTable::evaluateActions(const table_snapshot *snap)
 			}
 		}
 	}
+	
+	
+	// evaluate persistent actions
+	if (s->sitout)
+		stlayPersistentActions->setCurrentIndex(m_nBack);
+	else
+		stlayPersistentActions->setCurrentIndex(m_nSitout);
 }
 
 unsigned int WTable::seatToCentralView(int my, unsigned int seat) const

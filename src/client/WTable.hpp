@@ -226,7 +226,12 @@ private:
 	int				m_nPreActions;
 	int				m_nPostActions;
 	int				m_nNoAction;
-	int				m_nSitoutActions;
+	
+	
+	QLabel		*lblPersistentActions;
+	QStackedLayout	*stlayPersistentActions;
+	int				m_nSitout;
+	int				m_nBack;
 	
 	chips_type		m_autocall_amount;
 	
