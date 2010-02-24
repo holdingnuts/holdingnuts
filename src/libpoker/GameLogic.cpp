@@ -179,7 +179,11 @@ bool GameLogic::isStraight(vector<Card> *allcards, const int suit, vector<Card> 
 	
 	// is an A2345-straight ("wheel")
 	if (count == 4 && (last_face == Card::Two && allcards->front().getFace() == Card::Ace))
-		is_straight = true;
+	{
+		// check suit when testing for StraightFlush	
+		if (suit == -1 || allcards->front().getSuit() == suit)
+			is_straight = true;
+	}
 	
 	if (is_straight)
 	{
