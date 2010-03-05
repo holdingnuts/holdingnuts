@@ -196,6 +196,64 @@ int test_handstrength2()
 	return 0;
 }
 
+// testing bug ticket 202, changeset 741
+int test_handstrength3()
+{
+	struct test_hand {
+		char name[50];
+		Card cards[7];
+	};
+	
+	test_hand hands[] = {
+		{ "Royal Flush", {Card("Ah"), Card("Kh"), Card("Qh"), Card("Jh"), Card("Th"), Card("3d"), Card("4d")} },
+		{ "Straight Flush 1", {Card("Kh"), Card("Qh"), Card("Jh"), Card("Th"), Card("3d"), Card("4d"), Card("9h")} },
+		{ "Straight Flush Wheel", {Card("Ah"), Card("4h"), Card("2h"), Card("Kh"), Card("9c"), Card("3h"), Card("5h")} },
+		{ "Flush 1", {Card("Kh"), Card("Qh"), Card("Jh"), Card("Th"), Card("3d"), Card("4d"), Card("4h")} },
+		{ "Straight & Flush 1", {Card("As"), Card("4h"), Card("2h"), Card("Kh"), Card("9c"), Card("3h"), Card("5h")} },	 // bug ticket 202
+		{ "Straight & Flush 2", {Card("Ah"), Card("4h"), Card("2c"), Card("Kh"), Card("9c"), Card("3h"), Card("5h")} },
+		{ "Straight 1", {Card("Ah"), Card("4h"), Card("2c"), Card("Kh"), Card("9c"), Card("3h"), Card("5d")} },
+	};
+	
+	int hands_count = sizeof(hands) / sizeof(hands[0]);
+	
+	for (int i=0; i < hands_count; ++i)
+	{
+		test_hand *ch = &(hands[i]);
+		
+		HoleCards *h = new HoleCards();
+		CommunityCards *cc = new CommunityCards();
+		
+		h->setCards(
+			ch->cards[0],
+			ch->cards[1]
+		);
+		
+		cc->setFlop(
+			ch->cards[2],
+			ch->cards[3],
+			ch->cards[4]
+		);
+		
+		cc->setTurn(ch->cards[5]);
+		cc->setRiver(ch->cards[6]);
+	
+		printf("Test #%d: [", i+1);
+		for (int j=0; j < 7; ++j)
+			printf("%s ", ch->cards[j].getName());
+		
+		HandStrength hs;
+		GameLogic::getStrength(h, cc, &hs);
+		printf("] '%s': %s\n--------------------------------------------------------------------------------\n",
+			ch->name,
+			HandStrength::getRankingName(hs.getRanking()));
+		
+		delete h;
+		delete cc;
+	}
+	
+	return 0;
+}
+
 int test_winlist1()
 {
 	Deck d;
@@ -280,6 +338,7 @@ int main(void)
 #if 0
 	test_handstrength1();
 	test_handstrength2();
+	test_handstrength3();
 #endif
 
 #if 0
