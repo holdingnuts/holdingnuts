@@ -11,6 +11,13 @@ if (APPLE)
 	set(PLATFORM_STR  "macosx")
 	add_definitions(-DPLATFORM_MACOSX)
 endif (APPLE)
+
+# FIXME: which is the correct define for Haiku?
+if (BEOS)
+	set(PLATFORM_STR  "haiku")
+	add_definitions(-DPLATFORM_HAIKU)
+endif (BEOS)
+
 IF (NOT PLATFORM_STR)
  set(PLATFORM_STR  "unix")
  MESSAGE("No target platform specified, using default (${PLATFORM_STR})")

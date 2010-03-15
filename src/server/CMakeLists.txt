@@ -32,6 +32,10 @@ IF (WIN32)
 	ENDIF (MINGW)
 ENDIF (WIN32)
 
+# FIXME: Which one is the correct define for Haiku?
+IF (BEOS)
+	LIST(APPEND aux_lib network)
+ENDIF (BEOS)
 
 if (ENABLE_SQLITE)
        LIST (APPEND aux_lib Database)
