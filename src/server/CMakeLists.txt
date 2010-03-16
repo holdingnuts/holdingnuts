@@ -45,7 +45,7 @@ endif (ENABLE_SQLITE)
 
 add_executable (holdingnuts-server
 	pserver.cpp ${aux_obj}
-	game.cpp GameController.cpp Table.cpp
+	game.cpp GameController.cpp Table.cpp ranking.cpp
 )
 
 target_link_libraries(holdingnuts-server
