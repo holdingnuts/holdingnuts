@@ -30,6 +30,9 @@
 class Chip : public QObject, public QGraphicsItem
 {
 	Q_OBJECT
+#if QT_VERSION >= 0x040600
+	Q_INTERFACES(QGraphicsItem)
+#endif
 
 public:
 	Chip(const QImage& img, QGraphicsItem* parent);
