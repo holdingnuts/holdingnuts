@@ -40,6 +40,7 @@
 #include <QUuid>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QPixmapCache>    // only needed for applying workaround
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -1482,6 +1483,14 @@ PClient::~PClient()
 
 int PClient::init()
 {
+	// workaround QTBUG-6840 and QTBUG-8606:
+	// disable pixmap-cache for Qt 4.6.0 and 4.6.2
+	if ((QT_VERSION == QT_VERSION_CHECK(4, 6, 0)) || (QT_VERSION == QT_VERSION_CHECK(4, 6, 2)))
+	{
+		log_msg("main", "Working around QTBUG-6840 and QTBUG-8606");
+		QPixmapCache::setCacheLimit(0);
+	}
+
 	// change into data-dir
 	const char *datadir = sys_data_path();
 	if (datadir)
