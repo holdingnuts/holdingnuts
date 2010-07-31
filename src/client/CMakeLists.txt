@@ -31,17 +31,17 @@ IF (BEOS)
 ENDIF (BEOS)
 
 
-# use SDL only for audio
-if (ENABLE_AUDIO)
-	Find_Package ( SDL REQUIRED )
-
-	include_directories ( ${SDL_INCLUDE_DIR} )
-	
-	LIST (APPEND aux_src Audio.c)
-	LIST (APPEND aux_lib ${SDL_LIBRARY})
-else (ENABLE_AUDIO)
+## use SDL only for audio
+##if (ENABLE_AUDIO)
+##	Find_Package ( SDL REQUIRED )
+##
+##	include_directories ( ${SDL_INCLUDE_DIR} )
+##	
+##	LIST (APPEND aux_src Audio.c)
+##	LIST (APPEND aux_lib ${SDL_LIBRARY})
+##else (ENABLE_AUDIO)
 	add_definitions (-DNOAUDIO=1)
-endif (ENABLE_AUDIO)
+##endif (ENABLE_AUDIO)
 
 SET( QT_USE_QTNETWORK true )
 
@@ -59,20 +59,20 @@ QT4_ADD_RESOURCES(QtApp_RCC_SRCS ${QtApp_RCCS})
 # Warning: older CMake versions (2.6-patch-0) do not provide moc-qt4 with preprocessor definitions
 QT4_WRAP_CPP (
 	sources_MOC
-	pclient.hpp WMain.hpp SettingsDialog.hpp CreateGameDialog.hpp
-	AboutDialog.hpp GameListTableModel.hpp PlayerListTableModel.hpp GameListSortFilterProxyModel.hpp PlayerListSortFilterProxyModel.hpp
-	WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp
-	Chip.hpp ChipStack.hpp
+##	pclient.hpp WMain.hpp SettingsDialog.hpp CreateGameDialog.hpp
+##	AboutDialog.hpp GameListTableModel.hpp PlayerListTableModel.hpp GameListSortFilterProxyModel.hpp PlayerListSortFilterProxyModel.hpp
+##	WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp
+##	Chip.hpp ChipStack.hpp
 )
 
 add_executable (
 	holdingnuts
 	WIN32    # when building for windows: do not show the console window
-	pclient.cpp ${aux_obj}
-	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp
-	GameListTableModel.cpp PlayerListTableModel.cpp GameListSortFilterProxyModel.cpp PlayerListSortFilterProxyModel.cpp
-	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
-	Chip.cpp ChipStack.cpp
+	client_main.cpp ${aux_obj}
+##	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp
+##	GameListTableModel.cpp PlayerListTableModel.cpp GameListSortFilterProxyModel.cpp PlayerListSortFilterProxyModel.cpp
+##	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
+##	Chip.cpp ChipStack.cpp
 	${aux_src}
 	${sources_MOC} ${QtApp_RCC_SRCS}
 )
