@@ -80,7 +80,7 @@ QVariant GameListTableModel::data(const QModelIndex& index, int role) const
 			case 5:
 				return data.password;
 			default:
-				qDebug() << "GameListTableModel::data() invalided column ("<<index.column()<<")";
+				qDebug() << "GameListTableModel::data() invalid column ("<<index.column()<<")";
 		}
 	}
 
@@ -143,7 +143,7 @@ bool GameListTableModel::setData(
 				break;
 			default:
 			{
-				qDebug() << "GameListTableModel::setData() invalided column ("<<index.column()<<")";
+				qDebug() << "GameListTableModel::setData() invalid column ("<<index.column()<<")";
 					return false;
 			}
 		}

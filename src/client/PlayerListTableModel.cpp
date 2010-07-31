@@ -68,7 +68,7 @@ QVariant PlayerListTableModel::data(const QModelIndex& index, int role) const
 			case 3:
 				return data.location;
 			default:
-				qDebug() << "PlayerListTableModel::data() invalided column ("<<index.column()<<")";
+				qDebug() << "PlayerListTableModel::data() invalid column ("<<index.column()<<")";
 		}
 	}
 
@@ -124,7 +124,7 @@ bool PlayerListTableModel::setData(
 				break;
 			default:
 			{
-				qDebug() << "PlayerListTableModel::setData() invalided column ("<<index.column()<<")";
+				qDebug() << "PlayerListTableModel::setData() invalid column ("<<index.column()<<")";
 					return false;
 			}
 		}
