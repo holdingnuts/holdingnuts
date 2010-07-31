@@ -478,6 +478,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lblActions->setFixedSize(450, 90);
 	lblActions->setLayout(stlayActions);
 	
+#if 0
 	QListView *popupView = new QListView;
 	popupView->setModelColumn(1);
 	
@@ -485,11 +486,12 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	cmpChat->setPopup(popupView);
 	cmpChat->setCompletionRole(Qt::DisplayRole);
 	cmpChat->setCompletionColumn(((PClient*)qApp)->playerList()->nameColumn());
+#endif
 
 	m_pChat	= new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->setFixedHeight(150);
 	m_pChat->setFontPointSize(m_pChat->fontPointSize() - 1);
-	m_pChat->setCompleter(cmpChat);
+	//m_pChat->setCompleter(cmpChat);
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 
 	QGridLayout *mainLayout = new QGridLayout(this);

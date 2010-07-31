@@ -301,6 +301,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	wConnection = new QWidget(this);
 	wConnection->setLayout(lConnect);
 
+#if 0
 	QListView *popupView = new QListView;
 	popupView->setModelColumn(1);
 	
@@ -308,11 +309,12 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	cmpChat->setPopup(popupView);
 	cmpChat->setCompletionRole(Qt::DisplayRole);
 	cmpChat->setCompletionColumn(((PClient*)qApp)->playerList()->nameColumn());
+#endif
 
 	// the foyer chat box
 	m_pChat = new ChatBox(ChatBox::INPUTLINE_BOTTOM, 0, this);
 	m_pChat->showChatBtn(true);
-	m_pChat->setCompleter(cmpChat);
+	//m_pChat->setCompleter(cmpChat);
 	m_pChat->showTime((config.getInt("chat_verbosity_foyer") & 0x1));
 	connect(m_pChat, SIGNAL(dispatchedMessage(QString)), this, SLOT(actionChat(QString)));
 

@@ -800,7 +800,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	gi->password = flags & GameInfoPassword;
 	gi->owner = flags & GameInfoOwner;
 	
-	qDebug() << "[" << getMyCId() << "]" << gid << "owner" << gi->owner;
+//	qDebug() << "[" << getMyCId() << "]" << gid << "owner" << gi->owner;
 	
 	gi->players_max = it.getNextInt();
 	gi->players_count = it.getNextInt();
