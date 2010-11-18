@@ -39,6 +39,7 @@
 #include <QUuid>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QPixmapCache>    // only needed for applying workaround
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -52,7 +53,7 @@ ConfigParser config;
 // server command PSERVER <version> <client-id> <time>
 void PClient::serverCmdPserver(Tokenizer &t)
 {
-	const unsigned int version = t.getNextInt();
+	srv.version = t.getNextInt();
 	srv.cid = t.getNextInt();
 	
 	const unsigned int time_remote = t.getNextInt();
@@ -61,23 +62,23 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	srv.introduced = true;
 		
 	wMain->addLog(tr("Server running version %1.%2.%3. Your client ID is %4.")
-			  .arg(VERSION_GETMAJOR(version))
-			  .arg(VERSION_GETMINOR(version))
-			  .arg(VERSION_GETREVISION(version))
+			  .arg(VERSION_GETMAJOR(srv.version))
+			  .arg(VERSION_GETMINOR(srv.version))
+			  .arg(VERSION_GETREVISION(srv.version))
 			  .arg(srv.cid));
 	
 	
 	// there is a newer version available
-	if (version > VERSION)
+	if (srv.version > VERSION)
 	{
 		const QString sversion =
 			tr("There is a newer version of HoldingNuts available (at least %1.%2.%3)")
-				.arg(VERSION_GETMAJOR(version))
-				.arg(VERSION_GETMINOR(version))
-				.arg(VERSION_GETREVISION(version));
+				.arg(VERSION_GETMAJOR(srv.version))
+				.arg(VERSION_GETMINOR(srv.version))
+				.arg(VERSION_GETREVISION(srv.version));
 		wMain->addServerMessage(sversion);
 	}
-	else if (version < VERSION_COMPAT)
+	else if (srv.version < VERSION_COMPAT)
 	{
 		QMessageBox::critical(wMain, tr("Error"),
 			tr("The version of the server isn't compatible anymore "
@@ -100,6 +101,9 @@ void PClient::serverCmdPserver(Tokenizer &t)
 	
 	// request initial game-list and start update-timer
 	requestGamelist();
+	
+	// request initial server stats
+	requestServerStats();
 }
 
 // server command ERR [<code>] [<text>]
@@ -370,7 +374,7 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	{
 		const unsigned int hand_no = t.getNextInt();
 		
-		// add table to known table list
+		// add this table to known tables list
 		if (!tinfo)
 		{
 			addTable(gid, tid);
@@ -650,6 +654,7 @@ void PClient::serverCmdSnap(Tokenizer &t)
 	case SnapPlayerAction:
 		serverCmdSnapPlayerAction(t, gid, tid, tinfo);
 		break;
+	case SnapWinAmount:
 	case SnapWinPot:
 	case SnapOddChips:
 		{
@@ -663,9 +668,13 @@ void PClient::serverCmdSnap(Tokenizer &t)
 			
 			QString smsg;
 			if (snap == SnapWinPot)
-				smsg = QString(tr("%1 wins pot #%2 with %3.")
+				smsg = QString(tr("%1 receives pot #%2 with %3.")
 					.arg(getPlayerName(cid))
 					.arg(poti+1)
+					.arg(amount));
+			else if (snap == SnapWinAmount)
+				smsg = QString(tr("%1 wins %2.")
+					.arg(getPlayerName(cid))
 					.arg(amount));
 			else
 				smsg = QString(tr("%1 receives %3 odd chips of split pot #%2.")
@@ -792,6 +801,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	
 	unsigned int flags = it.getNextInt();
 	gi->registered = flags & GameInfoRegistered;
+	gi->subscribed = flags & GameInfoSubscribed;
 	gi->password = flags & GameInfoPassword;
 	gi->owner = flags & GameInfoOwner;
 	
@@ -806,7 +816,7 @@ void PClient::serverCmdGameinfo(Tokenizer &t)
 	it.parse(sblinds);
 	
 	gi->blinds_start = it.getNextInt();
-	gi->blinds_factor = it.getNextInt() / 10.0f;
+	gi->blinds_factor = it.getNextInt() / 10.0;
 	gi->blinds_time = it.getNextInt();
 	
 	
@@ -839,6 +849,43 @@ void PClient::serverCmdGamelist(Tokenizer &t)
 	requestGameinfo(sreq.c_str());
 	
 	wMain->notifyGamelist();
+}
+
+void PClient::serverCmdServerinfo(Tokenizer &t)
+{
+	std::string spair;
+	
+	int clients_count = -1;
+	int games_count = -1;
+	
+#if 1
+	// legacy: older versions use incompatible syntax
+	if (t.count() < 2)
+		return;
+#endif
+	
+	while (t.getNext(spair))
+	{
+		Tokenizer ti(":");
+		ti.parse(spair);
+		
+		const unsigned int code = ti.getNextInt();
+		const unsigned int value = ti.getNextInt();
+		
+		switch (code)
+		{
+		case StatsClientCount:
+			clients_count = value;
+			break;
+		case StatsGamesCount:
+			games_count = value;
+			break;
+		}
+	}
+	
+	// update the server stats label if valid response
+	if (clients_count != -1 && games_count != -1)
+		wMain->updateServerStatsLabel(clients_count, games_count);
 }
 
 int PClient::serverExecute(const char *cmd)
@@ -909,6 +956,8 @@ int PClient::serverExecute(const char *cmd)
 		serverCmdGameinfo(t);
 	else if (command == "GAMELIST")
 		serverCmdGamelist(t);
+	else if (command == "SERVERINFO")
+		serverCmdServerinfo(t);
 
 	return 0;
 }
@@ -979,6 +1028,7 @@ bool PClient::addTable(int gid, int tid)
 		table->sitting = true;
 		table->subscribed = true;
 		table->window = new WTable(gid, tid);
+		table->window->setWindowTitle(tr("HoldingNuts Table - [") + game->name + "]");
 		
 		// show table after some delay (give time to retrieve player-info)
 		QTimer::singleShot(2000, table->window, SLOT(slotShow()));
@@ -1017,18 +1067,28 @@ void PClient::doClose()
 	tcpSocket->close();
 }
 
-void PClient::doRegister(int gid, bool bRegister, const QString& password)
+void PClient::doRegister(int gid, bool bRegister, bool subscription, const QString& password)
 {
 	char msg[1024];
 	
 	if (!connected)
 		return;
 	
-	if (bRegister)
-		snprintf(msg, sizeof(msg), "REGISTER %d %s", gid, password.toStdString().c_str());
+	if (!subscription)
+	{
+		if (bRegister)
+			snprintf(msg, sizeof(msg), "REGISTER %d %s", gid, password.toStdString().c_str());
+		else
+			snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
+	}
 	else
-		snprintf(msg, sizeof(msg), "UNREGISTER %d", gid);
-		
+	{
+		if (bRegister)
+			snprintf(msg, sizeof(msg), "SUBSCRIBE %d %s", gid, password.toStdString().c_str());
+		else
+			snprintf(msg, sizeof(msg), "UNSUBSCRIBE %d", gid);
+	}
+	
 	netSendMsg(msg);
 }
 
@@ -1105,9 +1165,6 @@ void PClient::chatAll(const QString& text)
 		return;
 
 	QString strMsg = "CHAT -1 " + text.simplified();
-	
-	if (!config.getBool("chat_console"))
-		strMsg.replace("\"", "\\\"");
 
 	netSendMsg(strMsg.toStdString().c_str());
 }
@@ -1119,9 +1176,6 @@ void PClient::chat(const QString& text, int gid, int tid)
 
 	QString strMsg = QString("CHAT %1:%2 %3")
 		.arg(gid).arg(tid).arg(text.simplified());
-	
-	if (!config.getBool("chat_console"))
-		strMsg.replace("\"", "\\\"");
 
 	netSendMsg(strMsg.toStdString().c_str());
 }
@@ -1137,7 +1191,7 @@ bool PClient::createGame(gamecreate *createinfo)
 		createinfo->stake,
 		createinfo->timeout,
 		createinfo->blinds_start,
-		int(createinfo->blinds_factor * 10),
+		int(createinfo->blinds_factor * 10 + .05),
 		createinfo->blinds_time,
 		createinfo->password.simplified().toStdString().c_str(),
 		createinfo->name.simplified().toStdString().c_str());
@@ -1347,6 +1401,12 @@ void PClient::requestGamelist()
 	netSendMsg("REQUEST gamelist");
 }
 
+void PClient::requestServerStats()
+{
+	// query server stats
+	netSendMsg("REQUEST serverinfo");
+}
+
 bool PClient::isGameInList(int gid)
 {
 	for (gamelist_type::const_iterator e = gamelist.begin(); e != gamelist.end(); e++) 
@@ -1444,6 +1504,14 @@ PClient::~PClient()
 
 int PClient::init()
 {
+	// workaround QTBUG-6840 and QTBUG-8606:
+	// disable pixmap-cache for Qt 4.6.0 and 4.6.2
+	if ((QT_VERSION == QT_VERSION_CHECK(4, 6, 0)) || (QT_VERSION == QT_VERSION_CHECK(4, 6, 2)))
+	{
+		log_msg("main", "Working around QTBUG-6840 and QTBUG-8606");
+		QPixmapCache::setCacheLimit(0);
+	}
+
 	// change into data-dir
 	const char *datadir = sys_data_path();
 	if (datadir)
@@ -1617,7 +1685,9 @@ int main(int argc, char **argv)
 	{
 		char logfile[1024];
 		snprintf(logfile, sizeof(logfile), "%s/client.log", sys_config_path());
-		fplog = file_open(logfile, mode_write);
+		fplog = file_open(logfile, config.getBool("log_append")
+				? mode_append
+				: mode_write);
 		
 		// log destination
 		log_set(stdout, fplog);

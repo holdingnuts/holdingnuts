@@ -25,6 +25,11 @@ IF (WIN32)
 	ENDIF (MINGW)
 ENDIF (WIN32)
 
+# FIXME: Which one is the correct define for Haiku?
+IF (BEOS)
+       LIST(APPEND aux_lib network)
+ENDIF (BEOS)
+
 
 # use SDL only for audio
 if (ENABLE_AUDIO)
@@ -57,6 +62,7 @@ QT4_WRAP_CPP (
 	pclient.hpp WMain.hpp SettingsDialog.hpp CreateGameDialog.hpp
 	AboutDialog.hpp GameListTableModel.hpp PlayerListTableModel.hpp GameListSortFilterProxyModel.hpp
 	WTable.hpp ChatBox.hpp DealerButton.hpp Seat.hpp EditableSlider.hpp TimeOut.hpp
+	Chip.hpp ChipStack.hpp
 )
 
 add_executable (
@@ -66,6 +72,7 @@ add_executable (
 	WMain.cpp SettingsDialog.cpp CreateGameDialog.cpp AboutDialog.cpp
 	GameListTableModel.cpp PlayerListTableModel.cpp GameListSortFilterProxyModel.cpp
 	WTable.cpp ChatBox.cpp DealerButton.cpp Seat.cpp SeatImages.cpp EditableSlider.cpp TimeOut.cpp
+	Chip.cpp ChipStack.cpp
 	${aux_src}
 	${sources_MOC} ${QtApp_RCC_SRCS}
 )

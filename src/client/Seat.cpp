@@ -25,6 +25,7 @@
 #include "SeatImages.hpp"
 #include "Debug.h"
 #include "ConfigParser.hpp"
+#include "ChipStack.hpp"
 
 #include <QPainter>
 #include <QFont>
@@ -47,11 +48,17 @@ Seat::Seat(unsigned int id, QWidget *parent)
 :	m_nID(id),
 	m_bValid(false),
 	m_bMySeat(false),
-	m_bCurrent(false)
+	m_bCurrent(false),
+	m_xPosSmallCards(0),
+	m_yPosSmallCards(0)
 {
 	m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
+	m_pChipStack = new ChipStack(this);
 	
 	this->setZValue(8);
+	
+	// precalc position
+	calcSCardPos(m_xPosSmallCards, m_yPosSmallCards);
 }
 
 void Seat::setValid(bool valid)
@@ -59,7 +66,10 @@ void Seat::setValid(bool valid)
 	m_bValid = valid;
 	
 	if (!valid)
+	{
 		this->setToolTip(QString());	// unset tooltip
+		m_pChipStack->hide();
+	}
 }
 
 void Seat::setInfo(const QString& name, const QString& location)
@@ -121,6 +131,8 @@ void Seat::setAction(Player::PlayerAction action, chips_type amount)
 		m_strAmount.setNum(amount);
 	else
 		m_strAmount.clear();
+		
+	m_pChipStack->setAmount(amount);
 }
 
 void Seat::setWin(chips_type amount)
@@ -232,8 +244,8 @@ void Seat::paint(
 	static QImage imgCardBackside(QString("gfx/deck/%1/back.png")
 		.arg(QString::fromStdString(config.get("ui_card_deck"))));
 	
-	const qreal seat_width = SeatImages::Instance().imgBack.width();
-	const qreal seat_height = SeatImages::Instance().imgBack.height();
+	static const qreal seat_width = SeatImages::Instance().imgBack.width();
+	static const qreal seat_height = SeatImages::Instance().imgBack.height();
 	
 	const QImage *imgBack;
 	if (m_bSitout)
@@ -295,12 +307,35 @@ void Seat::paint(
 		Qt::AlignLeft,
 		m_strAmount);
 
+	// chip stake
+	qreal csx_pos = 0;
+	qreal csy_pos = 0;
+	
+	calcChipStackPos(csx_pos, csy_pos, m_fmInSeat.width(m_strAmount));
+
+	m_pChipStack->setPos(csx_pos, csy_pos);
+	m_pChipStack->update();
+
 	// big-cards
 	if (m_bBigCards)
 	{
+		qreal bc1x_pos = 0;
+		qreal bc2x_pos = 0;
+
+		if (m_nID >= 3 && m_nID <= 7)
+		{
+			bc1x_pos = 0;
+			bc2x_pos = sx_card * 0.5;
+		}
+		else // m_nID < 3 || m_nID > 7
+		{
+			bc1x_pos = seat_width + m_pCurrentActionImg->width() - (sx_card * 1.5);
+			bc2x_pos = seat_width + m_pCurrentActionImg->width() - sx_card;
+		}
+		
 		painter->drawPixmap(
 			QRectF(
-				seat_width + m_pCurrentActionImg->width() - (sx_card * 1.5),
+				bc1x_pos,
 				-(sy_card + 2),
 				sx_card,
 				sy_card),
@@ -308,7 +343,7 @@ void Seat::paint(
 			QRectF(0 , 0, m_FirstCard.width(), m_FirstCard.height()));
 		painter->drawPixmap(
 			QRectF(
-				seat_width + m_pCurrentActionImg->width() - sx_card,
+				bc2x_pos,
 				-(sy_card + 2),
 				sx_card,
 				sy_card),
@@ -319,22 +354,17 @@ void Seat::paint(
 	// small cards
 	if (m_bSmallCards)
 	{
-		qreal sx_pos = 0;
-		qreal sy_pos = 0;
-		
-		calcSCardPos(sx_pos, sy_pos);
-		
 		painter->drawImage(
 			QRectF(
-				sx_pos,
-				sy_pos,
+				m_xPosSmallCards,
+				m_yPosSmallCards,
 				sx_mini_card,
 				sy_mini_card),
 			imgCardBackside);
 		painter->drawImage(
 			QRectF(
-				sx_pos + sx_mini_card * 0.4,
-				sy_pos,
+				m_xPosSmallCards + sx_mini_card * 0.4,
+				m_yPosSmallCards,
 				sx_mini_card,
 				sy_mini_card),
 			imgCardBackside);
@@ -366,7 +396,7 @@ void Seat::calcSCardPos(qreal& x, qreal& y) const
 				y = 0;
 			break;
 		case 3: case 4: case 5:
-				x = 0;
+				x = SeatImages::Instance().imgBack.width() - (sx_mini_card * 0.4) - 5;
 				y = -(sy_mini_card + 5);
 			break;
 		case 8: case 9: case 0:
@@ -395,16 +425,45 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 				y = SeatImages::Instance().imgBack.height() - 30;
 			break;
 		case 3: case 4: case 5:
-				x = 0;
-				y = -(SeatImages::Instance().imgBack.height() + 5);
+				x = 175;
+				y = -(sy_mini_card + 35);
 			break;
 		case 8: case 9: case 0:
-				x = sx_mini_card * 1.7;
-				y = SeatImages::Instance().imgBack.height() + 10;
+				x = 0;
+				y = SeatImages::Instance().imgBack.height() + sy_mini_card + 10;
 			break;
 		case 6: case 7:
 				x = SeatImages::Instance().imgBack.width() + sx_mini_card + 10;
 				y = SeatImages::Instance().imgBack.height() - 30;
+			break;
+	}
+}
+
+void Seat::calcChipStackPos(qreal& x, qreal& y, int txt_width) const
+{
+	//		8	9	0
+	//	 7			   1
+	// 						
+	//   6			   2
+	//		5	4	3
+
+	switch (m_nID)
+	{
+		case 1: case 2:
+				x = -(sx_mini_card * 1.7 + 10); // width from both small cards
+				y = -30;
+			break;
+		case 3: case 4: case 5:
+				x = 155;
+				y = -(sy_mini_card + 60);
+			break;
+		case 8: case 9: case 0:
+				x = 70;
+				y = 158;
+			break;
+		case 6: case 7:
+				x = sx_card * 1.6;
+				y = -30;
 			break;
 	}
 }

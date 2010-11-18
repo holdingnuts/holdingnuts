@@ -17,6 +17,12 @@
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authors:
- *     Forname Surname <email@provider.tld>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
+
+
+#include "GameController.hpp"
+
+void ranking_update(const GameController *g);
+void ranking_setup();
 

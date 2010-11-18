@@ -89,10 +89,12 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	connect(lblWelcome, SIGNAL(linkActivated(const QString&)), this, SLOT(actionClose()));
 	lblServerTime = new QLabel(this);
 	
+	lblServerStats = new QLabel(this);
+	
 	QVBoxLayout *lHeaderLabels = new QVBoxLayout;
 	lHeaderLabels->addWidget(lblWelcome, 99, Qt::AlignVCenter);
+	lHeaderLabels->addWidget(lblServerStats, 1, Qt::AlignBottom);
 	lHeaderLabels->addWidget(lblServerTime, 1, Qt::AlignBottom);
-	
 	
 	QLabel *lblLogo = new QLabel(this);
 	lblLogo->setPixmap(QPixmap(":res/hn_logo_wide.png"));
@@ -192,6 +194,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnUnregister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
 	
+	btnSubscribe = new QPushButton(tr("&Subscribe"), this);
+	btnSubscribe->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnSubscribe, SIGNAL(clicked()), this, SLOT(actionSubscribe()));
+	
+	btnUnsubscribe = new QPushButton(tr("Unsu&bscribe"), this);
+	btnUnsubscribe->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(btnUnsubscribe, SIGNAL(clicked()), this, SLOT(actionUnsubscribe()));
+	
 	btnOpenTable = new QPushButton(tr("&Open table"), this);
 	btnOpenTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnOpenTable, SIGNAL(clicked()), this, SLOT(actionOpenTable()));
@@ -206,6 +216,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	
 	
 	QHBoxLayout *lGameActions = new QHBoxLayout();
+	lGameActions->addWidget(btnSubscribe);
+	lGameActions->addWidget(btnUnsubscribe);
 	lGameActions->addWidget(btnOpenTable);
 	lGameActions->addWidget(btnStartGame);
 	
@@ -381,6 +393,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	timerSelectedGameUpdate = new QTimer(this);
 	connect(timerSelectedGameUpdate, SIGNAL(timeout()), this, SLOT(actionSelectedGameUpdate()));
 	
+	// server stats update timer
+	timerServerStatsUpdate = new QTimer(this);
+	connect(timerServerStatsUpdate, SIGNAL(timeout()), qApp, SLOT(requestServerStats()));
+	
 	// current selected game update timer
 	timerServerTimeUpdate= new QTimer(this);
 	connect(timerServerTimeUpdate, SIGNAL(timeout()), this, SLOT(updateServerTimeLabel()));
@@ -488,8 +504,9 @@ void WMain::updateConnectionStatus()
 		btnClose->setEnabled(true);
 		cbSrvAddr->setEnabled(false);
 		
-		// setup timers for gamelist update, select-game update, server-time update
+		// setup timers for gamelist update, select-game update, server-stats, server-time update
 		timerGamelistUpdate->start(60*1000);
+		timerServerStatsUpdate->start(3*60*1000);
 		timerSelectedGameUpdate->start(15*1000);
 		timerServerTimeUpdate->start(1000);
 		
@@ -508,10 +525,13 @@ void WMain::updateConnectionStatus()
 		modelPlayerList->clear();
 		
 		timerGamelistUpdate->stop();
+		timerServerStatsUpdate->stop();
 		timerSelectedGameUpdate->stop();
 		timerServerTimeUpdate->stop();
 		
 		wConnection->setVisible(true);
+		
+		updateServerStatsLabel();
 	}
 	
 	m_pChat->setEnabled(is_connected);
@@ -670,7 +690,7 @@ void WMain::actionTest()
 #endif
 }
 
-void WMain::doRegister(bool bRegister)
+void WMain::doRegister(bool bRegister, bool subscription)
 {
 	Q_ASSERT_X(viewGameList, Q_FUNC_INFO, "invalid gamelistview pointer");
 	
@@ -697,7 +717,7 @@ void WMain::doRegister(bool bRegister)
 				return;
 		}
 		
-		((PClient*)qApp)->doRegister(gid, bRegister, password);
+		((PClient*)qApp)->doRegister(gid, bRegister, subscription, password);
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
 	}
@@ -705,12 +725,22 @@ void WMain::doRegister(bool bRegister)
 
 void WMain::actionRegister()
 {
-	doRegister(true);
+	doRegister(true, false);
 }
 
 void WMain::actionUnregister()
 {
-	doRegister(false);
+	doRegister(false, false);
+}
+
+void WMain::actionSubscribe()
+{
+	doRegister(true, true);
+}
+
+void WMain::actionUnsubscribe()
+{
+	doRegister(false, true);
 }
 
 void WMain::actionOpenTable()
@@ -766,7 +796,8 @@ void WMain::actionSettings()
 	if (dialogSettings.exec() != QDialog::Accepted)
 		return;
 	
-	// save the settings
+	// update config-version and save the config
+	config.set("version", VERSION);
 	config.save(cfgfile);
 	
 	// updates
@@ -812,7 +843,18 @@ void WMain::actionChat(QString msg)
 	// send raw to server if first char is '/'
 	if (config.getBool("chat_console") && msg.at(0) == QChar('/'))
 	{
-		((PClient*)qApp)->sendDebugMsg(msg.mid(1));
+		QString strMsg = msg.mid(1);
+		
+		if (!strMsg.length())
+			return;
+		
+		int space = strMsg.indexOf(' ');
+		if (space == -1)
+			strMsg = strMsg.toUpper();
+		else
+			strMsg = strMsg.left(space).toUpper() + strMsg.mid(space);
+		
+		((PClient*)qApp)->sendDebugMsg(strMsg);
 		return;
 	}
 
@@ -878,7 +920,7 @@ QString WMain::getGametypeString(gametype type)
 		case GameTypeHoldem:
 			return QString(tr("THNL"));
 		default:
-			return QString(tr("unkown gametype"));
+			return QString(tr("unknown gametype"));
 	}
 }
 
@@ -893,7 +935,7 @@ QString WMain::getGamemodeString(gamemode mode)
 		case GameModeSNG:
 			return QString(tr("Sit'n'Go"));
 		default:
-			return QString(tr("unkown gamemode"));
+			return QString(tr("unknown gamemode"));
 	}
 }
 
@@ -908,7 +950,7 @@ QString WMain::getGamestateString(gamestate state)
 		case GameStateEnded:
 			return QString(tr("Ended"));
 		default:
-			return QString(tr("unkown gamestate"));
+			return QString(tr("unknown gamestate"));
 	}
 }
 
@@ -954,6 +996,7 @@ void WMain::notifyGamelist()
 	}
 }
 
+// timer update
 void WMain::actionSelectedGameUpdate()
 {
 #if 0
@@ -1010,6 +1053,9 @@ void WMain::updateGameinfo(int gid)
 		btnRegister->setEnabled(false);
 		btnUnregister->setEnabled(false);
 		
+		btnSubscribe->setVisible(false);
+		btnUnsubscribe->setVisible(false);
+		
 		btnOpenTable->setVisible(false);
 		btnStartGame->setVisible(false);
 		
@@ -1028,7 +1074,7 @@ void WMain::updateGameinfo(int gid)
 	lblGameInfoTimeout->setText(QString("<qt>%1<b>s</b></qt>").arg(gi->player_timeout));
 	lblGameInfoBlinds->setText(QString("<qt>%1 /<br/><b>x</b>%2 /<br/>%3<b>s</b></qt>")
 		.arg(gi->blinds_start)
-		.arg(gi->blinds_factor, 0, 'f', 2)
+		.arg(gi->blinds_factor, 0, 'f', 1)
 		.arg(gi->blinds_time));
 	
 	
@@ -1036,7 +1082,12 @@ void WMain::updateGameinfo(int gid)
 	btnRegister->setEnabled(!gi->registered && gi->state == GameStateWaiting);
 	btnUnregister->setEnabled(gi->registered && gi->state == GameStateWaiting);
 	
-	btnOpenTable->setVisible(gi->registered && gi->state != GameStateWaiting);
+	btnSubscribe->setEnabled(!gi->registered && !gi->subscribed);
+	btnSubscribe->setVisible(!gi->registered);
+	btnUnsubscribe->setEnabled(!gi->registered && gi->subscribed);
+	btnUnsubscribe->setVisible(!gi->registered);
+	
+	btnOpenTable->setVisible((gi->registered || gi->subscribed) && gi->state != GameStateWaiting);
 	btnStartGame->setVisible(gi->registered &&
 		gi->owner &&
 		gi->players_count >= 2 &&
@@ -1050,10 +1101,28 @@ void WMain::updateServerTimeLabel()
 	if (is_connected)
 	{
 		const QDateTime timeServer = ((PClient*)qApp)->getServerTime();
-		lblServerTime->setText(timeServer.toString("dddd, yyyy-MM-dd, hh:mm:ss"));
+		lblServerTime->setText("<qt><span style=\"font-size: small\">" +
+			timeServer.toString("dddd, yyyy-MM-dd, hh:mm:ss") +
+			"</span></qt>");
 	}
 	else
 		lblServerTime->clear();
+}
+
+void WMain::updateServerStatsLabel(unsigned int client_count, unsigned int games_count)
+{
+	const bool is_connected = ((PClient*)qApp)->isConnected();
+	
+	if (is_connected)
+	{
+		lblServerStats->setText(
+			"<qt><span style=\"color: #333333; font-style: italic\">" +
+			tr("%1 player(s), %2 game(s)")
+				.arg(client_count).arg(games_count) +
+			"</span></qt>");
+	}
+	else
+		lblServerStats->clear();
 }
 
 void WMain::writeServerlist() const

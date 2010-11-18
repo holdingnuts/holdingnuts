@@ -32,6 +32,10 @@
 
 #include <vector>
 
+#ifndef NOSQLITE
+#include "Database.hpp"
+#endif
+
 #include "Config.h"
 #include "Platform.h"
 #include "Debug.h"
@@ -45,6 +49,10 @@
 using namespace std;
 
 ConfigParser config;
+
+#ifndef NOSQLITE
+Database *db;
+#endif /* !NOSQLITE */
 
 socktype fdset_get_descriptor(fd_set *fds)
 {
@@ -216,6 +224,25 @@ bool config_load()
 	return true;
 }
 
+#ifndef NOSQLITE
+int database_init()
+{
+	char dbfile[1024];
+	snprintf(dbfile, sizeof(dbfile), "%s/server.db", sys_config_path());;
+
+	/* open sqlite database */
+	db = new Database();
+	
+	if (db->open(dbfile))
+	{
+		log_msg("sqlite", "Error opening database");
+		return 1;
+	}
+	
+	return 0;
+}
+#endif /* !NOSQLITE */
+
 int main(int argc, char **argv)
 {
 	log_set(stdout, 0);
@@ -254,7 +281,9 @@ int main(int argc, char **argv)
 	{
 		char logfile[1024];
 		snprintf(logfile, sizeof(logfile), "%s/server.log", sys_config_path());
-		fplog = file_open(logfile, mode_write);
+		fplog = file_open(logfile, config.getBool("log_append")
+				  ? mode_append
+				  : mode_write);
 		
 		// log destination
 		log_set(stdout, fplog);
@@ -266,9 +295,23 @@ int main(int argc, char **argv)
 	
 	
 	network_init();
+
+#ifndef NOSQLITE
+	if (database_init())
+	{
+		log_msg("sqlite", "Error initializing database handle");
+		return 1;
+	}
+#endif /* !NOSQLITE */
+	
+	gameinit();
 	
 	mainloop();
 	
+#ifndef NOSQLITE
+	delete db;
+#endif /* !NOSQLITE */
+
 	network_shutdown();
 	
 	

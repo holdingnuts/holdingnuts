@@ -24,10 +24,12 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <string>
+
 #include "HoleCards.hpp"
 
-
 typedef unsigned int chips_type;
+
 
 
 class Player
@@ -65,10 +67,16 @@ public:
 	chips_type getStake() const { return stake; };
 	int getClientId() const { return client_id; };
 	
+	const std::string& getPlayerUUID() const { return uuid; };
+	
 	void resetLastAction() { last_action = Player::None; }
+	
 	
 private:
 	int client_id;
+	
+	// NOTE: redundant information here, because client may disconnect
+	std::string uuid;	/* copy of uuid needed */
 	
 	chips_type stake;		// currrent stake
 	chips_type stake_before;	// stake before new hand

@@ -26,10 +26,13 @@
 #define _HOLDINGNUTS_CHATBOX_H
 
 #include <QWidget>
+#include <QLineEdit>
+#include <QQueue>
 
-class QLineEdit;
 class QTextEdit;
 class QPushButton;
+
+class HistoryLineEdit;
 
 class ChatBox : public QWidget
 {
@@ -73,12 +76,31 @@ signals:
 
 private:
 	int			m_nFontPointSize;
-	QLineEdit		*m_pEditChat;
+	HistoryLineEdit		*m_pEditChat;
 	QTextEdit		*m_pEditChatLog;
 	//! \brief send message button, default is hidden
 	QPushButton		*m_pSendMsg;
 	//! \brief shows human-readable Timestamp 
 	bool			m_bShowTime;
+};
+
+
+class HistoryLineEdit : public QLineEdit
+{
+	Q_OBJECT
+
+public:
+	HistoryLineEdit(QWidget *parent = 0);
+	
+	void addHistory();
+	
+protected:
+	HistoryLineEdit();
+	void keyPressEvent( QKeyEvent * qke );
+
+private:
+	QQueue<QString> history;
+	int history_idx;
 };
 
 #endif /* _HOLDINGNUTS_CHATBOX_H */

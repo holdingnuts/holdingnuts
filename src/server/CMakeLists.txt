@@ -4,6 +4,11 @@ include_directories (
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
 	${HOLDINGNUTS_SOURCE_DIR}/src/server
 )
+
+if (ENABLE_SQLITE)
+	include_directories(${SQLITE3_INCLUDE_DIR})
+endif (ENABLE_SQLITE)
+
 link_directories(
 	${HOLDINGNUTS_SOURCE_DIR}/src/libpoker
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
@@ -27,10 +32,20 @@ IF (WIN32)
 	ENDIF (MINGW)
 ENDIF (WIN32)
 
+# FIXME: Which one is the correct define for Haiku?
+IF (BEOS)
+	LIST(APPEND aux_lib network)
+ENDIF (BEOS)
+
+if (ENABLE_SQLITE)
+       LIST (APPEND aux_lib Database)
+       LIST (APPEND aux_lib ${SQLITE3_LIBRARIES})
+endif (ENABLE_SQLITE)
+
 
 add_executable (holdingnuts-server
 	pserver.cpp ${aux_obj}
-	game.cpp GameController.cpp Table.cpp
+	game.cpp GameController.cpp Table.cpp ranking.cpp
 )
 
 target_link_libraries(holdingnuts-server

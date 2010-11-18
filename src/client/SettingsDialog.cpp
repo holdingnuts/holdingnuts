@@ -142,6 +142,9 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	checkHandStrength = new QCheckBox("", tabAppearance);
 	checkHandStrength->setCheckState(cfg->getBool("ui_show_handstrength") ? Qt::Checked : Qt::Unchecked);
 
+	checkSortHolecards = new QCheckBox("", tabAppearance);
+	checkSortHolecards->setCheckState(cfg->getBool("ui_sort_holecards") ? Qt::Checked : Qt::Unchecked);
+
 	checkCentralView = new QCheckBox("", tabAppearance);
 	checkCentralView->setCheckState(cfg->getBool("ui_centralized_view") ? Qt::Checked : Qt::Unchecked);
 
@@ -169,6 +172,7 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	
 	QFormLayout *formAppearance = new QFormLayout;
 	formAppearance->addRow(tr("Show strength of hand"), checkHandStrength);
+	formAppearance->addRow(tr("Sort hole cards (descending)"), checkSortHolecards);
 	formAppearance->addRow(tr("Centralized table view"), checkCentralView);
 	formAppearance->addRow(tr("Bring window to top"), checkBringToTop);
 	formAppearance->addRow(tr("Card deck"), comboCarddeck);
@@ -261,6 +265,7 @@ void SettingsDialog::actionOk()
 		
 		// tabAppearance
 		cfg->set("ui_show_handstrength", (checkHandStrength->checkState() == Qt::Checked) ? true : false);
+		cfg->set("ui_sort_holecards", (checkSortHolecards->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_centralized_view", (checkCentralView->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_bring_to_top", (checkBringToTop->checkState() == Qt::Checked) ? true : false);
 		cfg->set("ui_card_deck", comboCarddeck->itemData(comboCarddeck->currentIndex()).toString().toStdString());

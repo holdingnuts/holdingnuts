@@ -51,6 +51,7 @@ private:
 	
 	// tabAppearance
 	QCheckBox *checkHandStrength;
+	QCheckBox *checkSortHolecards;
 	QCheckBox *checkCentralView;
 	QCheckBox *checkBringToTop;
 	QComboBox *comboCarddeck;

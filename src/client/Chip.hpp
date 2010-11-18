@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2010, Dominik Geyer
+ * Copyright 2008, 2009, Dominik Geyer
  *
  * This file is part of HoldingNuts.
  *
@@ -17,6 +17,36 @@
  * along with HoldingNuts.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authors:
- *     Forname Surname <email@provider.tld>
+ *     Michael Miller <michael.miller@holdingnuts.net>
  */
 
+
+#ifndef _HOLDING_NUTS_CHIP_H
+#define _HOLDING_NUTS_CHIP_H
+
+#include <QGraphicsItem>
+#include <QImage>
+
+class Chip : public QObject, public QGraphicsItem
+{
+	Q_OBJECT
+#if QT_VERSION >= 0x040600
+	Q_INTERFACES(QGraphicsItem)
+#endif
+
+public:
+	Chip(const QImage& img, QGraphicsItem* parent);
+
+	QRectF boundingRect() const;
+
+	void paint(
+		QPainter* painter,
+		const QStyleOptionGraphicsItem* option,
+		QWidget* widget);
+
+private:
+	//! \brief
+	const QImage	*m_pImage;
+};
+
+#endif /* _HOLDING_NUTS_CHIP_H */

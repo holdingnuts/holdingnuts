@@ -75,6 +75,7 @@ class ChatBox;
 class DealerButton;
 class EditableSlider;
 class TimeOut;
+class ChipStack;
 
 class WTable : public QWidget
 {
@@ -116,10 +117,9 @@ protected:
 	QPointF calcCCardsPos(unsigned int nCard) const;
 	QPointF calcTimeoutPos(unsigned int nSeatID) const;
 	QPointF calcHandStrengthPos() const;
-	QPointF calcPotsPos() const;
-	QPointF calcDealerBtnPos(
-		unsigned int nSeatID, 
-		int offset = 20) const;
+	QPointF calcTxtPotsPos() const;
+	QPointF calcDealerBtnPos(unsigned int nSeatID) const;
+	void calcPotsPos();
 	
 	void doSitout(bool bSitout);
 
@@ -169,7 +169,7 @@ private slots:
 	void actionBetsizeHalfPot();
 	void actionBetsizeThreeQuarterPot();
 	void actionBetsizePotsize();
-	void actionBetsizeAllin();
+	void actionBetsizeMaximum();
 
 public slots:
 	void slotShow();
@@ -191,6 +191,7 @@ private:
 	TimeOut					*m_pTimeout;
 	QGraphicsSimpleTextItem *m_pTxtPots;
 	QGraphicsSimpleTextItem *m_pTxtHandStrength;
+	ChipStack				*m_Pots[8];
 	
 	// ui
 	ChatBox			*m_pChat;
@@ -204,7 +205,7 @@ private:
 	QPushButton		*btnBetsizeHalfPot;
 	QPushButton		*btnBetsizeThreeQuarterPot;
 	QPushButton		*btnBetsizePotsize;
-	QPushButton		*btnBetsizeAllin;
+	QPushButton		*btnBetsizeMaximum;
 	QWidget			*wRaiseBtns;
 	
 	QCheckBox 		*chkAutoFoldCheck;
@@ -215,12 +216,14 @@ private:
 	int				m_nPreActions;
 	int				m_nPostActions;
 	int				m_nNoAction;
-	int				m_nSitoutActions;
 	
-	chips_type			m_autocall_amount;
 	
-	// precomputed dealerbtn positions
-	QPointF			m_ptDealerBtn[10];
+	QLabel		*lblPersistentActions;
+	QStackedLayout	*stlayPersistentActions;
+	int				m_nSitout;
+	int				m_nBack;
+	
+	chips_type		m_autocall_amount;
 	
 	// shortcuts
 	QShortcut		*shortcutFold;
@@ -232,6 +235,15 @@ private:
 	QShortcut		*shortcutShow;
 	QShortcut		*shortcutSitout;
 	QShortcut		*shortcutBack;
+	
+	// 
+	QSizeF			sizeCommunityCards;
+	
+	qreal			posYCommunityCards;
+	qreal			posYTxtPots;
+	qreal			posYPots;
+	// precomputed dealerbtn positions
+	QPointF			m_ptDealerBtn[10];
 };
 
 #endif /* _WTABLE_H */

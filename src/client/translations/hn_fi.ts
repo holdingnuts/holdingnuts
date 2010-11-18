@@ -1,909 +1,911 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="ru_RU">
+<TS version="2.0" language="fi_FI">
 <context>
     <name>AboutDialog</name>
     <message>
         <source>About</source>
-        <translation>О программе</translation>
+        <translation type="unfinished">Tietoja</translation>
     </message>
     <message>
         <source>Version %1.%2.%3</source>
-        <translation>Версия %1.%2.%3</translation>
+        <translation type="unfinished">Versio %1.%2.%3</translation>
     </message>
     <message>
         <source>Licensed under the GPLv3</source>
-        <translation>Лицензировано под GPLv3</translation>
+        <translation type="unfinished">GPLv3 lisenssoitu</translation>
     </message>
 </context>
 <context>
     <name>ChatBox</name>
     <message>
         <source>Chat</source>
-        <translation>Чат</translation>
+        <translation type="unfinished">Chat</translation>
     </message>
 </context>
 <context>
     <name>CreateGameDialog</name>
     <message>
         <source>Create game</source>
-        <translation>Новая игра</translation>
+        <translation type="unfinished">Tee peli</translation>
     </message>
     <message>
         <source>General</source>
-        <translation>Главное</translation>
+        <translation type="unfinished">Yleinen</translation>
     </message>
     <message>
         <source>Game name</source>
-        <translation>Название игры</translation>
+        <translation type="unfinished">Pelin nimi</translation>
     </message>
     <message>
         <source>Game type</source>
-        <translation>Тип игры</translation>
+        <translation type="unfinished">Pelin nimi</translation>
     </message>
     <message>
         <source>Game mode</source>
-        <translation>Режим игры</translation>
+        <translation type="unfinished">Pelitapa</translation>
     </message>
     <message>
         <source>Players</source>
-        <translation>Игроки</translation>
+        <translation type="unfinished">Pelaajia</translation>
     </message>
     <message>
         <source>Max. players</source>
-        <translation>Число игроков</translation>
+        <translation type="unfinished">Pelaajia max</translation>
     </message>
     <message>
         <source>Timeout</source>
-        <translation>Таймаут</translation>
+        <translation type="unfinished">Aikakatkaisu</translation>
     </message>
     <message>
         <source>Initial stake</source>
-        <translation>Начальная ставка</translation>
+        <translation type="unfinished">Sisäänosto</translation>
     </message>
     <message>
         <source>Blinds</source>
-        <translatorcomment>I&apos;ve used common Russian term for &quot;blinds&quot; - it&apos;s direct transliteration from English</translatorcomment>
-        <translation>Блайнды</translation>
+        <translation type="unfinished">Sokkopanokset</translation>
     </message>
     <message>
         <source>Starting blinds</source>
-        <translation>Начальный блайнд</translation>
+        <translation type="unfinished">Aloituspanos</translation>
     </message>
     <message>
         <source>Raise factor</source>
-        <translation>Фактор повышения</translation>
+        <translation type="unfinished">Sokkopanosten nousukerroin</translation>
     </message>
     <message>
         <source>Raise time</source>
-        <translation>Время повышения</translation>
+        <translation type="unfinished">Tasojen väli</translation>
     </message>
     <message>
         <source>Private game</source>
-        <translation>Частная игра</translation>
+        <translation type="unfinished">Yksityispeli</translation>
     </message>
     <message>
         <source>Password protected</source>
-        <translation>Защита паролем</translation>
+        <translation type="unfinished">Salasanasuojattu</translation>
     </message>
     <message>
         <source>Password</source>
-        <translation>Пароль</translation>
+        <translation type="unfinished">Salasana</translation>
     </message>
 </context>
 <context>
     <name>GameListTableModel</name>
     <message>
         <source>Name</source>
-        <translation>Название</translation>
+        <translation type="unfinished">Nimi</translation>
     </message>
     <message>
         <source>Gametype</source>
-        <translation>Тип</translation>
+        <translation type="unfinished">Pelityyppi</translation>
     </message>
     <message>
         <source>Players</source>
-        <translation>Игроки</translation>
+        <translation type="unfinished">Pelaajia</translation>
     </message>
     <message>
         <source>State</source>
-        <translation>Статус</translation>
+        <translation type="unfinished">Tila</translation>
     </message>
 </context>
 <context>
     <name>PClient</name>
     <message>
         <source>Server running version %1.%2.%3. Your client ID is %4.</source>
-        <translation>Сервер версии %1.%2.%3. ID клиента %4.</translation>
+        <translation type="unfinished">Serverin versio %1.%2.%3. Client versiosi %4.</translation>
     </message>
     <message>
         <source>There is a newer version of HoldingNuts available (at least %1.%2.%3)</source>
-        <translation>Новая версия HoldingNuts доступна (как минимум %1.%2.%3)</translation>
+        <translation type="unfinished">Uusi versio saatavilla (vähintään %1.%2.%3)</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation>Ошибка</translation>
+        <translation type="unfinished">Virhe</translation>
     </message>
     <message>
         <source>The version of the server isn&apos;t compatible anymore with this client version. Please either use an older client version or request the server admin to update the server version.</source>
-        <translation>Версия сервера не совместима более с версией клиента. Пожалуйста, используйте старую версию клиента или попросите администратора обновить версию сервера.</translation>
+        <translation type="unfinished">Palvelimen ohjelmistoversio ei ole enää yhteensopiva asiakasohjelmistosi kanssa. Käytä vanhempaa asiakasohjelmistoa tai pyydä serverin hallinnoijaa päivittämään serverin ohjelmisto.</translation>
     </message>
     <message>
         <source>The version of this client isn&apos;t compatible anymore with the server. Please download a recent version.</source>
-        <translation>Версия клиента не совместима более с сервером. Пожалуйста, загрузите последнюю версию.</translation>
+        <translation type="unfinished">Ohjelmistosi on liian vanha, ole hyvä ja päivitä se uudempaan.</translation>
     </message>
     <message>
         <source>Game (%1) has been started.</source>
-        <translation>Игра (%1) началась.</translation>
+        <translation type="unfinished">Peli (%1) on alkanut.</translation>
     </message>
     <message>
         <source>Game (%1) has been ended.</source>
-        <translation>Игра (%1) закончилась.</translation>
+        <translation type="unfinished">Pelit (%1) on päättynyt.</translation>
     </message>
     <message>
         <source>A new hand (#%1) begins.</source>
-        <translation>Новая раздача (#%1).</translation>
+        <translation type="unfinished">Uusi jako (#%1) alkaa.</translation>
     </message>
     <message>
         <source>Blinds are now at %1/%2.</source>
-        <translation>Блайнды сейчас по %1/%2.</translation>
+        <translation type="unfinished">Sokkopanokset ovat nyt %1/%2.</translation>
     </message>
     <message>
         <source>Player %1 broke.</source>
-        <translation>%1 - банкрот.</translation>
+        <translation type="unfinished">Pelaaja %1 putosi.</translation>
     </message>
     <message>
         <source>Your hole cards: [%1 %2].</source>
-        <translation>Ваши карты: [%1 %2].</translation>
+        <translation type="unfinished">Hoolikorttisi: [%1 %2].</translation>
     </message>
     <message>
         <source>The flop: [%1 %2 %3].</source>
-        <translation>Флоп: [%1 %2 %3].</translation>
+        <translation type="unfinished">Floppi: [%1 %2 %3].</translation>
     </message>
     <message>
         <source>The turn: [%1].</source>
-        <translation>Тёрн: [%1].</translation>
+        <translation type="unfinished">Turni: [%1].</translation>
     </message>
     <message>
         <source>The river: [%1].</source>
-        <translation>Ривер: [%1].</translation>
+        <translation type="unfinished">Riveri: [%1].</translation>
     </message>
     <message>
         <source>%1 was folded.</source>
-        <translation>%1 упал(а).</translation>
+        <translation type="unfinished">%1 kippasi.</translation>
     </message>
     <message>
         <source>%1 folded.</source>
-        <translation>%1 упал(а).</translation>
+        <translation type="unfinished">%1 kippasi.</translation>
     </message>
     <message>
         <source>%1 was checked.</source>
-        <translation>%1 постучал(а).</translation>
+        <translation type="unfinished">%1 sökötti.</translation>
     </message>
     <message>
         <source>%1 checked.</source>
-        <translation>%1 постучал(а).</translation>
+        <translation type="unfinished">%1 sökötti.</translation>
     </message>
     <message>
         <source>%1 called %2.</source>
-        <translation>%1 ответил(а) %2.</translation>
+        <translation type="unfinished">%1 maksoi %2.</translation>
     </message>
     <message>
         <source>%1 bet to %2.</source>
-        <translation>%1 поставил(а) %2.</translation>
+        <translation type="unfinished">%1 betsasi %2.</translation>
     </message>
     <message>
         <source>%1 raised to %2.</source>
-        <translation>%1 повысил(а) до %2.</translation>
+        <translation type="unfinished">%1 korotti %2.</translation>
     </message>
     <message>
         <source>%1 is allin with %2.</source>
-        <translation>%1 идет ва-банк с %2.</translation>
+        <translation type="unfinished">%1 on allin %2.</translation>
     </message>
     <message>
         <source>%1 shows %2.</source>
-        <translation>%1 показал(а) %2.</translation>
+        <translation type="unfinished">%1 näyttää %2.</translation>
     </message>
     <message>
         <source>%2 (%1) joined foyer.</source>
-        <translation>%2 (%1) заглянул(а) в фойе.</translation>
+        <translation type="unfinished">%2 (%1) liittyi aulaan.</translation>
     </message>
     <message>
         <source>%2 (%1) left foyer.</source>
-        <translation>%2 (%1) покинул(а) фойе.</translation>
+        <translation type="unfinished">%2 (%1) lähti aulasta.</translation>
     </message>
     <message>
         <source>%1, it&apos;s your turn!</source>
-        <translation>%1, твой ход!</translation>
+        <translation type="unfinished">%1, on sinun vuorosi!</translation>
     </message>
     <message>
         <source>%1 wins pot #%2 with %3.</source>
-        <translation>%1 выиграл(а) банк #%2 с %3.</translation>
+        <translation type="unfinished">%1 voitti potin #%2 kädellä %3.</translation>
     </message>
     <message>
         <source>%1 receives %3 odd chips of split pot #%2.</source>
-        <translation>%1 получил(а) %3 чипсов из совместного банка #%2.</translation>
+        <translation type="unfinished">%1 sai %3 merkkiä (jaettu potti) #%2.</translation>
     </message>
     <message>
         <source>Protocol error. The remote host does not seem to be a HoldingNuts server.</source>
-        <translation>Ошибка протокола. Удаленный хост, по-видимому, не сервер HoldingNuts.</translation>
+        <translation type="unfinished">Protokollavirhe. Palvelimelta ei löydy HoldingNuts ohjelmistoa.</translation>
     </message>
     <message>
         <source>Connecting...</source>
-        <translation>Подключаюсь...</translation>
+        <translation type="unfinished">Yhdistää...</translation>
     </message>
     <message>
         <source>Connection error: %1.</source>
-        <translation>Ошибка подключения: %1.</translation>
+        <translation type="unfinished">Yhteysvirhe: %1.</translation>
     </message>
     <message>
         <source>Connected.</source>
-        <translation>Подключен.</translation>
+        <translation type="unfinished">Yhdistetty.</translation>
     </message>
     <message>
         <source>Connection closed.</source>
-        <translation>Соединение закрыто.</translation>
+        <translation type="unfinished">Yhteys katkaistu.</translation>
     </message>
 </context>
 <context>
     <name>PlayerListTableModel</name>
     <message>
         <source>Name</source>
-        <translation>Имя</translation>
+        <translation type="unfinished">Nimi</translation>
     </message>
 </context>
 <context>
     <name>Seat</name>
     <message>
         <source>Name: %1</source>
-        <translation>Имя: %1</translation>
+        <translation type="unfinished">Nimi: %1</translation>
     </message>
     <message>
         <source>Location: %1</source>
-        <translation>Место: %1</translation>
+        <translation type="unfinished">Sijainti: %1</translation>
     </message>
 </context>
 <context>
     <name>SettingsDialog</name>
     <message>
         <source>Settings</source>
-        <translation>Установки</translation>
+        <translation type="unfinished">Asetukset</translation>
     </message>
     <message>
         <source>General</source>
-        <translation>Главные</translation>
+        <translation type="unfinished">Yleinen</translation>
     </message>
     <message>
         <source>Player info</source>
-        <translation>Данные игрока</translation>
+        <translation type="unfinished">Pelaajan tiedot</translation>
     </message>
     <message>
         <source>Appearance</source>
-        <translation>Вид</translation>
+        <translation type="unfinished">Ulkoasu</translation>
     </message>
     <message>
         <source>Log and chat</source>
-        <translation>Лог и чат</translation>
+        <translation type="unfinished">Historia ja chat</translation>
     </message>
     <message>
         <source>Auto-Detect</source>
-        <translation>Автоопределение</translation>
+        <translation type="unfinished">Havaitse automaattisesti</translation>
     </message>
     <message>
         <source>enabled</source>
-        <translation>включен(ы)</translation>
+        <translation type="unfinished">Päällä</translation>
     </message>
     <message>
         <source>only on focus</source>
-        <translation>только в фокусе</translation>
+        <translation type="unfinished">vain kohdistettaessa</translation>
     </message>
     <message>
         <source>generate</source>
-        <translation>генерировать</translation>
+        <translation type="unfinished">Luo</translation>
     </message>
     <message>
         <source>clear</source>
-        <translation>очистить</translation>
+        <translation type="unfinished">Tyhjää</translation>
     </message>
     <message>
         <source>Locale</source>
-        <translation>Локаль</translation>
+        <translation type="unfinished">Kieli</translation>
     </message>
     <message>
         <source>Sounds</source>
-        <translation>Звуки</translation>
+        <translation type="unfinished">Äänet</translation>
     </message>
     <message>
         <source>UUID</source>
-        <translation>UUID</translation>
+        <translation type="unfinished">UUID</translation>
     </message>
     <message>
         <source>Player name</source>
-        <translation>Имя игрока</translation>
+        <translation type="unfinished">Pelaajan nimi</translation>
     </message>
     <message>
         <source>Location</source>
-        <translation>Место</translation>
+        <translation type="unfinished">Sijainti</translation>
     </message>
     <message>
         <source>Default</source>
-        <translation>По умолчанию</translation>
+        <translation type="unfinished">Vakio</translation>
     </message>
     <message>
         <source>Classic</source>
-        <translation>Классическая</translation>
+        <translation type="unfinished">Klassinen</translation>
     </message>
     <message>
         <source>Show strength of hand</source>
-        <translation>Показывать комбинацию игрока</translation>
+        <translation type="unfinished">Näytä käden arvo</translation>
     </message>
     <message>
         <source>Centralized table view</source>
-        <translation>Центрировать вид стола</translation>
+        <translation type="unfinished">Keskitä istuinpaikka</translation>
     </message>
     <message>
         <source>Bring window to top</source>
-        <translation>Держать окно вверху</translation>
+        <translation type="unfinished">Näytä päällimmäisenä</translation>
     </message>
     <message>
         <source>Card deck</source>
-        <translation>Колода карт</translation>
+        <translation type="unfinished">Korttipakka</translation>
     </message>
     <message>
         <source>log chat</source>
-        <translation>сохранять чат</translation>
+        <translation type="unfinished">Tallenna chatin historia</translation>
     </message>
     <message>
         <source>Display time in foyer chat</source>
-        <translation>Показывать время в чате</translation>
+        <translation type="unfinished">Näytä aika aulachatissa</translation>
     </message>
     <message>
         <source>Display join/left messages</source>
-        <translation>Показывать сообщения &quot;пришел/ушел&quot;</translation>
+        <translation type="unfinished">Näytä liittyi / poistui -viestit</translation>
     </message>
     <message>
         <source>Display game states</source>
-        <translation>Показывать состояния игры</translation>
+        <translation type="unfinished">Näytä pelin status</translation>
     </message>
     <message>
         <source>Display player chat</source>
-        <translation>Показывать чат</translation>
+        <translation type="unfinished">Näytä pelaajachat</translation>
     </message>
     <message>
         <source>Display player actions</source>
-        <translation>Показывать действия игрока</translation>
+        <translation type="unfinished">Näytä pelaajan toiminnot</translation>
     </message>
     <message>
         <source>Display hole/community cards</source>
-        <translation>Показывать пот/общие карты</translation>
+        <translation type="unfinished">Näytä hooli/yhteiskortit</translation>
     </message>
     <message>
         <source>Log to file</source>
-        <translation>Записывать в файл</translation>
+        <translation type="unfinished">Tallenna historia tiedostoon</translation>
     </message>
     <message>
         <source>Foyer chat verbosity</source>
-        <translation>Чат в фойе</translation>
+        <translation type="unfinished">Aulachatin laajuus</translation>
     </message>
     <message>
         <source>Table chat verbosity</source>
-        <translation>Чат за столом</translation>
+        <translation type="unfinished">Pöytächatin laajuus</translation>
     </message>
 </context>
 <context>
     <name>WMain</name>
     <message>
         <source>HoldingNuts Foyer</source>
-        <translation>Фойе HoldingNuts</translation>
+        <translation type="unfinished">HoldingNuts aula</translation>
     </message>
     <message>
         <source>hide started</source>
-        <translation>скрыть стартовавшие</translation>
+        <translation type="unfinished">piilota alkaneet</translation>
     </message>
     <message>
         <source>hide private</source>
-        <translation>скрыть частные</translation>
+        <translation type="unfinished">piilota yksityiset</translation>
     </message>
     <message>
         <source>&amp;Register</source>
-        <translation>&amp;Войти</translation>
+        <translation type="unfinished">Rekisteröidy</translation>
     </message>
     <message>
         <source>&amp;Unregister</source>
-        <translation>В&amp;ыйти</translation>
+        <translation type="unfinished">Kumoa rekisteröityminen</translation>
     </message>
     <message>
         <source>&amp;Open table</source>
-        <translation>&amp;Открыть стол</translation>
+        <translation type="unfinished">Avaa pöytä</translation>
     </message>
     <message>
         <source>&amp;Start game</source>
-        <translation>&amp;Начать игру</translation>
+        <translation type="unfinished">Aloita peli</translation>
     </message>
     <message>
         <source>Game ID</source>
-        <translation>ID игры</translation>
+        <translation type="unfinished">Peli ID</translation>
     </message>
     <message>
         <source>Initial stakes</source>
-        <translation>Начальная ставка</translation>
+        <translatorcomment>Vai tarkoittaakohan tämä aloitustasoa(?)</translatorcomment>
+        <translation type="unfinished">Sisäänosto</translation>
     </message>
     <message>
         <source>Player timeout</source>
-        <translation>Таймаут игрока</translation>
+        <translation type="unfinished">Pelaajan aikakatkaisu</translation>
     </message>
     <message>
         <source>Blinds</source>
-        <translation>Блайнды</translation>
+        <translation type="unfinished">Sokkopanokset</translation>
     </message>
     <message>
         <source>The desired server (domain-name or IP) to connect with.
 You can optionally specify a port number.
 Format: &lt;host&gt;[:&lt;port&gt;]</source>
-        <translation>Предпочтительный сервер (доменное имя или IP) для соединения.
-Вы можете опционально указать номер порта.
-Формат: &lt;host&gt;[:&lt;port&gt;]</translation>
+        <translation type="unfinished">Anna palvelimen nimi (domain tai IP) mihin yhdistetään.
+Voit myös määrittää portin numeron (ei pakollinen).
+Formaatti: &lt;serveri&gt;:&lt;portti&gt;</translation>
     </message>
     <message>
         <source>&amp;Connect</source>
-        <translation>&amp;Подключиться</translation>
+        <translation type="unfinished">Yhdistä</translation>
     </message>
     <message>
         <source>Cl&amp;ose</source>
-        <translation>За&amp;крыть</translation>
+        <translation type="unfinished">Sulje</translation>
     </message>
     <message>
         <source>Server:</source>
-        <translation>Сервер:</translation>
+        <translation type="unfinished">Palvelin:</translation>
     </message>
     <message>
         <source>Create own game</source>
-        <translation>Создать свою игру</translation>
+        <translation type="unfinished">Luo uusi peli</translation>
     </message>
     <message>
         <source>&amp;Settings</source>
-        <translation>&amp;Установки</translation>
+        <translation type="unfinished">Asetukset</translation>
     </message>
     <message>
         <source>CTRL+S</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+S</translation>
     </message>
     <message>
         <source>&amp;Test</source>
-        <translation>&amp;Тест</translation>
+        <translation type="unfinished">Testi</translation>
     </message>
     <message>
         <source>CTRL+T</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+T</translation>
     </message>
     <message>
         <source>&amp;Quit</source>
-        <translation>&amp;Выход</translation>
+        <translation type="unfinished">Lopeta</translation>
     </message>
     <message>
         <source>CTRL+Q</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+Q</translation>
     </message>
     <message>
         <source>&amp;Handbook</source>
-        <translation>&amp;Руководство</translation>
+        <translation type="unfinished">Käsikirja</translation>
     </message>
     <message>
         <source>CTRL+H</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+H</translation>
     </message>
     <message>
         <source>&amp;About</source>
-        <translation>&amp;О программе</translation>
+        <translation type="unfinished">Ohje</translation>
     </message>
     <message>
         <source>CTRL+A</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+A</translation>
     </message>
     <message>
         <source>&amp;Game</source>
-        <translation>&amp;Игра</translation>
+        <translation type="unfinished">Peli</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation>&amp;Помощь</translation>
+        <translation type="unfinished">Apua</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation>Название</translation>
+        <translation type="unfinished">Nimi</translation>
     </message>
     <message>
         <source>Connections</source>
-        <translation>Соденинения</translation>
+        <translation type="unfinished">Yhteydet</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation>Ошибка</translation>
+        <translation type="unfinished">Virhe</translation>
     </message>
     <message>
         <source>Error connecting.</source>
-        <translation>Ошибка связи.</translation>
+        <translation type="unfinished">Yhteysvirhe.</translation>
     </message>
     <message>
         <source>Private game</source>
-        <translation>Частная игра</translation>
+        <translation type="unfinished">Yksityispeli</translation>
     </message>
     <message>
         <source>Please enter the game password:</source>
-        <translation>Введите пароль игры:</translation>
+        <translation type="unfinished">Anna salasana:</translation>
+    </message>
+    <message>
+        <source>The table will be opened on the next hand.</source>
+        <translation type="unfinished">Pöytä avataan seuraavassa kädessä.</translation>
     </message>
     <message>
         <source>You may need to restart the client for all settings to take effect.</source>
-        <translation>Может понадобиться перезапуск клиента для новых установок.</translation>
+        <translation type="unfinished">Voit joutua käynnistämään ohjelman uudelleen asetusten voimaan saattamiseksi.</translation>
     </message>
     <message>
         <source>THNL</source>
-        <translation></translation>
+        <translation type="unfinished">THNL</translation>
     </message>
     <message>
         <source>unkown gametype</source>
-        <translation>неизвестный тип игры</translation>
+        <translation type="unfinished">tuntematon  pelityyppi</translation>
     </message>
     <message>
         <source>Cash game</source>
-        <translation>Игра на наличные</translation>
+        <translation type="unfinished">Käteispeli</translation>
     </message>
     <message>
         <source>Tournament</source>
-        <translation>Турнир</translation>
+        <translation type="unfinished">Turnaus</translation>
     </message>
     <message>
         <source>Sit&apos;n&apos;Go</source>
-        <translation></translation>
+        <translation type="unfinished">Sittari</translation>
     </message>
     <message>
         <source>unkown gamemode</source>
-        <translation>неизвестный режим игры</translation>
+        <translation type="unfinished">tuntematon pelimoodi</translation>
     </message>
     <message>
         <source>Waiting</source>
-        <translation>Ожидание</translation>
+        <translation type="unfinished">Odotetaan</translation>
     </message>
     <message>
         <source>Started</source>
-        <translation>Стартовала</translation>
+        <translation type="unfinished">Aloitettu</translation>
     </message>
     <message>
         <source>Ended</source>
-        <translation>Закончилась</translation>
+        <translation type="unfinished">Päättyi</translation>
     </message>
     <message>
         <source>unkown gamestate</source>
-        <translation>неизвестное состояние игры</translation>
+        <translation type="unfinished">tuntematon pelin tila</translation>
     </message>
     <message>
         <source>Logout</source>
-        <translation>Выход</translation>
+        <translation type="unfinished">Kirjaudu ulos</translation>
     </message>
     <message>
         <source>Welcome</source>
-        <translation>Добро пожаловать,</translation>
+        <translation type="unfinished">Tervetuloa</translation>
     </message>
 </context>
 <context>
     <name>WTable</name>
     <message>
         <source>&amp;Fold</source>
-        <translation>&amp;Упасть</translation>
+        <translation type="unfinished">Kippaa</translation>
     </message>
     <message>
         <source>&amp;Show</source>
-        <translation>&amp;Показать</translation>
+        <translation type="unfinished">Näytä</translation>
     </message>
     <message>
         <source>&amp;Muck</source>
-        <translation>&amp;Скрыть</translation>
+        <translation type="unfinished">Älä näytä</translation>
     </message>
     <message>
         <source>I&apos;m bac&amp;k</source>
-        <translation>&amp;Я вернулся</translation>
+        <translation type="unfinished">Tulin takaisin</translation>
     </message>
     <message>
         <source>Sit&amp;out</source>
-        <translation>&amp;Отойти</translation>
+        <translation type="unfinished">Pidä tauko</translation>
     </message>
     <message>
         <source>Min</source>
-        <translation>Мин</translation>
+        <translation type="unfinished">Min</translation>
     </message>
     <message>
         <source>1/4</source>
-        <translation></translation>
+        <translation type="unfinished">1/4</translation>
     </message>
     <message>
         <source>1/2</source>
-        <translation></translation>
+        <translation type="unfinished">1/2</translation>
     </message>
     <message>
         <source>3/4</source>
-        <translation></translation>
+        <translation type="unfinished">3/4</translation>
     </message>
     <message>
         <source>Pot</source>
-        <translation>Банк</translation>
+        <translation type="unfinished">Potti</translation>
     </message>
     <message>
         <source>Allin</source>
-        <translatorcomment>I&apos;ve used term &quot;va-bank&quot; but probably its obsolete word. Will ask my Russian friends :-)</translatorcomment>
-        <translation>Ва-банк</translation>
+        <translation type="unfinished">All-in</translation>
     </message>
     <message>
         <source>Ctrl+F</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+F</translation>
     </message>
     <message>
         <source>Ctrl+C</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+C</translation>
     </message>
     <message>
         <source>Ctrl+B</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+B</translation>
     </message>
     <message>
         <source>Ctrl+R</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+R</translation>
     </message>
     <message>
         <source>Ctrl+A</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+A</translation>
     </message>
     <message>
         <source>Ctrl+M</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+M</translation>
     </message>
     <message>
         <source>Ctrl+S</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+S</translation>
     </message>
     <message>
         <source>Ctrl+O</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+O</translation>
     </message>
     <message>
         <source>Ctrl+K</source>
-        <translation></translation>
+        <translation type="unfinished">CTRL+K</translation>
     </message>
     <message>
         <source>HoldingNuts table</source>
-        <translation>Стол HoldingNuts</translation>
+        <translation type="unfinished">HoldingNuts pöytä</translation>
     </message>
     <message>
         <source>&amp;Call %1</source>
-        <translation>&amp;Ответить %1</translation>
+        <translation type="unfinished">Maksa %1</translation>
     </message>
     <message>
         <source>&amp;Raise %1</source>
-        <translation>&amp;Повысить %1</translation>
+        <translation type="unfinished">Korota %1</translation>
     </message>
     <message>
         <source>&amp;Check</source>
-        <translation>&amp;Постучать</translation>
+        <translation type="unfinished">Sökötä</translation>
     </message>
     <message>
         <source>&amp;Bet %1</source>
-        <translation>П&amp;оставить %1</translation>
+        <translation type="unfinished">Panosta %1</translation>
     </message>
     <message>
         <source>&amp;Allin %1</source>
-        <translation>&amp;Ва-банк %1</translation>
+        <translation type="unfinished">All-in %1</translation>
     </message>
     <message>
         <source>Fold</source>
-        <translation>Упасть</translation>
+        <translation type="unfinished">Kippaa</translation>
     </message>
     <message>
         <source>Allin %1</source>
-        <translation>Ва-банк %1</translation>
+        <translation type="unfinished">All-in %1</translation>
     </message>
     <message>
         <source>Call %1</source>
-        <translation>Ответить %1</translation>
+        <translation type="unfinished">Maksa %1</translation>
     </message>
     <message>
         <source>Check/Fold</source>
-        <translation>Постучать/упасть</translation>
+        <translation type="unfinished">Sökötä/kippaa</translation>
     </message>
     <message>
         <source>Check</source>
-        <translation>Постучать</translation>
+        <translation type="unfinished">Sökötä</translation>
     </message>
     <message>
         <source>Main pot: %1</source>
-        <translation>Главный банк: %1</translation>
+        <translation type="unfinished">Pääpotti: %1</translation>
     </message>
     <message>
         <source>Side pot %1: %2</source>
-        <translatorcomment>No proper translation for &quot;side potЭб I used transliteration</translatorcomment>
-        <translation>Сайд-пот %1: %2</translation>
+        <translation type="unfinished">Sivupotti %1: %2</translation>
     </message>
     <message>
         <source>%1, it&apos;s your turn!</source>
-        <translation>%1, твой ход!</translation>
+        <translation type="unfinished">%1, on sinun vuorosi!</translation>
     </message>
     <message>
         <source>%1, you have %2 seconds left to respond!</source>
-        <translation>%1, у тебя %2 секунд для ответа!</translation>
+        <translation type="unfinished">%1, sinulla on %2 sekuntia aikaa toimia!</translation>
     </message>
     <message>
         <source>Saved screenshot: %1.</source>
-        <translation>Сохраненная копия экрана: %1.</translation>
+        <translation type="unfinished">Kuvakaappaus tallennettu: %1.</translation>
     </message>
     <message>
         <source>Unable to save screenshot in %1.</source>
-        <translation>Не могу сохранить копию экрана в %1.</translation>
+        <translation type="unfinished">Ei voi tallentaa kuvakaappausta %1.</translation>
     </message>
     <message>
         <source>Spades</source>
-        <translation>Пики</translation>
+        <translation type="unfinished">Pataa</translation>
     </message>
     <message>
         <source>Hearts</source>
-        <translation>Червы</translation>
+        <translation type="unfinished">Herttaa</translation>
     </message>
     <message>
         <source>Diamonds</source>
-        <translation>Бубны</translation>
+        <translation type="unfinished">Ruutua</translation>
     </message>
     <message>
         <source>Clubs</source>
-        <translation>Трефы</translation>
+        <translation type="unfinished">Ristiä</translation>
     </message>
     <message>
         <source>Deuce</source>
-        <translation>Два</translation>
+        <translation type="unfinished">Kakkonen</translation>
     </message>
     <message>
         <source>Deuces</source>
-        <translation>Двойки</translation>
+        <translation type="unfinished">Kakkospari</translation>
     </message>
     <message>
         <source>Three</source>
-        <translation>Три</translation>
+        <translation type="unfinished">Kolmonen</translation>
     </message>
     <message>
         <source>Threes</source>
-        <translation>Тройки</translation>
+        <translation type="unfinished">Kolmospari</translation>
     </message>
     <message>
         <source>Four</source>
-        <translation>Четыре</translation>
+        <translation type="unfinished">Nelonen</translation>
     </message>
     <message>
         <source>Fours</source>
-        <translation>Четверки</translation>
+        <translation type="unfinished">Nelospari</translation>
     </message>
     <message>
         <source>Five</source>
-        <translation>Пять</translation>
+        <translation type="unfinished">Vitonen</translation>
     </message>
     <message>
         <source>Fives</source>
-        <translation>Пятерки</translation>
+        <translation type="unfinished">Vitospari</translation>
     </message>
     <message>
         <source>Six</source>
-        <translation>Шесть</translation>
+        <translation type="unfinished">Kutonen</translation>
     </message>
     <message>
         <source>Sixes</source>
-        <translation>Шестерки</translation>
+        <translation type="unfinished">Kutospari</translation>
     </message>
     <message>
         <source>Seven</source>
-        <translation>Семь</translation>
+        <translation type="unfinished">Seiska</translation>
     </message>
     <message>
         <source>Sevens</source>
-        <translation>Семерки</translation>
+        <translation type="unfinished">Seiskapari</translation>
     </message>
     <message>
         <source>Eight</source>
-        <translation>Восемь</translation>
+        <translation type="unfinished">Kasi</translation>
     </message>
     <message>
         <source>Eights</source>
-        <translation>Восьмерки</translation>
+        <translation type="unfinished">Kasipari</translation>
     </message>
     <message>
         <source>Nine</source>
-        <translation>Девять</translation>
+        <translation type="unfinished">Ysi</translation>
     </message>
     <message>
         <source>Nines</source>
-        <translation>Девятки</translation>
+        <translation type="unfinished">Ysipari</translation>
     </message>
     <message>
         <source>Ten</source>
-        <translation>Десять</translation>
+        <translation type="unfinished">Kymppi</translation>
     </message>
     <message>
         <source>Tens</source>
-        <translation>Десятки</translation>
+        <translation type="unfinished">Kymppipari</translation>
     </message>
     <message>
         <source>Jack</source>
-        <translation>Валет</translation>
+        <translation type="unfinished">Jätkä</translation>
     </message>
     <message>
         <source>Jacks</source>
-        <translation>Вольты</translation>
+        <translation type="unfinished">Jätkäpari</translation>
     </message>
     <message>
         <source>Queen</source>
-        <translation>Дама</translation>
+        <translation type="unfinished">Akka</translation>
     </message>
     <message>
         <source>Queens</source>
-        <translation>Дамы</translation>
+        <translation type="unfinished">Akkapari</translation>
     </message>
     <message>
         <source>King</source>
-        <translation>Король</translation>
+        <translation type="unfinished">Kurko</translation>
     </message>
     <message>
         <source>Kings</source>
-        <translation>Короли</translation>
+        <translation type="unfinished">Kurkopari</translation>
     </message>
     <message>
         <source>Ace</source>
-        <translation>Туз</translation>
+        <translation type="unfinished">Naula</translation>
     </message>
     <message>
         <source>Aces</source>
-        <translation>Тузы</translation>
+        <translation type="unfinished">Naulapari</translation>
     </message>
     <message>
         <source>High Card</source>
-        <translation>Старшая карта</translation>
+        <translation type="unfinished">Hai</translation>
     </message>
     <message>
         <source>One Pair</source>
-        <translation>Одна пара</translation>
+        <translation type="unfinished">Pari</translation>
     </message>
     <message>
         <source>Two Pair</source>
-        <translation>Две пары</translation>
+        <translation type="unfinished">Kahdet parit</translation>
     </message>
     <message>
         <source>%1 and %2</source>
-        <translation>%1 и %2</translation>
+        <translation type="unfinished">%1 ja %2</translation>
     </message>
     <message>
         <source>Three Of A Kind</source>
-        <translation>Тройка</translation>
+        <translation type="unfinished">Kolmoset</translation>
     </message>
     <message>
         <source>Straight</source>
-        <translation>Стрит</translation>
+        <translation type="unfinished">Suora</translation>
     </message>
     <message>
         <source>%1 high</source>
-        <translation>%1 старшая (ший)</translation>
+        <translation type="unfinished">%1 hai</translation>
     </message>
     <message>
         <source>Flush</source>
-        <translation>Флэш</translation>
+        <translation type="unfinished">Väri</translation>
     </message>
     <message>
         <source>Full House</source>
-        <translation>Фул хауз</translation>
+        <translation type="unfinished">Täyskäsi</translation>
     </message>
     <message>
         <source>Four Of A Kind</source>
-        <translation>Каре</translation>
+        <translation type="unfinished">Neloset</translation>
     </message>
     <message>
         <source>Royal Flush</source>
-        <translation>Роял-флэш</translation>
+        <translation type="unfinished">Kuningasvärisuora</translation>
     </message>
     <message>
         <source>Straight Flush</source>
-        <translation>Флэш-стрит</translation>
+        <translation type="unfinished">Värisuora</translation>
     </message>
 </context>
 </TS>

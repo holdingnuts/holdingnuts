@@ -41,6 +41,7 @@
 #include "DealerButton.hpp"
 #include "EditableSlider.hpp"
 #include "TimeOut.hpp"
+#include "ChipStack.hpp"
 
 #ifndef NOAUDIO
 # include "Audio.h"
@@ -171,7 +172,7 @@ QDebug operator << (QDebug s, const Player::PlayerAction& p)
 				s << "Back";
 			break;
 		default:
-			s << "unkown";
+			s << "unknown";
 	}
 	return s;
 }
@@ -222,7 +223,11 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 :	QWidget(parent),
 	m_nGid(gid),
 	m_nTid(tid),
-	m_pImgTable(0)
+	m_pImgTable(0),
+	sizeCommunityCards(120, 170),
+	posYCommunityCards(360),
+	posYTxtPots(290),
+	posYPots(270)
 {
 	//setAttribute(Qt::WA_DeleteOnClose); // FIXME: implement correctly
 
@@ -255,11 +260,16 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	for (unsigned int j = 0; j < 5; j++)
 	{
 		m_CommunityCards[j] = new QGraphicsPixmapItem(
-			QPixmap(QString("gfx/deck/%1/blank.png")
+				QPixmap(QString("gfx/deck/%1/blank.png")
 				.arg(QString::fromStdString(config.get("ui_card_deck")))));
 
+		const QRectF& rc = m_CommunityCards[j]->boundingRect();
+
 		m_CommunityCards[j]->setTransformationMode(Qt::SmoothTransformation);
-		m_CommunityCards[j]->scale(1.1, 1.1);
+		// fixed size for any kind of cardsets
+		m_CommunityCards[j]->scale(
+				sizeCommunityCards.width() / rc.width(),
+				sizeCommunityCards.height() / rc.height());
 		m_CommunityCards[j]->setZValue(5.0);
 		m_CommunityCards[j]->setPos(calcCCardsPos(j));
 		m_CommunityCards[j]->hide();
@@ -275,7 +285,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		m_pScene->addItem(wseats[i]);
 		
 		// calculate dealer button pos
-		m_ptDealerBtn[i] = calcDealerBtnPos(i, 10);
+		m_ptDealerBtn[i] = calcDealerBtnPos(i);
 	}
 
 	Seat::setInSeatFont(QFont("Arial", 18,  QFont::Bold));
@@ -289,7 +299,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	const QPointF ptCenter = m_pImgTable->boundingRect().center();
 	
 	m_pTxtPots = m_pScene->addSimpleText("Main pot: 0", font);
-	m_pTxtPots->setPos(calcPotsPos());
+	m_pTxtPots->setPos(calcTxtPotsPos());
 	m_pTxtPots->setZValue(3);
 	
 	font.setBold(false);
@@ -298,6 +308,14 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pTxtHandStrength->setPos(calcHandStrengthPos());
 	m_pTxtHandStrength->setZValue(3);
 	m_pTxtHandStrength->setVisible(config.getBool("ui_show_handstrength"));
+
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+	{
+		m_Pots[t] = new ChipStack;
+		m_Pots[t]->setZValue(6);
+
+		m_pScene->addItem(m_Pots[t]);
+	}
 
 	// view
 	m_pView = new QGraphicsView(m_pScene);
@@ -333,13 +351,34 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QPushButton *btnMuck = new QPushButton(tr("&Muck"), this);
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
 	
+	
+	/* Persistent actions on the right, e.g. Sitout/Back, "Muck losing hands" */
 	QPushButton *btnBack = new QPushButton(tr("I'm bac&k"), this);
-	btnBack->setFixedWidth(actionbtn_width);
+	btnBack->setFixedSize(actionbtn_width, 25);
 	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
 	
 	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
-	btnSitout->setFixedWidth(actionbtn_width);
+	btnSitout->setFixedSize(actionbtn_width, 25);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
+	
+	stlayPersistentActions = new QStackedLayout();
+	m_nSitout = stlayPersistentActions->addWidget(btnSitout);
+	m_nBack = stlayPersistentActions->addWidget(btnBack);
+	
+	QCheckBox *chkAutoMuck = new QCheckBox(tr("Muck losing\nhands"), this);
+	chkAutoMuck->setFont(QFont("Arial", 8));
+	chkAutoMuck->setEnabled(false);	// FIXME: implement me...
+	
+	QVBoxLayout *layPersistentActions = new QVBoxLayout();
+	layPersistentActions->addLayout(stlayPersistentActions);
+	layPersistentActions->addWidget(chkAutoMuck, 0, Qt::AlignCenter);
+	
+	lblPersistentActions = new QLabel(this);
+	lblPersistentActions->setPixmap(QPixmap("gfx/table/actions.png"));
+	lblPersistentActions->setScaledContents(true);
+	lblPersistentActions->setFixedSize(120, 90);
+	lblPersistentActions->setLayout(layPersistentActions);
+	
 	
 	
 	// bet shortcuts
@@ -366,9 +405,9 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	btnBetsizePotsize->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizePotsize, SIGNAL(clicked()), this, SLOT(actionBetsizePotsize()));
 
-	btnBetsizeAllin = new QPushButton(tr("Allin"), this);
-	btnBetsizeAllin->setFixedSize(raisebtn_width, raisebtn_height);
-	connect(btnBetsizeAllin, SIGNAL(clicked()), this, SLOT(actionBetsizeAllin()));
+	btnBetsizeMaximum = new QPushButton(tr("Max"), this);
+	btnBetsizeMaximum->setFixedSize(raisebtn_width, raisebtn_height);
+	connect(btnBetsizeMaximum, SIGNAL(clicked()), this, SLOT(actionBetsizeMaximum()));
 
 	QHBoxLayout *lPots = new QHBoxLayout();
 	lPots->addStretch(2); 
@@ -378,7 +417,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lPots->addWidget(btnBetsizeHalfPot, Qt::AlignRight);
 	lPots->addWidget(btnBetsizeThreeQuarterPot, Qt::AlignRight);
 	lPots->addWidget(btnBetsizePotsize, Qt::AlignRight);
-	lPots->addWidget(btnBetsizeAllin, Qt::AlignRight);
+	lPots->addWidget(btnBetsizeMaximum, Qt::AlignRight);
 	
 	wRaiseBtns = new QWidget(this);
 	wRaiseBtns->setLayout(lPots);
@@ -410,32 +449,25 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	
 	QVBoxLayout *lPreActions = new QVBoxLayout();
 	lPreActions->addLayout(lPreActionsAuto);
-	lPreActions->addWidget(btnSitout, 0, Qt::AlignRight);   // FIXME: display outside StackedLayout
 	
 	QHBoxLayout *lPostActions = new QHBoxLayout();
 	lPostActions->addWidget(btnMuck);
 	lPostActions->addWidget(btnShow);
-	
-	QHBoxLayout *lSitoutActions = new QHBoxLayout();
-	lSitoutActions->addWidget(btnBack);
 	
 	stlayActions = new QStackedLayout();
 	QWidget *pageActions = new QWidget(this);
 	QWidget *pagePreActions = new QWidget(this);
 	QWidget *pagePostActions = new QWidget(this);
 	QWidget *pageNoActions = new QWidget(this);
-	QWidget *pageSitoutActions = new QWidget(this);
 	
 	pageActions->setLayout(lActions);
 	pagePreActions->setLayout(lPreActions);
 	pagePostActions->setLayout(lPostActions);
-	pageSitoutActions->setLayout(lSitoutActions);
 	
 	m_nActions = stlayActions->addWidget(pageActions);
 	m_nPreActions = stlayActions->addWidget(pagePreActions);
 	m_nPostActions = stlayActions->addWidget(pagePostActions);
 	m_nNoAction = stlayActions->addWidget(pageNoActions);
-	m_nSitoutActions = stlayActions->addWidget(pageSitoutActions);
 	
 	QLabel *lblActions = new QLabel(this);
 	lblActions->setPixmap(QPixmap("gfx/table/actions.png"));
@@ -450,9 +482,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	QGridLayout *mainLayout = new QGridLayout(this);
 
-	mainLayout->addWidget(m_pView, 0, 0, 1, 5);
+	mainLayout->addWidget(m_pView, 0, 0, 1, 7);
 	mainLayout->addWidget(m_pChat, 1, 0);
 	mainLayout->addWidget(lblActions, 1, 3);
+	mainLayout->addWidget(lblPersistentActions, 1, 5);
 	mainLayout->setColumnStretch(2, 2);
 	mainLayout->setColumnStretch(4, 2);
 
@@ -497,7 +530,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	this->setPalette(p);	
 	
 	this->setMinimumSize(640, 480);
-	this->setWindowTitle(tr("HoldingNuts table"));
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
 	
 	// load gui settings
@@ -524,6 +556,7 @@ WTable::~WTable()
 		delete wseats[i];
 		
 	delete stlayActions;
+	delete stlayPersistentActions;
 }
 
 QPointF WTable::calcSeatPos(unsigned int nSeatID) const
@@ -583,7 +616,7 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 
 	return QPointF(
 		((m_pScene->width() - (5 * card_width - card_spacing)) / 2) + nCard * card_width,
-		m_pScene->height() * 0.375);
+		posYCommunityCards);
 }
 
 QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
@@ -610,10 +643,10 @@ QPointF WTable::calcHandStrengthPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtHandStrength->text()) / 2),
-		220 + fm.height());
+		posYTxtPots + fm.height());
 }
 
-QPointF WTable::calcPotsPos() const
+QPointF WTable::calcTxtPotsPos() const
 {
 	Q_ASSERT_X(m_pTxtPots, Q_FUNC_INFO, "bad text pots pointer");
 	Q_ASSERT_X(m_pImgTable, Q_FUNC_INFO, "bad table image pointer");
@@ -623,12 +656,10 @@ QPointF WTable::calcPotsPos() const
 	
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2),
-		220);
+		posYTxtPots);
 }
 
-QPointF WTable::calcDealerBtnPos(
-	unsigned int nSeatID, 
-	int offset) const
+QPointF WTable::calcDealerBtnPos(unsigned int nSeatID) const
 {
 	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalid Seat Number");
 	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
@@ -645,26 +676,66 @@ QPointF WTable::calcDealerBtnPos(
 	switch (nSeatID)
 	{
 		case 0: case 8: case 9:
-				pt.ry() += (wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + offset);
+				pt.ry() += (wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 20);
+				pt.rx() += 10;
 			break;
-		case 1: case 2:
+		case 1:
 				pt.rx() -= (
 					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
 					m_pDealerButton->sceneBoundingRect().width() + 
-					offset);
+					30);
+				pt.ry() += 70;
+			break;
+		case 2:
+				pt.rx() -= (
+					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
+					m_pDealerButton->sceneBoundingRect().width() + 
+					30);
+				pt.ry() -= 40;	
 			break;
 		case 3: case 4: case 5:
 				pt.ry() -= (
 					wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 
-					m_pDealerButton->sceneBoundingRect().height() + 
-					offset);
+					m_pDealerButton->sceneBoundingRect().height() +
+					10);
+				pt.rx() -= 30;
 			break;
-		case 6: case 7:
-				pt.rx() += (wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + offset);
+		case 6:
+				pt.rx() += wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 20;
+			break;
+		case 7:
+				pt.rx() += wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 20;
+				pt.ry() += 70;
 			break;
 	}
 
 	return pt;
+}
+
+void WTable::calcPotsPos()
+{
+	static const qreal space = 5;
+
+	qreal wholePotsWidth = 0;
+
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+	{
+		if (m_Pots[t]->isVisible())
+			wholePotsWidth += m_Pots[t]->boundingRect().width() + space;
+	}
+	
+	qreal xStart = m_pImgTable->boundingRect().center().x() - (wholePotsWidth * 0.5);
+	
+	// place the pots on the table
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+	{
+		if (m_Pots[t]->isVisible())
+		{
+			m_Pots[t]->setPos(xStart, posYPots);
+		
+			xStart += m_Pots[t]->boundingRect().width() + space;
+		}
+	}
 }
 
 void WTable::evaluateActions(const table_snapshot *snap)
@@ -673,8 +744,11 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	if (snap->my_seat == -1)
 	{
 		stlayActions->setCurrentIndex(m_nNoAction);
+		lblPersistentActions->setEnabled(false);
 		return;
 	}
+	else
+		lblPersistentActions->setEnabled(true);
 	
 	
 	const seatinfo *s = &(snap->seats[snap->my_seat]);
@@ -698,7 +772,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	// evaluate available actions
 	if (s->sitout)
 	{
-		stlayActions->setCurrentIndex(m_nSitoutActions);
+		stlayActions->setCurrentIndex(m_nNoAction);
 	}
 	else if (!s->in_round ||
 		!(snap->state == Table::Blinds ||
@@ -837,6 +911,13 @@ void WTable::evaluateActions(const table_snapshot *snap)
 			}
 		}
 	}
+	
+	
+	// evaluate persistent actions
+	if (s->sitout)
+		stlayPersistentActions->setCurrentIndex(m_nBack);
+	else
+		stlayPersistentActions->setCurrentIndex(m_nSitout);
 }
 
 unsigned int WTable::seatToCentralView(int my, unsigned int seat) const
@@ -952,7 +1033,20 @@ void WTable::updateSeat(unsigned int s)
 				char card1[3], card2[3];
 				strcpy(card1, allcards[0].getName());
 				strcpy(card2, allcards[1].getName());
-				ui_seat->setCards(card1, card2);
+				
+				// display the holecards sorted?
+				if (config.getBool("ui_sort_holecards"))
+				{
+					Card c1(card1), c2(card2);
+					
+					// sort cards descending
+					if (c1 < c2)
+						ui_seat->setCards(card2, card1);
+					else
+						ui_seat->setCards(card1, card2);
+				}
+				else
+					ui_seat->setCards(card1, card2);
 				
 				ui_seat->showBigCards(true);
 			}
@@ -991,6 +1085,8 @@ void WTable::updatePots()
 	const table_snapshot *snap = &(tinfo->snap);
 	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
 	
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+		m_Pots[t]->hide();
 	
 	QString strPots;
 	chips_type pot_sum = 0;
@@ -1006,6 +1102,9 @@ void WTable::updatePots()
 			strPots.append(
 				QString("  " + tr("Side pot %1: %2")
 					.arg(t).arg(snap->pots.at(t))));
+					
+			m_Pots[t]->setAmount(snap->pots.at(t));
+			m_Pots[t]->show();
 		}
 	}
 	
@@ -1017,7 +1116,12 @@ void WTable::updatePots()
 	
 	m_pTxtPots->setText(strPotSum);
 	m_pTxtPots->setToolTip(strPots);
-	m_pTxtPots->setPos(calcPotsPos());
+	m_pTxtPots->setPos(calcTxtPotsPos());
+	
+	m_Pots[0]->setAmount(snap->pots.at(0));
+	m_Pots[0]->show();
+	// 
+	calcPotsPos();
 }
 
 void WTable::updateDealerButton()
@@ -1457,7 +1561,7 @@ void WTable::actionBetsizePotsize()
 	m_pSliderAmount->setValue(currentPot());
 }
 
-void WTable::actionBetsizeAllin()
+void WTable::actionBetsizeMaximum()
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
@@ -1746,7 +1850,11 @@ void WTable::showDebugTable()
 	{
 		wseats[i]->setAction(
 			Player::PlayerAction(qrand() % Player::Sitout),
-			(qrand() % 100 + 1) * 100);
+			(qrand() % 30000 + 1));
+		wseats[i]->setInfo(
+			QString::fromStdString(config.get("player_name")),
+			QString::fromStdString(config.get("info_location")));
+		wseats[i]->setStake(10000);
 		wseats[i]->setValid(true);
 		wseats[i]->setSitout(bool(qrand()%2));
 		wseats[i]->showBigCards(true);
@@ -1759,6 +1867,12 @@ void WTable::showDebugTable()
 
 		m_pScene->addItem(dealerBtn[i]);	
 	}
+	
+	// mainpot and sidepots
+//	for (unsigned int t = 0; t < qrand() % (sizeof(m_Pots) / sizeof(m_Pots[0])) + 1; t++)
+	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
+		m_Pots[t]->setAmount(qrand() % 30000 + 1);
+	calcPotsPos();
 	
 	// timeout
 	m_pTimeout->setPos(calcTimeoutPos(0));

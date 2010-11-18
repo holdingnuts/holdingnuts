@@ -34,6 +34,7 @@
 #include "ConfigParser.hpp"
 
 #include "game.hpp"
+#include "ranking.hpp"
 
 
 using namespace std;
@@ -53,6 +54,9 @@ static unsigned int cid_counter = 0;
 
 static clientconar_type con_archive;
 static time_t last_conarchive_cleanup = 0;   // last time scan
+
+static server_stats stats;
+
 
 
 GameController* get_game_by_id(int gid)
@@ -95,8 +99,10 @@ int send_msg(socktype sock, const char *message)
 	const int bytes = socket_write(sock, buf, len);
 	
 	// FIXME: send remaining bytes if not all have been sent
+	// FIXME: handle client-dead case
 	if (len != bytes)
-		log_msg("clientsock", "(%d) warning: not all bytes written (%d != %d)", sock, len, bytes);
+		dbg_msg("clientsock", "(%d) warning: not all bytes written (%d != %d).",
+			sock, len, bytes);
 	
 	return bytes;
 }
@@ -197,7 +203,7 @@ bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 		return false;
 	
 	vector<int> client_list;
-	g->getPlayerList(client_list);
+	g->getListenerList(client_list);
 	
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
@@ -285,6 +291,10 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	
 	clients.push_back(client);
 	
+	
+	// update stats
+	stats.clients_connected++;
+	
 	return true;
 }
 
@@ -350,6 +360,10 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		send_err(client, ErrWrongVersion, "The client version is too old."
 			"Please update your HoldingNuts client to a more recent version.");
 		client_remove(client->sock);
+		
+		
+		// update stats
+		stats.clients_incompatible++;
 	}
 	else
 	{
@@ -360,10 +374,15 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 		client->version = version;
 		client->state |= Introduced;
 		
+		// update stats
+		stats.clients_introduced++;
+		
+		
 		snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
 		
 		// re-assign cid if this client was previously connected (and cid isn't already connected)
 		bool use_prev_cid = false;
+		bool uuid_inuse = false;
 		
 		if (uuid.length())
 		{
@@ -383,6 +402,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 				{
 					log_msg("uuid", "(%d) uuid '%s' already connected; used by cid %d", client->sock, client->uuid, conc->id);
 					client->uuid[0] = '\0';    // client is not allowed to use this uuid
+					uuid_inuse = true;
 				}
 			}
 			else
@@ -404,6 +424,11 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 			(unsigned int) time(NULL));
 			
 		send_msg(client->sock, msg);
+		
+		
+		// send warning if UUID is already in use
+		if (uuid_inuse)
+			client_chat(-1, client->id, "Warning: UUID is already in use.");
 	}
 	
 	return 0;
@@ -576,6 +601,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		game_mode,
 		state,
 		(g->isPlayer(client->id) ? GameInfoRegistered : 0) |
+			(g->isSpectator(client->id) ? GameInfoSubscribed : 0) |
 			(g->hasPassword() ? GameInfoPassword : 0) |
 			(g->getOwner() == client->id ? GameInfoOwner : 0) |
 			(g->getRestart() ? GameInfoRestart : 0),
@@ -584,7 +610,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		g->getPlayerTimeout(),
 		g->getPlayerStakes(),
 		g->getBlindsStart(),
-		int(g->getBlindsFactor() * 10),
+		g->getBlindsFactor(),
 		g->getBlindsTime(),
 		g->getName().c_str());
 	
@@ -672,10 +698,16 @@ bool client_cmd_request_playerlist(clientcon *client, Tokenizer &t)
 
 bool client_cmd_request_serverinfo(clientcon *client, Tokenizer &t)
 {
-	snprintf(msg, sizeof(msg), "SERVERINFO %d:%d:%d",
-		(int) clients.size(),
-		(int) con_archive.size(),
-		(int) games.size());
+	snprintf(msg, sizeof(msg), "SERVERINFO "
+		"%d:%d %d:%d %d:%d %d:%d %d:%d %d:%d %d:%d %d:%d",
+		StatsServerStarted,		(unsigned int) stats.server_started,
+		StatsClientsConnected,		(unsigned int) stats.clients_connected,
+		StatsClientsIntroduced,		(unsigned int) stats.clients_introduced,
+		StatsClientsIncompatible,	(unsigned int) stats.clients_incompatible,
+		StatsGamesCreated,		(unsigned int) stats.games_created,
+		StatsClientCount,		(unsigned int) clients.size(),
+		StatsGamesCount,		(unsigned int) games.size(),
+		StatsConarchiveCount,		(unsigned int) con_archive.size());
 	
 	send_msg(client->sock, msg);
 	
@@ -715,6 +747,7 @@ bool client_cmd_request_gamerestart(clientcon *client, Tokenizer &t)
 
 	return true;
 }
+
 
 int client_cmd_request(clientcon *client, Tokenizer &t)
 {
@@ -792,7 +825,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 	}
 	
 	// check for max-games-register limit
-	unsigned int register_limit = config.getInt("max_register_per_player");
+	const unsigned int register_limit = config.getInt("max_register_per_player");
 	unsigned int count = 0;
 	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
 	{
@@ -815,7 +848,7 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 		return 1;
 	}
 	
-	if (!g->addPlayer(client->id))
+	if (!g->addPlayer(client->id, client->uuid))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to register");
 		return 1;
@@ -872,6 +905,114 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 	log_msg("game", "%s (%d) parted game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
+	
+	
+	send_ok(client);
+	
+	return 0;
+}
+
+int client_cmd_subscribe(clientcon *client, Tokenizer &t)
+{
+	if (!t.count())
+	{
+		send_err(client, ErrParameters);
+		return 1;
+	}
+	
+	int gid;
+	t >> gid;
+	
+	string passwd = "";
+	if (t.count() >=2)
+		t >> passwd;
+	
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (g->isSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are already subscribed");
+		return 1;
+	}
+	
+	// check for max-games-subscribe limit
+	const unsigned int subscribe_limit = config.getInt("max_subscribe_per_player");
+	unsigned int count = 0;
+	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
+	{
+		GameController *g = e->second;
+		
+		if (g->isSpectator(client->id))
+		{
+			if (++count == subscribe_limit)
+			{
+				send_err(client, 0 /*FIXME*/, "subscribe limit per player is reached");
+				return 1;
+			}
+		}
+	}
+
+	// check the password
+	if (!g->checkPassword(passwd))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to subscribe, wrong password");
+		return 1;
+	}
+	
+	if (!g->addSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to subscribe");
+		return 1;
+	}
+	
+	
+	log_msg("game", "%s (%d) subscribed game %d",
+		client->info.name, client->id, gid);
+	
+	
+	send_ok(client);
+	
+	return 0;
+}
+
+int client_cmd_unsubscribe(clientcon *client, Tokenizer &t)
+{
+	if (!t.count())
+	{
+		send_err(client, ErrParameters);
+		return 1;
+	}
+	
+	int gid;
+	t >> gid;
+	
+	GameController *g = get_game_by_id(gid);
+	if (!g)
+	{
+		send_err(client, 0 /*FIXME*/, "game does not exist");
+		return 1;
+	}
+	
+	if (!g->isSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "you are not subscribed");
+		return 1;
+	}
+	
+	if (!g->removeSpectator(client->id))
+	{
+		send_err(client, 0 /*FIXME*/, "unable to unsubscribe");
+		return 1;
+	}
+	
+	
+	log_msg("game", "%s (%d) unsubscribed game %d",
+		client->info.name, client->id, gid);
 	
 	
 	send_ok(client);
@@ -983,7 +1124,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		chips_type stake;
 		unsigned int timeout;
 		chips_type blinds_start;
-		float blinds_factor;
+		unsigned int blinds_factor;
 		unsigned int blinds_time;
 		string password;
 		bool restart;
@@ -994,7 +1135,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		1500,
 		30,
 		20,
-		2.0f,
+		20,
 		180,
 		"",
 		false,
@@ -1058,9 +1199,9 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		}
 		else if (infotype == "blinds_factor" && havearg)
 		{
-			ginfo.blinds_factor = Tokenizer::string2int(infoarg) / 10.0f;
+			ginfo.blinds_factor = Tokenizer::string2int(infoarg);
 			
-			if (ginfo.blinds_factor < 1.2f || ginfo.blinds_factor > 4.0f)
+			if (ginfo.blinds_factor < 12 || ginfo.blinds_factor > 40)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_time" && havearg)
@@ -1094,7 +1235,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		g->setPlayerMax(ginfo.max_players);
 		g->setPlayerTimeout(ginfo.timeout);
 		g->setPlayerStakes(ginfo.stake);
-		g->addPlayer(client->id);
+		g->addPlayer(client->id, client->uuid);
 		g->setOwner(client->id);
 		g->setName(ginfo.name);
 		g->setBlindsStart(ginfo.blinds_start);
@@ -1109,6 +1250,10 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		
 		log_msg("game", "%s (%d) created game %d",
 			client->info.name, client->id, gid);
+		
+		
+		// update stats
+		stats.games_created++;
 		
 		
 		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
@@ -1132,8 +1277,8 @@ int client_cmd_auth(clientcon *client, Tokenizer &t)
 	
 	if (t.count() >= 2 && config.get("auth_password").length())
 	{
-		int type = t.getNextInt();
-		string passwd = t.getNext();
+		const int type = t.getNextInt();
+		const string passwd = t.getNext();
 		
 		// -1 is server-auth
 		if (type == -1)
@@ -1189,6 +1334,17 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 			log_msg("config", "%s (%d) set var '%s' to '%s'",
 				client->info.name, client->id,
 				varname.c_str(), varvalue.c_str());
+		}
+		else if (action == "save")
+		{
+			char cfgfile[1024];
+			snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
+			
+			// update config-version and save config
+			config.set("version", VERSION);
+			config.save(cfgfile);
+			
+			client_chat(-1, client->id, "Config saved");
 		}
 		else
 			cmderr = true;
@@ -1249,6 +1405,10 @@ int client_execute(clientcon *client, const char *cmd)
 		return client_cmd_register(client, t);
 	else if (command == "UNREGISTER")
 		return client_cmd_unregister(client, t);
+	else if (command == "SUBSCRIBE")
+		return client_cmd_subscribe(client, t);
+	else if (command == "UNSUBSCRIBE")
+		return client_cmd_unsubscribe(client, t);
 	else if (command == "ACTION")
 		return client_cmd_action(client, t);
 	else if (command == "CREATE")
@@ -1376,8 +1536,19 @@ void remove_expired_conar_entries()
 	}
 }
 
-int gameloop()
+
+int gameinit()
 {
+	// initialize server stats struct
+	memset(&stats, 0, sizeof(server_stats));
+	stats.server_started = time(NULL);
+	
+	
+#ifndef NOSQLITE
+	ranking_setup();
+#endif /* NOSQLITE */
+	
+	
 #ifdef DEBUG
 	// initially add games for debugging purpose
 	if (!games.size())
@@ -1397,7 +1568,7 @@ int gameloop()
 			if (config.getBool("dbg_stresstest") && i > 10)
 			{
 				for (int j=0; j < config.getInt("dbg_testgame_players"); j++)
-					g->addPlayer(j*1000 + i);
+					g->addPlayer(j*1000 + i, "DEBUG");
 			}
 			
 			games[gid] = g;
@@ -1407,26 +1578,29 @@ int gameloop()
 	}
 #endif
 	
-	
+	return 0;
+}
+
+int gameloop()
+{
 	// handle all games
 	for (games_type::iterator e = games.begin(); e != games.end();)
 	{
 		GameController *g = e->second;
-		if (g->tick() < 0)
+		
+		// game has been deleted
+		int rc = g->tick();
+		if (rc < 0)
 		{
-			// replicate game if "restart" is set  // FIXME: implement copy-constructor
+			// replicate game if "restart" is set
 			if (g->getRestart())
 			{
 				const int gid = ++gid_counter;
-				GameController *newgame = new GameController();
+				GameController *newgame = new GameController(*g);
 				
+				// set new ID
 				newgame->setGameId(gid);
-				newgame->setName(g->getName());
-				newgame->setRestart(true);
-				newgame->setOwner(g->getOwner());
-				newgame->setPlayerMax(g->getPlayerMax());
-				newgame->setPlayerTimeout(g->getPlayerTimeout());
-				newgame->setPlayerStakes(g->getPlayerStakes());
+				
 				games[gid] = newgame;
 				
 				log_msg("game", "restarted game (old: %d, new: %d)",
@@ -1437,6 +1611,16 @@ int gameloop()
 			
 			delete g;
 			games.erase(e++);
+		}
+		else if (rc == 1 && !g->isFinished())  // game has ended (but not deleted)
+		{
+			g->setFinished();
+			
+#ifndef NOSQLITE
+			ranking_update(g);
+#endif /* !NOSQLITE */
+			
+			++e;
 		}
 		else
 			++e;

@@ -31,9 +31,14 @@
 
 #include "Player.hpp"
 
+class ChipStack;
+
 class Seat : public QObject, public QGraphicsItem
 {
-Q_OBJECT
+	Q_OBJECT
+#if QT_VERSION >= 0x040600
+	Q_INTERFACES(QGraphicsItem)
+#endif
 
 public:
 	Seat(unsigned int id, QWidget *parent);
@@ -47,8 +52,12 @@ public:
 	void setWin(chips_type amount = 0);
 	void setCards(const char *c1, const char *c2);
 	void setValid(bool valid);
+
 	void showBigCards(bool bShow) { m_bBigCards = bShow; };
 	void showSmallCards(bool bShow) { m_bSmallCards = bShow; };
+
+	void highlightFirstCard();
+	void highlightSecondCard();
 
 	virtual QRectF boundingRect() const;
 	virtual QRectF boundingRectSeat() const;
@@ -65,6 +74,7 @@ public:
 private:
 	void calcSCardPos(qreal& x, qreal& y) const;
 	void calcBetTextPos(qreal& x, qreal& y, int txt_width) const;
+	void calcChipStackPos(qreal& x, qreal& y, int txt_width) const;
 	
 	void chopName();
 	
@@ -103,6 +113,12 @@ private:
 	bool					m_bSmallCards;
 	//! \brief display small-cards
 	bool					m_bBigCards;
+	//! \brief
+	ChipStack				*m_pChipStack;
+	//! \brief X Position from small Cards
+	qreal					m_xPosSmallCards;
+	//! \brief Y Position from small Cards
+	qreal					m_yPosSmallCards;
 	
 	//! \brief In-Seat-Font (Name, Amount, ...)
 	static QFont			m_ftInSeat;

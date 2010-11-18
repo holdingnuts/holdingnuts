@@ -44,29 +44,77 @@ static char msg[1024];
 
 GameController::GameController()
 {
-	game_id = -1;
+	reset();
 	
-	started = false;
-	ended = false;
 	max_players = 10;
 	restart = false;
 	
 	player_stakes = 1500;
 	
-	blind.blindrule = BlindByTime;
 	blind.blinds_time = 60 * 4;
-	blind.blinds_factor = 2.0f;
+	blind.blinds_factor = 20;
 	blind.start = 10;
-	
-	hand_no = 0;
-	
-	type = SNG;
 	
 	name = "game";
 	password = "";
+	owner = -1;
 }
 
-bool GameController::addPlayer(int cid)
+GameController::GameController(const GameController& g)
+{
+	reset();
+	
+	setName(g.getName());
+	setRestart(g.getRestart());
+	setOwner(g.getOwner());
+	//setGameType()
+	setPlayerMax(g.getPlayerMax());
+	setPlayerTimeout(g.getPlayerTimeout());
+	setPlayerStakes(g.getPlayerStakes());
+	setBlindsStart(g.getBlindsStart());
+	setBlindsFactor(g.getBlindsFactor());
+	setBlindsTime(g.getBlindsTime());
+	setPassword(g.getPassword());
+}
+
+GameController::~GameController()
+{
+	// remove all players
+	for (players_type::iterator e = players.begin(); e != players.end();)
+	{
+		delete e->second;
+		players.erase(e++);
+	}
+}
+
+void GameController::reset()
+{
+	game_id = -1;
+	
+	type = SNG;	// FIXME
+	blind.blindrule = BlindByTime;	// FIXME:
+	
+	started = false;
+	ended = false;
+	finished = false;
+	
+	hand_no = 0;
+	
+	// remove all players
+	for (players_type::iterator e = players.begin(); e != players.end();)
+	{
+		delete e->second;
+		players.erase(e++);
+	}
+	
+	// remove all spectators
+	spectators.clear();
+	
+	// clear finish list
+	finish_list.clear();
+}
+
+bool GameController::addPlayer(int cid, const std::string &uuid)
 {
 	// is the game already started or full?
 	if (started || players.size() == max_players)
@@ -76,9 +124,16 @@ bool GameController::addPlayer(int cid)
 	if (isPlayer(cid))
 		return false;
 	
+	// remove from spectators list as we would receive the snapshots twice
+	if (isSpectator(cid))
+		removeSpectator(cid);
+	
 	Player *p = new Player;
 	p->client_id = cid;
 	p->stake = player_stakes;
+	
+	// save a copy of the UUID (player might disconnect)
+	p->uuid = uuid;
 	
 	players[cid] = p;
 	
@@ -101,6 +156,8 @@ bool GameController::removePlayer(int cid)
 	if (owner == cid)
 		bIsOwner = true;
 	
+	delete it->second;
+	
 	players.erase(it);
 	
 	
@@ -116,6 +173,39 @@ bool GameController::isPlayer(int cid) const
 	players_type::const_iterator it = players.find(cid);
 	
 	if (it == players.end())
+		return false;
+	
+	return true;
+}
+
+bool GameController::addSpectator(int cid)
+{
+	// is the client already a spectator (or a player)?
+	if (isSpectator(cid) || isPlayer(cid))
+		return false;
+	
+	spectators.insert(cid);
+	
+	return true;
+}
+
+bool GameController::removeSpectator(int cid)
+{
+	spectators_type::iterator it = spectators.find(cid);
+	
+	if (it == spectators.end())
+		return false;
+	
+	spectators.erase(it);
+	
+	return true;
+}
+
+bool GameController::isSpectator(int cid) const
+{
+	spectators_type::const_iterator it = spectators.find(cid);
+	
+	if (it == spectators.end())
 		return false;
 	
 	return true;
@@ -160,6 +250,25 @@ bool GameController::getPlayerList(vector<int> &client_list) const
 	return true;
 }
 
+bool GameController::getListenerList(vector<int> &client_list) const
+{
+	client_list.clear();
+	
+	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
+		client_list.push_back(e->first);
+	
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_list.push_back(*e);
+	
+	return true;
+}
+
+void GameController::getFinishList(vector<Player*> &player_list) const
+{
+	for (finish_list_type::const_iterator e = finish_list.begin(); e != finish_list.end(); e++)
+		player_list.push_back(*e);
+}
+
 void GameController::selectNewOwner()
 {
 	players_type::const_iterator e = players.begin();
@@ -171,8 +280,13 @@ void GameController::selectNewOwner()
 
 void GameController::chat(int tid, const char* msg)
 {
+	// players
 	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
 		client_chat(game_id, tid, e->first, msg);
+	
+	// spectators
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_chat(game_id, tid, *e, msg);
 }
 
 void GameController::chat(int cid, int tid, const char* msg)
@@ -182,8 +296,13 @@ void GameController::chat(int cid, int tid, const char* msg)
 
 void GameController::snap(int tid, int sid, const char* msg)
 {
+	// players
 	for (players_type::const_iterator e = players.begin(); e != players.end(); e++)
 		client_snapshot(game_id, tid, e->first, sid, msg);
+	
+	// spectators
+	for (spectators_type::const_iterator e = spectators.begin(); e != spectators.end(); e++)
+		client_snapshot(game_id, tid, *e, sid, msg);
 }
 
 void GameController::snap(int cid, int tid, int sid, const char* msg)
@@ -569,7 +688,7 @@ void GameController::stateBlinds(Table *t)
 		if (difftime(time(NULL), blind.last_blinds_time) > blind.blinds_time)
 		{
 			blind.last_blinds_time = time(NULL);
-			blind.amount = (int)(blind.blinds_factor * blind.amount);
+			blind.amount = (blind.blinds_factor * blind.amount) / 10;
 			
 			// send out blinds snapshot
 			snprintf(msg, sizeof(msg), "%d %d %d", SnapGameStateBlinds, blind.amount / 2, blind.amount);
@@ -811,7 +930,7 @@ void GameController::stateBetting(Table *t)
 				t->bet_amount = t->seats[t->cur_player].bet;
 			}
 			
-			if (action == Player::Allin || amount >= p->stake)
+			if (action == Player::Allin || p->stake == 0)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionAllin, p->client_id, t->seats[t->cur_player].bet);
 			else if (action == Player::Bet)
 				snprintf(msg, sizeof(msg), "%d %d %d", SnapPlayerActionBet, p->client_id, t->bet_amount);
@@ -1222,6 +1341,18 @@ void GameController::stateEndRound(Table *t)
 		// player has no stake left
 		if (p->stake == 0)
 			broken_players.insert(pair<chips_type,int>(p->stake_before, i));
+		else
+		{
+			// there is a net win
+			if (p->stake > p->stake_before)
+			{
+				snprintf(msg, sizeof(msg), "%d %d %d",
+					p->client_id,
+					-1,	/* reserved */
+					p->stake - p->stake_before);
+				snap(t->table_id, SnapWinAmount, msg);
+			}
+		}
 	}
 	
 	// remove players in right order: sorted by stake_before
@@ -1233,12 +1364,14 @@ void GameController::stateEndRound(Table *t)
 		
 		Player *p = t->seats[seat_num].player;
 		
+		// save finish position
+		finish_list.push_back(p);
 		
 		// send out player-broke snapshot
 		snprintf(msg, sizeof(msg), "%d %d %d",
 			SnapGameStateBroke,
 			p->client_id,
-			-1 /* FIXME: finish-position */);
+			getPlayerCount() - (int)finish_list.size() + 1);
 		
 		snap(t->table_id, SnapGameState, msg);
 		
@@ -1318,49 +1451,66 @@ void GameController::start()
 	
 	memset(t->seats, 0, sizeof(Table::Seat) * 10);
 	
-	// place players randomly at table
-	vector<Player*> rndseats;
-	players_type::const_iterator e = players.begin();
-	for (unsigned int i=0; i < 10; i++)
-	{
-		if (e != players.end())
-		{
-			rndseats.push_back(e->second);
-			e++;
-		}
-		else
-			rndseats.push_back(0);
-	}
 	
+	// place players at table
+	vector<Player*> rndseats;
+	
+	for (players_type::const_iterator e = players.begin(); e != players.end(); ++e)
+		rndseats.push_back(e->second);
 	
 #ifndef SERVER_TESTING
 	random_shuffle(rndseats.begin(), rndseats.end());
 #endif
 	
-	bool chose_dealer = false;
-	for (unsigned int i=0; i < rndseats.size(); i++)
+	for (unsigned int i=0; i < 10; i++)
 	{
-		Table::Seat seat;
-		memset(&seat, 0, sizeof(Table::Seat));
+		Table::Seat *seat = &(t->seats[i]);
 		
-		seat.seat_no = i;
-		
-		if (rndseats[i])
-		{
-			seat.occupied = true;
-			seat.player = rndseats[i];
-			
-			if (!chose_dealer)
-			{
-				t->dealer = i;
-				chose_dealer = true;
-			}
-		}
-		else
-			seat.occupied = false;
-		
-		t->seats[i] = seat;
+		seat->seat_no = i;
+		seat->occupied = false;
 	}
+	
+	
+	bool chose_dealer = false;
+	
+	const int placement[10][10] = {
+		{ 4 },					//  1 player
+		{ 4, 9 },				//  2 players
+		{ 4, 8, 0 },				//  3 players
+		{ 3, 5, 8, 0 },				//  4 players
+		{ 4, 6, 8, 0, 2 },			//  5 players
+		{ 1, 2, 4, 6, 7, 9 },			//  6 players
+		{ 4, 6, 2, 7, 1, 8, 0 },		//  7 players
+		{ 1, 2, 3, 5, 6, 7, 8, 0 },		//  8 players
+		{ 4, 6, 2, 7, 1, 8, 0, 5, 3 },		//  9 players
+		{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }	// 10 players
+	};
+	
+	const unsigned int place_row = players.size() - 1;
+	unsigned int place_idx = 0;
+	vector<Player*>::const_iterator it = rndseats.begin();
+	
+	do
+	{
+		const unsigned int place = placement[place_row][place_idx];
+		Table::Seat *seat = &(t->seats[place]);
+		const Player *p = *it;
+		
+		dbg_msg("placing", "place_row=%d place_idx=%d place=%d player=%d",
+			place_row, place_idx, place, p->client_id);
+		
+		seat->occupied = true;
+		seat->player = (Player*)p;
+		
+		// FIXME: implement choosing dealer correctly
+		if (!chose_dealer)
+		{
+			t->dealer = place;
+			chose_dealer = true;
+		}
+		
+		it++;
+	} while (++place_idx <= place_row);
 	
 	
 	t->state = Table::GameStart;
@@ -1393,14 +1543,10 @@ int GameController::tick()
 		// delay before game gets deleted
 		if ((unsigned int) difftime(time(NULL), ended_time) >= 4 * 60)
 		{
-			// remove all players
-			for (players_type::iterator e = players.begin(); e != players.end();)
-				players.erase(e++);
-			
 			return -1;
 		}
 		else
-			return 0;
+			return 1;
 	}
 	
 	// handle all tables
@@ -1411,7 +1557,7 @@ int GameController::tick()
 		// table closed?
 		if (handleTable(t) < 0)
 		{
-			// is this the last table?
+			// is this the last table?  /* FIXME: very very dirty */
 			if (tables.size() == 1)
 			{
 				ended = true;
@@ -1419,6 +1565,14 @@ int GameController::tick()
 				
 				snprintf(msg, sizeof(msg), "%d", SnapGameStateEnd);
 				snap(-1, SnapGameState, msg);
+				
+				// push back last remaining player to finish_list
+				for (unsigned int i=0; i < 10; ++i)
+					if (t->seats[i].occupied)
+					{
+						finish_list.push_back(t->seats[i].player);
+						break;
+					}
 			}
 			
 			delete t;

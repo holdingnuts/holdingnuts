@@ -18,17 +18,18 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
-#ifndef _HOLDING_NUTS_TIMEOUT_H
-#define _HOLDING_NUTS_TIMEOUT_H
+#ifndef _HOLDING_NUTS_CHIP_STACK_H
+#define _HOLDING_NUTS_CHIP_STACK_H
+
+#include "Player.hpp"
 
 #include <QGraphicsItem>
-#include <QTimeLine>
-#include <QGraphicsItemAnimation>
 
-class TimeOut : public QObject, public QGraphicsItem
+class ChipStack : public QObject, public QGraphicsItem
 {
 	Q_OBJECT
 #if QT_VERSION >= 0x040600
@@ -36,7 +37,7 @@ class TimeOut : public QObject, public QGraphicsItem
 #endif
 
 public:
-	TimeOut();
+	ChipStack(QGraphicsItem* parent = 0);
 
 	QRectF boundingRect() const;
 
@@ -44,36 +45,17 @@ public:
 		QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
-
-	void start(int seat, int sec_timeout);
-	void stop();
+		
+	void setAmount(chips_type amount);
 	
-Q_SIGNALS:
-	//! \brief signal emitted when the time is up
-	//! \param seatnumber
-	void timeup(int);
-	
-	void quarterElapsed(int);
-
-	void halfElapsed(int);
-
-	void threeQuarterElapsed(int);
-
-private Q_SLOTS:
-	void update(int frame);
+	void clear();
 
 private:
-	const QImage			m_Image;
-	//! \brief Timeline Dealerbutton Animation
-	QTimeLine				m_tl;
-	//! \brief Framenumber
-	int						m_nFrame;
-	//! \brief Seat ID
-	int						m_nSeat;
-	
-	bool 					m_bQuarterAlreadyEmitted;
-	bool 					m_bHalfAlreadyEmitted;
-	bool 					m_bThreeQuarterAlreadyEmitted;
+	void addChips(
+		unsigned num,
+		const QImage& img,
+		qreal& x,
+		qreal& y);
 };
 
-#endif /* _HOLDING_NUTS_TIMEOUT_H */
+#endif /* _HOLDING_NUTS_CHIP_STACK_H */

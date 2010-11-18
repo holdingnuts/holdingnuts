@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <ctime>
 
@@ -45,6 +46,9 @@ friend class TestCaseGameController;
 public:
 	typedef std::map<int,Table*>	tables_type;
 	typedef std::map<int,Player*>	players_type;
+	typedef std::set<int>		spectators_type;
+	
+	typedef std::vector<Player*>	finish_list_type;
 	
 	typedef enum {
 		RingGame,   // Cash game
@@ -67,6 +71,10 @@ public:
 	} LimitRule;
 	
 	GameController();
+	GameController(const GameController& g);
+	~GameController();
+	
+	void reset();
 	
 	bool setGameId(int gid) { game_id = gid; return true; };
 	int getGameId() const { return game_id; };
@@ -78,8 +86,8 @@ public:
 	
 	void setBlindsStart(chips_type blinds_start) { blind.start = blinds_start; };
 	chips_type getBlindsStart() const { return blind.start; };
-	void setBlindsFactor(float blinds_factor) { blind.blinds_factor = blinds_factor; };
-	float getBlindsFactor() const { return blind.blinds_factor; };
+	void setBlindsFactor(unsigned int blinds_factor) { blind.blinds_factor = blinds_factor; };
+	unsigned int getBlindsFactor() const { return blind.blinds_factor; };
 	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
 	unsigned int getBlindsTime() const { return blind.blinds_time; };
 	
@@ -92,11 +100,15 @@ public:
 	bool checkPassword(const std::string &passwd) const { return (!password.length() || password == passwd); };
 	bool hasPassword() const { return password.length(); };
 	bool setPassword(const std::string &str) { password = str; return true; };
+	std::string getPassword() const { return password; };
 	
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() const { return max_players; };
 	unsigned int getPlayerCount() const { return players.size(); };
+	
 	bool getPlayerList(std::vector<int> &client_list) const;
+	bool getListenerList(std::vector<int> &client_list) const;
+	void getFinishList(std::vector<Player*> &player_list) const;
 	
 	void setRestart(bool bRestart) { restart = bRestart; };
 	bool getRestart() const { return restart; };
@@ -104,9 +116,16 @@ public:
 	bool isStarted() const { return started; };
 	bool isEnded() const { return ended; };
 	
-	bool addPlayer(int cid);
+	bool isFinished() const { return finished; };
+	void setFinished() { finished = true; };
+	
+	bool addPlayer(int cid, const std::string &uuid);
 	bool removePlayer(int cid);
 	bool isPlayer(int cid) const;
+	
+	bool addSpectator(int cid);
+	bool removeSpectator(int cid);
+	bool isSpectator(int cid) const;
 	
 	void setOwner(int cid) { owner = cid; };
 	int getOwner() const { return owner; };
@@ -163,8 +182,9 @@ private:
 	chips_type player_stakes;
 	unsigned int timeout;
 	
-	players_type players;
-	tables_type tables;
+	players_type		players;
+	spectators_type		spectators;
+	tables_type		tables;
 	
 	struct {
 		chips_type start;
@@ -172,7 +192,7 @@ private:
 		BlindRule blindrule;
 		unsigned int blinds_time;  // seconds
 		time_t last_blinds_time;
-		float blinds_factor;
+		unsigned int blinds_factor;
 	} blind;
 	
 	unsigned int hand_no;
@@ -182,6 +202,9 @@ private:
 	
 	bool ended;
 	time_t ended_time;
+	
+	bool finished;
+	finish_list_type finish_list;
 	
 	std::string name;
 	std::string password;
