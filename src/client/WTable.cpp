@@ -1360,7 +1360,22 @@ void WTable::addServerMessage(const QString& text)
 
 void WTable::closeEvent(QCloseEvent *event)
 {
-	// FIXME: handle this case: send sitout if player (my_seat != -1 && sitout == false)
+	// automatically sitout
+	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
+	if (tinfo)
+	{
+		table_snapshot *snap = &(tinfo->snap);
+		if (snap && snap->my_seat != -1)
+		{
+			seatinfo *seat = (seatinfo*) &(snap->seats[snap->my_seat]);
+			if (seat && seat->sitout == false)
+			{
+				((PClient*)qApp)->doSetAction(m_nGid, Player::Sitout);
+				doSitout(true);
+			}
+		}
+	}
+
 	
 	// store settings
 	QSettings settings;
