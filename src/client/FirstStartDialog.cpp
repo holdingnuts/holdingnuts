@@ -32,7 +32,7 @@ FirstStartDialog::FirstStartDialog(ConfigParser &cp, QWidget *parent)
 	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint),
 	  cfg(&cp)
 {
-	setWindowTitle(tr("HoldingNuts - First start"));
+	setWindowTitle("HoldingNuts - " + tr("First start"));
 	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setFixedWidth(360);
 	
@@ -50,7 +50,7 @@ FirstStartDialog::FirstStartDialog(ConfigParser &cp, QWidget *parent)
 	
 	
 	QLabel *lblWelcome = new QLabel("<qt>" +
-			tr("This is the first time you start HoldingNuts. "
+			tr("This is the first time you started HoldingNuts. "
 				"Please confirm the below basic settings.") +
 			"</qt>", this);
 	lblWelcome->setWordWrap(true);
@@ -66,7 +66,7 @@ FirstStartDialog::FirstStartDialog(ConfigParser &cp, QWidget *parent)
 	checkUUID = new QCheckBox(tr("Use unique identifier"));
 	checkUUID->setCheckState(Qt::Checked);
 	QLabel *lblUUIDInfotext = new QLabel(tr("By using a unique identifier game servers can recognize you "
-			"which allows rejoining a game after a disconnect or participate in player rankings."), this);
+			"which allows rejoining games after a disconnect and participate in player rankings."), this);
 	lblUUIDInfotext->setWordWrap("true");
 
 	QVBoxLayout *uuidLayout = new QVBoxLayout;
