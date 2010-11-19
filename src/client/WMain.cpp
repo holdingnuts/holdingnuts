@@ -195,7 +195,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnUnregister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
 	
-	btnSubscribe = new QPushButton(tr("&Subscribe"), this);
+	btnSubscribe = new QPushButton(tr("Subs&cribe"), this);
 	btnSubscribe->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnSubscribe, SIGNAL(clicked()), this, SLOT(actionSubscribe()));
 	
@@ -419,9 +419,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 			Qt::CheckState(settings.value("filterHidePrivateGames", 0).toInt()));
 	settings.endGroup();
 	
+
 	// load serverlist model
+	QString defaultServer = QString::fromStdString(config.get("default_host") /*+ ":" + config.get("default_port")*/);
+	bool defaultServerFound = false;
+
 	QStandardItemModel *modelSrvLst = new QStandardItemModel(0, 2, parent);
 
+	// FIXME: In which way could this be useful??
 	modelSrvLst->setHeaderData(0, Qt::Horizontal, tr("Name"));
 	modelSrvLst->setHeaderData(1, Qt::Horizontal, tr("Connections"));
 	
@@ -435,26 +440,33 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 
 		if (!server.isEmpty())
 		{
-			modelSrvLst->insertRow(0);
-			modelSrvLst->setData(modelSrvLst->index(0, 0), server);
-			modelSrvLst->setData(modelSrvLst->index(0, 1), settings.value("Connections").toInt());
+			if (server.startsWith(defaultServer, Qt::CaseInsensitive))
+				defaultServerFound = true;
+
+			int idx = modelSrvLst->rowCount();	// prepend
+			modelSrvLst->insertRow(idx);
+			modelSrvLst->setData(modelSrvLst->index(idx, 0), server);
+			modelSrvLst->setData(modelSrvLst->index(idx, 1), settings.value("Connections").toInt());
 		}
 	}
 	settings.endArray();
 
-	modelSrvLst->sort(1, Qt::DescendingOrder);
+	// disabled sorting by connection-count
+	//modelSrvLst->sort(1, Qt::DescendingOrder);
 
-	// no serverhistory found then use default server from config
-	if (modelSrvLst->rowCount() == 0)
+	// always add default server
+	if (!defaultServerFound)
 	{
-		modelSrvLst->insertRow(0);
+		int idx = 0;
+		modelSrvLst->insertRow(idx);
 		modelSrvLst->setData(
-			modelSrvLst->index(0, 0),
-			QString::fromStdString(config.get("default_host") + ":" + config.get("default_port")));
-		modelSrvLst->setData(modelSrvLst->index(0, 1), 0);
+			modelSrvLst->index(idx, 0),
+			defaultServer);
+		modelSrvLst->setData(modelSrvLst->index(idx, 1), 0);
 	}
 		
 	cbSrvAddr->setModel(modelSrvLst);
+	cbSrvAddr->setCurrentIndex(cbSrvAddr->count() - 1);
 
 
 	// if this is the first start, show an initial config dialog
@@ -638,32 +650,39 @@ void WMain::updatePlayerList(int gid)
 
 void WMain::actionConnect()
 {
-	if (!cbSrvAddr->lineEdit()->text().length() || ((PClient*)qApp)->isConnected())
+	if (((PClient*)qApp)->isConnected())
+		return;
+
+	QString strServer = cbSrvAddr->lineEdit()->text();
+	if (!strServer.length())
 		return;
 	
 	// store server in combobox and settings
-	int idx = cbSrvAddr->findText(cbSrvAddr->lineEdit()->text());
+	int idx = cbSrvAddr->findText(strServer);
 
 	QAbstractItemModel *modelSrvLst = cbSrvAddr->model();
 
 	if (idx == -1)
 	{
-		modelSrvLst->insertRow(0);
-		modelSrvLst->setData(modelSrvLst->index(0, 0), cbSrvAddr->lineEdit()->text());
-		modelSrvLst->setData(modelSrvLst->index(0, 1), 1);
+		idx = modelSrvLst->rowCount();
+		modelSrvLst->insertRow(idx);
+		modelSrvLst->setData(modelSrvLst->index(idx, 0), strServer);
+		modelSrvLst->setData(modelSrvLst->index(idx, 1), 1);
 	}
 	else
 	{
-		int count = modelSrvLst->data(modelSrvLst->index(idx, 1)).toInt();
+		int connectionCount = modelSrvLst->data(modelSrvLst->index(idx, 1)).toInt();
 
-		modelSrvLst->setData(modelSrvLst->index(idx, 1), ++count);
-		modelSrvLst->sort(1, Qt::DescendingOrder);
+		modelSrvLst->setData(modelSrvLst->index(idx, 1), ++connectionCount);
+		// disabled sorting by connection-count
+		//modelSrvLst->sort(1, Qt::DescendingOrder);
 	}
 	
 	writeServerlist();
 	
+
 	// split up the connect-string: <hostname>:<port>
-	QStringList srvlist = cbSrvAddr->lineEdit()->text().split(":", QString::SkipEmptyParts);
+	QStringList srvlist = strServer.split(":", QString::SkipEmptyParts);
 	
 	unsigned int port = config.getInt("default_port");
 	
@@ -1140,19 +1159,21 @@ void WMain::writeServerlist() const
 
 	settings.beginWriteArray("Serverlist");
 	
-	int numServer = cbSrvAddr->count();
-	
-	// store maximal 10 server in recent list
-	if (numServer > 10)
-		numServer = 10;
-
 	QAbstractItemModel *pModel = cbSrvAddr->model();
+	int numServer = pModel->rowCount();
+	
+	// store a maximum of 10 entries in recent-list
+	const int maxEntries = 10;
+	if (numServer > maxEntries)
+		numServer = maxEntries;
 
 	for (int i = 0; i < numServer; ++i)
 	{
+		int idx = (pModel->rowCount() > maxEntries) ? pModel->rowCount() - maxEntries + i : i;
+
 		settings.setArrayIndex(i);
-		settings.setValue("Name", pModel->data(pModel->index(i, 0)));
-		settings.setValue("Connections", pModel->data(pModel->index(i, 1)).toInt());
+		settings.setValue("Name", pModel->data(pModel->index(idx, 0)));
+		settings.setValue("Connections", pModel->data(pModel->index(idx, 1)).toInt());
 	}
 
 	settings.endArray();
