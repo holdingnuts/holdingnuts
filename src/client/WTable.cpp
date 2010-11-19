@@ -1510,11 +1510,11 @@ chips_type WTable::currentPot() const
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
-		return;
+		return 0;
 	
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
-		return;
+		return 0;
 
 	chips_type cur_pot = 0;
 	
