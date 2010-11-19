@@ -1576,7 +1576,9 @@ int PClient::init()
 		unsigned int id;
 		const char *file;
 	} sounds[] = {
+#ifdef DEBUG
 		{ SOUND_TEST_1,		"audio/test.wav" },
+#endif /* DEBUG */
 		{ SOUND_DEAL_1,		"audio/deal.wav" },
 		{ SOUND_CHIP_1,		"audio/chip1.wav" },
 		{ SOUND_CHIP_2,		"audio/chip2.wav" },
