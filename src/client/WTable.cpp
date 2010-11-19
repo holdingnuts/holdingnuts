@@ -948,10 +948,12 @@ void WTable::updateSeat(unsigned int s)
 		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 	
 	const seatinfo *seat = &(snap->seats[s]);
-	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	if (!seat)
+		return;
 	
 	
 	// get correct mapping (central/normal view) for seat-id
@@ -1083,7 +1085,8 @@ void WTable::updatePots()
 		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 	
 	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
 		m_Pots[t]->hide();
@@ -1131,8 +1134,8 @@ void WTable::updateDealerButton()
 		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
-	
+	if (!snap)
+		return;
 	
 	// remember last state change
 	static int last_state = -1;
@@ -1154,8 +1157,8 @@ void WTable::updateCommunityCards()
 		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
-	
+	if (!snap)
+		return;
 	
 	if (snap->state == Table::NewRound)
 		for (unsigned int i = 0; i < 5; i++)
@@ -1185,13 +1188,15 @@ void WTable::handleAutoActions()
 		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 	
 	if (snap->my_seat == -1)
 		return;
 	
 	const seatinfo *seat = &(snap->seats[snap->my_seat]);
-	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	if (!seat)
+		return;
 	
 	
 	// handle auto-actions
@@ -1246,7 +1251,8 @@ void WTable::updateHandStrength()
 		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 	
 	// is not a player
 	if (snap->my_seat == -1)
@@ -1256,7 +1262,8 @@ void WTable::updateHandStrength()
 	}
 	
 	const seatinfo *seat = &(snap->seats[snap->my_seat]);
-	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	if (!seat)
+		return;
 	
 	
 	if (seat->in_round)
@@ -1290,8 +1297,8 @@ void WTable::updateView()
 		return;
 
 	const table_snapshot *snap = &(tinfo->snap);
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
-	
+	if (!snap)
+		return;
 	
 	
 	// update seat widgets
@@ -1382,11 +1389,13 @@ void WTable::actionBetRaise()
 {
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	
-	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	if (!tinfo)
+		return;
 	
 	table_snapshot *snap = &(tinfo->snap);
 	
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 
 	if (snap->my_seat == -1)
 		return;
@@ -1500,12 +1509,12 @@ void WTable::slotBetRaiseAmountChanged()
 chips_type WTable::currentPot() const
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	
-	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	if (!tinfo)
+		return;
 	
 	const table_snapshot *snap = &(tinfo->snap);
-	
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 
 	chips_type cur_pot = 0;
 	
@@ -1518,7 +1527,7 @@ chips_type WTable::currentPot() const
 	{
 		const seatinfo *seat = &(snap->seats[i]);
 
-		if (seat->valid && seat->in_round)
+		if (seat && seat->valid && seat->in_round)
 			cur_pot += seat->bet;
 	}
 
@@ -1528,12 +1537,12 @@ chips_type WTable::currentPot() const
 void WTable::actionBetsizeMinimum()
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	
-	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	if (!tinfo)
+		return;
 	
 	const table_snapshot *snap = &(tinfo->snap);
-	
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 	
 	if (snap->my_seat == -1)
 		return;
@@ -1564,12 +1573,12 @@ void WTable::actionBetsizePotsize()
 void WTable::actionBetsizeMaximum()
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	
-	Q_ASSERT_X(tinfo, Q_FUNC_INFO, "getTableInfo failed");
+	if (!tinfo)
+		return;
 	
 	const table_snapshot *snap = &(tinfo->snap);
-	
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 	
 	if (snap->my_seat == -1)
 		return;
@@ -1600,15 +1609,15 @@ void WTable::slotFirstReminder(int seatnr)
 		return;
 	
 	const table_snapshot *snap = &(tinfo->snap);
-	
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 
 	if (snap->my_seat != seatnr)
 		return;
 
 	const seatinfo *seat = &(snap->seats[seatnr]);
-
-	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	if (!seat)
+		return;
 		
 	addServerMessage(
 		QString(tr("%1, it's your turn!")
@@ -1623,19 +1632,19 @@ void WTable::slotSecondReminder(int seatnr)
 		return;
 	
 	const table_snapshot *snap = &(tinfo->snap);
-	
-	Q_ASSERT_X(snap, Q_FUNC_INFO, "invalid snapshot pointer");
+	if (!snap)
+		return;
 
 	if (snap->my_seat != seatnr)
 		return;
 
 	const seatinfo *seat = &(snap->seats[seatnr]);
-
-	Q_ASSERT_X(seat, Q_FUNC_INFO, "invalid seat pointer");
+	if (!seat)
+		return;
 		
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
-
-	Q_ASSERT_X(ginfo, Q_FUNC_INFO, "invalid gameinfo pointer");
+	if (!ginfo)
+		return;
 		
 	addServerMessage(
 		QString(tr("%1, you have %2 seconds left to respond!")
