@@ -25,6 +25,7 @@
 #include "WMain.hpp"
 #include "ChatBox.hpp"
 #include "WTable.hpp"
+#include "FirstStartDialog.hpp"
 #include "SettingsDialog.hpp"
 #include "CreateGameDialog.hpp"
 #include "AboutDialog.hpp"
@@ -454,6 +455,17 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	}
 		
 	cbSrvAddr->setModel(modelSrvLst);
+
+
+	// if this is the first start, show an initial config dialog
+	if (config.getBool("first_start"))
+	{
+		FirstStartDialog dialogFirstStart(config);
+		dialogFirstStart.exec();
+
+		config.set("first_start", false);
+		((PClient*)qApp)->saveConfig();
+	}
 }
 
 void WMain::addLog(const QString &line)
@@ -789,16 +801,13 @@ void WMain::actionStartGame()
 
 void WMain::actionSettings()
 {
-	char cfgfile[1024];
-	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
-	
 	SettingsDialog dialogSettings(config);
 	if (dialogSettings.exec() != QDialog::Accepted)
 		return;
 	
 	// update config-version and save the config
 	config.set("version", VERSION);
-	config.save(cfgfile);
+	((PClient*)qApp)->saveConfig();
 	
 	// updates
 	this->updateWelcomeLabel();

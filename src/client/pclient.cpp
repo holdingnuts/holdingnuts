@@ -1457,6 +1457,14 @@ bool PClient::isTableWindowRemaining()
 	return false;
 }
 
+void PClient::saveConfig()
+{
+	char cfgfile[1024];
+	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
+
+	config.save(cfgfile);
+}
+
 PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 {
 	connected = false;

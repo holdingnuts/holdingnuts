@@ -147,6 +147,7 @@ public:
 	~PClient();
 	
 	int init();
+	void saveConfig();
 	
 	bool doConnect(QString strServer, unsigned int port);
 	void doClose();

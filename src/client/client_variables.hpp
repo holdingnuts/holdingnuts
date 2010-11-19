@@ -21,6 +21,7 @@
 // Client defaults
 
 config.set("version",		VERSION);		// config file version
+config.set("first_start",	true);			// whether this is a start without config
 config.set("default_host",	"game.holdingnuts.net");	// default host to connect to
 config.set("default_port",	DEFAULT_SERVER_PORT);	// default port to connect to
 config.set("auto_connect",	false);			// automatically connect to default server
