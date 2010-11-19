@@ -451,7 +451,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	}
 	settings.endArray();
 
-	// disabled sorting by connection-count
+	// NOTE: disabled sorting by connection-count
 	//modelSrvLst->sort(1, Qt::DescendingOrder);
 
 	// always add default server
@@ -459,9 +459,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	{
 		int idx = 0;
 		modelSrvLst->insertRow(idx);
-		modelSrvLst->setData(
-			modelSrvLst->index(idx, 0),
-			defaultServer);
+		modelSrvLst->setData(modelSrvLst->index(idx, 0), defaultServer);
 		modelSrvLst->setData(modelSrvLst->index(idx, 1), 0);
 	}
 		
@@ -662,22 +660,25 @@ void WMain::actionConnect()
 
 	QAbstractItemModel *modelSrvLst = cbSrvAddr->model();
 
-	if (idx == -1)
+	int connectionCount = 0;
+	if (idx != -1)
 	{
-		idx = modelSrvLst->rowCount();
-		modelSrvLst->insertRow(idx);
-		modelSrvLst->setData(modelSrvLst->index(idx, 0), strServer);
-		modelSrvLst->setData(modelSrvLst->index(idx, 1), 1);
-	}
-	else
-	{
-		int connectionCount = modelSrvLst->data(modelSrvLst->index(idx, 1)).toInt();
-
-		modelSrvLst->setData(modelSrvLst->index(idx, 1), ++connectionCount);
-		// disabled sorting by connection-count
-		//modelSrvLst->sort(1, Qt::DescendingOrder);
+		connectionCount = modelSrvLst->data(modelSrvLst->index(idx, 1)).toInt();
+		modelSrvLst->removeRow(idx);
 	}
 	
+	// add entry to model
+	idx = modelSrvLst->rowCount();
+	modelSrvLst->insertRow(idx);
+	modelSrvLst->setData(modelSrvLst->index(idx, 0), strServer);
+	modelSrvLst->setData(modelSrvLst->index(idx, 1), ++connectionCount);
+	// NOTE: disabled sorting by connection-count
+	//modelSrvLst->sort(1, Qt::DescendingOrder);
+
+	cbSrvAddr->setCurrentIndex(cbSrvAddr->count() - 1);
+
+
+	// save list
 	writeServerlist();
 	
 
