@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009, Dominik Geyer
+ * Copyright 2008-2010, Dominik Geyer
  *
  * This file is part of HoldingNuts.
  *
@@ -62,7 +62,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 	
 	QLabel *lblLicense = new QLabel(tr("Licensed under the GPLv3"));
 	
-	QLabel *lblCopyright = new QLabel("Copyright 2008, 2009, Dominik Geyer &\nHoldingNuts team", this);
+	QLabel *lblCopyright = new QLabel("Copyright 2008-2010, Dominik Geyer &\nHoldingNuts team", this);
 	
 	QLabel *lblWebsite = new QLabel(this);
 	lblWebsite->setText("<qt><a href=\"http://www.holdingnuts.net/\">http://www.holdingnuts.net/</a></qt>");

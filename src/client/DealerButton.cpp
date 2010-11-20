@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009, Dominik Geyer
+ * Copyright 2008-2010, Dominik Geyer
  *
  * This file is part of HoldingNuts.
  *
