@@ -112,7 +112,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	// sort and filter proxy model
 	proxyModelGameList = new GameListSortFilterProxyModel(this);
 	proxyModelGameList->setSourceModel(modelGameList);
-	proxyModelGameList->setDynamicSortFilter(true);
+//	proxyModelGameList->setDynamicSortFilter(true);
 			
 	// view game
 	viewGameList = new QTableView(this);
@@ -123,7 +123,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->verticalHeader()->setHighlightSections(false);
 	viewGameList->setSelectionMode(QAbstractItemView::SingleSelection);
 	viewGameList->setSelectionBehavior(QAbstractItemView::SelectRows);
-	viewGameList->setSortingEnabled(false);   // FIXME: disabled till issues solved
+	viewGameList->setSortingEnabled(true);
 	
 #if 0
 	QFont font = viewGameList->font();
@@ -131,11 +131,14 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setFont(font);
 #endif
 	viewGameList->setModel(proxyModelGameList);
-	viewGameList->setColumnWidth(0, 200);	// name
-	viewGameList->setColumnWidth(1, 90);	// type
-	viewGameList->setColumnWidth(2, 50);	// players
-	viewGameList->setColumnWidth(3, 50);	// state
-	viewGameList->setColumnHidden(4, true);
+	viewGameList->setColumnWidth(1, 200);	// name
+	viewGameList->setColumnWidth(2, 90);	// type
+	viewGameList->setColumnWidth(3, 50);	// players
+	viewGameList->setColumnWidth(4, 50);	// state
+#ifndef DEBUG
+	viewGameList->setColumnHidden(0, true);	// gid
+#endif
+	viewGameList->setColumnHidden(5, true);	// password
 
 	connect(
 		viewGameList->selectionModel(),
@@ -902,12 +905,6 @@ void WMain::gameListSelectionChanged(
 	{
 		const int selected_row = proxyModelGameList->mapToSource((*selected.begin()).topLeft()).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
-		
-		/*
-		dbg_msg("gameListSelectionChanged", "selected-row:%d gid:%d",
-			selected_row,
-			gid);
-		*/
 		
 		((PClient*)qApp)->requestGameinfo(gid);
 		((PClient*)qApp)->requestPlayerlist(gid);
