@@ -519,6 +519,8 @@ void WMain::updateConnectionStatus()
 		cbSrvAddr->setEnabled(false);
 		
 		wConnection->setVisible(true);
+
+		btnClose->setFocus(Qt::OtherFocusReason);
 	}
 	else if (is_connected)
 	{
@@ -554,6 +556,8 @@ void WMain::updateConnectionStatus()
 		wConnection->setVisible(true);
 		
 		updateServerStatsLabel();
+
+		cbSrvAddr->setFocus(Qt::OtherFocusReason);
 	}
 	
 	m_pChat->setEnabled(is_connected);
@@ -566,6 +570,7 @@ void WMain::updateConnectionStatus()
 	updateWelcomeLabel();
 	updateServerTimeLabel();
 	
+
 	QItemSelectionModel *pSelect = viewGameList->selectionModel();
 	Q_ASSERT_X(pSelect, Q_FUNC_INFO, "invalid selection model pointer");
 	
@@ -578,6 +583,10 @@ void WMain::updateConnectionStatus()
 	}
 	else
 		updateGameinfo(-1);
+
+
+	if (is_connected)
+		m_pChat->setInputFocus();
 }
 
 void WMain::notifyPlayerinfo(int cid)
@@ -695,12 +704,7 @@ void WMain::actionConnect()
 	if (!((PClient*)qApp)->doConnect(srvlist.at(0), port))
 		addLog(tr("Error connecting."));
 	else
-	{
 		updateConnectionStatus();
-		
-		// FIXME: set focus on chat input line
-		//m_pChat->setFocus(Qt::OtherFocusReason);
-	}
 }
 
 void WMain::actionClose()

@@ -157,6 +157,13 @@ void ChatBox::setEnabled(bool enable)
 	m_pSendMsg->setEnabled(enable);
 }
 
+void ChatBox::setInputFocus()
+{
+	Q_ASSERT_X(m_pEditChat, Q_FUNC_INFO, "invalid lineedit pointer");
+
+	m_pEditChat->setFocus(Qt::OtherFocusReason);
+}
+
 bool ChatBox::hasInputFocus() const
 {
 	Q_ASSERT_X(m_pEditChat, Q_FUNC_INFO, "invalid lineedit pointer");
@@ -180,7 +187,7 @@ void ChatBox::actionChat()
 		m_pEditChat->addHistory();
 		
 		m_pEditChat->clear();
-		m_pEditChat->setFocus();
+		m_pEditChat->setFocus(Qt::OtherFocusReason);
 	}
 }
 

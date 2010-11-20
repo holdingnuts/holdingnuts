@@ -61,6 +61,7 @@ public:
 
 	void setEnabled(bool enable);
 
+	void setInputFocus();
 	bool hasInputFocus() const;
 
 protected:
