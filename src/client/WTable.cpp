@@ -365,13 +365,18 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_nSitout = stlayPersistentActions->addWidget(btnSitout);
 	m_nBack = stlayPersistentActions->addWidget(btnBack);
 	
+#if 0
+	// FIXME: implement me...
 	QCheckBox *chkAutoMuck = new QCheckBox(tr("Muck losing\nhands"), this);
 	chkAutoMuck->setFont(QFont("Arial", 8));
-	chkAutoMuck->setEnabled(false);	// FIXME: implement me...
+	chkAutoMuck->setEnabled(false);
+#endif
 	
 	QVBoxLayout *layPersistentActions = new QVBoxLayout();
 	layPersistentActions->addLayout(stlayPersistentActions);
+#if 0
 	layPersistentActions->addWidget(chkAutoMuck, 0, Qt::AlignCenter);
+#endif
 	
 	lblPersistentActions = new QLabel(this);
 	lblPersistentActions->setPixmap(QPixmap("gfx/table/actions.png"));
