@@ -82,7 +82,7 @@
     <message>
         <location filename="../CreateGameDialog.cpp" line="106"/>
         <source>Starting blinds</source>
-        <translation>Anfängliche blinds</translation>
+        <translation>Anfängliche Blinds</translation>
     </message>
     <message>
         <location filename="../CreateGameDialog.cpp" line="113"/>
@@ -574,7 +574,7 @@
     <message>
         <location filename="../WMain.cpp" line="201"/>
         <source>Subs&amp;cribe</source>
-        <translation>A&amp;bonieren</translation>
+        <translation>A&amp;bonnieren</translation>
     </message>
     <message>
         <location filename="../WMain.cpp" line="248"/>
@@ -689,7 +689,7 @@
     <message>
         <location filename="../WMain.cpp" line="252"/>
         <source>Player timeout</source>
-        <translation>Spieler timeout</translation>
+        <translation>Spieler-Timeout</translation>
     </message>
     <message>
         <location filename="../WMain.cpp" line="254"/>
