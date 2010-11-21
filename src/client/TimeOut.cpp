@@ -39,10 +39,11 @@ TimeOut::TimeOut()
 	m_bHalfAlreadyEmitted(false),
 	m_bThreeQuarterAlreadyEmitted(false)
 {
-	this->setEnabled(false);
+	//this->setEnabled(false);
 	this->setZValue(10);
 	
-	m_tl.setFrameRange(0, m_Image.width());
+	// first frame will be emitted after some time, so start with 1
+	m_tl.setFrameRange(1, m_Image.width() - 1);
 	m_tl.setUpdateInterval(200);
 
 	connect(&m_tl, SIGNAL(frameChanged(int)), this, SLOT(update(int)));
@@ -63,7 +64,7 @@ void TimeOut::paint(
 {
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
-	
+
 	painter->save();
 
 	painter->setClipRegion(
@@ -73,10 +74,13 @@ void TimeOut::paint(
 		QRectF(0, 0, m_Image.width(), m_Image.height()),
 		m_Image);
 
+	painter->restore();
+	painter->save();
+
 #ifdef DEBUG	
 	if (config.getBool("dbg_bbox"))
 	{
-		painter->setPen(Qt::blue);
+		painter->setPen(Qt::yellow);
 		painter->drawRect(this->boundingRect());
 	}
 #endif
@@ -107,6 +111,8 @@ void TimeOut::stop()
 
 void TimeOut::update(int frame)
 {
+	qDebug() << "m_nFrame: " << m_nFrame;
+
 	m_nFrame = frame;
 	
 	// pass 1/4
@@ -139,7 +145,7 @@ void TimeOut::update(int frame)
 		}
 	}
 
-	if (m_nFrame == m_Image.width())
+	if (m_nFrame == m_Image.width() - 1)
 		emit timeup(m_nSeat);
 
 	QGraphicsItem::update(this->boundingRect());
