@@ -43,7 +43,7 @@ TimeOut::TimeOut()
 	this->setZValue(10);
 	
 	// first frame will be emitted after some time, so start with 1
-	m_tl.setFrameRange(1, m_Image.width() - 1);
+	m_tl.setFrameRange(1, m_Image.width());
 	m_tl.setUpdateInterval(200);
 
 	connect(&m_tl, SIGNAL(frameChanged(int)), this, SLOT(update(int)));
@@ -111,7 +111,7 @@ void TimeOut::stop()
 
 void TimeOut::update(int frame)
 {
-	qDebug() << "m_nFrame: " << m_nFrame;
+//	qDebug() << "m_nFrame: " << frame;
 
 	m_nFrame = frame;
 	
@@ -145,7 +145,7 @@ void TimeOut::update(int frame)
 		}
 	}
 
-	if (m_nFrame == m_Image.width() - 1)
+	if (m_nFrame == m_Image.width())
 		emit timeup(m_nSeat);
 
 	QGraphicsItem::update(this->boundingRect());
