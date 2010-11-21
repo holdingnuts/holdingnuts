@@ -1496,7 +1496,7 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 		path = dir.absolutePath();
 		
 		sys_set_config_path(path.toStdString().c_str());
-		log_msg("config", "Using manual config-directory '%s'", path.toStdString().c_str());
+		log_msg("config", "Using custom config-directory '%s'", path.toStdString().c_str());
 	}
 	
 	

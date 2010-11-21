@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 		const char *path = argv[2];
 		
 		sys_set_config_path(path);
-		log_msg("config", "Using manual config-directory '%s'", path);
+		log_msg("config", "Using custom config-directory '%s'", path);
 	}
 	
 	
