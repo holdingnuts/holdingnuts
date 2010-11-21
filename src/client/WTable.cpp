@@ -527,11 +527,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	QShortcut *shortcutScreenshot = new QShortcut(Qt::Key_F10, this);
 	connect(shortcutScreenshot, SIGNAL(activated()), this, SLOT(actionScreenshot()));
 	
-	// set background
-	QPalette p(this->palette());
-	p.setBrush(QPalette::Window, QBrush(QPixmap("gfx/table/background.png")));
-	this->setPalette(p);
-	
 
 	this->setMinimumSize(640, 480);
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
@@ -1689,6 +1684,13 @@ void WTable::resizeEvent(QResizeEvent *event)
 	m_pView->move(width()/2 - m_pView->width() / 2, m_pView->y());
 	
 	m_pView->fitInView(m_pScene->itemsBoundingRect());
+
+
+	// set background
+	static QPixmap background = QPixmap("gfx/table/background.jpg");
+	QPalette p(this->palette());
+	p.setBrush(QPalette::Window, background.scaled(this->width(), this->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+	this->setPalette(p);
 }
 
 bool WTable::greaterBet(const table_snapshot *snap, const chips_type bet, chips_type *pbet) const
