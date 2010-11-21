@@ -85,8 +85,7 @@ int audio_init()
 
 int audio_deinit()
 {
-	/* FIXME: free allocated sound-data */
-	
+	SDL_PauseAudio(1);
 	SDL_CloseAudio();
 	SDL_Quit();
 	
