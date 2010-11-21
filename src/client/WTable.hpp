@@ -113,6 +113,8 @@ protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	
+	void updateAfterSizeChange();
+
 	QPointF calcSeatPos(unsigned int nSeatID) const;
 	QPointF calcCCardsPos(unsigned int nCard) const;
 	QPointF calcTimeoutPos(unsigned int nSeatID) const;

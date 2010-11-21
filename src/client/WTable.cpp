@@ -530,7 +530,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	this->setMinimumSize(640, 480);
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
-	
 
 	// load gui settings
 	QSettings settings;
@@ -1606,9 +1605,8 @@ void WTable::slotShow()
 	updateView();
 	
 	show();
-	
-	// FIXME: better solution
-	resizeEvent(NULL);
+
+	updateAfterSizeChange();
 }
 
 void WTable::slotTimeup(int seat)
@@ -1672,16 +1670,24 @@ void WTable::slotSecondReminder(int seatnr)
 
 void WTable::resizeEvent(QResizeEvent *event)
 {
+	QWidget::resizeEvent(event);
+
+	updateAfterSizeChange();
+}
+
+void WTable::updateAfterSizeChange()
+{
 	// preserve aspect ratio of our view
 	const float aspect_ratio = 0.6f;
 	int new_width = (int)(m_pView->height() / aspect_ratio);
 	
 	// fit in window if preserving aspect-ratio is not possible
+	const int padding = 15;
 	if (new_width > this->width())
-		new_width = this->width();
+		new_width = this->width() - padding;
 	
 	m_pView->resize(new_width, m_pView->height());
-	m_pView->move(width()/2 - m_pView->width() / 2, m_pView->y());
+	m_pView->move(this->width()/2 - m_pView->width() / 2, m_pView->y());
 	
 	m_pView->fitInView(m_pScene->itemsBoundingRect());
 
@@ -1689,7 +1695,8 @@ void WTable::resizeEvent(QResizeEvent *event)
 	// set background
 	static QPixmap background = QPixmap("gfx/table/background.jpg");
 	QPalette p(this->palette());
-	p.setBrush(QPalette::Window, background.scaled(this->width(), this->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+	p.setBrush(QPalette::Window,
+		background.scaled(this->width(), this->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 	this->setPalette(p);
 }
 
