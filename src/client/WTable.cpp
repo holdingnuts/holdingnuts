@@ -235,8 +235,8 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pScene = new QGraphicsScene(this);
 
 	//m_pScene->setBackgroundBrush(Qt::black);//QPixmap("gfx/table/background.png"));
-	// don't use bsptree
-	m_pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
+	// as most graphics-items are static we can use BspTree
+	m_pScene->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
 
 	m_pImgTable = new QGraphicsPixmapItem(QPixmap("gfx/table/table.png"));
 	m_pImgTable->setTransformationMode(Qt::SmoothTransformation);
@@ -320,11 +320,10 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	// view
 	m_pView = new QGraphicsView(m_pScene);
 	m_pView->setRenderHint(QPainter::SmoothPixmapTransform);
-	m_pView->setCacheMode(QGraphicsView::CacheNone);
+	m_pView->setCacheMode(QGraphicsView::CacheBackground);
 	m_pView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_pView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_pView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	m_pView->setOptimizationFlag(QGraphicsView::DontClipPainter, true);
 	m_pView->setFrameStyle(QFrame::Plain);
 	m_pView->setStyleSheet("background: transparent");
 	

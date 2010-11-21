@@ -314,7 +314,10 @@ void Seat::paint(
 	calcChipStackPos(csx_pos, csy_pos, m_fmInSeat.width(m_strAmount));
 
 	m_pChipStack->setPos(csx_pos, csy_pos);
-	m_pChipStack->update();
+
+	// NOTE: The following would result in insanely high workload/ repaint-recursion...
+	// it should automatically get updated by parent
+	//m_pChipStack->update();
 
 	// big-cards
 	if (m_bBigCards)
