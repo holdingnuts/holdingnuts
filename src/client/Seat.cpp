@@ -354,7 +354,7 @@ void Seat::paint(
 	}
 	
 	// small cards
-	if (m_bSmallCards)
+	if (m_bSmallCards && !m_bBigCards)
 	{
 		// image card backside
 		static QImage imgCardBackside(QString("gfx/deck/%1/back.png")
