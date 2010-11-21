@@ -288,7 +288,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		m_ptDealerBtn[i] = calcDealerBtnPos(i);
 	}
 
-	Seat::setInSeatFont(QFont("Arial", 18,  QFont::Bold));
+	Seat::setInSeatFont(QFont("Arial", 18, QFont::Bold));
 
 	QFont font = QApplication::font();
 	
@@ -296,7 +296,6 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	font.setBold(true);
 	
 	const QFontMetrics fm(font);
-	const QPointF ptCenter = m_pImgTable->boundingRect().center();
 	
 	m_pTxtPots = m_pScene->addSimpleText("Main pot: 0", font);
 	m_pTxtPots->setPos(calcTxtPotsPos());
@@ -331,7 +330,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	// fixed width for action buttons which have an amount in their caption
 	const unsigned int actionbtn_width = 100;
 	
-	// ui - widgets
+	// action buttons
 	QPushButton *btnFold = new QPushButton(tr("&Fold"), this);
 	btnFold->setFixedWidth(actionbtn_width);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
@@ -531,17 +530,19 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	// set background
 	QPalette p(this->palette());
 	p.setBrush(QPalette::Window, QBrush(QPixmap("gfx/table/background.png")));
-	this->setPalette(p);	
+	this->setPalette(p);
 	
+
 	this->setMinimumSize(640, 480);
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
 	
+
 	// load gui settings
 	QSettings settings;
 
 	settings.beginGroup("TableWindow");
-		this->resize(settings.value("size", QSize(800, 630)).toSize());
-		this->move(settings.value("pos", QPoint(50, 50)).toPoint());
+	this->resize(settings.value("size", QSize(800, 630)).toSize());
+	this->move(settings.value("pos", QPoint(50, 50)).toPoint());
 	settings.endGroup();
 }
 
@@ -1877,7 +1878,7 @@ void WTable::showDebugTable()
 	for (unsigned int i = 0; i < nMaxSeats; i++)
 	{
 		wseats[i]->setAction(
-			Player::PlayerAction(qrand() % Player::Sitout),
+			Player::PlayerAction(i != 0 ? qrand() % Player::Sitout : Player::None),
 			(qrand() % 30000 + 1));
 		wseats[i]->setInfo(
 			QString::fromStdString(config.get("player_name")),

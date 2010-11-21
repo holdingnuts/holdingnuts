@@ -18,6 +18,7 @@
  *
  * Authors:
  *     Michael Miller <michael.miller@holdingnuts.net>
+ *     Dominik Geyer <dominik.geyer@holdingnuts.net>
  */
 
 
@@ -240,10 +241,8 @@ void Seat::paint(
 	if (!m_bValid)
 		return;
 	
-	// image card backside
-	static QImage imgCardBackside(QString("gfx/deck/%1/back.png")
-		.arg(QString::fromStdString(config.get("ui_card_deck"))));
 	
+	// seat
 	static const qreal seat_width = SeatImages::Instance().imgBack.width();
 	static const qreal seat_height = SeatImages::Instance().imgBack.height();
 	
@@ -291,7 +290,7 @@ void Seat::paint(
 	
 	painter->fillPath(pathTxtStake, Qt::black);
 
-	// text amount
+	// text bet-amount
 	qreal tx_pos = 0;
 	qreal ty_pos = 0;
 			
@@ -307,7 +306,7 @@ void Seat::paint(
 		Qt::AlignLeft,
 		m_strAmount);
 
-	// chip stake
+	// chip stack
 	qreal csx_pos = 0;
 	qreal csy_pos = 0;
 	
@@ -357,6 +356,10 @@ void Seat::paint(
 	// small cards
 	if (m_bSmallCards)
 	{
+		// image card backside
+		static QImage imgCardBackside(QString("gfx/deck/%1/back.png")
+			.arg(QString::fromStdString(config.get("ui_card_deck"))));
+
 		painter->drawImage(
 			QRectF(
 				m_xPosSmallCards,

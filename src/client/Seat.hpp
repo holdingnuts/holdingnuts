@@ -113,7 +113,7 @@ private:
 	bool					m_bSmallCards;
 	//! \brief display small-cards
 	bool					m_bBigCards;
-	//! \brief
+	//! \brief chipstack at seat
 	ChipStack				*m_pChipStack;
 	//! \brief X Position from small Cards
 	qreal					m_xPosSmallCards;

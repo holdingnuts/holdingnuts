@@ -22,10 +22,13 @@
 
 
 #include "Chip.hpp"
+#include "ConfigParser.hpp"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
+
+extern ConfigParser config;
 
 Chip::Chip(const QImage& img, QGraphicsItem* parent)
 :	QGraphicsItem(parent),
@@ -53,5 +56,12 @@ void Chip::paint(
 	painter->drawImage(
 		QRectF(0, 0, m_pImage->width(), m_pImage->height()),
 		*m_pImage);
+#ifdef DEBUG
+	if (config.getBool("dbg_bbox"))
+	{
+		painter->setPen(Qt::green);
+		painter->drawRect(this->boundingRect());
+	}
+#endif
 	painter->restore();
 }
