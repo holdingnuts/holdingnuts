@@ -795,12 +795,20 @@ void WMain::actionOpenTable()
 		const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
 		const int gid = modelGameList->findGidByRow(selected_row);
 		
+		const gameinfo *gi = ((PClient*)qApp)->getGameInfo(gid);
+
+		// player needs to be registered/subscribed to receive table updates
+		if (!gi || !((gi->registered || gi->subscribed) && gi->state != GameStateWaiting))
+			return;
+
 		tableinfo* tinfo = ((PClient*)qApp)->getTableInfo(gid, 0 /* FIXME */);
 		
-		// drop message and display notice if there is no table-info
+		// display notice if there is no table-info (e.g. after a re-connect or spectate-mode)
 		if (!tinfo)
 		{
 			addLog(tr("The table will be opened on the next hand."));
+
+			// get out here!
 			return;
 		}
 		
