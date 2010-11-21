@@ -443,11 +443,12 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 	{
 		it.parse(infostr);
 		
+		bool havearg = (it.count() >= 2);
 		string infotype, infoarg;
+
 		it.getNext(infotype);
-		
-		bool havearg = it.getNext(infoarg);
-		
+		infoarg = it.getTillEnd(':');
+
 		if (infotype == "name" && havearg)
 		{
 			// allow name-change only once per session
@@ -1149,10 +1150,11 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 	{
 		it.parse(infostr);
 		
+		bool havearg = (it.count() >= 2);
 		string infotype, infoarg;
+
 		it.getNext(infotype);
-		
-		bool havearg = it.getNext(infoarg);
+		infoarg = it.getTillEnd(':');
 		
 		if (infotype == "type" && havearg)
 		{
