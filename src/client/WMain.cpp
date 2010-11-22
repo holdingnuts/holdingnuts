@@ -775,6 +775,8 @@ void WMain::actionUnregister()
 void WMain::actionSubscribe()
 {
 	doRegister(true, true);
+
+	actionOpenTable();
 }
 
 void WMain::actionUnsubscribe()
