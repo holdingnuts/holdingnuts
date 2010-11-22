@@ -1,6 +1,6 @@
 .\" Man page for the HoldingNuts project
 .\"   groff -man -Tascii holdingnuts.6
-.TH HOLDINGNUTS 6 "Version 0.0.4" "Dominik Geyer" "HoldingNuts manual"
+.TH HOLDINGNUTS 6 "Version 0.8.0" "Dominik Geyer" "HoldingNuts manual"
 .SH NAME
 HoldingNuts \- a poker client and server
 .SH SYNOPSIS
@@ -18,11 +18,17 @@ This is the client part which is used to connect to a running instance of the
 .BR holdingnuts-server (6)
 game-server.
 .SH OPTIONS
+.IP "-h"
+Print usage.
 .IP "-c config-dir"
-Use an alternate
-.I config-dir
+Use an alternative
+.I configuration directory
 instead of the default
 .IR ~/.holdingnuts .
+.IP "-d data-dir"
+Use an alternative
+.I data directory
+instead of searching for it.
 .SH FILES
 .I ~/.holdingnuts/client.cfg
 .RS
@@ -41,7 +47,7 @@ The project wiki:
 The online manual:
 .B http://wiki.holdingnuts.net/manual
 .SH AUTHOR
-Dominik Geyer <dominik.geyer@holdingnuts.net> is the main author, but the whole
+Dominik Geyer <dominik.geyer@holdingnuts.net> is the main author. The complete
 list of contributors is found at 
 .PP
 .B http://www.holdingnuts.net/about
