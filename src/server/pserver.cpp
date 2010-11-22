@@ -214,11 +214,11 @@ bool config_load()
 	snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
 	
 	if (config.load(cfgfile))
-		log_msg("config", "Loaded configuration from %s", cfgfile);
+		log_msg("config", "Loaded configuration from '%s'", cfgfile);
 	else
 	{
 		if (config.save(cfgfile))
-			log_msg("config", "Saved initial configuration to %s", cfgfile);
+			log_msg("config", "Saved initial configuration to '%s'", cfgfile);
 	}
 	
 	return true;
@@ -245,32 +245,37 @@ int database_init()
 
 int main(int argc, char **argv)
 {
+	int custom_config = 0;
+
+	// check for command-line arguments
+	if (argc > 1)
+	{
+		char *option = argv[1];
+		if (argc == 3 && option[0] == '-' && option[1] == 'c')
+		{
+			const char *path = argv[2];
+
+			sys_set_config_path(path);
+			custom_config = 1;
+		}
+		else
+		{
+			printf("Usage: holdingnuts-server [-c <config-dir>]\n");
+			return 0;
+		}
+	}
+
+
 	log_set(stdout, 0);
-	
 	log_msg("main", "HoldingNuts pserver (version %d.%d.%d; svn %s)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
 		VERSIONSTR_SVN);
 	
-#if !defined(PLATFORM_WINDOWS)
-	// ignore broken-pipe signal eventually caused by sockets
-	signal(SIGPIPE, SIG_IGN);
-#endif
-	
-	// init PRNG
-	srand((unsigned) time(NULL));
-	
-	
-	// use config-directory set on command-line
-	if (argc >= 3 && (argv[1][0] == '-' && argv[1][1] == 'c'))
-	{
-		const char *path = argv[2];
-		
-		sys_set_config_path(path);
-		log_msg("config", "Using custom config-directory '%s'", path);
-	}
-	
 	
 	// load config
+	if (custom_config)
+		log_msg("config", "Using custom config-directory '%s'", sys_config_path());
+	
 	config_load();
 	config.print();
 	
@@ -294,6 +299,10 @@ int main(int argc, char **argv)
 	}
 	
 	
+#if !defined(PLATFORM_WINDOWS)
+	// ignore broken-pipe signal eventually caused by sockets
+	signal(SIGPIPE, SIG_IGN);
+#endif
 	network_init();
 
 #ifndef NOSQLITE
@@ -304,6 +313,9 @@ int main(int argc, char **argv)
 	}
 #endif /* !NOSQLITE */
 	
+	// initialize PRNG
+	srand((unsigned) time(NULL));
+
 	gameinit();
 	
 	mainloop();

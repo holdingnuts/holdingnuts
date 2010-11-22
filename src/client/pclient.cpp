@@ -1484,25 +1484,6 @@ PClient::PClient(int &argc, char **argv) : QApplication(argc, argv)
 	QCoreApplication::setOrganizationName(CONFIG_APPNAME);
 	QCoreApplication::setOrganizationDomain("www.holdingnuts.net");
 	QCoreApplication::setApplicationName(CONFIG_APPNAME);
-	
-	
-	// use config-directory set on command-line
-	if (argc >= 3 && (argv[1][0] == '-' && argv[1][1] == 'c'))
-	{
-		// we need an absolute path because we chdir into data-dir
-		QString path(argv[2]);
-		QDir dir(path);
-		
-		path = dir.absolutePath();
-		
-		sys_set_config_path(path.toStdString().c_str());
-		log_msg("config", "Using custom config-directory '%s'", path.toStdString().c_str());
-	}
-	
-	
-	// create config-dir if it doesn't yet exist
-	QDir config_dir;
-	config_dir.mkpath(QString(sys_config_path()));
 }
 
 PClient::~PClient()
@@ -1510,7 +1491,7 @@ PClient::~PClient()
 	Q_CLEANUP_RESOURCE(pclient);
 }
 
-int PClient::init()
+void PClient::init()
 {
 	// workaround QTBUG-6840 and QTBUG-8606:
 	// disable pixmap-cache for Qt 4.6.0 and 4.6.2
@@ -1518,23 +1499,6 @@ int PClient::init()
 	{
 		log_msg("main", "Working around QTBUG-6840 and QTBUG-8606");
 		QPixmapCache::setCacheLimit(0);
-	}
-
-	// change into data-dir
-	const char *datadir = sys_data_path();
-	if (datadir)
-	{
-		log_msg("main", "Using data-directory: %s", datadir);
-		
-		QString sdatadir(datadir);
-		QDir::setCurrent(sdatadir);
-	}
-	else
-	{
-		log_msg("main", "Error: data-directory was not found");
-		QMessageBox::critical(NULL, "Error", "The data directory was not found.");
-		
-		return 1;
 	}
 	
 	
@@ -1636,8 +1600,6 @@ int PClient::init()
 	if (config.getInt("dbg_register") != -1)
 		QTimer::singleShot(1000, this, SLOT(slotDbgRegister()));
 #endif
-	
-	return 0;
 }
 
 bool config_load()
@@ -1645,11 +1607,16 @@ bool config_load()
 	// include config defaults
 	#include "client_variables.hpp"
 	
+
+	// create config-dir if it doesn't yet exist
+	sys_mkdir(sys_config_path());
+
+
 	char cfgfile[1024];
 	snprintf(cfgfile, sizeof(cfgfile), "%s/client.cfg", sys_config_path());
 	
 	if (config.load(cfgfile))
-		log_msg("config", "Loaded configuration from %s", cfgfile);
+		log_msg("config", "Loaded configuration from '%s'", cfgfile);
 	else
 	{
 		// override defaults
@@ -1665,7 +1632,7 @@ bool config_load()
 		config.set("uuid", suuid.toStdString());
 		
 		if (config.save(cfgfile))
-			log_msg("config", "Saved initial configuration to %s", cfgfile);
+			log_msg("config", "Saved initial configuration to '%s'", cfgfile);
 	}
 	
 	return true;
@@ -1673,22 +1640,80 @@ bool config_load()
 
 int main(int argc, char **argv)
 {
+	// the app-instance
+	PClient app(argc, argv);
+
+	QString datadir(sys_data_path());
+
+	int custom_config = 0, custom_data = 0;
+
+	// check for command-line arguments
+	QStringList args = app.arguments();
+	for (int i=1; i < args.size(); ++i)
+	{
+		if (i < args.size() -1 && args.at(i) == "-c")
+		{
+			QDir dir(args.at(++i));
+
+			sys_set_config_path(dir.absolutePath().toStdString().c_str());
+			custom_config = 1;
+		}
+		else if (i < args.size() -1 && args.at(i) == "-d")
+		{
+			QDir dir(args.at(++i));
+
+			datadir = dir.absolutePath();
+
+			custom_data = 1;
+		}
+		else
+		{
+			printf("Usage: holdingnuts [-c <config-dir>] [-d <data-dir>]\n");
+			return 0;
+		}
+	}
+
+
 	log_set(stdout, 0);
-	
 	log_msg("main", "HoldingNuts pclient (version %d.%d.%d; svn %s; Qt version %s)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
 		VERSIONSTR_SVN,
 		qVersion());
 	
 	
-	// the app instance
-	PClient app(argc, argv);
-	
-	
 	// load config
+	if (custom_config)
+		log_msg("config", "Using custom config-directory '%s'", sys_config_path());
+
 	config_load();
 	config.print();
-	
+
+
+	// change into data-dir
+	if (custom_data)
+		log_msg("config", "Using custom data-directory '%s'", datadir.toStdString().c_str());
+
+	if (!datadir.isNull())
+	{
+		log_msg("main", "Changing into data-directory '%s'", datadir.toStdString().c_str());
+
+		if (!QDir::setCurrent(datadir))
+		{
+			log_msg("main", "Error: could not change into data-directory");
+			QMessageBox::critical(NULL, "Error", "Could not change into data-directory.");
+
+			return 1;
+		}
+	}
+	else
+	{
+		log_msg("main", "Error: data-directory was not found");
+		QMessageBox::critical(NULL, "Error", "The data directory was not found.");
+
+		return 1;
+	}
+
+
 	// start logging
 	filetype *fplog = NULL;
 	if (config.getBool("log"))
@@ -1718,8 +1743,7 @@ int main(int argc, char **argv)
 	audio_init();
 #endif
 	
-	if (app.init())
-		return 1;
+	app.init();
 	
 	int retval = app.exec();
 	

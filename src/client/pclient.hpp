@@ -146,7 +146,7 @@ public:
 	PClient(int &argc, char **argv);
 	~PClient();
 	
-	int init();
+	void init();
 	void saveConfig();
 	
 	bool doConnect(QString strServer, unsigned int port);
