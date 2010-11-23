@@ -109,6 +109,9 @@ public:
 	//! \brief brings window to foreground
 	void setForegroundWindow();
 
+	//! \brief start a timeout for window closing (end ended)
+	void startCloseTimer(unsigned int seconds);
+
 protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent *event);

@@ -1245,6 +1245,10 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		g->setBlindsTime(ginfo.blinds_time);
 		g->setPassword(ginfo.password);
 		g->setRestart(ginfo.restart);
+
+		if (config.getInt("game_deletion_delay"))
+			g->setGameDeletionDelay(config.getInt("game_deletion_delay"));
+
 		games[gid] = g;
 		
 		send_ok(client);

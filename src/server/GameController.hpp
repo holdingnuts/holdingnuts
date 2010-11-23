@@ -135,6 +135,9 @@ public:
 	
 	bool setPlayerAction(int cid, Player::PlayerAction action, chips_type amount);
 	
+	void setGameDeletionDelay(unsigned int seconds) { game_deletion_delay = seconds; };
+	unsigned int getGameDeletionDelay() const { return game_deletion_delay; };
+
 	void start();
 	
 	int tick();
@@ -202,6 +205,7 @@ private:
 	
 	bool ended;
 	time_t ended_time;
+	unsigned int game_deletion_delay;
 	
 	bool finished;
 	finish_list_type finish_list;

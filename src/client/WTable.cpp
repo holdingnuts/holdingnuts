@@ -1949,3 +1949,10 @@ void WTable::setForegroundWindow()
 // TODO: test on other platforms
 }
 
+void WTable::startCloseTimer(unsigned int seconds)
+{
+	this->addServerMessage(
+		tr("This table will be closed in %1 seconds.").arg(seconds));
+
+	QTimer::singleShot(seconds * 1000, this, SLOT(close()));
+}

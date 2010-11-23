@@ -58,6 +58,8 @@ GameController::GameController()
 	name = "game";
 	password = "";
 	owner = -1;
+
+	game_deletion_delay = 5 * 60;
 }
 
 GameController::GameController(const GameController& g)
@@ -75,6 +77,7 @@ GameController::GameController(const GameController& g)
 	setBlindsFactor(g.getBlindsFactor());
 	setBlindsTime(g.getBlindsTime());
 	setPassword(g.getPassword());
+	setGameDeletionDelay(g.getGameDeletionDelay());
 }
 
 GameController::~GameController()
@@ -1541,7 +1544,7 @@ int GameController::tick()
 	else if (ended)
 	{
 		// delay before game gets deleted
-		if ((unsigned int) difftime(time(NULL), ended_time) >= 4 * 60)
+		if ((unsigned int) difftime(time(NULL), ended_time) >= getGameDeletionDelay())
 		{
 			return -1;
 		}
@@ -1563,8 +1566,8 @@ int GameController::tick()
 				ended = true;
 				ended_time = time(NULL);
 				
-				snprintf(msg, sizeof(msg), "%d", SnapGameStateEnd);
-				snap(-1, SnapGameState, msg);
+				snprintf(msg, sizeof(msg), "%d %d", SnapGameStateEnd, this->game_deletion_delay);
+				snap(t->getTableId(), SnapGameState, msg);
 				
 				// push back last remaining player to finish_list
 				for (unsigned int i=0; i < 10; ++i)

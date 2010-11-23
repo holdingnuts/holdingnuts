@@ -361,14 +361,25 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 	{
 		if (config.getInt("chat_verbosity_foyer") & 0x4)
 			wMain->addServerMessage(
-				QString(tr("Game (%1) has been started.").arg(gid)));
+				tr("Game (%1) has been started.").arg(gid));
 		
 		addTable(gid, tid);
 	}
-	else if (type == SnapGameStateEnd && config.getInt("chat_verbosity_foyer") & 0x4)
+	else if (type == SnapGameStateEnd)
 	{
-		wMain->addServerMessage(
-			QString(tr("Game (%1) has been ended.").arg(gid)));
+		if (config.getInt("chat_verbosity_foyer") & 0x4)
+			wMain->addServerMessage(
+					tr("Game (%1) has been ended.").arg(gid));
+
+		// since version 0.8.0
+		const unsigned int game_deletion_delay = t.getNextInt();
+		if (game_deletion_delay)
+		{
+			if (!tinfo)
+				return;
+
+			tinfo->window->startCloseTimer(game_deletion_delay);
+		}
 	}
 	else if (type == SnapGameStateNewHand)
 	{
@@ -382,7 +393,7 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 		}
 		
 		tinfo->window->addServerMessage(
-			QString(tr("A new hand (#%1) begins.").arg(hand_no)));
+			tr("A new hand (#%1) begins.").arg(hand_no));
 	}
 	else if (type == SnapGameStateBlinds)
 	{
@@ -394,9 +405,9 @@ void PClient::serverCmdSnapGamestate(Tokenizer &t, int gid, int tid, tableinfo* 
 			return;
 		
 		tinfo->window->addServerMessage(
-			QString(tr("Blinds are now at %1/%2.")
+			tr("Blinds are now at %1/%2.")
 				.arg(blind_small)
-				.arg(blind_big)));
+				.arg(blind_big));
 	}
 	else if (type == SnapGameStateBroke)
 	{
