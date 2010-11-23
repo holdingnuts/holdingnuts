@@ -133,8 +133,8 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	viewGameList->setModel(proxyModelGameList);
 	viewGameList->setColumnWidth(1, 200);	// name
 	viewGameList->setColumnWidth(2, 90);	// type
-	viewGameList->setColumnWidth(3, 50);	// players
-	viewGameList->setColumnWidth(4, 50);	// state
+	viewGameList->setColumnWidth(3, 60);	// players
+	viewGameList->setColumnWidth(4, 55);	// state
 #ifndef DEBUG
 	viewGameList->setColumnHidden(0, true);	// gid
 #endif
