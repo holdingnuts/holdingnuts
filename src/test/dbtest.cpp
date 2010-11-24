@@ -33,26 +33,26 @@ using namespace std;
 int main(int argc, char **argv)
 {
 	printf("Database test\n");
-	
+
 	Database db("test.db");
 	QueryResult *result;
 	int rc;
 	rc = db.query(&result, "CREATE TABLE test (id INT NOT NULL PRIMARY KEY, value INT NOT NULL);");
 	db.freeQueryResult(&result);
-	
+
 	rc = db.query(&result,  "INSERT INTO test (id,value) VALUES (1,99999);"
 				"INSERT INTO test (id,value) VALUES (2,12345);");
 	db.freeQueryResult(&result);
-	
+
 	rc = db.query(&result, "SELECT * FROM test;");
-	
+
 	for (int i=0; i < result->numCols(); i++)
 		printf("col %d=%s\n", i, result->getCol(i));
 
 	for (int i=0; i < result->numRows(); i++)
 		printf("row %d=%s\n", i, result->getRow(1, i));
-	
+
 	db.freeQueryResult(&result);
-	
+
 	return 0;
 }

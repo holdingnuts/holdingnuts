@@ -47,46 +47,46 @@ int test_tokenizer()
 		"space at end "
 	};
 	const int count = sizeof(sa) / sizeof(sa[0]);
-	
+
 	Tokenizer t;
-	
+
 	for (int i = 0; i < count; i++)
 	{
 		cout << "Test " << i + 1 << ":" << flush;
 		t.parse(sa[i]);
-		
+
 		for (unsigned int j=0; j < t.count(); j++)
 			cout << "_" << t[j] << "_";
-		
+
 		cout << endl << flush;
 	}
-	
-	
+
+
 	t.parse("Hallo das ist ein Test");
-	
+
 	string str;
 	while (t.getNext(str))
 		cout << "_" << str << "_";
-	
+
 	cout << endl << flush;
-	
-	
+
+
 	///////////
-	
+
 	t.parse("Garbage FooBar 1 2 3");
-	
+
 	int gid, tid, cid;
 	std::string name;
-	
+
 	// pop first item
 	--t;
-	
+
 	// read items
 	t >> name >> gid >> tid >> cid;
-	
-	
+
+
 	cout << "gid:" << gid << " tid:" << tid << " cid:" << cid << " name:" << name << endl;
-	
+
 	return 0;
 }
 
@@ -94,64 +94,64 @@ int test_sysaccess()
 {
 	filetype *fp;
 	fp = file_open("testfile", mode_write | mode_read);
-	
+
 	if (!fp)
 	{
 		log_msg("io", "Error opening file for read/write");
 		return -1;
 	}
-	
+
 	char buffer[1024];
 	strcpy(buffer, "Hallo\n");
-	
+
 	file_write(fp, buffer, strlen(buffer));
-	
+
 	//file_setpos(f1, 3, seek_set);
 	//file_write(f1, buffer, strlen(buffer));
-	
+
 	long length = file_length(fp);
-	
+
 	log_msg("io", "length: %ld", length);
-	
+
 	file_writeline(fp, "a line");
-	
+
 	file_setpos(fp, 0, seek_set);
-	
+
 	while (file_readline(fp, buffer, sizeof(buffer)))
 		log_msg("io", "line: _%s_", buffer);
-	
-	
+
+
 	file_close(fp);
-	
+
 	return 0;
 }
 
 int test_configparser()
 {
 	ConfigParser cp;
-	
+
 	cp.load("settings.conf");
-	
+
 	string value = cp.get("test");
 	int count = cp.getInt("count");
-	
+
 	log_msg("config", "test=_%s_  count=%d", value.c_str(), count);
-	
+
 	cp.save("settings.new.conf");
-	
+
 	return 0;
 }
 
 int main(void)
 {
 	//test_tokenizer();
-	
+
 	//test_sysaccess();
-	
+
 	//test_configparser();
-	
+
 	//const char *config_path = sys_config_path();
 	//log_msg("sys", "config-path: _%s_", config_path);
-	
+
 	return 0;
 }

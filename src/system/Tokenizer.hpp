@@ -31,24 +31,24 @@ class Tokenizer
 {
 public:
 	Tokenizer(std::string sep = " \t\n");
-	
+
 	bool parse(const std::string& str);
 	bool getNext(std::string &str);
 	std::string getNext();
 	std::string getTillEnd(char sep=' ');
 	int getNextInt();
 	//float getNextFloat();
-	
+
 	bool popFirst();
-	
+
 	unsigned int count() const { return tokens.size(); };
 	std::string operator[](const unsigned int i) const;
-	
+
 	bool isSep(char ch);
-	
+
 	static int string2int(std::string s, unsigned int base = 0);
 	//static float string2float(std::string s);
-	
+
 	friend Tokenizer& operator>>(Tokenizer& left, int& i);
 	//friend Tokenizer& operator>>(Tokenizer& left, float& f);
 	friend Tokenizer& operator>>(Tokenizer& left, std::string& str);
@@ -58,7 +58,7 @@ public:
 private:
 	std::vector<std::string> tokens;
 	unsigned int index;
-	
+
 	std::string sep;
 };
 

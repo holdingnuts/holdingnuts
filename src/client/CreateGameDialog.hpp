@@ -43,7 +43,7 @@ friend class WMain;
 
 public:
 	CreateGameDialog(QWidget *parent = 0);
-	
+
 	QString getName() const;
 	QString getPassword() const;
 	chips_type getStake() const;
@@ -52,7 +52,7 @@ public:
 	chips_type getBlindsStart() const;
 	double getBlindsFactor() const;
 	unsigned int getBlindsTime() const;
-	
+
 
 private:
 	QLineEdit	*editName;
@@ -63,7 +63,7 @@ private:
 	QDoubleSpinBox  *spinBlindsFactor;
 	QSpinBox        *spinBlindsTime;
 	QLineEdit	*editPassword;
-	
+
 private slots:
 	void actionOk();
 	void slotCheckStatePrivate(int value);

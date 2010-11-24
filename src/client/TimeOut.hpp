@@ -47,12 +47,12 @@ public:
 
 	void start(int seat, int sec_timeout);
 	void stop();
-	
+
 Q_SIGNALS:
 	//! \brief signal emitted when the time is up
 	//! \param seatnumber
 	void timeup(int);
-	
+
 	void quarterElapsed(int);
 
 	void halfElapsed(int);
@@ -70,7 +70,7 @@ private:
 	int						m_nFrame;
 	//! \brief Seat ID
 	int						m_nSeat;
-	
+
 	bool 					m_bQuarterAlreadyEmitted;
 	bool 					m_bHalfAlreadyEmitted;
 	bool 					m_bThreeQuarterAlreadyEmitted;

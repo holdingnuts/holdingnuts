@@ -38,7 +38,7 @@ public:
 
 	void hideGameState(const QString& filter);
 	void showGameState(const QString& filter);
-	
+
 	void showPrivateGames(bool value);
 
 	//void setFilterMinimumPlayers(int n);
@@ -55,12 +55,12 @@ private:
 
 private:
 	QStringList	filterGameState;
-	
+
 	bool		bShowPrivateGames;
 
 	int			minPlayers;
 	int			maxPlayers;
-	
+
 	int			minRegisteredPlayers;
 	int			maxRegisteredPlayers;
 };

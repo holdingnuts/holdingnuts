@@ -36,25 +36,25 @@ class ConfigParser
 public:
 	bool load(const char *filename);
 	bool save(const char *filename);
-	
+
 	bool exists(const std::string &name) const;
-	
+
 	bool get(const std::string &name, std::string &value) const;
 	std::string get(const std::string &name) const;
-	
+
 	bool getInt(const std::string &name, int &value) const;
 	int getInt(const std::string &name) const;
-	
+
 	bool getBool(const std::string &name, bool &value) const;
 	bool getBool(const std::string &name) const;
-	
+
 	bool set(const std::string &name, const std::string &value);
 	bool set(const std::string &name, const char *value);
 	bool set(const std::string &name, int value);
 	bool set(const std::string &name, bool value);
-	
+
 	void print();
-	
+
 private:
 	cfgvars_type vars;
 };

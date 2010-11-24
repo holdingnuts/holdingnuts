@@ -42,8 +42,8 @@ public:
 	QVariant headerData(
 		int section,
 		Qt::Orientation orientation,
-		int role = Qt::DisplayRole) const;	
-	
+		int role = Qt::DisplayRole) const;
+
 	bool setData(
 		const QModelIndex& index,
 		const QVariant& value,
@@ -53,12 +53,12 @@ public:
 		int position,
 		int rows,
 		const QModelIndex &index = QModelIndex());
-		
+
 	bool appendRows(
 		int rows,
 		const QModelIndex &index = QModelIndex());
 
-	//! \brief 
+	//! \brief
 	//! \param value
 	void updateRow(int row, const QStringList& value);
 
@@ -73,8 +73,8 @@ public:
 
 private:
 	QStringList				strlstHeaderLabels;
-	
-	QList<QStringList>		lstRows; // QStringList == row[n,0], row[n,1],... 
+
+	QList<QStringList>		lstRows; // QStringList == row[n,0], row[n,1],...
 };
 
 #endif	/* _HOLDING_NUTS_GAME_LIST_TABLE_MODEL_H */

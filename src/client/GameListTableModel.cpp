@@ -31,9 +31,9 @@ GameListTableModel::GameListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
 {
 	strlstHeaderLabels << QString("ID")
-		<< tr("Name") 
-		<< tr("Gametype") 
-		<< tr("Players") 
+		<< tr("Name")
+		<< tr("Gametype")
+		<< tr("Players")
 		<< tr("State")
 		<< QString("Password protected");
 }
@@ -85,7 +85,7 @@ QVariant GameListTableModel::data(const QModelIndex& index, int role) const
 	}
 
 	if (
-		role == Qt::DecorationRole && 
+		role == Qt::DecorationRole &&
 		index.column() == 1 &&
 		games.at(index.row()).password)
 			return QVariant(QIcon("gfx/foyer/lock.png"));
@@ -161,14 +161,14 @@ bool GameListTableModel::setData(
 bool GameListTableModel::insertRows(int position, int rows, const QModelIndex& index)
 {
 	Q_UNUSED(index);
-	
+
 	beginInsertRows(QModelIndex(), position, position + rows - 1);
 
 	for (int row = 0; row < rows; row++)
 		games.insert(position, gameinfo_type::value_type());
-	
+
 	endInsertRows();
-	
+
 	return true;
 }
 
@@ -245,12 +245,12 @@ void GameListTableModel::dump() const
 {
 #ifdef DEBUG
 
-	qDebug() << "-----------------";	
+	qDebug() << "-----------------";
 
 	for (int i = 0; i < rowCount(); ++i)
 		qDebug() << "row(" << i << ") " << games.at(i).gid << games.at(i).name;
 
-	qDebug() << "-----------------";	
+	qDebug() << "-----------------";
 
 #endif
 }

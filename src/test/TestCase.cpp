@@ -33,17 +33,17 @@ TestCase::TestCase() :
 	m_name("Unnamed test"),
 	m_count(0), m_fail(0)
 {
-	
+
 }
 
 bool TestCase::test(bool result, const string& desc)
 {
 	m_count++;
-	
+
 	if (!result)
 		m_fail++;
-	
+
 	cerr << "TEST " << (result ? "OK  " : "FAIL") << " [" << m_name << "] " << " " << desc  << endl;
-	
+
 	return result;
 }

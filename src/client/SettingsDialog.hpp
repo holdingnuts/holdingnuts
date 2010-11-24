@@ -43,23 +43,23 @@ public:
 
 private:
 	ConfigParser *cfg;
-	
+
 	// tabGeneral
 	QLabel *labelUUIDdisplay;
 	QComboBox *comboLocale;
 	QCheckBox *checkSound, *checkSoundFocus;
-	
+
 	// tabAppearance
 	QCheckBox *checkHandStrength;
 	QCheckBox *checkSortHolecards;
 	QCheckBox *checkCentralView;
 	QCheckBox *checkBringToTop;
 	QComboBox *comboCarddeck;
-	
+
 	// tabPlayerinfo
 	QLineEdit *editPlayerName;
 	QLineEdit *editPlayerLocation;
-	
+
 	// tabLogChat
 	QCheckBox *checkLog, *checkLogChat;
 	QCheckBox *checkVerboseFoyerTime;
@@ -69,7 +69,7 @@ private:
 	QCheckBox *checkVerboseTablePlayerActions;
 	QCheckBox *checkVerboseTableCards;
 	QCheckBox *checkVerboseTablePlayerChat;
-	
+
 private slots:
 	void actionOk();
 	void actionGenUUID();

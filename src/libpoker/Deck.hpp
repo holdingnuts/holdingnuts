@@ -34,15 +34,15 @@ public:
 	void fill();
 	void empty();
 	int count() const;
-	
+
 	bool push(Card card);
 	bool pop(Card &card);
 	bool shuffle();
-	
+
 	void debugRemoveCard(Card card);
 	void debugPushCards(const std::vector<Card> *cardsvec);
 	void debug();
-	
+
 private:
 	std::vector<Card> cards;
 };

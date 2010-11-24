@@ -48,11 +48,11 @@ using namespace std;
 bool GameLogic::getStrength(const HoleCards *hole, const CommunityCards *community, HandStrength *strength)
 {
 	vector<Card> allcards;
-	
+
 	// merge hole- and community-cards
 	hole->copyCards(&allcards);
 	community->copyCards(&allcards);
-	
+
 	return getStrength(&allcards, strength);
 }
 
@@ -61,18 +61,18 @@ bool GameLogic::getStrength(vector<Card> *allcards, HandStrength *strength)
 	HandStrength::Ranking *r = &(strength->ranking);
 	vector<Card> *rank = &(strength->rank);
 	vector<Card> *kicker = &(strength->kicker);
-	
+
 	// sort them descending
 	sort(allcards->begin(), allcards->end(), greater<Card>());
-	
+
 #if 0
 	print_cards("AllCards", &allcards);
 #endif
-	
+
 	// clear rank and kicker
 	rank->clear();
 	kicker->clear();
-	
+
 	// test for all combinations
 	if (isFlush(allcards, rank) && isStraight(allcards, rank->front().getSuit(), rank))
 		*r = HandStrength::StraightFlush;
@@ -93,21 +93,21 @@ bool GameLogic::getStrength(vector<Card> *allcards, HandStrength *strength)
 	else
 	{
 		*r = HandStrength::HighCard;
-		
+
 		rank->clear();
 		rank->push_back(allcards->front());
-		
+
 		kicker->clear();
 		for (vector<Card>::iterator e = allcards->begin() + 1; e != allcards->end() && kicker->size() < 4; e++)
 			kicker->push_back(*e);
 	}
-	
+
 #if 0
 	log_msg("getStrength", "Strength: %s", HandStrength::getRankingName(*r));
 	print_cards("Rank", rank);
 	print_cards("Kicker", kicker);
 #endif
-	
+
 	return true;
 }
 
@@ -115,32 +115,32 @@ bool GameLogic::isTwoPair(std::vector<Card> *allcards, std::vector<Card> *rank, 
 {
 	bool is_twopair = false;
 	vector<Card> trank, tkicker;  // tkicker is unused dummy
-	
+
 	// contains first Pair
 	if (isXOfAKind(allcards, 2, &trank, &tkicker))
 	{
 		Card fp = trank.front();
-		
+
 		// and contains a second Pair (other than first pair face)
 		// use previous rank for "exclude"
 		if (isXOfAKind(allcards, 2, &trank, &tkicker))
 		{
 			Card sp = trank.front();
-			
+
 			rank->clear();
 			rank->push_back(fp);
 			rank->push_back(sp);
-			
+
 			// copy remaining one kicker
 			kicker->clear();
 			for (vector<Card>::iterator e = allcards->begin(); e != allcards->end() && kicker->size() < 1; e++)
 				if (e->getFace() != fp.getFace() && e->getFace() != sp.getFace())
 					kicker->push_back(*e);
-			
+
 			is_twopair = true;
 		}
 	}
-	
+
 	return is_twopair;
 }
 
@@ -149,17 +149,17 @@ bool GameLogic::isStraight(vector<Card> *allcards, const int suit, vector<Card> 
 	bool is_straight = false;
 	int last_face = -1, count = 0;
 	Card high;
-	
+
 	for (vector<Card>::iterator e = allcards->begin(); e != allcards->end(); e++)
 	{
 		// ignore wrong suit when testing for StraightFlush
 		if (suit != -1 && e->getSuit() != suit)
 			continue;
-		
+
 		// ignore cards of same face (e.g. Qs and Qc)
 		if (last_face == e->getFace())
 			continue;
-		
+
 		if (last_face - 1 != e->getFace())
 		{
 			count = 1;
@@ -173,24 +173,24 @@ bool GameLogic::isStraight(vector<Card> *allcards, const int suit, vector<Card> 
 				break;
 			}
 		}
-		
+
 		last_face = e->getFace();
 	}
-	
+
 	// is an A2345-straight ("wheel")
 	if (count == 4 && (last_face == Card::Two && allcards->front().getFace() == Card::Ace))
 	{
-		// check suit when testing for StraightFlush	
+		// check suit when testing for StraightFlush
 		if (suit == -1 || allcards->front().getSuit() == suit)
 			is_straight = true;
 	}
-	
+
 	if (is_straight)
 	{
 		rank->clear();
 		rank->push_back(high);
 	}
-	
+
 	return is_straight;
 }
 
@@ -199,7 +199,7 @@ bool GameLogic::isFlush(vector<Card> *allcards, vector<Card> *rank)
 	bool is_flush = false;
 	Card::Suit flush_suit;
 	int suit_count[4] = {0, 0, 0, 0};
-	
+
 	// count same suits
 	for (vector<Card>::iterator e = allcards->begin(); e != allcards->end(); e++)
 	{
@@ -210,17 +210,17 @@ bool GameLogic::isFlush(vector<Card> *allcards, vector<Card> *rank)
 			break;
 		}
 	}
-	
+
 	if (is_flush)
 	{
 		// copy all cards with flush suit as rank; max 5 cards
 		rank->clear();
-		
+
 		for (vector<Card>::iterator e = allcards->begin(); e != allcards->end() && rank->size() < 5; e++)
 			if (e->getSuit() == flush_suit)
 				rank->push_back(*e);
 	}
-	
+
 	return is_flush;
 }
 
@@ -230,19 +230,19 @@ bool GameLogic::isXOfAKind(vector<Card> *allcards, const unsigned int n, vector<
 	int face = -1;
 	Card high;
 	unsigned int count = 0;
-	
+
 	// count face of cards, break on n of a kind
 	for (vector<Card>::iterator e = allcards->begin(); e != allcards->end(); e++)
 	{
 		// ignore face which might be in rank-vector at first index
 		if (rank->size() && rank->begin()->getFace() == e->getFace())
 			continue;
-		
+
 		if (e->getFace() != face)
 		{
 			face = e->getFace();
 			count = 1;
-			
+
 			high = *e;
 		}
 		else
@@ -254,22 +254,22 @@ bool GameLogic::isXOfAKind(vector<Card> *allcards, const unsigned int n, vector<
 			}
 		}
 	}
-	
+
 	// clear rank and kicker in any case
 	rank->clear();
 	kicker->clear();
-	
+
 	if (is_xofakind)
 	{
 		// rank is highest first card of XOfAKind
 		rank->push_back(high);
-		
+
 		// copy the kicker; max (5-n) card
 		for (vector<Card>::iterator e = allcards->begin(); e != allcards->end() && kicker->size() < (5 - n); e++)
 			if (e->getFace() != face)
 				kicker->push_back(*e);
 	}
-	
+
 	return is_xofakind;
 }
 
@@ -277,26 +277,26 @@ bool GameLogic::isFullHouse(vector<Card> *allcards, vector<Card> *rank)
 {
 	bool is_fullhouse = false;
 	vector<Card> trank, tkicker;  // tkicker is unused dummy
-	
+
 	// contains ThreeOfAKind
 	if (isXOfAKind(allcards, 3, &trank, &tkicker))
 	{
 		Card toak = trank.front();
-		
+
 		// and contains a Pair (other than the ThreeOfAKind-card)
 		// use previous rank as "exclude"
 		if (isXOfAKind(allcards, 2, &trank, &tkicker))
 		{
 			Card pc = trank.front();
-			
+
 			rank->clear();
 			rank->push_back(toak);
 			rank->push_back(pc);
-			
+
 			is_fullhouse = true;
 		}
 	}
-	
+
 	return is_fullhouse;
 }
 
@@ -304,15 +304,15 @@ bool GameLogic::getWinList(vector<HandStrength> &hands, vector< vector<HandStren
 {
 	winlist.clear();
 	winlist.push_back(hands);
-	
+
 	unsigned int index=0;
 	do
 	{
 		vector<HandStrength> &tw = winlist[index];
 		vector<HandStrength> tmp;
-		
+
 		sort(tw.begin(), tw.end(), greater<HandStrength>());
-		
+
 		for (unsigned int i=tw.size()-1; i > 0; i--)
 		{
 			if (tw[i] < tw[0])
@@ -321,15 +321,15 @@ bool GameLogic::getWinList(vector<HandStrength> &hands, vector< vector<HandStren
 				tw.pop_back();
 			}
 		}
-		
+
 		if (!tmp.size())
 			break;
-		
+
 		winlist.push_back(tmp);
 		index++;
-		
+
 	} while (true);
-	
+
 	return true;
 }
 
@@ -346,7 +346,7 @@ const char* HandStrength::getRankingName(Ranking r)
 		"Four Of A Kind",
 		"Straight Flush"
 	};
-	
+
 	return sstr[r - HighCard];
 }
 
@@ -356,7 +356,7 @@ bool HandStrength::operator < (const HandStrength &c) const
 		return true;
 	else if (getRanking() > c.getRanking())
 		return false;
-	
+
 	for (unsigned int i=0; i < rank.size(); i++)
 	{
 		if (rank[i].getFace() < c.rank[i].getFace())
@@ -364,7 +364,7 @@ bool HandStrength::operator < (const HandStrength &c) const
 		else if (rank[i].getFace() > c.rank[i].getFace())
 			return false;
 	}
-	
+
 	for (unsigned int i=0; i < kicker.size(); i++)
 	{
 		if (kicker[i].getFace() < c.kicker[i].getFace())
@@ -372,7 +372,7 @@ bool HandStrength::operator < (const HandStrength &c) const
 		else if (kicker[i].getFace() > c.kicker[i].getFace())
 			return false;
 	}
-	
+
 	return false;
 }
 
@@ -382,7 +382,7 @@ bool HandStrength::operator > (const HandStrength &c) const
 		return true;
 	else if (getRanking() < c.getRanking())
 		return false;
-	
+
 	for (unsigned int i=0; i < rank.size(); i++)
 	{
 		if (rank[i].getFace() > c.rank[i].getFace())
@@ -390,7 +390,7 @@ bool HandStrength::operator > (const HandStrength &c) const
 		else if (rank[i].getFace() < c.rank[i].getFace())
 			return false;
 	}
-	
+
 	for (unsigned int i=0; i < kicker.size(); i++)
 	{
 		if (kicker[i].getFace() > c.kicker[i].getFace())
@@ -398,7 +398,7 @@ bool HandStrength::operator > (const HandStrength &c) const
 		else if (kicker[i].getFace() < c.kicker[i].getFace())
 			return false;
 	}
-	
+
 	return false;
 }
 
@@ -406,18 +406,18 @@ bool HandStrength::operator == (const HandStrength &c) const
 {
 	if (getRanking() != c.getRanking())
 		return false;
-	
+
 	for (unsigned int i=0; i < rank.size(); i++)
 	{
 		if (rank[i].getFace() != c.rank[i].getFace())
 			return false;
 	}
-	
+
 	for (unsigned int i=0; i < kicker.size(); i++)
 	{
 		if (kicker[i].getFace() != c.kicker[i].getFace())
 			return false;
 	}
-	
+
 	return true;
 }

@@ -38,7 +38,7 @@ public:
 	int numRows() const { return nrow; };
 	const char *getRow(int col, int row);
 	const char *getCol(int col);
-	
+
 private:
 	QueryResult(char **result, int nrow, int ncol);
 	~QueryResult();
@@ -52,19 +52,19 @@ public:
 	Database();
 	Database(const char *filename);
 	~Database();
-	
+
 	int open(const char *filename);
 	int query(const char *q, ...);
 	int query(QueryResult **qr, const char *q, ...);
-	
+
 	void freeQueryResult(QueryResult **qr);
-	
+
 	char* createQueryString(const char *q, ...);
 	void freeQueryString(char *q);
-	
+
 private:
 	sqlite3 *db;
-	
+
 };
 
 #endif /* DATABASE_H */

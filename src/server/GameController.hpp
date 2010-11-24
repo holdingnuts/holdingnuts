@@ -47,112 +47,112 @@ public:
 	typedef std::map<int,Table*>	tables_type;
 	typedef std::map<int,Player*>	players_type;
 	typedef std::set<int>		spectators_type;
-	
+
 	typedef std::vector<Player*>	finish_list_type;
-	
+
 	typedef enum {
 		RingGame,   // Cash game
 		FreezeOut,  // Tournament
 		SNG         // Sit'n'Go
 	} GameType;
-	
-	
+
+
 	typedef enum {
 		BlindByTime,
 		//BlindByRound,
 		BlindByKnockout
 	} BlindRule;
-	
+
 	typedef enum {
 		NoLimit,
 		PotLimit,
 		SplitLimit,
 		FixedLimit
 	} LimitRule;
-	
+
 	GameController();
 	GameController(const GameController& g);
 	~GameController();
-	
+
 	void reset();
-	
+
 	bool setGameId(int gid) { game_id = gid; return true; };
 	int getGameId() const { return game_id; };
-	
+
 	GameType getGameType() const { return type; };
-	
+
 	void setPlayerTimeout(unsigned int respite) { timeout = respite; };
 	unsigned int getPlayerTimeout() const { return timeout; };
-	
+
 	void setBlindsStart(chips_type blinds_start) { blind.start = blinds_start; };
 	chips_type getBlindsStart() const { return blind.start; };
 	void setBlindsFactor(unsigned int blinds_factor) { blind.blinds_factor = blinds_factor; };
 	unsigned int getBlindsFactor() const { return blind.blinds_factor; };
 	void setBlindsTime(unsigned int blinds_time) { blind.blinds_time = blinds_time; };
 	unsigned int getBlindsTime() const { return blind.blinds_time; };
-	
+
 	bool setPlayerStakes(chips_type stake);
 	chips_type getPlayerStakes() const { return player_stakes; };
-	
+
 	std::string getName() const { return name; };
 	bool setName(const std::string &str) { name = str; return true; }; // FIXME: validate
-	
+
 	bool checkPassword(const std::string &passwd) const { return (!password.length() || password == passwd); };
 	bool hasPassword() const { return password.length(); };
 	bool setPassword(const std::string &str) { password = str; return true; };
 	std::string getPassword() const { return password; };
-	
+
 	bool setPlayerMax(unsigned int max);
 	unsigned int getPlayerMax() const { return max_players; };
 	unsigned int getPlayerCount() const { return players.size(); };
-	
+
 	bool getPlayerList(std::vector<int> &client_list) const;
 	bool getListenerList(std::vector<int> &client_list) const;
 	void getFinishList(std::vector<Player*> &player_list) const;
-	
+
 	void setRestart(bool bRestart) { restart = bRestart; };
 	bool getRestart() const { return restart; };
-	
+
 	bool isStarted() const { return started; };
 	bool isEnded() const { return ended; };
-	
+
 	bool isFinished() const { return finished; };
 	void setFinished() { finished = true; };
-	
+
 	bool addPlayer(int cid, const std::string &uuid);
 	bool removePlayer(int cid);
 	bool isPlayer(int cid) const;
-	
+
 	bool addSpectator(int cid);
 	bool removeSpectator(int cid);
 	bool isSpectator(int cid) const;
-	
+
 	void setOwner(int cid) { owner = cid; };
 	int getOwner() const { return owner; };
-	
+
 	void chat(int tid, const char* msg);
 	void chat(int cid, int tid, const char* msg);
-	
+
 	bool setPlayerAction(int cid, Player::PlayerAction action, chips_type amount);
-	
+
 	void setGameDeletionDelay(unsigned int seconds) { game_deletion_delay = seconds; };
 	unsigned int getGameDeletionDelay() const { return game_deletion_delay; };
 
 	void start();
-	
+
 	int tick();
-	
-	
+
+
 protected:
 	Player* findPlayer(int cid);
 	void selectNewOwner();
-	
+
 	void snap(int tid, int sid, const char* msg="");
 	void snap(int cid, int tid, int sid, const char* msg="");
-	
+
 	bool createWinlist(Table *t, std::vector< std::vector<HandStrength> > &winlist);
 	chips_type determineMinimumBet(Table *t) const;
-	
+
 	int handleTable(Table *t);
 	void stateNewRound(Table *t);
 	void stateBlinds(Table *t);
@@ -162,33 +162,33 @@ protected:
 	void stateAllFolded(Table *t);
 	void stateShowdown(Table *t);
 	void stateEndRound(Table *t);
-	
+
 	// pseudo-state for delays
 	void stateDelay(Table *t);
-	
+
 	void dealHole(Table *t);
 	void dealFlop(Table *t);
 	void dealTurn(Table *t);
 	void dealRiver(Table *t);
-	
+
 	void sendTableSnapshot(Table *t);
 	void sendPlayerShowSnapshot(Table *t, Player *p);
-	
+
 private:
 	int game_id;
-	
+
 	bool started;
 	unsigned int max_players;
-	
+
 	GameType type;
 	LimitRule limit;
 	chips_type player_stakes;
 	unsigned int timeout;
-	
+
 	players_type		players;
 	spectators_type		spectators;
 	tables_type		tables;
-	
+
 	struct {
 		chips_type start;
 		chips_type amount;
@@ -197,22 +197,22 @@ private:
 		time_t last_blinds_time;
 		unsigned int blinds_factor;
 	} blind;
-	
+
 	unsigned int hand_no;
-	
+
 	int owner;   // owner of a game
 	bool restart;   // should be restarted when ended?
-	
+
 	bool ended;
 	time_t ended_time;
 	unsigned int game_deletion_delay;
-	
+
 	bool finished;
 	finish_list_type finish_list;
-	
+
 	std::string name;
 	std::string password;
-	
+
 #ifdef DEBUG
 	std::vector<Card> debug_cards;
 #endif

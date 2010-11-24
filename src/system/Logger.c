@@ -41,25 +41,25 @@ void log_msg(const char *level, const char *format, ...)
 	va_list args;
 	char msg[1024];
 	unsigned int i;
-	
+
 	va_start(args, format);
 	vsnprintf(msg, sizeof(msg), format, args);
 	va_end(args);
-	
+
 	// if there was no log target specified with log_set()
 	if (!logger[0])
 		logger[0] = stderr;
-	
+
 	for (i=0; i < 2; i++)
 	{
 		if (!logger[i])
 			continue;
-		
+
 		if (log_timestamp)
 			fprintf(logger[i], "[%ld %10s]  %s\n", time(0), level, msg);
 		else
 			fprintf(logger[i], "[%10s]  %s\n", level, msg);
-		
+
 		fflush(logger[i]);
 	}
 }

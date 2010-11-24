@@ -32,7 +32,7 @@ class TestCase
 public:
 	TestCase();
 	virtual bool run() = 0;
-	
+
 	const std::string& name() const { return m_name; };
 	unsigned int countResults() const { return m_count; };
 	unsigned int countFailed() const { return m_fail; };
@@ -40,9 +40,9 @@ public:
 
 protected:
 	bool test(bool result, const std::string& desc="");
-	
+
 	void setName(const std::string& name) { m_name = name; };
-	
+
 private:
 	std::string m_name;
 	unsigned int m_count;

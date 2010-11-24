@@ -39,7 +39,7 @@ ChipStack::ChipStack(QGraphicsItem* parent)
 QRectF ChipStack::boundingRect() const
 {
 	QTransform m = this->transform();
-	
+
 	return m.mapRect(childrenBoundingRect());
 }
 
@@ -48,13 +48,13 @@ void ChipStack::paint(
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget)
 {
-#ifdef DEBUG	
+#ifdef DEBUG
 	if (config.getBool("dbg_bbox"))
 	{
 		painter->save();
 		painter->setPen(Qt::cyan);
 		painter->drawRect(this->boundingRect());
-		painter->restore();	
+		painter->restore();
 	}
 #endif
 }
@@ -73,7 +73,7 @@ unsigned calc(chips_type& amount, chips_type value)
 void ChipStack::setAmount(chips_type amount)
 {
 	clear();
-	
+
 	// load images
 	static const QImage imgJeton1("gfx/table/jeton_1.png");
 	static const QImage imgJeton5("gfx/table/jeton_5.png");
@@ -111,7 +111,7 @@ void ChipStack::clear()
 {
 	QList<QGraphicsItem*> lst = childItems();
 	QList<QGraphicsItem*>::iterator it;
-	
+
 	for (it = lst.begin(); it != lst.end(); ++it)
 		scene()->removeItem(*it);
 }
@@ -124,18 +124,18 @@ void ChipStack::addChips(
 {
 	const qreal save_y = y;
 	qreal z = 5;
-	
+
 	for (unsigned i = 0; i < num; ++i)
 	{
 		Chip* p = new Chip(img, this);
-		
+
 		y -= 8;
 		z += 1;
-		
+
 		p->setPos(x, y);
 		p->setZValue(z);
 	}
-	
+
 	if (num > 0)
 		x += 32;
 

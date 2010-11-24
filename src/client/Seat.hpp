@@ -61,23 +61,23 @@ public:
 
 	virtual QRectF boundingRect() const;
 	virtual QRectF boundingRectSeat() const;
-	
+
 	virtual void paint(
 		QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
-		
+
 	bool isValid() const { return m_bValid; }
-	
+
 	static void setInSeatFont(const QFont& font);
-	
+
 private:
 	void calcSCardPos(qreal& x, qreal& y) const;
 	void calcBetTextPos(qreal& x, qreal& y, int txt_width) const;
 	void calcChipStackPos(qreal& x, qreal& y, int txt_width) const;
-	
+
 	void chopName();
-	
+
 public:
 	// cards size
 	static const qreal sx_card;
@@ -85,7 +85,7 @@ public:
 	// mini cards size
 	static const qreal sx_mini_card;
 	static const qreal sy_mini_card;
-	
+
 private:
 	//! \brief Seat ID (clockwise)
 	const unsigned int		m_nID;
@@ -95,9 +95,9 @@ private:
 	QString					m_strStake;
 	//! \brief
 	QString					m_strAmount;
-	//! \brief 
+	//! \brief
 	bool					m_bValid;
-	//! \brief				
+	//! \brief
 	bool					m_bMySeat;
 	//! \brief
 	bool					m_bCurrent;
@@ -119,7 +119,7 @@ private:
 	qreal					m_xPosSmallCards;
 	//! \brief Y Position from small Cards
 	qreal					m_yPosSmallCards;
-	
+
 	//! \brief In-Seat-Font (Name, Amount, ...)
 	static QFont			m_ftInSeat;
 	//! \brief Font Metrics from InSeatFont

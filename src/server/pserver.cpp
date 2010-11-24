@@ -75,13 +75,13 @@ int listensock_create(unsigned int port, int backlog)
 		log_msg("listensock", "socket() failed (%d: %s)", errno, strerror(errno));
 		return -1;
 	}
-	
+
 	sock = listenfd;
-	
+
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_port = htons(port);
-	
+
 	/* Use address even it is in use (TIME_WAIT) */
 	int reuse = 1;
 	if (socket_setopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0)
@@ -89,24 +89,24 @@ int listensock_create(unsigned int port, int backlog)
 		log_msg("listensock", "setsockopt:SO_REUSEADDR failed");
 		return -4;
 	}
-	
+
 	socket_setnonblocking(sock);
-	
+
 	if (socket_bind(sock, (struct sockaddr*)&addr, sizeof(addr)) == -1)
 	{
 		log_msg("listensock", "bind() failed: (%d: %s)", errno, strerror(errno));
 		return -2;
 	}
-	
+
 	if (socket_listen(sock, backlog) == -1)
 	{
 		log_msg("listensock", "listen() failed: (%d: %s)", errno, strerror(errno));
 		return -3;
 	}
-	
-	
+
+
 	log_msg("listensock", "listening (port: %d)", port);
-	
+
 	return sock;
 }
 
@@ -118,40 +118,40 @@ int mainloop()
 		log_msg("listensock", "(%d) error creating socket", listenfd);
 		return 1;
 	}
-	
-	
+
+
 	socktype sock = listenfd;
 	socktype max;     /* highest socket number select() uses */
 	fd_set fds;
-	
-	
+
+
 	for (;;)
 	{
 		// handle game
 		gameloop();
-		
+
 		struct timeval timeout;  /* timeout for select */
 		timeout.tv_sec  = 0;
 		timeout.tv_usec = SERVER_SELECT_TIMEOUT_USEC;
-		
+
 		FD_ZERO(&fds);
-		
+
 		/* add listening socket to the fd-set */
 		FD_SET(sock, &fds);
 		max = sock;
-		
+
 		/* add control clients to select-SET */
 		vector<clientcon> &clientvec = get_client_vector();
 		for (unsigned int i=0; i < clientvec.size(); i++)
 		{
 			socktype client_sock = clientvec[i].sock;
 			FD_SET(client_sock, &fds);
-			
+
 			if (client_sock > max)
 				max = client_sock;
 		}
-		
-		
+
+
 		// are there any modified descriptors?
 		if (select(max + 1, &fds, NULL, NULL, &timeout))
 		{
@@ -161,22 +161,22 @@ int mainloop()
 				sockaddr_in saddr;
 				unsigned int saddrlen = sizeof(saddr);
 				memset(&saddr, 0, sizeof(sockaddr_in));
-				
+
 				socktype client_sock = socket_accept(sock, (struct sockaddr*) &saddr, &saddrlen);
 				log_msg("listensock", "(%d) accepted connection (%s)",
 					client_sock, inet_ntoa((struct in_addr) saddr.sin_addr));
-				
+
 				socket_setnonblocking(client_sock);
-				
+
 				client_add(client_sock, &saddr);
-				
+
 				FD_CLR(sock, &fds);
 			}
 			else
 			{
 				// handle only one client-request per iteration
 				socktype sender = fdset_get_descriptor(&fds);
-				
+
 				int status = client_handle(sender);
 				if (status <= 0)
 				{
@@ -185,7 +185,7 @@ int mainloop()
 					log_msg("clientsock", "(%d) socket closed (%d: %s)", sender, errno, strerror(errno));
 
 					client_remove(sender);
-					
+
 					FD_CLR(sender, &fds);
 				}
 			}
@@ -196,7 +196,7 @@ int mainloop()
 			//fprintf(stderr, ".\n"); fflush(stderr);
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -204,15 +204,15 @@ bool config_load()
 {
 	// include defaults
 	#include "server_variables.hpp"
-	
-	
+
+
 	// create config-dir if it doesn't yet exist
 	sys_mkdir(sys_config_path());
-	
-	
+
+
 	char cfgfile[1024];
 	snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
-	
+
 	if (config.load(cfgfile))
 		log_msg("config", "Loaded configuration from '%s'", cfgfile);
 	else
@@ -220,7 +220,7 @@ bool config_load()
 		if (config.save(cfgfile))
 			log_msg("config", "Saved initial configuration to '%s'", cfgfile);
 	}
-	
+
 	return true;
 }
 
@@ -232,13 +232,13 @@ int database_init()
 
 	/* open sqlite database */
 	db = new Database();
-	
+
 	if (db->open(dbfile))
 	{
 		log_msg("sqlite", "Error opening database");
 		return 1;
 	}
-	
+
 	return 0;
 }
 #endif /* !NOSQLITE */
@@ -270,16 +270,16 @@ int main(int argc, char **argv)
 	log_msg("main", "HoldingNuts pserver (version %d.%d.%d; svn %s)",
 		VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION,
 		VERSIONSTR_SVN);
-	
-	
+
+
 	// load config
 	if (custom_config)
 		log_msg("config", "Using custom config-directory '%s'", sys_config_path());
-	
+
 	config_load();
 	config.print();
-	
-	
+
+
 	// start logging
 	filetype *fplog = NULL;
 	if (config.getBool("log"))
@@ -289,16 +289,16 @@ int main(int argc, char **argv)
 		fplog = file_open(logfile, config.getBool("log_append")
 				  ? mode_append
 				  : mode_write);
-		
+
 		// log destination
 		log_set(stdout, fplog);
-		
+
 		// log timestamp
 		if (config.getBool("log_timestamp"))
 			log_use_timestamp(1);
 	}
-	
-	
+
+
 #if !defined(PLATFORM_WINDOWS)
 	// ignore broken-pipe signal eventually caused by sockets
 	signal(SIGPIPE, SIG_IGN);
@@ -312,24 +312,24 @@ int main(int argc, char **argv)
 		return 1;
 	}
 #endif /* !NOSQLITE */
-	
+
 	// initialize PRNG
 	srand((unsigned) time(NULL));
 
 	gameinit();
-	
+
 	mainloop();
-	
+
 #ifndef NOSQLITE
 	delete db;
 #endif /* !NOSQLITE */
 
 	network_shutdown();
-	
-	
+
+
 	// close log-file
 	if (fplog)
 		file_close(fplog);
-	
+
 	return 0;
 }

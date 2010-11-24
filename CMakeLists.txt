@@ -19,7 +19,7 @@ option (UPDATE_TRANSLATIONS "Update source translations" Off)
 # check for inner-source-build
 STRING (COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" in_source)
 IF (in_source)
-	MESSAGE( "Inner-source-builds should not be used. For an outer-source-build create a separate build-directory and run cmake within it again.") 
+	MESSAGE( "Inner-source-builds should not be used. For an outer-source-build create a separate build-directory and run cmake within it again.")
 ENDIF (in_source)
 
 ################################################################################

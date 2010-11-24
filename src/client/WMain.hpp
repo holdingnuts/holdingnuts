@@ -52,7 +52,7 @@ Q_OBJECT
 
 public:
 	WMain(QWidget *parent = 0);
-	
+
 	void addLog(const QString &line);
 
 	void addChat(const QString &from, const QString &text);
@@ -61,35 +61,35 @@ public:
 
 	//! \brief Set the Connect Widgets to right State
 	void updateConnectionStatus();
-	
+
 	void updateServerStatsLabel(unsigned int client_count=0, unsigned int games_count=0);
-	
+
 	void notifyGameinfo(int gid);
 	void notifyGamelist();
 
 	void notifyPlayerinfo(int cid);
 	void notifyPlayerlist(int gid);
-	
+
 	void updatePlayerList(int gid);
 
 	static QString getGametypeString(gametype type);
 	static QString getGamemodeString(gamemode mode);
 	static QString getGamestateString(gamestate state);
-	
+
 protected:
 	void doRegister(bool bRegister, bool subscription);
-	
+
 	void updateWelcomeLabel();
 	void updateGameinfo(int gid);
-	
+
 	void writeServerlist() const;
 
 private slots:
 	void closeEvent(QCloseEvent *event);
-	
+
 	void actionConnect();
 	void actionClose();
-	
+
 	void actionRegister();
 	void actionUnregister();
 	void actionSubscribe();
@@ -97,29 +97,29 @@ private slots:
 	void actionOpenTable();
 	void actionCreateGame();
 	void actionStartGame();
-	
+
 	void actionSettings();
-	
+
 	void actionHelp();
 	void actionAbout();
-	
+
 	void actionChat(QString msg);
-	
+
 	void actionTest();
 
 	void gameListSelectionChanged(
 		const QItemSelection& selected,
 		const QItemSelection& deselected);
-	
+
 	void actionSelectedGameUpdate();
-	
+
 	void gameFilterChanged();
-	
+
 	void updateServerTimeLabel();
-	
+
 	void filterHideStartedGames(int state);
 	void filterHidePrivateGames(int state);
-	
+
 private:
 	//! \brief Label in header displaying a welcome message
 	QLabel			*lblWelcome;
@@ -127,7 +127,7 @@ private:
 	QLabel 			*lblServerTime;
 	//! \brief Label in header displaying the server stats
 	QLabel 			*lblServerStats;
-	
+
 	//! \brief Combobox server adress
 	QComboBox		*cbSrvAddr;
 	//! \brief Connect Button
@@ -136,28 +136,28 @@ private:
 	QPushButton		*btnClose;
 	//! \brief Container widget for connection-widgets
 	QWidget			*wConnection;
-	
+
 	//! \Brief Chatbox
 	ChatBox			*m_pChat;
-	
+
 	//! \brief MVC Model
 	GameListTableModel	*modelGameList;
 	//! \brief MVC View
 	QTableView		*viewGameList;
 	//! \brief Sort- and Filter Proxy Model
 	GameListSortFilterProxyModel	*proxyModelGameList;
-	
+
 	QLineEdit		*filterPatternGame;
 	//! \brief Checkbox for hiding started games
 	QCheckBox		*chkHideStartedGames;
 	//! \brief Checkbox for hiding private games
 	QCheckBox		*chkHidePrivateGames;
-	
+
 	//! \brief MVC Model
 	PlayerListTableModel	*modelPlayerList;
 	//! \brief Playerlist of game
 	QTableView 	 	*viewPlayerList;
-	
+
 	//! \brief Label for Gamename
 	QLabel			*lblGameInfoName;
 	//! \brief Label for the number of Players in selected Game
@@ -170,37 +170,37 @@ private:
 	QLabel			*lblGameInfoTimeout;
 	//! \brief Label for blinds settings
 	QLabel			*lblGameInfoBlinds;
-	
+
 	//! \brief Container widget for gamelist filter widgets
 	QWidget			*wGameFilter;
 	//! \brief Container widget for gameinfo widgets
 	QWidget			*wGameInfo;
-	
+
 	//! \brief Create new game
 	QPushButton		*btnCreateGame;
-	
+
 	//! \brief Register to a game
 	QPushButton		*btnRegister;
 	//! \brief Un-register a game
 	QPushButton		*btnUnregister;
-	
+
 	//! \brief Subscribe to a game
 	QPushButton		*btnSubscribe;
 	//! \brief Un-subscribe a game
 	QPushButton		*btnUnsubscribe;
-	
+
 	QPushButton		*btnOpenTable;
 	QPushButton		*btnStartGame;
-	
+
 	//! \brief Timer for updating the gamelist
 	QTimer			*timerGamelistUpdate;
-	
+
 	//! \brief Timer for updating the selected game
 	QTimer			*timerSelectedGameUpdate;
-	
+
 	//! \brief Timer for updating the server stats
 	QTimer			*timerServerStatsUpdate;
-	
+
 	//! \brief Timer for updating the server timerGamelistUpdate
 	QTimer			*timerServerTimeUpdate;
 };

@@ -18,7 +18,7 @@ IF (WIN32)
 			-o ${CMAKE_CURRENT_BINARY_DIR}/pclient_res.obj
 			< ${CMAKE_CURRENT_SOURCE_DIR}/pclient.rc
 		)
-		
+
 		LIST(APPEND aux_obj pclient_res.obj)
 	ELSE (MINGW)
 		# FIXME: use VC resource compiler rc.exe
@@ -36,7 +36,7 @@ if (ENABLE_AUDIO)
 	Find_Package ( SDL REQUIRED )
 
 	include_directories ( ${SDL_INCLUDE_DIR} )
-	
+
 	LIST (APPEND aux_src Audio.c)
 	LIST (APPEND aux_lib ${SDL_LIBRARY})
 else (ENABLE_AUDIO)
@@ -109,9 +109,9 @@ if (UPDATE_TRANSLATIONS)
   qt4_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
 else (UPDATE_TRANSLATIONS)
   qt4_add_translation(QM_FILES ${TRANSLATIONS_FILES})
-endif (UPDATE_TRANSLATIONS) 
+endif (UPDATE_TRANSLATIONS)
 
 add_custom_target (translations ALL DEPENDS ${QM_FILES})
 
-install(FILES ${QM_FILES} DESTINATION	
+install(FILES ${QM_FILES} DESTINATION
 	${CMAKE_DATA_PATH}/holdingnuts/data/i18n)

@@ -45,9 +45,9 @@ public:
 		QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
-		
+
 	void setAmount(chips_type amount);
-	
+
 	void clear();
 
 private:

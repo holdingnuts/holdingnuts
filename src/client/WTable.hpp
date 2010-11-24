@@ -84,28 +84,28 @@ Q_OBJECT
 public:
 	WTable(int gid, int tid, QWidget *parent = 0);
 	~WTable();
-	
+
 	//! \brief Update whole table view
 	void updateView();
-	
+
 
 	void addChat(const QString& from, const QString& text);
 	void addServerMessage(const QString& text);
-	
+
 	void playSound(unsigned int id) const;
-	
+
 	//! \brief Translate seat-number depending on view-point
 	unsigned int seatToCentralView(int my, unsigned int seat) const;
-	
+
 	static const unsigned int	nMaxSeats;
-	
+
 	static QString buildHandStrengthString(HandStrength *strength, int verbosity=0);
 	static QString buildFaceString(const Card& card, bool plural=false);
 	static QString buildSuitString(const Card& card);
-	
+
 	//! \brief shows all entitys from table
 	void showDebugTable();
-	
+
 	//! \brief brings window to foreground
 	void setForegroundWindow();
 
@@ -115,7 +115,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent *event);
-	
+
 	void updateAfterSizeChange();
 
 	QPointF calcSeatPos(unsigned int nSeatID) const;
@@ -125,26 +125,26 @@ protected:
 	QPointF calcTxtPotsPos() const;
 	QPointF calcDealerBtnPos(unsigned int nSeatID) const;
 	void calcPotsPos();
-	
+
 	void doSitout(bool bSitout);
 
 	void evaluateActions(const table_snapshot *snap);
-	
+
 	bool greaterBet(
 		const table_snapshot *snap,
 		const chips_type bet,
 		chips_type *pbet = 0) const;
-	
+
 
 	//! \brief returns current Potsize including all Bets on Table
 	chips_type currentPot() const;
-	
+
 	void updateSeat(unsigned int s);
 	void updatePots();
 	void updateDealerButton();
 	void updateCommunityCards();
 	void updateHandStrength();
-	
+
 	void handleAutoActions();
 
 private slots:
@@ -155,7 +155,7 @@ private slots:
 	void actionMuck();
 	void actionBack();
 	void actionSitout();
-	
+
 	void actionAutoFoldCheck(int state);
 	void actionAutoCheckCall(int state);
 
@@ -164,11 +164,11 @@ private slots:
 	void slotSecondReminder(int seat);
 
 	void actionScreenshot();
-	
+
 	void actionChat(QString msg);
-	
+
 	void slotBetRaiseAmountChanged();
-	
+
 	void actionBetsizeMinimum();
 	void actionBetsizeQuarterPot();
 	void actionBetsizeHalfPot();
@@ -184,7 +184,7 @@ private:
 	const int	m_nGid;
 	//! \brief Table ID
 	const int	m_nTid;
-	
+
 	QGraphicsView			*m_pView;
 	QGraphicsScene			*m_pScene;
 
@@ -197,14 +197,14 @@ private:
 	QGraphicsSimpleTextItem *m_pTxtPots;
 	QGraphicsSimpleTextItem *m_pTxtHandStrength;
 	ChipStack				*m_Pots[8];
-	
+
 	// ui
 	ChatBox			*m_pChat;
 	QStackedLayout	*stlayActions;
 	EditableSlider	*m_pSliderAmount;
 	QPushButton		*btnCheckCall;
 	QPushButton		*btnBetRaise;
-	
+
 	QPushButton		*btnBetsizeMinimum;
 	QPushButton		*btnBetsizeQuarterPot;
 	QPushButton		*btnBetsizeHalfPot;
@@ -212,24 +212,24 @@ private:
 	QPushButton		*btnBetsizePotsize;
 	QPushButton		*btnBetsizeMaximum;
 	QWidget			*wRaiseBtns;
-	
+
 	QCheckBox 		*chkAutoFoldCheck;
 	QCheckBox		*chkAutoCheckCall;
-	
+
 	// stackedlayout widgets id
 	int				m_nActions;
 	int				m_nPreActions;
 	int				m_nPostActions;
 	int				m_nNoAction;
-	
-	
+
+
 	QLabel		*lblPersistentActions;
 	QStackedLayout	*stlayPersistentActions;
 	int				m_nSitout;
 	int				m_nBack;
-	
+
 	chips_type		m_autocall_amount;
-	
+
 	// shortcuts
 	QShortcut		*shortcutFold;
 	QShortcut		*shortcutCallCheck;
@@ -240,10 +240,10 @@ private:
 	QShortcut		*shortcutShow;
 	QShortcut		*shortcutSitout;
 	QShortcut		*shortcutBack;
-	
-	// 
+
+	//
 	QSizeF			sizeCommunityCards;
-	
+
 	qreal			posYCommunityCards;
 	qreal			posYTxtPots;
 	qreal			posYPots;

@@ -42,7 +42,7 @@ public:
 	EditableSlider(QWidget *parent = 0);
 
 	virtual ~EditableSlider();
-		
+
 	void setMinimum(chips_type value);
 	void setMaximum(chips_type value);
 	void setValue(chips_type value);
@@ -51,7 +51,7 @@ public:
 
 	bool validValue() const;
 	void setFocus();
-	
+
 protected:
 	int valueToSliderPosition(chips_type value) const;
 
@@ -65,12 +65,12 @@ private slots:
 	void sliderMoved(int value);
 	void textChanged(const QString& text);
 	void textEdited(const QString& text);
-	
+
 private:
 	QSlider			*m_pSlider;
 	QLineEdit		*m_pEdit;
 	QIntValidator		*m_pValidator;
-			
+
 	chips_type	m_nMin;
 	chips_type	m_nMax;
 };

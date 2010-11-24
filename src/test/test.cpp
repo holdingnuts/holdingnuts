@@ -51,7 +51,7 @@ int test_card1()
 		c->getName()
 		);
 	delete c;
-	
+
 	return 0;
 }
 
@@ -59,42 +59,42 @@ int test_card2()
 {
 	Card cd1(Card::King, Card::Spades);
 	Card cd2(Card::Jack, Card::Hearts);
-	
+
 	if (cd1 < cd2)
 		printf("c1 < c2\n");
 	else if (cd1 > cd2)
 		printf("c1 > c2\n");
 	else
 		printf("Equal\n");
-	
+
 	return 0;
 }
 
 int test_card3()
 {
 	Card c("Jh");
-	
+
 	printf("Card face=%c suit=%c => %s\n",
 		c.getFaceSymbol(),
 		c.getSuitSymbol(),
 		c.getName()
 		);
-	
+
 	return 0;
 }
 
 int test_deck1()
 {
 	Deck *d = new Deck();
-	
+
 	d->fill();
 	d->debug();
-	
+
 	d->shuffle();
 	d->debug();
-	
+
 	delete d;
-	
+
 	return 0;
 }
 
@@ -102,29 +102,29 @@ int test_handstrength1()
 {
 	HoleCards *h = new HoleCards();
 	CommunityCards *cc = new CommunityCards();
-	
+
 	Card::Suit s = Card::Spades;
 	h->setCards(
 		Card(Card::Six, s),
 		Card(Card::Two, s)
 	);
-	
+
 	cc->setFlop(
 		Card(Card::Five, s),
 		Card(Card::Four, s),
 		Card(Card::Three, s/*Card::Diamonds*/)
 	);
-	
+
 	cc->setTurn(Card(Card::Two, Card::Clubs));
 	cc->setRiver(Card(Card::Three, Card::Diamonds));
-	
+
 	HandStrength hs;
 	GameLogic::getStrength(h, cc, &hs);
 	printf("Strength: %s\n----------------\n", HandStrength::getRankingName(hs.getRanking()));
-	
+
 	delete h;
 	delete cc;
-	
+
 	return 0;
 }
 
@@ -133,26 +133,26 @@ int test_handstrength2()
 	for(;;)
 	{
 		Deck *d = new Deck();
-		
+
 		d->fill();
 		d->shuffle();
-		
-		
+
+
 		HoleCards *h1 = new HoleCards();
 		HoleCards *h2 = new HoleCards();
-		
+
 		Card c1, c2;
 		d->pop(c1);
 		d->pop(c2);
 		h1->setCards(c1, c2);
-		
+
 		d->pop(c1);
 		d->pop(c2);
 		h2->setCards(c1, c2);
-		
-		
+
+
 		CommunityCards *cc = new CommunityCards();
-		
+
 		Card f1, f2, f3, t, r;
 		d->pop(f1);
 		d->pop(f2);
@@ -162,13 +162,13 @@ int test_handstrength2()
 		cc->setTurn(t);
 		d->pop(r);
 		cc->setRiver(r);
-		
-		
+
+
 		HandStrength strength1, strength2;
 		GameLogic::getStrength(h1, cc, &strength1);
 		printf("---\n");
 		GameLogic::getStrength(h2, cc, &strength2);
-		
+
 		const char* lge = "";
 		if (strength1 > strength2)
 			lge = ">";
@@ -177,22 +177,22 @@ int test_handstrength2()
 		else if (strength1 < strength2)
 			lge = "<";
 		else { printf("Outch, bug in strength-operator\n"); return 0; }
-		
+
 		printf("Strength: %s %s %s\n",
 			HandStrength::getRankingName(strength1.getRanking()),
 			lge,
 			HandStrength::getRankingName(strength2.getRanking())
 		);
 		printf("----------------------\n");
-		
+
 		delete cc;
 		delete h1;
 		delete h2;
 		delete d;
-		
+
 		getchar();
 	}
-	
+
 	return 0;
 }
 
@@ -203,7 +203,7 @@ int test_handstrength3()
 		char name[50];
 		Card cards[7];
 	};
-	
+
 	test_hand hands[] = {
 		{ "Royal Flush", {Card("Ah"), Card("Kh"), Card("Qh"), Card("Jh"), Card("Th"), Card("3d"), Card("4d")} },
 		{ "Straight Flush 1", {Card("Kh"), Card("Qh"), Card("Jh"), Card("Th"), Card("3d"), Card("4d"), Card("9h")} },
@@ -213,44 +213,44 @@ int test_handstrength3()
 		{ "Straight & Flush 2", {Card("Ah"), Card("4h"), Card("2c"), Card("Kh"), Card("9c"), Card("3h"), Card("5h")} },
 		{ "Straight 1", {Card("Ah"), Card("4h"), Card("2c"), Card("Kh"), Card("9c"), Card("3h"), Card("5d")} },
 	};
-	
+
 	int hands_count = sizeof(hands) / sizeof(hands[0]);
-	
+
 	for (int i=0; i < hands_count; ++i)
 	{
 		test_hand *ch = &(hands[i]);
-		
+
 		HoleCards *h = new HoleCards();
 		CommunityCards *cc = new CommunityCards();
-		
+
 		h->setCards(
 			ch->cards[0],
 			ch->cards[1]
 		);
-		
+
 		cc->setFlop(
 			ch->cards[2],
 			ch->cards[3],
 			ch->cards[4]
 		);
-		
+
 		cc->setTurn(ch->cards[5]);
 		cc->setRiver(ch->cards[6]);
-	
+
 		printf("Test #%d: [", i+1);
 		for (int j=0; j < 7; ++j)
 			printf("%s ", ch->cards[j].getName());
-		
+
 		HandStrength hs;
 		GameLogic::getStrength(h, cc, &hs);
 		printf("] '%s': %s\n--------------------------------------------------------------------------------\n",
 			ch->name,
 			HandStrength::getRankingName(hs.getRanking()));
-		
+
 		delete h;
 		delete cc;
 	}
-	
+
 	return 0;
 }
 
@@ -259,53 +259,53 @@ int test_winlist1()
 	Deck d;
 	d.fill();
 	d.shuffle();
-	
+
 	Card f1, f2, f3, t, r;
 	CommunityCards cc;
-	
+
 	d.pop(f1); d.pop(f2); d.pop(f3); d.pop(t); d.pop(r);
 	cc.setFlop(f1, f2, f3);
 	cc.setTurn(t);
 	cc.setRiver(r);
-	
+
 	const unsigned int players = 4;
-	
+
 	HoleCards h[players];
 	HandStrength hs[players];
-	
+
 	vector<HandStrength> wl;
 	vector< vector<HandStrength> > winlist;
-	
+
 	for (unsigned int i=0; i < players; i++)
 	{
 		printf("--- Player %d ---\n", i); fflush(stdout);
-		
+
 		Card c1, c2;
 		d.pop(c1);
 		d.pop(c2);
 		h[i].setCards(c1, c2);
-		
+
 		GameLogic::getStrength(&(h[i]), &cc, &(hs[i]));
 		hs[i].setId(i);
-		
+
 		wl.push_back(hs[i]);
 	}
-	
-	
+
+
 	// determine winlist
 	GameLogic::getWinList(wl, winlist);
-	
-	
+
+
 	for (unsigned int i=0; i < winlist.size(); i++)
 	{
 		printf("--- Winlist %d---\n", i); fflush(stdout);
-		
+
 		vector<HandStrength> &tw = winlist[i];
-		
+
 		for (unsigned int j=0; j < tw.size(); j++)
 			printf("Rank %d = player %d\n", j, tw[j].getId()); fflush(stdout);
 	}
-	
+
 	return 0;
 }
 
@@ -313,7 +313,7 @@ int test_winlist1()
 int main(void)
 {
 	printf("Poker-test; running on ");
-	
+
 #if defined(PLATFORM_UNIX)
 	printf("UNIX\n");
 #elif defined(PLATFORM_WINDOWS)
@@ -321,20 +321,20 @@ int main(void)
 #else
 	printf("UNKNOWN\n");
 #endif
-	
+
 	// init PRNG
 	srand((unsigned) time(NULL));
-	
+
 #if 0
 	test_card1();
 	test_card2();
 	test_card3();
 #endif
-	
+
 #if 0
 	test_deck1();
 #endif
-	
+
 #if 0
 	test_handstrength1();
 	test_handstrength2();

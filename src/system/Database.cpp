@@ -47,7 +47,7 @@ Database::~Database()
 int Database::open(const char *filename)
 {
 	int rc;
-	
+
 	/* open sqlite database */
 	rc = sqlite3_open(filename, &db);
 	if (rc)
@@ -56,7 +56,7 @@ int Database::open(const char *filename)
 		sqlite3_close(db);
 		db = 0;
 	}
-	
+
 	return rc;
 }
 
@@ -64,27 +64,27 @@ int Database::query(const char *q, ...)
 {
 	if (!db)
 		return SQLITE_ERROR;
-	
+
 	va_list args;
-	
+
 	char *zErrMsg;
-	
+
 	va_start(args, q);
 	char *qstr = sqlite3_vmprintf(q, args);
 	va_end(args);
-	
+
 	dbg_msg("sqlite", "query= %s", qstr);
-	
+
 	int rc = sqlite3_exec(db, qstr, 0, 0, &zErrMsg);
-	
+
 	sqlite3_free(qstr);
-	
+
 	if (rc != SQLITE_OK)
 	{
 		dbg_msg("sqlite", "Error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
-	
+
 	return rc;
 }
 
@@ -92,19 +92,19 @@ int Database::query(QueryResult **qr, const char *q, ...)
 {
 	if (!db)
 		return SQLITE_ERROR;
-	
+
 	va_list args;
-	
+
 	char **result;
 	char *zErrMsg;
 	int nrow, ncol;
-	
+
 	va_start(args, q);
 	char *qstr = sqlite3_vmprintf(q, args);
 	va_end(args);
-	
+
 	dbg_msg("sqlite", "query= %s", qstr);
-	
+
 	int rc = sqlite3_get_table(
 		db,              /* An open database */
 		qstr,       /* SQL to be executed */
@@ -113,9 +113,9 @@ int Database::query(QueryResult **qr, const char *q, ...)
 		&ncol,          /* Number of result columns written here */
 		&zErrMsg          /* Error msg written here */
 		);
-	
+
 	sqlite3_free(qstr);
-	
+
 	if (rc != SQLITE_OK)
 	{
 		dbg_msg("sqlite", "Error: %s", zErrMsg);
@@ -124,7 +124,7 @@ int Database::query(QueryResult **qr, const char *q, ...)
 	}
 	else
 		*qr = new QueryResult(result, nrow, ncol);
-	
+
 	return rc;
 }
 
@@ -132,7 +132,7 @@ void Database::freeQueryResult(QueryResult **qr)
 {
 	if (qr)
 		return;
-	
+
 	delete qr;
 	qr = 0;
 }
@@ -141,11 +141,11 @@ char* Database::createQueryString(const char *q, ...)
 {
 	va_list args;
 	char *qstr;
-	
+
 	va_start(args, q);
 	qstr = sqlite3_vmprintf(q, args);
 	va_end(args);
-	
+
 	return qstr;
 }
 

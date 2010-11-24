@@ -49,7 +49,7 @@ typedef enum {
 typedef struct {
 	//! \brief Unique client identifier
 	int		id;
-	
+
 	//! \brief Network socket descriptor
 	socktype	sock;
 	//! \brief Saved address info
@@ -58,24 +58,24 @@ typedef struct {
 	unsigned int	version;
 	//! \brief Unique connection-identifier chosen by client
 	char uuid[37];  // 16*2 + 4 sep + \0 = 37
-	
+
 	//! \brief Receive-buffer for client messages
 	char	msgbuf[1024];
 	//! \brief Length of current buffer
 	int	buflen;
-	
+
 	//! \brief Id of last received message
 	int	last_msgid;
-	
+
 	//! \brief Current state of client (combination of type clientstate)
 	unsigned int	state;
-	
+
 	//! \brief Client info sent by client
 	struct {
 		char name[20+1];
 		char location[30+1];
 	} info;
-	
+
 	//! \brief Flood-protection: time client sent last chat-message
 	time_t last_chat;
 	//! \brief Flood-protection: count of sent messages per interval
@@ -105,7 +105,7 @@ typedef struct {
 	unsigned int	clients_introduced;
 	unsigned int	clients_incompatible;
 	unsigned int	games_created;
-	
+
 } server_stats;
 
 // used by pserver.cpp

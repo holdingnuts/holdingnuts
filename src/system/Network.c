@@ -107,15 +107,15 @@ int socket_setnonblocking(socktype sock)
 {
 #if defined(PLATFORM_WINDOWS)
 	ULONG NonBlock = 1;
-	
+
 	if (ioctlsocket(sock, FIONBIO, &NonBlock) == SOCKET_ERROR)
 		return -1;
 #else
 	int opts;
-	
+
 	if ((opts = fcntl(sock, F_GETFL)) < 0)
 		return -1;
-	
+
 	opts |= O_NONBLOCK;
 	if (fcntl(sock, F_SETFL, opts) < 0)
 		return -2;
@@ -127,7 +127,7 @@ int network_isinprogress()
 {
 #if defined(PLATFORM_WINDOWS)
 	int wserrno = WSAGetLastError();
-	
+
 	return (wserrno == WSAEWOULDBLOCK || wserrno == WSAEINPROGRESS);
 #else
 	return (errno == EWOULDBLOCK || errno == EINPROGRESS);

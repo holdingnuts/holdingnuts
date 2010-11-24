@@ -79,7 +79,7 @@ clientcon* get_client_by_sock(socktype sock)
 	for (unsigned int i=0; i < clients.size(); i++)
 		if (clients[i].sock == sock)
 			return &(clients[i]);
-	
+
 	return NULL;
 }
 
@@ -88,7 +88,7 @@ clientcon* get_client_by_id(int cid)
 	for (unsigned int i=0; i < clients.size(); i++)
 		if (clients[i].id == cid)
 			return &(clients[i]);
-	
+
 	return NULL;
 }
 
@@ -97,13 +97,13 @@ int send_msg(socktype sock, const char *message)
 	char buf[MSG_BUFFER_SIZE];
 	const int len = snprintf(buf, sizeof(buf), "%s\r\n", message);
 	const int bytes = socket_write(sock, buf, len);
-	
+
 	// FIXME: send remaining bytes if not all have been sent
 	// FIXME: handle client-dead case
 	if (len != bytes)
 		dbg_msg("clientsock", "(%d) warning: not all bytes written (%d != %d).",
 			sock, len, bytes);
-	
+
 	return bytes;
 }
 
@@ -116,7 +116,7 @@ bool send_response(socktype sock, bool is_success, int last_msgid, int code=0, c
 	else
 		snprintf(buf, sizeof(buf), "%d %s %d %s",
 			  last_msgid, is_success ? "OK" : "ERR", code, str);
-	
+
 	return send_msg(sock, buf);
 }
 
@@ -138,7 +138,7 @@ bool send_err(clientcon *client, int code=0, const char *str="")
 bool client_chat(int from, int to, const char *message)
 {
 	char msg[256];
-	
+
 	if (from == -1)
 	{
 		snprintf(msg, sizeof(msg), "MSG %d %s %s",
@@ -147,20 +147,20 @@ bool client_chat(int from, int to, const char *message)
 	else
 	{
 		clientcon* fromclient = get_client_by_id(from);
-		
+
 		snprintf(msg, sizeof(msg), "MSG %d \"%s\" %s",
 			from,
 			(fromclient) ? fromclient->info.name : "???",
 			message);
 	}
-	
+
 	if (to == -1)
 	{
 		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
 		{
 			if (!(e->state & Introduced))  // do not send broadcast to non-introduced clients
 				continue;
-			
+
 			send_msg(e->sock, msg);
 		}
 	}
@@ -172,7 +172,7 @@ bool client_chat(int from, int to, const char *message)
 		else
 			return false;
 	}
-	
+
 	return true;
 }
 
@@ -180,14 +180,14 @@ bool client_chat(int from, int to, const char *message)
 bool client_chat(int from_gid, int from_tid, int to, const char *message)
 {
 	char msg[256];
-	
+
 	snprintf(msg, sizeof(msg), "MSG %d:%d %s %s",
 		from_gid, from_tid, (from_tid == -1) ? "game" : "table", message);
-	
+
 	clientcon* toclient = get_client_by_id(to);
 	if (toclient)
 		send_msg(toclient->sock, msg);
-	
+
 	return true;
 }
 
@@ -195,28 +195,28 @@ bool client_chat(int from_gid, int from_tid, int to, const char *message)
 bool table_chat(int from_cid, int to_gid, int to_tid, const char *message)
 {
 	char msg[256];
-	
+
 	clientcon* fromclient = get_client_by_id(from_cid);
-	
+
 	GameController *g = get_game_by_id(to_gid);
 	if (!g)
 		return false;
-	
+
 	vector<int> client_list;
 	g->getListenerList(client_list);
-	
+
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
 		snprintf(msg, sizeof(msg), "MSG %d:%d:%d \"%s\" %s",
 			to_gid, to_tid, from_cid,
 			(fromclient) ? fromclient->info.name : "???",
 			message);
-		
+
 		clientcon* toclient = get_client_by_id(client_list[i]);
 		if (toclient)
 			send_msg(toclient->sock, msg);
 	}
-	
+
 	return true;
 }
 
@@ -225,11 +225,11 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *me
 	char buf[MSG_BUFFER_SIZE];
 	snprintf(buf, sizeof(buf), "SNAP %d:%d %d %s",
 		from_gid, from_tid, sid, message);
-	
+
 	clientcon* toclient = get_client_by_id(to);
 	if (toclient && toclient->state & Introduced)
 		send_msg(toclient->sock, buf);
-	
+
 	return true;
 }
 
@@ -242,7 +242,7 @@ bool client_snapshot(int to, int sid, const char *message)
 	}
 	else
 		client_snapshot(-1, -1, to, sid, message);
-	
+
 	return true;
 }
 
@@ -253,11 +253,11 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 	{
 		send_response(sock, false, -1, ErrServerFull, "server full");
 		socket_close(sock);
-		
+
 		return false;
 	}
-	
-	
+
+
 	// drop client if maximum connections per IP is reached
 	const unsigned int connection_max = (unsigned int) config.getInt("max_connections_per_ip");
 	if (connection_max)
@@ -272,29 +272,29 @@ bool client_add(socktype sock, sockaddr_in *saddr)
 				{
 					send_response(sock, false, -1, ErrMaxConnectionsPerIP, "connection limit per IP is reached");
 					socket_close(sock);
-					
+
 					return false;
 				}
 			}
 		}
 	}
-	
+
 	// add the client
 	clientcon client;
 	memset(&client, 0, sizeof(client));
 	client.sock = sock;
 	client.saddr = *saddr;
 	client.id = -1;
-	
+
 	// set initial state
 	client.state |= Connected;
-	
+
 	clients.push_back(client);
-	
-	
+
+
 	// update stats
 	stats.clients_connected++;
-	
+
 	return true;
 }
 
@@ -305,7 +305,7 @@ bool client_remove(socktype sock)
 		if (client->sock == sock)
 		{
 			socket_close(client->sock);
-			
+
 			bool send_msg = false;
 			if (client->state & SentInfo)
 			{
@@ -316,36 +316,36 @@ bool client_remove(socktype sock)
 					if (!g->isStarted() && g->isPlayer(client->id))
 						g->removePlayer(client->id);
 				}
-				
-				
+
+
 				snprintf(msg, sizeof(msg),
 					"%d %d \"%s\"",
 					SnapFoyerLeave, client->id, client->info.name);
-				
+
 				send_msg = true;
-				
+
 				// save client-con in archive
 				string uuid = client->uuid;
-				
+
 				if (uuid.length())
 				{
 					// FIXME: only add max. 3 entries for each IP
 					con_archive[uuid].logout_time = time(NULL);
 				}
 			}
-			
+
 			log_msg("clientsock", "(%d) connection closed", client->sock);
-			
+
 			clients.erase(client);
-			
+
 			// send foyer snapshot to all remaining clients
 			if (send_msg)
 				client_snapshot(-1, SnapFoyer, msg);
-			
+
 			break;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -353,15 +353,15 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 {
 	unsigned int version = t.getNextInt();
 	string uuid = t.getNext();
-	
+
 	if (version < VERSION_COMPAT)
 	{
 		log_msg("client", "client %d version (%d) too old", client->sock, version);
 		send_err(client, ErrWrongVersion, "The client version is too old."
 			"Please update your HoldingNuts client to a more recent version.");
 		client_remove(client->sock);
-		
-		
+
+
 		// update stats
 		stats.clients_incompatible++;
 	}
@@ -369,25 +369,25 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 	{
 		// ack the command
 		send_ok(client);
-		
-		
+
+
 		client->version = version;
 		client->state |= Introduced;
-		
+
 		// update stats
 		stats.clients_introduced++;
-		
-		
+
+
 		snprintf(client->uuid, sizeof(client->uuid), "%s", uuid.c_str());
-		
+
 		// re-assign cid if this client was previously connected (and cid isn't already connected)
 		bool use_prev_cid = false;
 		bool uuid_inuse = false;
-		
+
 		if (uuid.length())
 		{
 			clientconar_type::iterator it = con_archive.find(uuid);
-			
+
 			if (it != con_archive.end())
 			{
 				clientcon *conc = get_client_by_id(it->second.id);
@@ -395,7 +395,7 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 				{
 					client->id = it->second.id;
 					use_prev_cid = true;
-					
+
 					log_msg("uuid", "(%d) using previous cid (%d) for uuid '%s'", client->sock, client->id, client->uuid);
 				}
 				else
@@ -408,29 +408,29 @@ int client_cmd_pclient(clientcon *client, Tokenizer &t)
 			else
 				log_msg("uuid", "(%d) reserving uuid '%s'", client->sock, client->uuid);
 		}
-		
+
 		if (!use_prev_cid)
 			client->id = cid_counter++;
-		
-		
+
+
 		// set initial client info
 		snprintf(client->info.name, sizeof(client->info.name), "client_%d", client->id);
 		*(client->info.location) = '\0';
-		
+
 		// send 'introduced response'
 		snprintf(msg, sizeof(msg), "PSERVER %d %d %d",
 			VERSION,
 			client->id,
 			(unsigned int) time(NULL));
-			
+
 		send_msg(client->sock, msg);
-		
-		
+
+
 		// send warning if UUID is already in use
 		if (uuid_inuse)
 			client_chat(-1, client->id, "Warning: UUID is already in use.");
 	}
-	
+
 	return 0;
 }
 
@@ -438,11 +438,11 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 {
 	string infostr;
 	Tokenizer it(":");
-	
+
 	while (t.getNext(infostr))
 	{
 		it.parse(infostr);
-		
+
 		bool havearg = (it.count() >= 2);
 		string infotype, infoarg;
 
@@ -458,9 +458,9 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 		else if (infotype == "location" && havearg)
 			snprintf(client->info.location, sizeof(client->info.location), "%s", infoarg.c_str());
 	}
-	
+
 	send_ok(client);
-	
+
 	if (!(client->state & SentInfo))
 	{
 		// store UUID in connection-archive
@@ -471,8 +471,8 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 			ar.id = client->id;
 			con_archive[client->uuid] = ar;
 		}
-		
-		
+
+
 		// send welcome message
 		const string welcome_message = config.get("welcome_message");
 		if (welcome_message.length())
@@ -480,71 +480,71 @@ int client_cmd_info(clientcon *client, Tokenizer &t)
 			snprintf(msg, sizeof(msg),
 				"%s",
 				welcome_message.c_str());
-		
+
 			client_chat(-1, client->id, msg);
 		}
-		
-		
+
+
 		// send foyer snapshot broadcast
 		snprintf(msg, sizeof(msg),
 			"%d %d \"%s\"",
 			SnapFoyerJoin, client->id, client->info.name);
-		
+
 		client_snapshot(-1, SnapFoyer, msg);
 	}
-	
+
 	client->state |= SentInfo;
-	
+
 	return 0;
 }
 
 int client_cmd_chat(clientcon *client, Tokenizer &t)
 {
 	bool cmderr = false;
-	
+
 	if (t.count() < 2)
 		cmderr = true;
 	else
 	{
 		// flooding-protection
 		int time_since_last_chat = (int) difftime(time(NULL), client->last_chat);
-		
+
 		// is the client still muted?
 		if (time_since_last_chat < 0)
 		{
 			send_err(client, 0, "you are still muted");
 			return 0;
 		}
-		
+
 		if ((unsigned int)time_since_last_chat > (unsigned int) config.getInt("flood_chat_interval"))
 		{
 			// reset flood-measure for new interval
 			client->last_chat = time(NULL);
 			client->chat_count = 0;
 		}
-		
+
 		// is client flooding?
 		if (++client->chat_count >= (unsigned int) config.getInt("flood_chat_per_interval"))
 		{
 			log_msg("flooding", "client (%d) caught flooding the chat", client->id);
-			
+
 			// mute client for n-seconds
 			client->last_chat = time(NULL) + config.getInt("flood_chat_mute");
 			client->chat_count = 0;
-			
+
 			send_err(client, 0, "you have been muted for some time");
 			return 0;
 		}
-		
-		
+
+
 		Tokenizer ct(":");
 		ct.parse(t.getNext());
 		string chatmsg = t.getTillEnd();
-		
+
 		if (ct.count() == 1) // cid
 		{
 			int dest = ct.getNextInt();
-			
+
 			if (!client_chat(client->id, dest, chatmsg.c_str()))
 				cmderr = true;
 		}
@@ -552,17 +552,17 @@ int client_cmd_chat(clientcon *client, Tokenizer &t)
 		{
 			int gid = ct.getNextInt();
 			int tid = ct.getNextInt();
-			
+
 			if (!table_chat(client->id, gid, tid, chatmsg.c_str()))
 				cmderr = true;
 		}
 	}
-	
+
 	if (!cmderr)
 		send_ok(client);
 	else
 		send_err(client);
-	
+
 	return 0;
 }
 
@@ -572,7 +572,7 @@ bool send_gameinfo(clientcon *client, int gid)
 	const GameController *g;
 	if (!(g = get_game_by_id(gid)))
 		return false;
-	
+
 	int game_mode = 0;
 	switch ((int)g->getGameType())
 	{
@@ -586,7 +586,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		game_mode = GameModeRingGame;
 		break;
 	}
-	
+
 	int state = 0;
 	if (g->isEnded())
 		state = GameStateEnded;
@@ -594,7 +594,7 @@ bool send_gameinfo(clientcon *client, int gid)
 		state = GameStateStarted;
 	else
 		state = GameStateWaiting;
-	
+
 	snprintf(msg, sizeof(msg),
 		"GAMEINFO %d %d:%d:%d:%d:%d:%d:%d:%d %d:%d:%d \"%s\"",
 		gid,
@@ -614,9 +614,9 @@ bool send_gameinfo(clientcon *client, int gid)
 		g->getBlindsFactor(),
 		g->getBlindsTime(),
 		g->getName().c_str());
-	
+
 	send_msg(client->sock, msg);
-	
+
 	return true;
 }
 
@@ -628,7 +628,7 @@ bool client_cmd_request_gameinfo(clientcon *client, Tokenizer &t)
 		const int gid = Tokenizer::string2int(sgid);
 		send_gameinfo(client, gid);
 	}
-	
+
 	return true;
 }
 
@@ -645,11 +645,11 @@ bool client_cmd_request_clientinfo(clientcon *client, Tokenizer &t)
 				"CLIENTINFO %d \"name:%s\" \"location:%s\"",
 				cid,
 				c->info.name, c->info.location);
-			
+
 			send_msg(client->sock, msg);
 		}
 	}
-	
+
 	return true;
 }
 
@@ -659,16 +659,16 @@ bool client_cmd_request_gamelist(clientcon *client, Tokenizer &t)
 	for (games_type::iterator e = games.begin(); e != games.end(); e++)
 	{
 		const int gid = e->first;
-		
+
 		snprintf(msg, sizeof(msg), "%d ", gid);
 		gamelist += msg;
 	}
-	
+
 	snprintf(msg, sizeof(msg),
 		"GAMELIST %s", gamelist.c_str());
-	
+
 	send_msg(client->sock, msg);
-	
+
 	return true;
 }
 
@@ -676,24 +676,24 @@ bool client_cmd_request_playerlist(clientcon *client, Tokenizer &t)
 {
 	int gid;
 	t >> gid;
-	
+
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 		return false;
-	
+
 	vector<int> client_list;
 	g->getPlayerList(client_list);
-	
+
 	string slist;
 	for (unsigned int i=0; i < client_list.size(); i++)
 	{
 		snprintf(msg, sizeof(msg), "%d ", client_list[i]);
 		slist += msg;
 	}
-	
+
 	snprintf(msg, sizeof(msg), "PLAYERLIST %d %s", gid, slist.c_str());
 	send_msg(client->sock, msg);
-	
+
 	return true;
 }
 
@@ -709,9 +709,9 @@ bool client_cmd_request_serverinfo(clientcon *client, Tokenizer &t)
 		StatsClientCount,		(unsigned int) clients.size(),
 		StatsGamesCount,		(unsigned int) games.size(),
 		StatsConarchiveCount,		(unsigned int) con_archive.size());
-	
+
 	send_msg(client->sock, msg);
-	
+
 	return true;
 }
 
@@ -719,16 +719,16 @@ bool client_cmd_request_gamestart(clientcon *client, Tokenizer &t)
 {
 	int gid;
 	t >> gid;
-	
+
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 		return false;
-	
+
 	if (g->getOwner() != client->id && !(client->state & Authed))
 		return false;
-	
+
 	g->start();
-	
+
 	return true;
 }
 
@@ -757,12 +757,12 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		send_err(client, ErrParameters);
 		return 1;
 	}
-	
+
 	bool cmderr = false;
-	
+
 	string request;
 	t >> request;
-	
+
 	if (request == "clientinfo")
 		cmderr = !client_cmd_request_clientinfo(client, t);
 	else if (request == "gameinfo")
@@ -779,7 +779,7 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 		cmderr = !client_cmd_request_gamerestart(client, t);
 	else
 		cmderr = true;
-	
+
 	// FIXME: temporarily disabled for release 0.0.3
 #if 0
 	if (!cmderr)
@@ -787,7 +787,7 @@ int client_cmd_request(clientcon *client, Tokenizer &t)
 	else
 		send_err(client);
 #endif
-	
+
 	return 0;
 }
 
@@ -798,40 +798,40 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 		send_err(client, ErrParameters);
 		return 1;
 	}
-	
+
 	int gid;
 	t >> gid;
-	
+
 	string passwd = "";
 	if (t.count() >=2)
 		t >> passwd;
-	
+
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 	{
 		send_err(client, 0 /*FIXME*/, "game does not exist");
 		return 1;
 	}
-	
+
 	if (g->isStarted())
 	{
 		send_err(client, 0 /*FIXME*/, "game has already been started");
 		return 1;
 	}
-	
+
 	if (g->isPlayer(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "you are already registered");
 		return 1;
 	}
-	
+
 	// check for max-games-register limit
 	const unsigned int register_limit = config.getInt("max_register_per_player");
 	unsigned int count = 0;
 	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
 	{
 		GameController *g = e->second;
-		
+
 		if (g->isPlayer(client->id))
 		{
 			if (++count == register_limit)
@@ -841,28 +841,28 @@ int client_cmd_register(clientcon *client, Tokenizer &t)
 			}
 		}
 	}
-	
+
 	// check the password
 	if (!g->checkPassword(passwd))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to register, wrong password");
 		return 1;
 	}
-	
+
 	if (!g->addPlayer(client->id, client->uuid))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to register");
 		return 1;
 	}
-	
-	
+
+
 	log_msg("game", "%s (%d) joined game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
-	
-	
+
+
 	send_ok(client);
-	
+
 	return 0;
 }
 
@@ -873,43 +873,43 @@ int client_cmd_unregister(clientcon *client, Tokenizer &t)
 		send_err(client, ErrParameters);
 		return 1;
 	}
-	
+
 	int gid;
 	t >> gid;
-	
+
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 	{
 		send_err(client, 0 /*FIXME*/, "game does not exist");
 		return 1;
 	}
-	
+
 	if (g->isStarted())
 	{
 		send_err(client, 0 /*FIXME*/, "game has already been started");
 		return 1;
 	}
-	
+
 	if (!g->isPlayer(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "you are not registered");
 		return 1;
 	}
-	
+
 	if (!g->removePlayer(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to unregister");
 		return 1;
 	}
-	
-	
+
+
 	log_msg("game", "%s (%d) parted game %d (%d/%d)",
 		client->info.name, client->id, gid,
 		g->getPlayerCount(), g->getPlayerMax());
-	
-	
+
+
 	send_ok(client);
-	
+
 	return 0;
 }
 
@@ -920,34 +920,34 @@ int client_cmd_subscribe(clientcon *client, Tokenizer &t)
 		send_err(client, ErrParameters);
 		return 1;
 	}
-	
+
 	int gid;
 	t >> gid;
-	
+
 	string passwd = "";
 	if (t.count() >=2)
 		t >> passwd;
-	
+
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 	{
 		send_err(client, 0 /*FIXME*/, "game does not exist");
 		return 1;
 	}
-	
+
 	if (g->isSpectator(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "you are already subscribed");
 		return 1;
 	}
-	
+
 	// check for max-games-subscribe limit
 	const unsigned int subscribe_limit = config.getInt("max_subscribe_per_player");
 	unsigned int count = 0;
 	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
 	{
 		GameController *g = e->second;
-		
+
 		if (g->isSpectator(client->id))
 		{
 			if (++count == subscribe_limit)
@@ -964,20 +964,20 @@ int client_cmd_subscribe(clientcon *client, Tokenizer &t)
 		send_err(client, 0 /*FIXME*/, "unable to subscribe, wrong password");
 		return 1;
 	}
-	
+
 	if (!g->addSpectator(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to subscribe");
 		return 1;
 	}
-	
-	
+
+
 	log_msg("game", "%s (%d) subscribed game %d",
 		client->info.name, client->id, gid);
-	
-	
+
+
 	send_ok(client);
-	
+
 	return 0;
 }
 
@@ -988,36 +988,36 @@ int client_cmd_unsubscribe(clientcon *client, Tokenizer &t)
 		send_err(client, ErrParameters);
 		return 1;
 	}
-	
+
 	int gid;
 	t >> gid;
-	
+
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 	{
 		send_err(client, 0 /*FIXME*/, "game does not exist");
 		return 1;
 	}
-	
+
 	if (!g->isSpectator(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "you are not subscribed");
 		return 1;
 	}
-	
+
 	if (!g->removeSpectator(client->id))
 	{
 		send_err(client, 0 /*FIXME*/, "unable to unsubscribe");
 		return 1;
 	}
-	
-	
+
+
 	log_msg("game", "%s (%d) unsubscribed game %d",
 		client->info.name, client->id, gid);
-	
-	
+
+
 	send_ok(client);
-	
+
 	return 0;
 }
 
@@ -1028,23 +1028,23 @@ int client_cmd_action(clientcon *client, Tokenizer &t)
 		send_err(client, ErrParameters);
 		return 1;
 	}
-	
+
 	int gid;
 	string action;
 	chips_type amount;
-	
+
 	t >> gid >> action;
 	amount = t.getNextInt();
-	
+
 	GameController *g = get_game_by_id(gid);
 	if (!g)
 	{
 		send_err(client, 0 /* FIXME */, "game does not exist");
 		return 1;
 	}
-	
+
 	Player::PlayerAction a = Player::None;
-	
+
 	if (action == "check")
 		a = Player::Check;
 	else if (action == "fold")
@@ -1072,12 +1072,12 @@ int client_cmd_action(clientcon *client, Tokenizer &t)
 		send_err(client, ErrParameters);
 		return 1;
 	}
-	
-	
+
+
 	g->setPlayerAction(client->id, a, amount);
-	
+
 	send_ok(client);
-	
+
 	return 0;
 }
 
@@ -1088,23 +1088,23 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		send_err(client, ErrNoPermission, "no permission");
 		return 1;
 	}
-	
-	
+
+
 	// check for server games count limit
 	if (games.size() >= (unsigned int) config.getInt("max_games"))
 	{
 		send_err(client, 0 /*FIXME*/, "server games count reached");
 		return 1;
 	}
-	
-	
+
+
 	// check for max-games-create limit
 	unsigned int create_limit = config.getInt("max_create_per_player");
 	unsigned int count = 0;
 	for (games_type::const_iterator e = games.begin(); e != games.end(); e++)
 	{
 		GameController *g = e->second;
-		
+
 		if (g->getOwner() == client->id)
 		{
 			if (++count == create_limit)
@@ -1114,10 +1114,10 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 			}
 		}
 	}
-	
-	
+
+
 	bool cmderr = false;
-	
+
 	struct {
 		string name;
 		unsigned int max_players;
@@ -1141,25 +1141,25 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		"",
 		false,
 	};
-	
-	
+
+
 	string infostr;
 	Tokenizer it(":");
-	
+
 	while (t.getNext(infostr))
 	{
 		it.parse(infostr);
-		
+
 		bool havearg = (it.count() >= 2);
 		string infotype, infoarg;
 
 		it.getNext(infotype);
 		infoarg = it.getTillEnd(':');
-		
+
 		if (infotype == "type" && havearg)
 		{
 			ginfo.type = Tokenizer::string2int(infoarg);
-			
+
 			// TODO: no other gamesmodes supported yet
 			if (ginfo.type != GameController::SNG)
 				cmderr = true;
@@ -1167,21 +1167,21 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		else if (infotype == "players" && havearg)
 		{
 			ginfo.max_players = Tokenizer::string2int(infoarg);
-			
+
 			if (ginfo.max_players < 2 || ginfo.max_players > 10)
 				cmderr = true;
 		}
 		else if (infotype == "stake" && havearg)
 		{
 			ginfo.stake = Tokenizer::string2int(infoarg);
-			
+
 			if (ginfo.stake < 10 || ginfo.stake > 1000000*100)
 				cmderr = true;
 		}
 		else if (infotype == "timeout" && havearg)
 		{
 			ginfo.timeout = Tokenizer::string2int(infoarg);
-			
+
 			if (ginfo.timeout < 5 || ginfo.timeout > 5*60)
 				cmderr = true;
 		}
@@ -1189,27 +1189,27 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			if (infoarg.length() > 50)
 				infoarg = string(infoarg, 0, 50);
-			
+
 			ginfo.name = infoarg;
 		}
 		else if (infotype == "blinds_start" && havearg)
 		{
 			ginfo.blinds_start = Tokenizer::string2int(infoarg);
-			
+
 			if (ginfo.blinds_start < 5 || ginfo.blinds_start > 200*100)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_factor" && havearg)
 		{
 			ginfo.blinds_factor = Tokenizer::string2int(infoarg);
-			
+
 			if (ginfo.blinds_factor < 12 || ginfo.blinds_factor > 40)
 				cmderr = true;
 		}
 		else if (infotype == "blinds_time" && havearg)
 		{
 			ginfo.blinds_time = Tokenizer::string2int(infoarg);
-			
+
 			if (ginfo.blinds_time < 30 || ginfo.blinds_time > 30*60)
 				cmderr = true;
 		}
@@ -1217,7 +1217,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 		{
 			if (infoarg.length() > 16)
 				infoarg = string(infoarg, 0, 16);
-			
+
 			ginfo.password = infoarg;
 		}
 		else if (infotype == "restart" && havearg)
@@ -1228,7 +1228,7 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 				cmderr = true;
 		}
 	}
-	
+
 	if (!cmderr)
 	{
 		GameController *g = new GameController();
@@ -1250,76 +1250,76 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 			g->setGameDeletionDelay(config.getInt("game_deletion_delay"));
 
 		games[gid] = g;
-		
+
 		send_ok(client);
-		
-		
+
+
 		log_msg("game", "%s (%d) created game %d",
 			client->info.name, client->id, gid);
-		
-		
+
+
 		// update stats
 		stats.games_created++;
-		
-		
+
+
 		for (clients_type::iterator e = clients.begin(); e != clients.end(); e++)
 		{
 			clientcon *client = &(*e);
 			if (!(client->state & Introduced))  // do not send broadcast to non-introduced clients
 				continue;
-			
+
 			send_gameinfo(client, gid);
 		}
 	}
 	else
 		send_err(client);
-	
+
 	return 0;
 }
 
 int client_cmd_auth(clientcon *client, Tokenizer &t)
 {
 	bool cmderr = true;
-	
+
 	if (t.count() >= 2 && config.get("auth_password").length())
 	{
 		const int type = t.getNextInt();
 		const string passwd = t.getNext();
-		
+
 		// -1 is server-auth
 		if (type == -1)
 		{
 			if (passwd == config.get("auth_password"))
 			{
 				client->state |= Authed;
-				
+
 				cmderr = false;
 			}
 		}
 	}
-	
+
 	if (!cmderr)
 	{
 		log_msg("auth", "%s (%d) has been authed",
 			client->info.name, client->id);
-	
+
 		send_ok(client);
 	}
 	else
 		send_err(client, 0, "auth failed");
-	
+
 	return 0;
 }
 
 int client_cmd_config(clientcon *client, Tokenizer &t)
 {
 	bool cmderr = false;
-	
+
 	if (client->state & Authed)
 	{
 		const string action = t.getNext();
 		const string varname = t.getNext();
-		
+
 		if (action == "get")
 		{
 			if (config.exists(varname))
@@ -1334,9 +1334,9 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 		else if (action == "set")
 		{
 			const string varvalue = t.getNext();
-			
+
 			config.set(varname, varvalue);
-			
+
 			log_msg("config", "%s (%d) set var '%s' to '%s'",
 				client->info.name, client->id,
 				varname.c_str(), varvalue.c_str());
@@ -1345,11 +1345,11 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 		{
 			char cfgfile[1024];
 			snprintf(cfgfile, sizeof(cfgfile), "%s/server.cfg", sys_config_path());
-			
+
 			// update config-version and save config
 			config.set("version", VERSION);
 			config.save(cfgfile);
-			
+
 			client_chat(-1, client->id, "Config saved");
 		}
 		else
@@ -1357,12 +1357,12 @@ int client_cmd_config(clientcon *client, Tokenizer &t)
 	}
 	else
 		cmderr = true;
-	
+
 	if (!cmderr)
 		send_ok(client);
 	else
 		send_err(client, 0, "config request failed");
-	
+
 	return 0;
 }
 
@@ -1370,13 +1370,13 @@ int client_execute(clientcon *client, const char *cmd)
 {
 	Tokenizer t(" ");
 	t.parse(cmd);  // parse the command line
-	
+
 	// ignore blank command
 	if (!t.count())
 		return 0;
-	
+
 	//dbg_msg("clientsock", "(%d) executing '%s'", client->sock, cmd);
-	
+
 	// FIXME: could be done better...
 	// extract message-id if present
 	const char firstchar = t[0][0];
@@ -1384,12 +1384,12 @@ int client_execute(clientcon *client, const char *cmd)
 		client->last_msgid = t.getNextInt();
 	else
 		client->last_msgid = -1;
-	
-	
+
+
 	// get command argument
 	const string command = t.getNext();
-	
-	
+
+
 	if (!(client->state & Introduced))  // state: not introduced
 	{
 		if (command == "PCLIENT")
@@ -1430,7 +1430,7 @@ int client_execute(clientcon *client, const char *cmd)
 	}
 	else
 		send_err(client, ErrNotImplemented, "not implemented");
-	
+
 	return 0;
 }
 
@@ -1438,7 +1438,7 @@ int client_execute(clientcon *client, const char *cmd)
 int client_parsebuffer(clientcon *client)
 {
 	//log_msg("clientsock", "(%d) parse (bufferlen=%d)", client->sock, client->buflen);
-	
+
 	int found_nl = -1;
 	for (int i=0; i < client->buflen; i++)
 	{
@@ -1450,9 +1450,9 @@ int client_parsebuffer(clientcon *client)
 			break;
 		}
 	}
-	
+
 	int retval = 0;
-	
+
 	// is there a command in queue?
 	if (found_nl != -1)
 	{
@@ -1460,7 +1460,7 @@ int client_parsebuffer(clientcon *client)
 		char cmd[sizeof(client->msgbuf)];
 		memcpy(cmd, client->msgbuf, found_nl);
 		cmd[found_nl] = '\0';
-		
+
 		//log_msg("clientsock", "(%d) command: '%s' (len=%d)", client->sock, cmd, found_nl);
 		if (client_execute(client, cmd) != -1)  // client quitted ?
 		{
@@ -1468,7 +1468,7 @@ int client_parsebuffer(clientcon *client)
 			memmove(client->msgbuf, client->msgbuf + found_nl + 1, client->buflen - (found_nl + 1));
 			client->buflen -= found_nl + 1;
 			//log_msg("clientsock", "(%d) new buffer after cmd (bufferlen=%d)", client->sock, client->buflen);
-			
+
 			retval = client->buflen;
 		}
 		else
@@ -1479,7 +1479,7 @@ int client_parsebuffer(clientcon *client)
 	}
 	else
 		retval = 0;
-	
+
 	return retval;
 }
 
@@ -1487,21 +1487,21 @@ int client_handle(socktype sock)
 {
 	char buf[1024];
 	int bytes;
-	
+
 	// return early on client close/error
 	if ((bytes = socket_read(sock, buf, sizeof(buf))) <= 0)
 		return bytes;
-	
-	
+
+
 	//log_msg("clientsock", "(%d) DATA len=%d", sock, bytes);
-	
+
 	clientcon *client = get_client_by_sock(sock);
 	if (!client)
 	{
 		log_msg("clientsock", "(%d) error: no client associated", sock);
 		return -1;
 	}
-	
+
 	if (client->buflen + bytes > (int)sizeof(client->msgbuf))
 	{
 		log_msg("clientsock", "(%d) error: buffer size exceeded", sock);
@@ -1511,11 +1511,11 @@ int client_handle(socktype sock)
 	{
 		memcpy(client->msgbuf + client->buflen, buf, bytes);
 		client->buflen += bytes;
-		
+
 		// parse and execute all commands in queue
 		while (client_parsebuffer(client));
 	}
-	
+
 	return bytes;
 }
 
@@ -1523,15 +1523,15 @@ void remove_expired_conar_entries()
 {
 	time_t curtime = time(NULL);
 	unsigned int expire = config.getInt("conarchive_expire");
-	
+
 #if 0
 	dbg_msg("clientar", "scanning for expired entries");
 #endif
-	
+
 	for (clientconar_type::iterator e = con_archive.begin(); e != con_archive.end();)
 	{
 		clientcon_archive *conar = &(e->second);
-		
+
 		if (conar->logout_time && (unsigned int)difftime(curtime, conar->logout_time) > expire)
 		{
 			dbg_msg("clientar", "removing expired entry %s", e->first.c_str());
@@ -1548,13 +1548,13 @@ int gameinit()
 	// initialize server stats struct
 	memset(&stats, 0, sizeof(server_stats));
 	stats.server_started = time(NULL);
-	
-	
+
+
 #ifndef NOSQLITE
 	ranking_setup();
 #endif /* NOSQLITE */
-	
-	
+
+
 #ifdef DEBUG
 	// initially add games for debugging purpose
 	if (!games.size())
@@ -1570,20 +1570,20 @@ int gameinit()
 			g->setPlayerMax(config.getInt("dbg_testgame_players"));
 			g->setPlayerTimeout(config.getInt("dbg_testgame_timeout"));
 			g->setPlayerStakes(config.getInt("dbg_testgame_stakes"));
-			
+
 			if (config.getBool("dbg_stresstest") && i > 10)
 			{
 				for (int j=0; j < config.getInt("dbg_testgame_players"); j++)
 					g->addPlayer(j*1000 + i, "DEBUG");
 			}
-			
+
 			games[gid] = g;
-			
+
 			gid_counter++;
 		}
 	}
 #endif
-	
+
 	return 0;
 }
 
@@ -1593,7 +1593,7 @@ int gameloop()
 	for (games_type::iterator e = games.begin(); e != games.end();)
 	{
 		GameController *g = e->second;
-		
+
 		// game has been deleted
 		int rc = g->tick();
 		if (rc < 0)
@@ -1603,43 +1603,43 @@ int gameloop()
 			{
 				const int gid = ++gid_counter;
 				GameController *newgame = new GameController(*g);
-				
+
 				// set new ID
 				newgame->setGameId(gid);
-				
+
 				games[gid] = newgame;
-				
+
 				log_msg("game", "restarted game (old: %d, new: %d)",
 					g->getGameId(), newgame->getGameId());
 			}
 			else
 				log_msg("game", "deleting game %d", g->getGameId());
-			
+
 			delete g;
 			games.erase(e++);
 		}
 		else if (rc == 1 && !g->isFinished())  // game has ended (but not deleted)
 		{
 			g->setFinished();
-			
+
 #ifndef NOSQLITE
 			ranking_update(g);
 #endif /* !NOSQLITE */
-			
+
 			++e;
 		}
 		else
 			++e;
 	}
-	
-	
+
+
 	// delete all expired archived connection-data (con_archive)
 	if ((unsigned int)difftime(time(NULL), last_conarchive_cleanup) > 5 * 60)
 	{
 		remove_expired_conar_entries();
-		
+
 		last_conarchive_cleanup = time(NULL);
 	}
-	
+
 	return 0;
 }

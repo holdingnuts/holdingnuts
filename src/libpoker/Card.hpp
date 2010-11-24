@@ -41,37 +41,37 @@ public:
 		Queen,
 		King,
 		Ace,
-		
+
 		FirstFace=Two,
 		LastFace=Ace
 	} Face;
-	
+
 	typedef enum {
 		Clubs=1,
 		Diamonds,
 		Hearts,
 		Spades,
-		
+
 		FirstSuit=Clubs,
 		LastSuit=Spades
 	} Suit;
-	
+
 	Card();
 	Card(Face f, Suit s);
 	Card(const char *str);
-	
+
 	void getValue(Face *f, Suit *s) const;
 	Face getFace() const { return face; };
 	Suit getSuit() const { return suit; };
-	
+
 	char getFaceSymbol() const;
 	char getSuitSymbol() const;
 	const char* getName() const;
-	
+
 	bool operator <  (const Card &c) const { return (getFace() < c.getFace()); };
 	bool operator >  (const Card &c) const { return (getFace() > c.getFace()); };
 	bool operator == (const Card &c) const { return (getFace() == c.getFace()); };
-	
+
 	static Face convertFaceSymbol(char fsym);
 	static Suit convertSuitSymbol(char ssym);
 

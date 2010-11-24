@@ -35,19 +35,19 @@ void GameListSortFilterProxyModel::hideGameState(const QString& filter)
 {
 	if (filterGameState.contains(filter))
 		return;
-		
+
 	filterGameState.append(filter);
-	
+
 	invalidateFilter();
 }
 
 void GameListSortFilterProxyModel::showGameState(const QString& filter)
 {
 	int i = filterGameState.indexOf(filter);
-	
+
 	if (i == -1)
 		return;
-		
+
 	filterGameState.removeAt(i);
 
 	invalidateFilter();
@@ -89,7 +89,7 @@ bool GameListSortFilterProxyModel::filterAcceptsRow(
 	const QModelIndex& sourceParent) const
 {
 	const QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent); // gid
-	const QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent); // name 
+	const QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent); // name
 	const QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent); // gametype + gamemode
 	const QModelIndex index3 = sourceModel()->index(sourceRow, 3, sourceParent); // players (current / max)
 	const QModelIndex index4 = sourceModel()->index(sourceRow, 4, sourceParent); // gamestate

@@ -92,16 +92,16 @@ static unsigned int calc_score(unsigned int score, unsigned int num_players, uns
 {
 	const unsigned int min_score = 1;
 	const unsigned int max_score = 1000;
-	
+
 	const float diff_ratio = 1 / 8.0f;
-	
+
 	// invert place value (e.g. 10 players => 1 = #10 and 10 = #1)
 	const int inv_place = num_players - place + 1;
 
-	
+
 	int result;
 	int offset = 0, divisor;
-	
+
 	if (num_players == 2)	// special case
 	{
 		result = (inv_place == 1) ? -1 : 1;
@@ -117,41 +117,41 @@ static unsigned int calc_score(unsigned int score, unsigned int num_players, uns
 		else
 		{
 			offset = (num_players / 2) + 1;
-			
+
 			// case 1 (win):   -3 -2 -1  0 [1  2]
 			// case 2 (lose): [-3 -2 -1] 0  1  2
 			divisor = (inv_place - offset > 0) ? (num_players / 2) - 1 : num_players / 2;
 		}
-		
+
 		result = inv_place - offset;
 	}
-	
-	
+
+
 	// ratio of score to max_score
 	float ratio = ((float)score / (float)max_score);
-	
+
 	// on win invert ratio => win_ratio
 	if (result > 0)
 		ratio = 1.0f - ratio;
-	
+
 	// prevent ratio getting too small
 	if (ratio < 0.01f)
 		ratio = 0.01f;
-	
+
 	// max. value to add/substract
 	const float max_diff = max_score * diff_ratio;
-	
+
 	// actual score to add/substract
 	int tmp_score = (int) ceil((max_diff * ratio) * (result / (float)divisor));
-		
+
 	dbg_msg("score", "old_score=%d | ratio=%.2f | diff=%d | inv_place=%d | o=%d d=%d | result=%d | new_score=%d",
 		score, ratio, tmp_score, inv_place, offset, divisor, result, score + tmp_score);
-	
-	
+
+
 	// update score
 	score += tmp_score;
 
-	
+
 	// check if score within margin
 	if (score > max_score)
 		score = max_score;
@@ -166,26 +166,26 @@ void ranking_update(const GameController *g)
 {
 	std::vector<Player*> player_list;
 	g->getFinishList(player_list);
-	
+
 	bool query_error = false;
 	int rc = db->query("BEGIN TRANSACTION;");
-	
+
 	for (unsigned int u=0; u < player_list.size(); u++)
 	{
 		const Player* player = player_list[u];
 		const std::string &uuid = player->getPlayerUUID();
 		const int place = g->getPlayerCount() - u;
-		
+
 		dbg_msg("finish", "%s finished @ #%d",
 			uuid.c_str(), place);
-		
+
 		// skip empty UUID
 		if (!uuid.length())
 			continue;
-		
+
 		QueryResult *result;
 		rc = db->query(&result, "SELECT ranking FROM players WHERE uuid = '%q' LIMIT 1;", uuid.c_str());
-		
+
 		if (rc)
 		{
 			query_error = true;
@@ -196,22 +196,22 @@ void ranking_update(const GameController *g)
 		{
 			const clientcon *client = get_client_by_id(player->getClientId());
 			std::string player_name = "__unknown__";
-			
+
 			// use either stored or current player name
 			if (client)
 				player_name = client->info.name;
-			
-			
+
+
 			if (!result->numRows())	// insert new row
 			{
 				dbg_msg("SQL", "no rows, inserting...");
-				
+
 				const int initial_score = 500;
 				rc = db->query("INSERT INTO players "
 					"(uuid,name,t_lastgame,gamecount,ranking) VALUES('%q','%q',datetime('now'),%d,%d);",
 						uuid.c_str(), player_name.c_str(),
 						1, calc_score(initial_score, g->getPlayerCount(), place));
-				
+
 				if (rc)
 				{
 					query_error = true;
@@ -223,22 +223,22 @@ void ranking_update(const GameController *g)
 			{
 				const int old_score = atoi(result->getRow(0,0));
 				const int new_score = calc_score(old_score, g->getPlayerCount(), place);
-				
+
 				dbg_msg("RATING", "uuid=%s  old_score=%d  new_score=%d",
 					uuid.c_str(), old_score, new_score);
-				
+
 				// update player name only if client is connected
 				char *q_setname = 0;	// Note: mingw32 compiler warning if not set to 0
 				if (client)
 					q_setname = db->createQueryString("name = '%q',", player_name.c_str());
-				
+
 				rc = db->query("UPDATE players "
 					"SET %s t_lastgame = datetime('now'), gamecount = gamecount + 1, ranking = %d "
 					"WHERE uuid = '%q';", (client) ? q_setname : "", new_score, uuid.c_str());
-				
+
 				if (client)
 					db->freeQueryString(q_setname);
-				
+
 				if (rc)
 				{
 					query_error = true;
@@ -247,10 +247,10 @@ void ranking_update(const GameController *g)
 				}
 			}
 		}
-		
+
 		db->freeQueryResult(&result);
 	}
-	
+
 	if (!query_error)
 		rc = db->query("COMMIT;");
 	else

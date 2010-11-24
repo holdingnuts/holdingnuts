@@ -41,7 +41,7 @@ QRectF Chip::boundingRect() const
 
 	QRectF rc(0, 0, m_pImage->width(), m_pImage->height());
 	QTransform m = this->transform();
-	
+
 	return m.mapRect(rc);
 }
 

@@ -50,7 +50,7 @@ const char* build_mode_string(int mode)
 {
 	static char mode_str[4];
 	char *ms = mode_str;
-	
+
 	if (mode & mode_read && mode & mode_write)
 	{
 		*ms++ = 'w';
@@ -65,20 +65,20 @@ const char* build_mode_string(int mode)
 	{
 		if (mode & mode_read)
 			*ms++ = 'r';
-		
+
 		if (mode & mode_write)
 			*ms++ = 'w';
-		
+
 		if (mode & mode_append)
 			*ms++ = 'a';
 	}
-	
+
 #if defined(PLATFORM_WINDOWS)
 	*ms++ = 'b';
 #endif
-	
+
 	*ms = '\0';
-	
+
 	return mode_str;
 }
 
@@ -110,7 +110,7 @@ size_t file_write(filetype *fp, const void *buf, unsigned int size)
 int file_setpos(filetype *fp, long offset, int whence)
 {
 	int pos = SEEK_SET;
-	
+
 	switch (whence)
 	{
 	case seek_set:
@@ -123,7 +123,7 @@ int file_setpos(filetype *fp, long offset, int whence)
 		pos = SEEK_END;
 		break;
 	}
-	
+
 	return fseek(fp, offset, pos);
 }
 
@@ -135,12 +135,12 @@ long file_getpos(filetype *fp)
 long file_length(filetype *fp)
 {
 	long cur, length;
-	
+
 	cur = file_getpos(fp);
 	file_setpos(fp, 0, seek_end);
 	length = file_getpos(fp);
 	file_setpos(fp, cur, seek_set);
-	
+
 	return length;
 }
 
@@ -148,19 +148,19 @@ char* file_readline(filetype *fp, char *buf, int max)
 {
 	char *s;
 	s = fgets(buf, max, fp);
-	
+
 	if (s)
 	{
 		// remove newline
 		int length = strlen(buf);
-		
+
 		if (length >= 1 && (buf[length - 1] == '\n' || buf[length - 1] == '\r'))
 			buf[length - 1] = '\0';
 		if (length >= 2 && (buf[length - 2] == '\n' || buf[length - 2] == '\r'))
 			buf[length - 2] = '\0';
-		
+
 	}
-	
+
 	return s;
 }
 
@@ -169,7 +169,7 @@ int file_writeline(filetype *fp, const char *buf)
 	int length = strlen(buf);
 	file_write(fp, buf, length);
 	file_write(fp, "\n", 1);
-	
+
 	return length + 1;
 }
 
@@ -182,11 +182,11 @@ int sys_mkdir(const char *path)
 	if (mkdir(path, 0755) == 0)
 		return 0;
 #endif
-	
+
 	// don't indicate error if directory already exists
 	if(errno == EEXIST)
 		return 0;
-	
+
 	return -1;
 }
 
@@ -198,7 +198,7 @@ int sys_isdir(const char *path)
 
 	if (S_ISDIR(sb.st_mode))
 		return 1;
-	
+
 	return 0;
 }
 
@@ -206,7 +206,7 @@ int sys_chdir(const char *path)
 {
 	if (chdir(path) == -1)
 		return -1;
-	
+
 	return 0;
 }
 
@@ -220,26 +220,26 @@ const char* sys_config_path()
 {
 	static char path[MAX_PATH_LEN + 1];
 	const char *config_path;
-	
+
 	// use manually set config-directory
 	if (*cfg_path)
 		return cfg_path;
-	
+
 #if defined(PLATFORM_WINDOWS)
 	config_path = getenv("APPDATA");
 #else
 	config_path = getenv("HOME");
 #endif
-	
+
 	if (!config_path)
 		return 0;
-	
+
 #if defined(PLATFORM_WINDOWS)
 	snprintf(path, sizeof(path), "%s/%s", config_path, CONFIG_APPNAME);
 #else
 	snprintf(path, sizeof(path), "%s/.%s", config_path, CONFIG_APPNAME);
 #endif
-	
+
 	return path;
 }
 
@@ -261,9 +261,9 @@ const char* sys_data_path()
 #endif
 #endif /* defined(DATA_DIR) */
 	};
-	
+
 	const unsigned int count = sizeof(search_dirs) / sizeof(search_dirs[0]);
-	
+
 	for (i=0; i < count; i++)
 	{
 		// FIXME: ~/data could be found if run from $HOME.
@@ -271,16 +271,16 @@ const char* sys_data_path()
 		if (sys_isdir(search_dirs[i]))
 			return search_dirs[i];
 	}
-	
+
 	return 0;
 }
 
 const char* sys_username()
 {
 	static char username[128];
-	
+
 	*username = '\0';
-	
+
 #if defined(PLATFORM_WINDOWS)
 	TCHAR userBuf[128];
 	DWORD bufCount = sizeof(userBuf);

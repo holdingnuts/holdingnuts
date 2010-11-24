@@ -40,7 +40,7 @@ bool Tokenizer::isSep(char ch)
 		if (sep[i] == ch)
 			return true;
 	}
-	
+
 	return false;
 }
 
@@ -48,21 +48,21 @@ bool Tokenizer::parse(const string& str)
 {
 	tokens.clear();
 	index = 0;
-	
+
 	bool quote_open = false;
 	int token_start = -1;
-	
+
 	char last_char = '\0';
-	
+
 	for (unsigned int i=0; i < str.length(); i++)
 	{
 		char cur_char = str[i];
-		
+
 		if (token_start != -1)
 		{
 			bool end_tok = false;
 			int token_end = 0;
-			
+
 			if (!quote_open)
 			{
 				if (i == str.length()-1 && !isSep(cur_char))
@@ -82,11 +82,11 @@ bool Tokenizer::parse(const string& str)
 				quote_open = false;
 				token_end = i - token_start;
 			}
-			
+
 			if (end_tok)
 			{
 				tokens.push_back(str.substr(token_start, token_end));
-				
+
 				token_start = -1;
 			}
 		}
@@ -100,7 +100,7 @@ bool Tokenizer::parse(const string& str)
 						token_start = i;
 					else
 						token_start = i + 1;
-					
+
 					quote_open = true;
 				}
 				else
@@ -112,10 +112,10 @@ bool Tokenizer::parse(const string& str)
 				}
 			}
 		}
-		
+
 		last_char = cur_char;
 	}
-	
+
 	return true;
 }
 
@@ -126,7 +126,7 @@ bool Tokenizer::getNext(string &str)
 		str = "";
 		return false;
 	}
-	
+
 	str = tokens[index++];
 	return true;
 }
@@ -135,7 +135,7 @@ string Tokenizer::getNext()
 {
 	if (index == count())
 		return "";
-	
+
 	return tokens[index++];
 }
 
@@ -143,7 +143,7 @@ string Tokenizer::getTillEnd(char sep)
 {
 	if (index == count())
 		return "";
-	
+
 	string scompl;
 	for (unsigned int i=index; i < count(); i++)
 	{
@@ -151,9 +151,9 @@ string Tokenizer::getTillEnd(char sep)
 		if (i < count() - 1)
 			scompl += sep;
 	}
-	
+
 	index = count();
-	
+
 	return scompl;
 }
 
@@ -173,14 +173,14 @@ bool Tokenizer::popFirst()
 {
 	if (!count())
 		return false;
-	
+
 	// move current position
 	if (index)
 		index--;
-	
+
 	// remove the first element
 	tokens.erase(tokens.begin());
-	
+
 	return true;
 }
 

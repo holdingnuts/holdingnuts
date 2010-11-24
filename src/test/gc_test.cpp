@@ -75,27 +75,27 @@ public:
 
 protected:
 	void tick(unsigned int ticks=30);
-	
+
 	void setPlayerStake(int cid, chips_type stake) { game->findPlayer(cid)->stake = stake; };
 	chips_type getPlayerStake(int cid) const { return game->findPlayer(cid)->stake; };
-	
+
 	void setCards(const std::vector<Card> *cardsvec) { game->debug_cards.insert(game->debug_cards.end(), cardsvec->rbegin(), cardsvec->rend()); };
-	
+
 	void setDealerSeat(unsigned int seat) { game->tables.begin()->second->dealer = seat; };
 	int getDealerSeat() const { return game->tables.begin()->second->dealer; };
 	int getSbSeat() const { return game->tables.begin()->second->sb; };
 	int getBbSeat() const { return game->tables.begin()->second->bb; };
-	
+
 	HoleCards getPlayerHoleCards(int cid) const { return game->findPlayer(cid)->holecards; };
 	Table::State getTableState() const { return game->tables.begin()->second->state; };
-	
+
 	GameController *game;
 };
 
 TestCaseGameController::TestCaseGameController()
 {
 	setName("TestCaseGameController");
-	
+
 	game = new GameController();
 }
 
@@ -113,7 +113,7 @@ void TestCaseGameController::tick(unsigned int ticks)
 			log_msg("STOP", "do not tick anymore");
 			return;
 		}
-		
+
 		game->tick();
 	}
 }
@@ -133,14 +133,14 @@ public:
 			bool win1)
 	{
 		setName(string("Headsup-") + name);
-		
+
 		m_stake1 = stake1;
 		m_stake2 = stake2;
 		m_blinds = blinds;
 		m_dealer = dealer;
 		m_win1 = win1;
 	};
-	
+
 	bool run();
 
 private:
@@ -164,16 +164,16 @@ bool TestHeadsup::run()
 		{ 222,	m_stake2 },
 	};
 	const unsigned int players_count = sizeof(players) / sizeof(players[0]);
-	
-	
+
+
 	message_filter = players[0].id;	// filter out Player1 messages
 	stop_ticks_hand = 2;	// stop game after 1st hand
 	stop_ticks = false;
-	
+
 	// game options
 	game->setBlindsStart(m_blinds);  // blinds at 400/800
 	game->setPlayerMax(10/*players_count*/);
-	
+
 	// players
 	for (unsigned int i=0; i < players_count; i++)
 	{
@@ -181,8 +181,8 @@ bool TestHeadsup::run()
 		game->addPlayer(pl->id, "gc_test");
 		setPlayerStake(pl->id, pl->stake);
 	}
-	
-	
+
+
 	// use own cards
 	const char *cards_array[] = {
 		"Kc", "3h",	// player 1
@@ -190,86 +190,86 @@ bool TestHeadsup::run()
 		"2d", "7c", "8s", "9d", "Th"  // community cards
 	};
 	const unsigned int cards_count = sizeof(cards_array) / sizeof(cards_array[0]);
-	
-	
+
+
 	if (m_win1)
 	{
 		// switch cards so player1 wins
 		cards_array[2] = "3d";
 	}
-	
-	
+
+
 	vector<Card> cards;
 	for (unsigned int i=0; i < cards_count; i++)
 		cards.push_back(Card(cards_array[i]));
-	
+
 	setCards(&cards);
-	
+
 	/////////////////////
-	
+
 	// start the game (if not already started by max-players)
 	game->start();
-	
+
 	/////////////////////
 	tick(1);  // FIXME: this may change
-	
-	
+
+
 	int expected_dealer = 0;
 	int expected_sb = 0;
 	int expected_bb = 1;
-	
+
 	if (m_dealer) // switch dealer button (0=normal, 1=switched)
 	{
 		log_msg("info", "switch dealer button");
 		setDealerSeat(1);	// test with switched dealer_button
-		
+
 		expected_dealer = 1;
 		expected_sb = 1;
 		expected_bb = 0;
 	}
-	
+
 
 	tick(1);  // FIXME: this may change
 	test(getTableState() == Table::Blinds, "state after 1 tick: before blinds");
-	
+
 	//test(getPlayerStake(players[0].id) == players[0].stake, "player1 stake");
 	test(getDealerSeat() == expected_dealer, "expected dealer seat");  // assume table seats _aren't_ shuffled
-	
+
 	// headsup-rule test
 	test(getSbSeat() == expected_sb, "expected sb seat");
 	test(getBbSeat() == expected_bb, "expected bb seat");
 
 
-	
+
 	/////////////////////
-	
+
 	tick(1);  // FIXME: this may change
 	test(getTableState() == Table::Betting, "state after 1 tick: before betting");
-	
+
 	HoleCards hole = getPlayerHoleCards(players[expected_dealer].id);
 	vector<Card> tmp;
 	hole.copyCards(&tmp);
-	
+
 	if (test(tmp.size(), "hole cards available"))
 		test(tmp[0] == cards[0], "first hole card == first deck card");
-	
+
 	/////////////////////
 
 	// let the whole action take place
 	tick();
-	
-	
-	
+
+
+
 	// case 1 (should not be possible)
 	//game->setPlayerAction(expected_xxx, Player::Fold, 0);
-	
+
 	// case 2 (should not be neccessary)
 	//game->setPlayerAction(expected_xxx, Player::Call, 0);
-	
+
 	//tick();
 
-	
-	
+
+
 	return true;
 }
 
@@ -281,9 +281,9 @@ bool client_chat(int from, int to, const char *msg)
 {
 	if (message_filter != -1 && message_filter != to)
 		return true;
-	
+
 	log_msg("msg", "%d: %s", to, msg);
-	
+
 	return true;
 }
 
@@ -297,10 +297,10 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 {
 	if (message_filter != -1 && message_filter != to)
 		return true;
-	
+
 	Tokenizer t;
 	t.parse(msg);
-	
+
 	const char *ssnaptype = "Unknown snaptype";
 	switch (sid)
 	{
@@ -311,10 +311,10 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 		case SnapOddChips:	ssnaptype = "SnapOddChips";	break;
 		case SnapPlayerAction:	ssnaptype = "SnapPlayerAction";	break;
 		case SnapPlayerShow:	ssnaptype = "SnapPlayerShow";	break;
-		
+
 	}
-	
-	
+
+
 	if (sid == SnapWinPot)
 	{
 		int cid, pot, amount;
@@ -336,7 +336,7 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 	}
 	else
 		log_msg(ssnaptype, "%d: [%d] %s", to, sid, msg);
-	
+
 	return true;
 }
 
@@ -344,14 +344,14 @@ bool client_snapshot(int from_gid, int from_tid, int to, int sid, const char *ms
 int main(void)
 {
 	log_msg("main", "GameController test");
-	
+
 #ifndef SERVER_TESTING
 	log_msg("main", "These tests are unlikely to work without SERVER_TESTING defined.");
-#endif	
-	
+#endif
+
 	// init PRNG
 	srand((unsigned) time(NULL));
-	
+
 #ifdef DEBUG
 	// perform these test cases
 	TestCase *tests[] = {
@@ -363,41 +363,41 @@ int main(void)
 		new TestHeadsup("bb allin (less BB), win1", 	40, 500, 80, true, true),
 		new TestHeadsup("bb allin (complete BB), win1",	80, 500, 80, true, true), // action needed
 	};
-	
+
 	unsigned int test_count = sizeof(tests) / sizeof(tests[0]);
-	
+
 	for (unsigned int i=0; i < test_count; i++)
 	{
 		TestCase *tc = tests[i];
-		
+
 		cerr << endl << ">>> BEGIN test (#" << (i+1) << ") " << tc->name() << " >>>" << endl;
-		
+
 		const bool retval = tc->run();
-		
-		cerr << "<<< END test (#" << (i+1) << ") " << tc->name() << 
+
+		cerr << "<<< END test (#" << (i+1) << ") " << tc->name() <<
 			": RESULT=" << (retval ? "ok" : "err") << " OK=" << tc->countSuccess() <<
 			" FAIL=" << tc->countFailed() << " <<<" << endl << endl;
 	}
-	
-	
+
+
 	cerr << endl << "Test results:" << endl;
 	int failed_tests = 0;
-	
+
 	for (unsigned int i=0; i < test_count; i++)
 	{
 		TestCase *tc = tests[i];
-		
+
 		cerr << "Test (#" << (i+1) << ")" <<
 			" OK=" << tc->countSuccess() <<
 			" FAIL=" << tc->countFailed() <<
 			"  " << tc->name() << endl;
-		
+
 		if (tc->countFailed())
 			failed_tests++;
-		
+
 		delete tc;
 	}
-	
+
 	if (failed_tests)
 		cerr << "Overall: " << failed_tests << " out of " << test_count << " tests FAILED." << endl;
 	else

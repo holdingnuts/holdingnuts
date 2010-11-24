@@ -4,7 +4,7 @@ include_directories (
 	${HOLDINGNUTS_SOURCE_DIR}/src/system
 	${HOLDINGNUTS_SOURCE_DIR}/src/server
 	${HOLDINGNUTS_SOURCE_DIR}/src/test
-	
+
 )
 
 if (ENABLE_SQLITE)

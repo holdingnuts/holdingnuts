@@ -51,15 +51,15 @@
 
 typedef struct {
 	unsigned int version;
-	
+
 	char msgbuf[1024*256];
 	int buflen;
 	int last_msgid;
-	
+
 	int cid;   // our client-id assigned by server
-	
+
 	bool introduced;   // PCLIENT->PSERVER sequence success
-	
+
 	uint time_remote_delta;
 } servercon;
 
@@ -145,26 +145,26 @@ Q_OBJECT
 public:
 	PClient(int &argc, char **argv);
 	~PClient();
-	
+
 	void init();
 	void saveConfig();
-	
+
 	bool doConnect(QString strServer, unsigned int port);
 	void doClose();
-	
+
 	bool isConnected() const { return connected; };
 	bool isConnecting() const { return connecting; };
-	
+
 	void chatAll(const QString& text);
 	void chat(const QString& text, int gid, int tid);
-	
+
 	bool createGame(gamecreate *createinfo);
-	
+
 	bool doSetAction(int gid, Player::PlayerAction action, chips_type amount=0);
-	
+
 	void doRegister(int gid, bool bRegister=true, bool subscription=false, const QString& password="");
 	void doStartGame(int gid);
-	
+
 #if 0
 	const gamelist_type& getGameList();
 #endif
@@ -174,39 +174,39 @@ public:
 	playerinfo* getPlayerInfo(int cid);
 	QString getPlayerName(int cid);
 	int getMyCId();
-	
+
 	WMain* getMainWnd() const { return wMain; };
 	bool isTableWindowRemaining();
-	
+
 	//! \brief query playerlist from Server
 	void requestPlayerlist(int gid);
-	
+
 	void requestGameinfo(const char *glist);
 	void requestGameinfo(int gid);
-	
+
 	void sendDebugMsg(const QString& msg);
-	
+
 	QDateTime getServerTime();
-	
+
 private:
 	WMain *wMain;
-		
+
 	bool connected;
 	bool connecting;
-	
+
 	QTcpSocket	*tcpSocket;
-	
+
 private:
 	servercon		srv;
 	players_type		players;
 	games_type		games;
 	gamelist_type		gamelist;
-private:	
+private:
 	int netSendMsg(const char *msg);
-	
+
 	int serverExecute(const char *cmd);
 	int serverParsebuffer();
-	
+
 	void serverCmdPserver(Tokenizer &t);
 	void serverCmdErr(Tokenizer &t);
 	void serverCmdMsg(Tokenizer &t);
@@ -222,22 +222,22 @@ private:
 	void serverCmdGameinfo(Tokenizer &t);
 	void serverCmdGamelist(Tokenizer &t);
 	void serverCmdServerinfo(Tokenizer &t);
-	
+
 	bool addTable(int gid, int tid);
 
 public slots:
 	//! \brief query gamelist from Server
 	void requestGamelist();
-	
+
 	//! \brief request server stats
 	void requestServerStats();
-	
+
 private slots:
 	void netRead();
 	void netError(QAbstractSocket::SocketError socketError);
 	void netConnected();
 	void netDisconnected();
-	
+
 #ifdef DEBUG
 	void slotDbgRegister();
 #endif

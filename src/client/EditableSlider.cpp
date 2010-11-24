@@ -37,29 +37,29 @@ EditableSlider::EditableSlider(QWidget *parent)
 	m_pEdit = new QLineEdit("0", this);
 	m_pEdit->setAlignment(Qt::AlignRight);
 //	m_pEdit->setMinimumHeight(2* m_pEdit->fontInfo().pixelSize());
-	
+
 	m_pValidator = new QIntValidator(m_pEdit);
-	
+
 	m_pEdit->setValidator(m_pValidator);
-	
+
 	connect(m_pEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged(const QString&)));
 	connect(m_pEdit, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
 	connect(m_pEdit, SIGNAL(returnPressed()), this, SIGNAL(returnPressed()));
-			
+
 	m_pSlider = new QSlider(Qt::Horizontal, this);
 	m_pSlider->setTracking(false);
 	m_pSlider->setTickInterval(10);
 	m_pSlider->setSingleStep(1);
 	m_pSlider->setRange(0, 100);
 	m_pSlider->setValue(0);
-	
+
 	connect(m_pSlider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
 	connect(m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
-	
+
 	QVBoxLayout *layout = new QVBoxLayout(this);
 	// qwidget has already margins
 	layout->setContentsMargins(0, 0, 0, 0);
-	layout->setSizeConstraint(QLayout::SetMinimumSize); 
+	layout->setSizeConstraint(QLayout::SetMinimumSize);
 	layout->addWidget(m_pEdit);
 	layout->addWidget(m_pSlider);
 	setLayout(layout);
@@ -70,10 +70,10 @@ EditableSlider::~EditableSlider() { }
 void EditableSlider::setMinimum(chips_type value)
 {
 	m_nMin = value;
-	
+
 	m_pEdit->setText(QString::number(value));
 	m_pEdit->selectAll();
-	
+
 	m_pSlider->setValue(0);
 	m_pValidator->setBottom(value);
 }
@@ -92,10 +92,10 @@ void EditableSlider::setValue(chips_type value)
 chips_type EditableSlider::value() const
 {
 	chips_type value = m_pEdit->text().toInt();
-	
+
 	if (value > m_nMax)
 		value = m_nMax;
-	
+
 	return value;
 }
 
@@ -103,7 +103,7 @@ bool EditableSlider::validValue() const
 {
 	QString temp(m_pEdit->text());
 	int pos = 0;
-	
+
 	const QValidator::State state = m_pValidator->validate(temp, pos);
 
 	return (state == QValidator::Acceptable);
@@ -112,7 +112,7 @@ bool EditableSlider::validValue() const
 void EditableSlider::sliderValueChanged(int value)
 {
 	chips_type amount = 0;
-	
+
 	if (value == 100)	// 100% == allin
 		amount = m_nMax;
 	else if (value == 0)    // 0% == minimum bet
@@ -127,12 +127,12 @@ void EditableSlider::sliderValueChanged(int value)
 			amount = (int)((m_nMax * .45f) * value * .02f);
 		else
 			amount = (int)(m_nMax * value / 100);
-		
+
 		amount += m_nMin;
 	}
-	
+
 	QString str;
-	
+
 	if (amount > m_nMax)
 		str.setNum(m_nMax);
 	else
@@ -140,7 +140,7 @@ void EditableSlider::sliderValueChanged(int value)
 
 	m_pEdit->setText(str);
 	m_pEdit->selectAll();
-	
+
 	emit dataChanged();
 }
 
@@ -175,13 +175,13 @@ void EditableSlider::textEdited(const QString& text)
 {
 	QString temp(text);
 	int pos = 0;
-		
+
 	const QValidator::State state = m_pValidator->validate(temp, pos);
 
 	if (state == QValidator::Acceptable)
 	{
 		const chips_type value = text.toInt();
-		
+
 		m_pSlider->setSliderPosition(valueToSliderPosition(value));
 	}
 }

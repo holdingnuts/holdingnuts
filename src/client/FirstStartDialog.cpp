@@ -35,33 +35,33 @@ FirstStartDialog::FirstStartDialog(ConfigParser &cp, QWidget *parent)
 	setWindowTitle("HoldingNuts - " + tr("First start"));
 	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setFixedWidth(360);
-	
-	
+
+
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(actionOk()));
-	
-	
+
+
 	QLabel *lblLogo = new QLabel(this);
 	QImage image(":res/hn_logo.png");
 	lblLogo->setPixmap(QPixmap::fromImage(image));
-	
-	
+
+
 	QLabel *lblProjectname = new QLabel("<qt><b><font size=+3>HoldingNuts</font></b></qt>", this);
-	
-	
+
+
 	QLabel *lblWelcome = new QLabel("<qt>" +
 			tr("This is the first time you started HoldingNuts. "
 				"Please confirm the below basic settings.") +
 			"</qt>", this);
 	lblWelcome->setWordWrap(true);
-	
+
 
 	editPlayerName = new QLineEdit(QString::fromStdString(cfg->get("player_name")), this);
 	editPlayerName->setMaxLength(20);
-	
+
 	QFormLayout *formPlayerinfo = new QFormLayout;
 	formPlayerinfo->addRow(tr("Player name"), editPlayerName);
-	
+
 
 	checkUUID = new QCheckBox(tr("Use unique identifier"));
 	checkUUID->setCheckState(Qt::Checked);
@@ -79,11 +79,11 @@ FirstStartDialog::FirstStartDialog(ConfigParser &cp, QWidget *parent)
 	contentLayout->addWidget(lblWelcome);
 	contentLayout->addLayout(formPlayerinfo);
 	contentLayout->addLayout(uuidLayout);
-	
+
 	QHBoxLayout *topLayout = new QHBoxLayout;
 	topLayout->addWidget(lblLogo, 30, Qt::AlignHCenter | Qt::AlignVCenter);
 	topLayout->addWidget(lblProjectname, 70, Qt::AlignLeft | Qt::AlignVCenter);
-	
+
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	mainLayout->setSpacing(20);
 	mainLayout->addLayout(topLayout, 30);

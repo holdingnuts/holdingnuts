@@ -40,12 +40,12 @@ public:
 	int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-	
+
 	QVariant headerData(
 		int section,
 		Qt::Orientation orientation,
-		int role = Qt::DisplayRole) const;	
-	
+		int role = Qt::DisplayRole) const;
+
 	bool setData(
 		const QModelIndex& index,
 		const QVariant& value,
@@ -55,12 +55,12 @@ public:
 		int position,
 		int rows,
 		const QModelIndex &index = QModelIndex());
-		
+
 	bool removeRows(
 		int position,
 		int rows,
 		const QModelIndex &index = QModelIndex());
-		
+
 	void updateValue(int gid, int column, const QVariant& value);
 
 	void updateGameName(int gid, const QString& value);
@@ -74,7 +74,7 @@ public:
 
 	//! \brief translation methods (gid<->row)
 	int findGidByRow(int row) const;
-	
+
 	void dump() const;
 
 private:
@@ -91,7 +91,7 @@ private:
 			state("???"),
 			password(false)
 		{ }
-		
+
 		//! \brief ID; ColumnIndex 0
 		int			gid;
 		//! \brief name of the Game; ColumnIndex 1
@@ -107,7 +107,7 @@ private:
 	};
 
 	typedef QList<gameinfo>		gameinfo_type;
-	
+
 	gameinfo_type				games;
 };
 

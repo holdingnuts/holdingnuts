@@ -41,7 +41,7 @@ TimeOut::TimeOut()
 {
 	//this->setEnabled(false);
 	this->setZValue(10);
-	
+
 	// first frame will be emitted after some time, so start with 1
 	m_tl.setFrameRange(1, m_Image.width());
 	m_tl.setUpdateInterval(200);
@@ -53,7 +53,7 @@ QRectF TimeOut::boundingRect() const
 {
 	QRectF rc(0, 0, m_Image.width(), m_Image.height());
 	QTransform m = this->transform();
-	
+
 	return m.mapRect(rc);
 }
 
@@ -77,7 +77,7 @@ void TimeOut::paint(
 	painter->restore();
 	painter->save();
 
-#ifdef DEBUG	
+#ifdef DEBUG
 	if (config.getBool("dbg_bbox"))
 	{
 		painter->setPen(Qt::yellow);
@@ -92,12 +92,12 @@ void TimeOut::start(int seat, int sec_timeout)
 {
 	if (m_tl.state() == QTimeLine::Running)
 		this->stop();
-	
+
 	m_tl.setDuration(sec_timeout * 1000);
 	m_tl.start();
 
 	m_nSeat = seat;
-	
+
 	m_bQuarterAlreadyEmitted = false;
 	m_bHalfAlreadyEmitted = false;
 	m_bThreeQuarterAlreadyEmitted = false;
@@ -114,7 +114,7 @@ void TimeOut::update(int frame)
 //	qDebug() << "m_nFrame: " << frame;
 
 	m_nFrame = frame;
-	
+
 	// pass 1/4
 	if (m_nFrame > m_Image.width() / 4)
 	{
@@ -124,7 +124,7 @@ void TimeOut::update(int frame)
 			m_bQuarterAlreadyEmitted = true;
 		}
 	}
-	
+
 	// pass 2/4
 	if (m_nFrame > m_Image.width() / 2)
 	{
@@ -134,7 +134,7 @@ void TimeOut::update(int frame)
 			m_bHalfAlreadyEmitted = true;
 		}
 	}
-	
+
 	// pass 3/4
 	if (m_nFrame > m_Image.width() / 4 * 3)
 	{

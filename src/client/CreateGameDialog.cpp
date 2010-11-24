@@ -34,31 +34,31 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	setWindowTitle(tr("Create game"));
 	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setMinimumWidth(300);
-	
+
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
 					  Qt::Horizontal, this);
-	
+
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(actionOk()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-	
-	
+
+
 	QGroupBox *groupGeneral = new QGroupBox(tr("General"), this);
-	
+
 	QLabel *labelName = new QLabel(tr("Game name"), this);
 	editName = new QLineEdit(QString::fromStdString(config.get("player_name")) + "'s game", this);
-	
+
 	// FIXME:
 	QLabel *labelGametype = new QLabel(tr("Game type"), this);
 	QComboBox *comboGametype = new QComboBox(this);
 	comboGametype->addItem("THNL");
 	comboGametype->setEnabled(false);
-	
+
 	// FIXME:
 	QLabel *labelGamemode = new QLabel(tr("Game mode"), this);
 	QComboBox *comboGamemode = new QComboBox(this);
 	comboGamemode->addItem("Sit'n'Go");
 	comboGamemode->setEnabled(false);
-	
+
 	QGridLayout *layoutGeneral = new QGridLayout;
 	layoutGeneral->addWidget(labelName, 0, 0);
 	layoutGeneral->addWidget(editName, 0, 1);
@@ -67,30 +67,30 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	layoutGeneral->addWidget(labelGamemode, 2, 0);
 	layoutGeneral->addWidget(comboGamemode, 2, 1);
 	groupGeneral->setLayout(layoutGeneral);
-	
+
 	QGroupBox *groupPlayers = new QGroupBox(tr("Players"), this);
-	
+
 	QLabel *labelPlayers = new QLabel(tr("Max. players"), this);
 	spinPlayers = new QSpinBox(this);
 	spinPlayers->setMinimum(2);
 	spinPlayers->setMaximum(10);
 	spinPlayers->setSingleStep(1);
 	spinPlayers->setValue(5);
-	
+
 	QLabel *labelTimeout = new QLabel(tr("Timeout"), this);
 	spinTimeout = new QSpinBox(this);
 	spinTimeout->setMinimum(5);
 	spinTimeout->setMaximum(3*60);
 	spinTimeout->setSingleStep(10);
 	spinTimeout->setValue(30);
-	
+
 	QLabel *labelStake = new QLabel(tr("Initial stake"), this);
 	spinStake = new QSpinBox(this);
 	spinStake->setMinimum(500);
 	spinStake->setMaximum(1000000);
 	spinStake->setSingleStep(100);
 	spinStake->setValue(1500);
-	
+
 	QGridLayout *layoutPlayers = new QGridLayout;
 	layoutPlayers->addWidget(labelPlayers, 0, 0);
 	layoutPlayers->addWidget(spinPlayers, 0, 1);
@@ -99,17 +99,17 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	layoutPlayers->addWidget(labelStake, 2, 0);
 	layoutPlayers->addWidget(spinStake, 2, 1);
 	groupPlayers->setLayout(layoutPlayers);
-	
-	
+
+
 	QGroupBox *groupBlinds = new QGroupBox(tr("Blinds"), this);
-	
+
 	QLabel *labelBlindsStart = new QLabel(tr("Starting blinds"), this);
 	spinBlindsStart = new QSpinBox(this);
 	spinBlindsStart->setMinimum(5);
 	spinBlindsStart->setMaximum(200);
 	spinBlindsStart->setSingleStep(10);
 	spinBlindsStart->setValue(20);
-	
+
 	QLabel *labelBlindsFactor = new QLabel(tr("Raise factor"), this);
 	spinBlindsFactor = new QDoubleSpinBox(this);
 	spinBlindsFactor->setDecimals(1);
@@ -117,14 +117,14 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	spinBlindsFactor->setMaximum(3.5);
 	spinBlindsFactor->setSingleStep(0.1);
 	spinBlindsFactor->setValue(2.0);
-	
+
 	QLabel *labelBlindsTime = new QLabel(tr("Raise time"), this);
 	spinBlindsTime = new QSpinBox(this);
 	spinBlindsTime->setMinimum(60);
 	spinBlindsTime->setMaximum(10*60);
 	spinBlindsTime->setSingleStep(60);
 	spinBlindsTime->setValue(5*60);
-	
+
 	QGridLayout *layoutBlinds = new QGridLayout;
 	layoutBlinds->addWidget(labelBlindsStart, 0, 0);
 	layoutBlinds->addWidget(spinBlindsStart, 0, 1);
@@ -133,28 +133,28 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 	layoutBlinds->addWidget(labelBlindsTime, 2, 0);
 	layoutBlinds->addWidget(spinBlindsTime, 2, 1);
 	groupBlinds->setLayout(layoutBlinds);
-	
-	
+
+
 	QGroupBox *groupPrivate = new QGroupBox(tr("Private game"), this);
-	
+
 	QLabel *labelPrivate = new QLabel(tr("Password protected"), this);
 	QCheckBox *checkPrivate = new QCheckBox(this);
 	connect(checkPrivate, SIGNAL(stateChanged(int)), this, SLOT(slotCheckStatePrivate(int)));
-	
+
 	QLabel *labelPassword = new QLabel(tr("Password"), this);
 	editPassword = new QLineEdit(this);
 	editPassword->setEnabled(false);
 	editPassword->setEchoMode(config.getBool("ui_echo_password") ? QLineEdit::Normal : QLineEdit::Password);
-	
-	
+
+
 	QGridLayout *layoutPrivate = new QGridLayout;
 	layoutPrivate->addWidget(labelPrivate, 0, 0);
 	layoutPrivate->addWidget(checkPrivate, 0, 1);
 	layoutPrivate->addWidget(labelPassword, 1, 0);
 	layoutPrivate->addWidget(editPassword, 1, 1);
 	groupPrivate->setLayout(layoutPrivate);
-	
-	
+
+
 	QGridLayout *mainLayout = new QGridLayout;
 	mainLayout->addWidget(groupGeneral, 0, 0);
 	mainLayout->addWidget(groupPlayers, 0, 1);
@@ -167,11 +167,11 @@ CreateGameDialog::CreateGameDialog(QWidget *parent) : QDialog(parent)
 void CreateGameDialog::actionOk()
 {
 	bool bError = false;
-	
+
 	if (!bError)
 	{
 		// TODO: validate
-		
+
 		accept();
 	}
 }
@@ -197,12 +197,12 @@ chips_type CreateGameDialog::getStake() const
 }
 
 unsigned int CreateGameDialog::getPlayers() const
-{ 
+{
 	return spinPlayers->value();
 }
 
 unsigned int CreateGameDialog::getTimeout() const
-{ 
+{
 	return spinTimeout->value();
 }
 
@@ -217,6 +217,6 @@ double CreateGameDialog::getBlindsFactor() const
 }
 
 unsigned int CreateGameDialog::getBlindsTime() const
-{ 
+{
 	return spinBlindsTime->value();
 }

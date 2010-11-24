@@ -47,7 +47,7 @@ IF (USE_SVNREV)
 	IF (SVNVERSION)
 		EXEC_PROGRAM (${SVNVERSION} ARGS ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE REVISION)
 		MESSAGE ("Using svn revision string: ${REVISION}")
-		
+
 		# DIRTY and dangerous workaround to determine if svnversion returned a revision;
 		# svnversion always returns 0 as exit-code... so it's hard to find out
 		STRING(LENGTH ${REVISION} revlen)

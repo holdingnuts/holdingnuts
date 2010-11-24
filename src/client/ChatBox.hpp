@@ -49,12 +49,12 @@ public:
 		InputLineAlignment align = INPUTLINE_TOP,
 		int nTextLogHeight = 0,
 		QWidget *parent = 0);
-		
+
 	void addMessage(const QString &msg, const QString &from = "", const QColor &color = Qt::black);
 	void addMessage(const QString &msg, const QColor &color = Qt::black);
-	
+
 	void setFontPointSize(int size);
-	int fontPointSize() const;	
+	int fontPointSize() const;
 
 	void showChatBtn(bool bShow);
 	void showTime(bool bShow);
@@ -66,7 +66,7 @@ public:
 
 protected:
 	ChatBox();
-	
+
 	void resizeEvent(QResizeEvent *event);
 
 private slots:
@@ -81,7 +81,7 @@ private:
 	QTextEdit		*m_pEditChatLog;
 	//! \brief send message button, default is hidden
 	QPushButton		*m_pSendMsg;
-	//! \brief shows human-readable Timestamp 
+	//! \brief shows human-readable Timestamp
 	bool			m_bShowTime;
 };
 
@@ -92,9 +92,9 @@ class HistoryLineEdit : public QLineEdit
 
 public:
 	HistoryLineEdit(QWidget *parent = 0);
-	
+
 	void addHistory();
-	
+
 protected:
 	HistoryLineEdit();
 	void keyPressEvent( QKeyEvent * qke );

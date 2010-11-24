@@ -29,7 +29,7 @@
 PlayerListTableModel::PlayerListTableModel(QObject *parent)
 :	QAbstractTableModel(parent)
 {
-	strlstHeaderLabels << tr("Name"); 
+	strlstHeaderLabels << tr("Name");
 }
 
 int PlayerListTableModel::rowCount(const QModelIndex& parent) const
@@ -81,9 +81,9 @@ bool PlayerListTableModel::setData(
 	if (index.isValid() && role == Qt::EditRole)
 	{
 		lstRows[index.row()].replace(index.column(), value.toString());
-		
+
 		emit dataChanged(index, index);
-		
+
 		return true;
 	}
 	else
@@ -105,7 +105,7 @@ bool PlayerListTableModel::insertRows(int position, int rows, const QModelIndex&
 		lstRows.insert(i, lstTemp);
 
 	endInsertRows();
-	
+
 	return true;
 }
 
@@ -139,16 +139,16 @@ void PlayerListTableModel::updatePlayerName(int row, const QString& value)
 void PlayerListTableModel::clear()
 {
 	if (!this->rowCount()) return;
-	
+
 	beginRemoveRows(QModelIndex(), 0, this->rowCount() - 1);
-	
+
 	//for (int i = 0; i < rowCount(); ++i)
 	//	lstRows[i].clear();
-		
+
 	lstRows.clear();
-	
+
 	endRemoveRows();
-	
+
 	reset();
 }
 

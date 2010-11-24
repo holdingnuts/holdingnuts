@@ -32,7 +32,7 @@ using namespace std;
 void Deck::fill()
 {
 	cards.clear();
-	
+
 	for (int f=Card::FirstFace; f <= Card::LastFace; f++)
 		for (int s=Card::FirstSuit; s <= Card::LastSuit; s++)
 		{
@@ -61,7 +61,7 @@ bool Deck::pop(Card &card)
 {
 	if (!count())
 		return false;
-	
+
 	card = cards.back();
 	cards.pop_back();
 	return true;

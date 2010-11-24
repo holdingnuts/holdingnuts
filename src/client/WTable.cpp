@@ -177,7 +177,7 @@ QDebug operator << (QDebug s, const Player::PlayerAction& p)
 	return s;
 }
 
-QDebug operator << (QDebug s, const seatinfo& si)	
+QDebug operator << (QDebug s, const seatinfo& si)
 {
 	s << "seatinfo" << "\n";
 	s << "\t client_id= " << si.client_id << "\n";
@@ -188,7 +188,7 @@ QDebug operator << (QDebug s, const seatinfo& si)
 	s << "\t bet= " << si.bet << "\n";
 	s << "\t stake= " << si.stake << "\n";
 	s << "end seatinfo" << "\n";
-	
+
 	return s;
 }
 
@@ -211,7 +211,7 @@ QDebug operator << (QDebug s, const table_snapshot& t)
 
 	s << "\t my_seat= " << t.my_seat << "\n";
 	s << "end table_snapshot" << "\n";
-	
+
 	return s;
 }
 
@@ -245,7 +245,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	m_pDealerButton = new DealerButton;
 	m_pDealerButton->setPos(m_pImgTable->boundingRect().center());
-	
+
 	m_pScene->addItem(m_pDealerButton);
 
 	m_pTimeout = new TimeOut;
@@ -283,7 +283,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 		wseats[i]->setPos(calcSeatPos(i));
 
 		m_pScene->addItem(wseats[i]);
-		
+
 		// calculate dealer button pos
 		m_ptDealerBtn[i] = calcDealerBtnPos(i);
 	}
@@ -291,18 +291,18 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	Seat::setInSeatFont(QFont("Arial", 18, QFont::Bold));
 
 	QFont font = QApplication::font();
-	
-	font.setPointSize(20); 
+
+	font.setPointSize(20);
 	font.setBold(true);
-	
+
 	const QFontMetrics fm(font);
-	
+
 	m_pTxtPots = m_pScene->addSimpleText("Main pot: 0", font);
 	m_pTxtPots->setPos(calcTxtPotsPos());
 	m_pTxtPots->setZValue(3);
-	
+
 	font.setBold(false);
-	
+
 	m_pTxtHandStrength = m_pScene->addSimpleText("HandStrength", font);
 	m_pTxtHandStrength->setPos(calcHandStrengthPos());
 	m_pTxtHandStrength->setZValue(3);
@@ -325,65 +325,65 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	m_pView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	m_pView->setFrameStyle(QFrame::Plain);
 	m_pView->setStyleSheet("background: transparent");
-	
-	
+
+
 	// fixed width for action buttons which have an amount in their caption
 	const unsigned int actionbtn_width = 100;
-	
+
 	// action buttons
 	QPushButton *btnFold = new QPushButton(tr("&Fold"), this);
 	btnFold->setFixedWidth(actionbtn_width);
 	connect(btnFold, SIGNAL(clicked()), this, SLOT(actionFold()));
-	
+
 	btnCheckCall = new QPushButton("Check/Call", this);
 	btnCheckCall->setFixedWidth(actionbtn_width);
 	connect(btnCheckCall, SIGNAL(clicked()), this, SLOT(actionCheckCall()));
-	
+
 	btnBetRaise = new QPushButton("Bet/Raise", this);
 	btnBetRaise->setFixedWidth(actionbtn_width);
 	connect(btnBetRaise, SIGNAL(clicked()), this, SLOT(actionBetRaise()));
-	
+
 	QPushButton *btnShow = new QPushButton(tr("&Show"), this);
 	connect(btnShow, SIGNAL(clicked()), this, SLOT(actionShow()));
-	
+
 	QPushButton *btnMuck = new QPushButton(tr("&Muck"), this);
 	connect(btnMuck, SIGNAL(clicked()), this, SLOT(actionMuck()));
-	
-	
+
+
 	/* Persistent actions on the right, e.g. Sitout/Back, "Muck losing hands" */
 	QPushButton *btnBack = new QPushButton(tr("I'm bac&k"), this);
 	btnBack->setFixedSize(actionbtn_width, 25);
 	connect(btnBack, SIGNAL(clicked()), this, SLOT(actionBack()));
-	
+
 	QPushButton *btnSitout = new QPushButton(tr("Sit&out"), this);
 	btnSitout->setFixedSize(actionbtn_width, 25);
 	connect(btnSitout, SIGNAL(clicked()), this, SLOT(actionSitout()));
-	
+
 	stlayPersistentActions = new QStackedLayout();
 	m_nSitout = stlayPersistentActions->addWidget(btnSitout);
 	m_nBack = stlayPersistentActions->addWidget(btnBack);
-	
+
 #if 0
 	// FIXME: implement me...
 	QCheckBox *chkAutoMuck = new QCheckBox(tr("Muck losing\nhands"), this);
 	chkAutoMuck->setFont(QFont("Arial", 8));
 	chkAutoMuck->setEnabled(false);
 #endif
-	
+
 	QVBoxLayout *layPersistentActions = new QVBoxLayout();
 	layPersistentActions->addLayout(stlayPersistentActions);
 #if 0
 	layPersistentActions->addWidget(chkAutoMuck, 0, Qt::AlignCenter);
 #endif
-	
+
 	lblPersistentActions = new QLabel(this);
 	lblPersistentActions->setPixmap(QPixmap("gfx/table/actions.png"));
 	lblPersistentActions->setScaledContents(true);
 	lblPersistentActions->setFixedSize(120, 90);
 	lblPersistentActions->setLayout(layPersistentActions);
-	
-	
-	
+
+
+
 	// bet shortcuts
 	const unsigned int raisebtn_width = 39;
 	const unsigned int raisebtn_height = 18;
@@ -391,7 +391,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	btnBetsizeMinimum = new QPushButton(tr("Min"), this);
 	btnBetsizeMinimum->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizeMinimum, SIGNAL(clicked()), this, SLOT(actionBetsizeMinimum()));
-	
+
 	btnBetsizeQuarterPot = new QPushButton(tr("1/4"), this);
 	btnBetsizeQuarterPot->setFixedSize(raisebtn_width, raisebtn_height);
 	connect(btnBetsizeQuarterPot, SIGNAL(clicked()), this, SLOT(actionBetsizeQuarterPot()));
@@ -413,7 +413,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	connect(btnBetsizeMaximum, SIGNAL(clicked()), this, SLOT(actionBetsizeMaximum()));
 
 	QHBoxLayout *lPots = new QHBoxLayout();
-	lPots->addStretch(2); 
+	lPots->addStretch(2);
 	lPots->setContentsMargins(0, 0, 0, 0);
 	lPots->addWidget(btnBetsizeMinimum, Qt::AlignRight);
 	lPots->addWidget(btnBetsizeQuarterPot, Qt::AlignRight);
@@ -421,16 +421,16 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lPots->addWidget(btnBetsizeThreeQuarterPot, Qt::AlignRight);
 	lPots->addWidget(btnBetsizePotsize, Qt::AlignRight);
 	lPots->addWidget(btnBetsizeMaximum, Qt::AlignRight);
-	
+
 	wRaiseBtns = new QWidget(this);
 	wRaiseBtns->setLayout(lPots);
-	
-	
+
+
 	chkAutoFoldCheck = new QCheckBox("Fold/Check", this);
 	connect(chkAutoFoldCheck, SIGNAL(stateChanged(int)), this, SLOT(actionAutoFoldCheck(int)));
 	chkAutoCheckCall = new QCheckBox("Check/Call", this);
 	connect(chkAutoCheckCall, SIGNAL(stateChanged(int)), this, SLOT(actionAutoCheckCall(int)));
-	
+
 	m_pSliderAmount = new EditableSlider(this);
 	connect(m_pSliderAmount, SIGNAL(dataChanged()), this, SLOT(slotBetRaiseAmountChanged()));
 	connect(m_pSliderAmount, SIGNAL(returnPressed()), this, SLOT(actionBetRaise()));
@@ -440,38 +440,38 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	lActionsBtns->addWidget(btnCheckCall);
 	lActionsBtns->addWidget(btnBetRaise);
 	lActionsBtns->addWidget(m_pSliderAmount);
-	
-	
-	QVBoxLayout *lActions = new QVBoxLayout();	
+
+
+	QVBoxLayout *lActions = new QVBoxLayout();
 	lActions->addWidget(wRaiseBtns);
 	lActions->addLayout(lActionsBtns);
-	
+
 	QHBoxLayout *lPreActionsAuto = new QHBoxLayout();
 	lPreActionsAuto->addWidget(chkAutoFoldCheck);
 	lPreActionsAuto->addWidget(chkAutoCheckCall);
-	
+
 	QVBoxLayout *lPreActions = new QVBoxLayout();
 	lPreActions->addLayout(lPreActionsAuto);
-	
+
 	QHBoxLayout *lPostActions = new QHBoxLayout();
 	lPostActions->addWidget(btnMuck);
 	lPostActions->addWidget(btnShow);
-	
+
 	stlayActions = new QStackedLayout();
 	QWidget *pageActions = new QWidget(this);
 	QWidget *pagePreActions = new QWidget(this);
 	QWidget *pagePostActions = new QWidget(this);
 	QWidget *pageNoActions = new QWidget(this);
-	
+
 	pageActions->setLayout(lActions);
 	pagePreActions->setLayout(lPreActions);
 	pagePostActions->setLayout(lPostActions);
-	
+
 	m_nActions = stlayActions->addWidget(pageActions);
 	m_nPreActions = stlayActions->addWidget(pagePreActions);
 	m_nPostActions = stlayActions->addWidget(pagePostActions);
 	m_nNoAction = stlayActions->addWidget(pageNoActions);
-	
+
 	QLabel *lblActions = new QLabel(this);
 	lblActions->setPixmap(QPixmap("gfx/table/actions.png"));
 	lblActions->setScaledContents(true);
@@ -493,7 +493,7 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 	mainLayout->setColumnStretch(4, 2);
 
 	this->setLayout(mainLayout);
-	
+
 	// shortcuts
 	shortcutFold = new QShortcut(tr("Ctrl+F"), btnFold);
 	connect(shortcutFold, SIGNAL(activated()), this, SLOT(actionFold()));
@@ -516,17 +516,17 @@ WTable::WTable(int gid, int tid, QWidget *parent)
 
 	shortcutShow = new QShortcut(tr("Ctrl+S"), btnShow);
 	connect(shortcutShow, SIGNAL(activated()), this, SLOT(actionShow()));
-	
+
 	shortcutSitout = new QShortcut(tr("Ctrl+O"), this);
 	connect(shortcutSitout, SIGNAL(activated()), this, SLOT(actionSitout()));
-	
+
 	shortcutBack = new QShortcut(tr("Ctrl+K"), this);
 	connect(shortcutBack, SIGNAL(activated()), this, SLOT(actionBack()));
-	
+
 	// assign shortcut for making screenshot
 	QShortcut *shortcutScreenshot = new QShortcut(Qt::Key_F10, this);
 	connect(shortcutScreenshot, SIGNAL(activated()), this, SLOT(actionScreenshot()));
-	
+
 
 	this->setMinimumSize(640, 480);
 	this->setWindowIcon(QIcon(":/res/hn_logo.png"));
@@ -553,7 +553,7 @@ WTable::~WTable()
 
 	for (unsigned int i = 0; i < nMaxSeats; i++)
 		delete wseats[i];
-		
+
 	delete stlayActions;
 	delete stlayPersistentActions;
 }
@@ -566,10 +566,10 @@ QPointF WTable::calcSeatPos(unsigned int nSeatID) const
 
 	//		8	9	0
 	//	 7			   1
-	// 						
+	//
 	//   6			   2
 	//		5	4	3
-	
+
 	const QRectF& rcSeat = wseats[nSeatID]->boundingRectSeat();
 	const QRectF& rcTable = this->m_pImgTable->boundingRect();
 
@@ -607,7 +607,7 @@ QPointF WTable::calcCCardsPos(unsigned int nCard) const
 
 	QRectF rc = m_CommunityCards[nCard]->boundingRect();
 	const QTransform m = m_CommunityCards[nCard]->transform();
-	
+
 	rc = m.mapRect(rc);
 
 	const qreal card_spacing = rc.width() * 0.1;
@@ -623,10 +623,10 @@ QPointF WTable::calcTimeoutPos(unsigned int nSeatID) const
 	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalid Seat Number");
 	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
 	Q_ASSERT_X(m_pTimeout, Q_FUNC_INFO, "bad timeout pointer");
-	
+
 	QPointF pt = wseats[nSeatID]->scenePos();
 
-	pt.ry() += wseats[nSeatID]->boundingRectSeat().height() - 
+	pt.ry() += wseats[nSeatID]->boundingRectSeat().height() -
 		m_pTimeout->boundingRect().height();
 
 	return pt;
@@ -639,7 +639,7 @@ QPointF WTable::calcHandStrengthPos() const
 
 	static const QFontMetrics fm(m_pTxtHandStrength->font());
 	static const QPointF ptCenter = m_pImgTable->boundingRect().center();
-	
+
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtHandStrength->text()) / 2),
 		posYTxtPots + fm.height());
@@ -652,7 +652,7 @@ QPointF WTable::calcTxtPotsPos() const
 
 	static const QFontMetrics fm(m_pTxtPots->font());
 	static const QPointF ptCenter = m_pImgTable->boundingRect().center();
-	
+
 	return QPointF(
 		ptCenter.x() - (fm.width(m_pTxtPots->text()) / 2),
 		posYTxtPots);
@@ -663,15 +663,15 @@ QPointF WTable::calcDealerBtnPos(unsigned int nSeatID) const
 	Q_ASSERT_X(nSeatID < nMaxSeats, Q_FUNC_INFO, "invalid Seat Number");
 	Q_ASSERT_X(wseats[nSeatID], Q_FUNC_INFO, "bad seat pointer");
 	Q_ASSERT_X(m_pDealerButton, Q_FUNC_INFO, "bad table image pointer");
-	
+
 	QPointF pt = wseats[nSeatID]->sceneBoundingRect().center();
 
 	//		8	9	0
 	//	 7			   1
-	// 						
+	//
 	//   6			   2
 	//		5	4	3
-	
+
 	switch (nSeatID)
 	{
 		case 0: case 8: case 9:
@@ -680,21 +680,21 @@ QPointF WTable::calcDealerBtnPos(unsigned int nSeatID) const
 			break;
 		case 1:
 				pt.rx() -= (
-					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
-					m_pDealerButton->sceneBoundingRect().width() + 
+					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f +
+					m_pDealerButton->sceneBoundingRect().width() +
 					30);
 				pt.ry() += 70;
 			break;
 		case 2:
 				pt.rx() -= (
-					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f + 
-					m_pDealerButton->sceneBoundingRect().width() + 
+					wseats[nSeatID]->sceneBoundingRect().width() * 0.5f +
+					m_pDealerButton->sceneBoundingRect().width() +
 					30);
-				pt.ry() -= 40;	
+				pt.ry() -= 40;
 			break;
 		case 3: case 4: case 5:
 				pt.ry() -= (
-					wseats[nSeatID]->sceneBoundingRect().height() * 0.5f + 
+					wseats[nSeatID]->sceneBoundingRect().height() * 0.5f +
 					m_pDealerButton->sceneBoundingRect().height() +
 					10);
 				pt.rx() -= 30;
@@ -722,16 +722,16 @@ void WTable::calcPotsPos()
 		if (m_Pots[t]->isVisible())
 			wholePotsWidth += m_Pots[t]->boundingRect().width() + space;
 	}
-	
+
 	qreal xStart = m_pImgTable->boundingRect().center().x() - (wholePotsWidth * 0.5);
-	
+
 	// place the pots on the table
 	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
 	{
 		if (m_Pots[t]->isVisible())
 		{
 			m_Pots[t]->setPos(xStart, posYPots);
-		
+
 			xStart += m_Pots[t]->boundingRect().width() + space;
 		}
 	}
@@ -748,10 +748,10 @@ void WTable::evaluateActions(const table_snapshot *snap)
 	}
 	else
 		lblPersistentActions->setEnabled(true);
-	
-	
+
+
 	const seatinfo *s = &(snap->seats[snap->my_seat]);
-	
+
 	// minimum bet
 	if (snap->minimum_bet > s->stake)
 	{
@@ -763,11 +763,11 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		m_pSliderAmount->setMinimum(snap->minimum_bet);
 		m_pSliderAmount->setEnabled(true);
 	}
-	
+
 	// maximum bet is stake size
 	m_pSliderAmount->setMaximum(s->stake + s->bet);
-	
-	
+
+
 	// evaluate available actions
 	if (s->sitout)
 	{
@@ -796,11 +796,11 @@ void WTable::evaluateActions(const table_snapshot *snap)
 		// re-enable if actions were disabled by something else
 		btnCheckCall->setEnabled(true);
 		btnBetRaise->setEnabled(true);
-		
-		
+
+
 		chips_type greatest_bet = 0;
 		bool bGreaterBet = greaterBet(snap, s->bet, &greatest_bet);
-		
+
 		if (snap->s_cur == snap->my_seat)
 		{
 			if (s->stake == 0)
@@ -808,42 +808,42 @@ void WTable::evaluateActions(const table_snapshot *snap)
 			else
 			{
 				setForegroundWindow();
-				
+
 				if (bGreaterBet)
 				{
 					btnCheckCall->setText(tr("&Call %1").arg(greatest_bet - s->bet));
 					btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
-					
+
 					shortcutBet->setEnabled(false);
 					shortcutRaise->setEnabled(true);
 				}
 				else
 				{
 					btnCheckCall->setText(tr("&Check"));
-					
+
 					if (greaterBet(snap, 0))
 					{
 						btnBetRaise->setText(tr("&Raise %1").arg(m_pSliderAmount->value()));
-						
+
 						shortcutBet->setEnabled(false);
 						shortcutRaise->setEnabled(true);
 					}
 					else
 					{
 						btnBetRaise->setText(tr("&Bet %1").arg(m_pSliderAmount->value()));
-						
+
 						shortcutBet->setEnabled(true);
 						shortcutRaise->setEnabled(false);
 					}
 				}
-				
+
 				// handle allin-case
 				if (greatest_bet >= s->stake + s->bet)
 				{
 					btnCheckCall->setVisible(false);
 					m_pSliderAmount->setVisible(false);
 					wRaiseBtns->setVisible(false);
-					
+
 					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
@@ -854,7 +854,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(false);
 					wRaiseBtns->setVisible(false);
-					
+
 					btnBetRaise->setText(tr("&Allin %1").arg(s->stake));
 					shortcutAllin->setEnabled(true);
 					shortcutBet->setEnabled(false);
@@ -865,18 +865,18 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					btnCheckCall->setVisible(true);
 					m_pSliderAmount->setVisible(true);
 					wRaiseBtns->setVisible(true);
-					
+
 					shortcutAllin->setEnabled(false);
 					shortcutBet->setEnabled(true);
 					shortcutRaise->setEnabled(true);
 				}
-				
+
 				stlayActions->setCurrentIndex(m_nActions);
-				
+
 				if (wRaiseBtns->isVisible())
 				{
 					const chips_type cur_pot = currentPot();
-					
+
 					btnBetsizeMinimum->setEnabled(s->stake + s->bet > snap->minimum_bet);
 					btnBetsizeQuarterPot->setEnabled(cur_pot * 0.25f > snap->minimum_bet);
 					btnBetsizeHalfPot->setEnabled(cur_pot * 0.5f > snap->minimum_bet);
@@ -894,7 +894,7 @@ void WTable::evaluateActions(const table_snapshot *snap)
 				if (bGreaterBet)
 				{
 					chkAutoFoldCheck->setText(tr("Fold"));
-					
+
 					if (greatest_bet >= s->stake + s->bet)
 						chkAutoCheckCall->setText(tr("Allin %1").arg(s->stake));
 					else
@@ -905,13 +905,13 @@ void WTable::evaluateActions(const table_snapshot *snap)
 					chkAutoFoldCheck->setText(tr("Check/Fold"));
 					chkAutoCheckCall->setText(tr("Check"));
 				}
-				
+
 				stlayActions->setCurrentIndex(m_nPreActions);
 			}
 		}
 	}
-	
-	
+
+
 	// evaluate persistent actions
 	if (s->sitout)
 		stlayPersistentActions->setCurrentIndex(m_nBack);
@@ -932,7 +932,7 @@ unsigned int WTable::seatToCentralView(int my, unsigned int seat) const
 	}
 	else
 		mapped_seat = seat;
-	
+
 	return mapped_seat;
 }
 
@@ -941,7 +941,7 @@ void WTable::updateSeat(unsigned int s)
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
 	if (!ginfo)
 		return;
-	
+
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return;
@@ -949,46 +949,46 @@ void WTable::updateSeat(unsigned int s)
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	const seatinfo *seat = &(snap->seats[s]);
 	if (!seat)
 		return;
-	
-	
+
+
 	// get correct mapping (central/normal view) for seat-id
 	const unsigned int mapped_seat = seatToCentralView(snap->my_seat, s);
-	
+
 	// pointer to seat-entity
 	Seat *ui_seat = wseats[mapped_seat];
-	
+
 	ui_seat->setValid(seat->valid);
-	
+
 	// update seat widget if seat is occupied
 	if (seat->valid)
 	{
 		ui_seat->setStake(seat->stake);
 		ui_seat->setSitout(seat->sitout);
-		
-		
+
+
 		const int cid = seat->client_id;
 		const playerinfo *pinfo = ((PClient*)qApp)->getPlayerInfo(cid);
-		
+
 		// check if playerinfo is available
 		if (pinfo)
 			ui_seat->setInfo(pinfo->name,
 						pinfo->location);
 		else
 			ui_seat->setInfo(((PClient*)qApp)->getPlayerName(cid), "");
-		
-		
+
+
 		if (snap->state > Table::ElectDealer)
 		{
 			// highlight current seat
 			ui_seat->setCurrent(snap->s_cur != -1 && snap->s_cur == (int)s);
-			
+
 			// update timeout display
 			if (snap->s_cur != -1 &&
-				(snap->state == Table::Blinds || 
+				(snap->state == Table::Blinds ||
 				snap->state == Table::Betting) &&
 				snap->seats[snap->s_cur].stake > 0 &&
 				snap->seats[snap->s_cur].sitout == false)
@@ -1004,42 +1004,42 @@ void WTable::updateSeat(unsigned int s)
 				m_pTimeout->stop();
 			}
 		}
-		
+
 		// in case the player associated with seat is involved in hand
 		if (seat->in_round)
 		{
 			// is it our seat?
 			ui_seat->setMySeat(snap->my_seat == (int)s);
-			
-			
+
+
 			if (snap->state == Table::EndRound)
 				ui_seat->setWin(seat->bet);
 			else
 				ui_seat->setAction((seat->stake == 0) ? Player::Allin : seat->action,
 								seat->bet);
-			
-			
-			
+
+
+
 			std::vector<Card> allcards;
-			
+
 			// use cards of saved holecards or snapshot
 			if (snap->my_seat == (int)s)
 				tinfo->holecards.copyCards(&allcards);
 			else
 				seat->holecards.copyCards(&allcards);
-			
+
 			// are there cards visible?
 			if (allcards.size())
 			{
 				char card1[3], card2[3];
 				strcpy(card1, allcards[0].getName());
 				strcpy(card2, allcards[1].getName());
-				
+
 				// display the holecards sorted?
 				if (config.getBool("ui_sort_holecards"))
 				{
 					Card c1(card1), c2(card2);
-					
+
 					// sort cards descending
 					if (c1 < c2)
 						ui_seat->setCards(card2, card1);
@@ -1048,7 +1048,7 @@ void WTable::updateSeat(unsigned int s)
 				}
 				else
 					ui_seat->setCards(card1, card2);
-				
+
 				ui_seat->showBigCards(true);
 			}
 			else
@@ -1057,10 +1057,10 @@ void WTable::updateSeat(unsigned int s)
 					ui_seat->setCards("blank", "blank");
 				else
 					ui_seat->setCards("back", "back");
-				
+
 				ui_seat->showBigCards(false);
 			}
-			
+
 			ui_seat->showSmallCards(true);
 		}
 		else   // player isn't anymore involved in current hand
@@ -1071,8 +1071,8 @@ void WTable::updateSeat(unsigned int s)
 			ui_seat->showSmallCards(false);
 		}
 	}
-	
-	
+
+
 	// schedule scene update
 	ui_seat->update(ui_seat->boundingRect());
 }
@@ -1086,43 +1086,43 @@ void WTable::updatePots()
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
 		m_Pots[t]->hide();
-	
+
 	QString strPots;
 	chips_type pot_sum = 0;
 	if (snap->pots.at(0) > 0)
 	{
 		pot_sum += snap->pots.at(0);
-		
+
 		strPots = QString(tr("Main pot: %1").arg(snap->pots.at(0)));
 		for (unsigned int t = 1; t < snap->pots.size(); ++t)
 		{
 			pot_sum += snap->pots.at(t);
-			
+
 			strPots.append(
 				QString("  " + tr("Side pot %1: %2")
 					.arg(t).arg(snap->pots.at(t))));
-					
+
 			m_Pots[t]->setAmount(snap->pots.at(t));
 			m_Pots[t]->show();
 		}
 	}
-	
+
 	QString strPotSum;
 	if (snap->state <= Table::Betting && currentPot() > 0)
 		strPotSum = QString("%1").arg(currentPot());
 	else if (pot_sum > 0)
 		strPotSum = QString("%1").arg(pot_sum);
-	
+
 	m_pTxtPots->setText(strPotSum);
 	m_pTxtPots->setToolTip(strPots);
 	m_pTxtPots->setPos(calcTxtPotsPos());
-	
+
 	m_Pots[0]->setAmount(snap->pots.at(0));
 	m_Pots[0]->show();
-	// 
+	//
 	calcPotsPos();
 }
 
@@ -1135,17 +1135,17 @@ void WTable::updateDealerButton()
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	// remember last state change
 	static int last_state = -1;
-	
+
 	if (snap->state == Table::NewRound && last_state != snap->state)
 	{
 		// update dealer button
 		const unsigned int dealerseat_mapped = seatToCentralView(snap->my_seat, snap->s_dealer);
 		m_pDealerButton->startAnimation(m_ptDealerBtn[dealerseat_mapped]);
 	}
-	
+
 	last_state = snap->state;
 }
 
@@ -1158,16 +1158,16 @@ void WTable::updateCommunityCards()
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	if (snap->state == Table::NewRound)
 		for (unsigned int i = 0; i < 5; i++)
 			m_CommunityCards[i]->hide();
-	
-	
+
+
 	std::vector<Card> allcards;
 	snap->communitycards.copyCards(&allcards);
-	
-	
+
+
 	// load community cards   // FIXME: cache pixmaps
 	for (unsigned int i = 0; i < allcards.size(); i++)
 	{
@@ -1181,7 +1181,7 @@ void WTable::updateCommunityCards()
 }
 
 void WTable::handleAutoActions()
-{	
+{
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return;
@@ -1189,15 +1189,15 @@ void WTable::handleAutoActions()
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	if (snap->my_seat == -1)
 		return;
-	
+
 	const seatinfo *seat = &(snap->seats[snap->my_seat]);
 	if (!seat)
 		return;
-	
-	
+
+
 	// handle auto-actions
 	if (snap->state == Table::Betting)
 	{
@@ -1209,17 +1209,17 @@ void WTable::handleAutoActions()
 					actionFold();
 				else
 					actionCheckCall();
-				
+
 				chkAutoFoldCheck->setCheckState(Qt::Unchecked);
 			}
 			else if (chkAutoCheckCall->checkState() == Qt::Checked)
 			{
 				chips_type greatest_bet;
 				greaterBet(snap, 0, &greatest_bet);
-				
+
 				if (m_autocall_amount >= greatest_bet)
 					actionCheckCall();
-				
+
 				chkAutoCheckCall->setCheckState(Qt::Unchecked);
 			}
 		}
@@ -1229,7 +1229,7 @@ void WTable::handleAutoActions()
 			{
 				chips_type greatest_bet;
 				greaterBet(snap, 0, &greatest_bet);
-				
+
 				if (m_autocall_amount < greatest_bet)
 					chkAutoCheckCall->setCheckState(Qt::Unchecked);
 			}
@@ -1252,29 +1252,29 @@ void WTable::updateHandStrength()
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	// is not a player
 	if (snap->my_seat == -1)
 	{
 		m_pTxtHandStrength->setText(QString());
 		return;
 	}
-	
+
 	const seatinfo *seat = &(snap->seats[snap->my_seat]);
 	if (!seat)
 		return;
-	
-	
+
+
 	if (seat->in_round)
 	{
 		vector<Card> allcards;
 		tinfo->holecards.copyCards(&allcards);
-		
+
 		if (allcards.size())
 		{
 			HandStrength strength;
 			GameLogic::getStrength(&(tinfo->holecards), &(snap->communitycards), &strength);
-			
+
 			m_pTxtHandStrength->setText(WTable::buildHandStrengthString(&strength, 0));
 			m_pTxtHandStrength->setPos(calcHandStrengthPos());
 		}
@@ -1290,7 +1290,7 @@ void WTable::updateView()
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
 	if (!ginfo)
 		return;
-	
+
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return;
@@ -1298,37 +1298,37 @@ void WTable::updateView()
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
-	
+
+
 	// update seat widgets
 	for (unsigned int i=0; i < nMaxSeats; i++)
 		updateSeat(i);
-	
-	
+
+
 	// update the dealer button
 	updateDealerButton();
-	
-	
+
+
 	// update all pots
 	updatePots();
-	
-	
+
+
 	// update hand-strength
 	updateHandStrength();
-	
-	
+
+
 	// update the community cards
 	updateCommunityCards();
-	
-	
+
+
 	// evaluate all available actions
 	evaluateActions(snap);
-	
-	
+
+
 	// handle pre-set actions
 	handleAutoActions();
-	
-	
+
+
 	// set focus on EditableSlider only if focus isn't on ChatBox
 	if (!m_pChat->hasInputFocus())
 		m_pSliderAmount->setFocus();
@@ -1337,7 +1337,7 @@ void WTable::updateView()
 void WTable::addChat(const QString& from, const QString& text)
 {
 	m_pChat->addMessage(text, from);
-	
+
 	if (config.getBool("log_chat"))
 		log_msg("table", "(%d:%d) (%s) %s",
 			m_nGid,
@@ -1349,7 +1349,7 @@ void WTable::addChat(const QString& from, const QString& text)
 void WTable::addServerMessage(const QString& text)
 {
 	m_pChat->addMessage(text, Qt::blue);
-	
+
 	if (config.getBool("log_chat"))
 		log_msg("table", "(%d:%d) %s",
 			m_nGid,
@@ -1375,7 +1375,7 @@ void WTable::closeEvent(QCloseEvent *event)
 		}
 	}
 
-	
+
 	// store settings
 	QSettings settings;
 
@@ -1388,35 +1388,35 @@ void WTable::closeEvent(QCloseEvent *event)
 void WTable::actionFold()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Fold);
-	
+
 	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionCheckCall()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Call);
-	
+
 	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionBetRaise()
 {
 	tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	
+
 	if (!tinfo)
 		return;
-	
+
 	table_snapshot *snap = &(tinfo->snap);
-	
+
 	if (!snap)
 		return;
 
 	if (snap->my_seat == -1)
 		return;
-	
+
 	chips_type greatest_bet = 0;
 	greaterBet(snap, 0, &greatest_bet);
-	
+
 	if (greatest_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet ||
 		snap->minimum_bet >= snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet)
 	{
@@ -1424,21 +1424,21 @@ void WTable::actionBetRaise()
 	}
 	else
 		((PClient*)qApp)->doSetAction(m_nGid, Player::Raise, m_pSliderAmount->value());
-	
+
 	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionShow()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Show);
-	
+
 	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
 void WTable::actionMuck()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Muck);
-	
+
 	stlayActions->setCurrentIndex(m_nNoAction);
 }
 
@@ -1447,16 +1447,16 @@ void WTable::doSitout(bool bSitout)
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return;
-	
+
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	if (snap->my_seat == -1)
 		return;
-	
+
 	seatinfo *seat = (seatinfo*) &(snap->seats[snap->my_seat]);
-	
+
 	// set sitout and show available actions again
 	seat->sitout = bSitout;
 	evaluateActions(snap);
@@ -1465,14 +1465,14 @@ void WTable::doSitout(bool bSitout)
 void WTable::actionSitout()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Sitout);
-	
+
 	doSitout(true);
 }
 
 void WTable::actionBack()
 {
 	((PClient*)qApp)->doSetAction(m_nGid, Player::Back);
-	
+
 	doSitout(false);
 }
 
@@ -1487,22 +1487,22 @@ void WTable::actionAutoCheckCall(int state)
 {
 	if (state != Qt::Checked)
 		return;
-	
+
 	// uncheck other auto-actions
 	chkAutoFoldCheck->setCheckState(Qt::Unchecked);
-	
-	
+
+
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return;
-	
+
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	chips_type greatest_bet;
 	greaterBet(snap, 0, &greatest_bet);
-	
+
 	m_autocall_amount = greatest_bet;
 }
 
@@ -1512,9 +1512,9 @@ void WTable::slotBetRaiseAmountChanged()
 	btnBetRaise->setEnabled(is_valid);
 	shortcutRaise->setEnabled(is_valid);
 	shortcutBet->setEnabled(is_valid);
-	
+
 	const QString str = btnBetRaise->text();
-	
+
 	btnBetRaise->setText(QString("%1 %2")
 				.arg(str.left(str.lastIndexOf(' ')))
 				.arg(m_pSliderAmount->value()));
@@ -1525,17 +1525,17 @@ chips_type WTable::currentPot() const
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return 0;
-	
+
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return 0;
 
 	chips_type cur_pot = 0;
-	
+
 	// sum all pots
 	for (unsigned int i=0; i < snap->pots.size(); i++)
 		cur_pot += snap->pots.at(i);
-	
+
 	// sum all seat bets
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
@@ -1553,14 +1553,14 @@ void WTable::actionBetsizeMinimum()
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return;
-	
+
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	if (snap->my_seat == -1)
 		return;
-	
+
 	m_pSliderAmount->setValue(snap->minimum_bet);
 }
 
@@ -1589,21 +1589,21 @@ void WTable::actionBetsizeMaximum()
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
 	if (!tinfo)
 		return;
-	
+
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
-	
+
 	if (snap->my_seat == -1)
 		return;
-	
+
 	m_pSliderAmount->setValue(snap->seats[snap->my_seat].stake + snap->seats[snap->my_seat].bet);
 }
 
 void WTable::slotShow()
 {
 	updateView();
-	
+
 	show();
 
 	updateAfterSizeChange();
@@ -1617,10 +1617,10 @@ void WTable::slotTimeup(int seat)
 void WTable::slotFirstReminder(int seatnr)
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	
+
 	if (!tinfo)
 		return;
-	
+
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
@@ -1631,7 +1631,7 @@ void WTable::slotFirstReminder(int seatnr)
 	const seatinfo *seat = &(snap->seats[seatnr]);
 	if (!seat)
 		return;
-		
+
 	addServerMessage(
 		QString(tr("%1, it's your turn!")
 			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))));
@@ -1640,10 +1640,10 @@ void WTable::slotFirstReminder(int seatnr)
 void WTable::slotSecondReminder(int seatnr)
 {
 	const tableinfo *tinfo = ((PClient*)qApp)->getTableInfo(m_nGid, m_nTid);
-	
+
 	if (!tinfo)
 		return;
-	
+
 	const table_snapshot *snap = &(tinfo->snap);
 	if (!snap)
 		return;
@@ -1654,11 +1654,11 @@ void WTable::slotSecondReminder(int seatnr)
 	const seatinfo *seat = &(snap->seats[seatnr]);
 	if (!seat)
 		return;
-		
+
 	const gameinfo *ginfo = ((PClient*)qApp)->getGameInfo(m_nGid);
 	if (!ginfo)
 		return;
-		
+
 	addServerMessage(
 		QString(tr("%1, you have %2 seconds left to respond!")
 			.arg(((PClient*)qApp)->getPlayerName(seat->client_id))
@@ -1680,15 +1680,15 @@ void WTable::updateAfterSizeChange()
 	// preserve aspect ratio of our view
 	const float aspect_ratio = 0.6f;
 	int new_width = (int)(m_pView->height() / aspect_ratio);
-	
+
 	// fit in window if preserving aspect-ratio is not possible
 	const int padding = 15;
 	if (new_width > this->width())
 		new_width = this->width() - padding;
-	
+
 	m_pView->resize(new_width, m_pView->height());
 	m_pView->move(this->width()/2 - m_pView->width() / 2, m_pView->y());
-	
+
 	m_pView->fitInView(m_pScene->itemsBoundingRect());
 
 
@@ -1703,7 +1703,7 @@ void WTable::updateAfterSizeChange()
 bool WTable::greaterBet(const table_snapshot *snap, const chips_type bet, chips_type *pbet) const
 {
 	chips_type cur_bet = bet;
-	
+
 	for (unsigned int i=0; i < nMaxSeats; i++)
 	{
 		const seatinfo *seat = &(snap->seats[i]);
@@ -1711,10 +1711,10 @@ bool WTable::greaterBet(const table_snapshot *snap, const chips_type bet, chips_
 		if (seat->valid && seat->in_round && seat->bet > cur_bet)
 			cur_bet = seat->bet;
 	}
-	
+
 	if (pbet)
 		*pbet = cur_bet;
-	
+
 	return (cur_bet > bet);
 }
 
@@ -1724,14 +1724,14 @@ void WTable::actionScreenshot()
 	QDateTime datetime = QDateTime::currentDateTime();
 	QString filename = QString("holdingnuts_%1.png")
 		.arg(datetime.toString("yyyy-MM-dd_hh.mm.ss"));
-	
+
 	QDir dir;
 	if (!dir.exists(pathScrshot))
 		dir.mkdir(pathScrshot);
-	
+
 	// grab the content of this window
 	QPixmap pixShot = QPixmap::grabWidget(this);
-	
+
 	if (pixShot.save(pathScrshot + "/" + filename, "PNG"))
 		addServerMessage(tr("Saved screenshot: %1.").arg(filename));
 	else
@@ -1748,7 +1748,7 @@ void WTable::playSound(unsigned int id) const
 #ifndef NOAUDIO
 	if (!config.getBool("sound") || isHidden() || (config.getBool("sound_focus") && !isActiveWindow()))
 		return;
-	
+
 	audio_play(id);
 #endif
 }
@@ -1756,7 +1756,7 @@ void WTable::playSound(unsigned int id) const
 QString WTable::buildSuitString(const Card& card)
 {
 	QString scard;
-	
+
 	switch (card.getSuit())
 	{
 		case Card::Spades:	scard = tr("Spades");	break;
@@ -1764,14 +1764,14 @@ QString WTable::buildSuitString(const Card& card)
 		case Card::Diamonds:	scard = tr("Diamonds");	break;
 		case Card::Clubs:	scard = tr("Clubs");	break;
 	}
-	
+
 	return scard;
 }
 
 QString WTable::buildFaceString(const Card& card, bool plural)
 {
 	QString scard;
-	
+
 	switch (card.getFace())
 	{
 		case Card::Two:		scard = !plural ? tr("Deuce") :	tr("Deuces");	break;
@@ -1788,7 +1788,7 @@ QString WTable::buildFaceString(const Card& card, bool plural)
 		case Card::King:	scard = !plural ? tr("King") :	tr("Kings");	break;
 		case Card::Ace:		scard = !plural ? tr("Ace") :	tr("Aces");	break;
 	}
-	
+
 	return scard;
 }
 
@@ -1797,15 +1797,15 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	vector<Card> rank, kicker;
 	strength->copyRankCards(&rank);
 	strength->copyKickerCards(&kicker);
-	
+
 	// provide translation for hand strength
 	QString sstrength = "unknown hand strength";
 	QString srank;
 	QStringList slkicker;
-	
+
 	for (unsigned int i=0; i < kicker.size(); i++)
 		slkicker += QString(kicker[i].getName());
-	
+
 	switch (strength->getRanking())
 	{
 	case HandStrength::HighCard:
@@ -1831,14 +1831,14 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 	case HandStrength::Flush:
 		sstrength = tr("Flush");
 		srank = QString("%1").arg(buildSuitString(rank[0]));
-		
+
 		if (verbosity)
 		{
 			QStringList slrank;
-			
+
 			for (unsigned int i=0; i < rank.size(); i++)
 				slrank += QString(rank[i].getName());
-			
+
 			srank += " (" + slrank.join(" ") + ")";
 		}
 		break;
@@ -1865,12 +1865,12 @@ QString WTable::buildHandStrengthString(HandStrength *strength, int verbosity)
 		}
 		break;
 	}
-	
+
 	QString retstr = sstrength + ", " + srank;
-	
+
 	if (verbosity && kicker.size())
 		retstr += " (" + slkicker.join(" ") + ")";
-	
+
 	return retstr;
 }
 
@@ -1882,7 +1882,7 @@ void WTable::showDebugTable()
 	m_pDealerButton->hide();
 
 	DealerButton *dealerBtn[nMaxSeats];
-	
+
 	// seats and dealerbutton
 	for (unsigned int i = 0; i < nMaxSeats; i++)
 	{
@@ -1903,15 +1903,15 @@ void WTable::showDebugTable()
 		dealerBtn[i] = new DealerButton;
 		dealerBtn[i]->setPos(m_ptDealerBtn[i]);
 
-		m_pScene->addItem(dealerBtn[i]);	
+		m_pScene->addItem(dealerBtn[i]);
 	}
-	
+
 	// mainpot and sidepots
 //	for (unsigned int t = 0; t < qrand() % (sizeof(m_Pots) / sizeof(m_Pots[0])) + 1; t++)
 	for (unsigned int t = 0; t < sizeof(m_Pots) / sizeof(m_Pots[0]); t++)
 		m_Pots[t]->setAmount(qrand() % 30000 + 1);
 	calcPotsPos();
-	
+
 	// timeout
 	m_pTimeout->setPos(calcTimeoutPos(0));
 	m_pTimeout->start(0, 60);
@@ -1940,7 +1940,7 @@ void WTable::setForegroundWindow()
 
 	this->activateWindow();
 	this->raise();
-	
+
 #if defined(Q_OS_WIN)
 	SetWindowPos(winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	SetWindowPos(winId(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);

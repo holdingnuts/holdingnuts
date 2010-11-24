@@ -36,44 +36,44 @@ AboutDialog::AboutDialog(QWidget *parent)
 	setWindowTitle(tr("About"));
 	setWindowIcon(QIcon(":/res/hn_logo.png"));
 	setFixedSize(350, 230);
-	
-	
+
+
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-	
-	
+
+
 	QLabel *lblLogo = new QLabel(this);
 	QImage image(":res/hn_logo.png");
 	lblLogo->setPixmap(QPixmap::fromImage(image));
-	
-	
+
+
 	QLabel *lblProjectname = new QLabel("<qt><b><font size=+3>HoldingNuts</font></b></qt>", this);
-	
-	
+
+
 	QLabel *lblVersion = new QLabel("<qt><b>" +
 					tr("Version %1.%2.%3")
 						.arg(VERSION_MAJOR)
 						.arg(VERSION_MINOR)
 						.arg(VERSION_REVISION) + "</b> <i>(" +
-						QString("SVN %1").arg(VERSIONSTR_SVN) + 
+						QString("SVN %1").arg(VERSIONSTR_SVN) +
 					")</i></qt>",
 					 this);
-	
-	
+
+
 	QLabel *lblLicense = new QLabel(tr("Licensed under the GPLv3"));
-	
+
 	QLabel *lblCopyright = new QLabel("Copyright 2008-2010, Dominik Geyer &\nHoldingNuts team", this);
-	
+
 	QLabel *lblWebsite = new QLabel(this);
 	lblWebsite->setText("<qt><a href=\"http://www.holdingnuts.net/\">http://www.holdingnuts.net/</a></qt>");
 	connect(lblWebsite, SIGNAL(linkActivated(const QString&)), this, SLOT(actionHyperlink(const QString&)));
-	
-	
+
+
 	QLabel *lblMail = new QLabel(this);
 	lblMail->setText("<qt><a href=\"mailto:contact@holdingnuts.net\">contact@holdingnuts.net</a></qt>");
 	connect(lblMail, SIGNAL(linkActivated(const QString&)), this, SLOT(actionHyperlink(const QString&)));
-	
-	
+
+
 	QVBoxLayout *contentLayout = new QVBoxLayout;
 	contentLayout->addWidget(lblProjectname);
 	contentLayout->addWidget(lblVersion);
@@ -81,11 +81,11 @@ AboutDialog::AboutDialog(QWidget *parent)
 	contentLayout->addWidget(lblCopyright);
 	contentLayout->addWidget(lblWebsite);
 	contentLayout->addWidget(lblMail);
-	
+
 	QHBoxLayout *baseLayout = new QHBoxLayout;
 	baseLayout->addWidget(lblLogo, 30, Qt::AlignHCenter | Qt::AlignTop);
 	baseLayout->addLayout(contentLayout, 70);
-	
+
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	mainLayout->addLayout(baseLayout);
 	mainLayout->addWidget(buttonBox, 0, Qt::AlignBottom);

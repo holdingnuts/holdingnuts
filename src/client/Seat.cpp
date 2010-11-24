@@ -55,9 +55,9 @@ Seat::Seat(unsigned int id, QWidget *parent)
 {
 	m_pCurrentActionImg = &SeatImages::Instance().imgActNone;
 	m_pChipStack = new ChipStack(this);
-	
+
 	this->setZValue(8);
-	
+
 	// precalc position
 	calcSCardPos(m_xPosSmallCards, m_yPosSmallCards);
 }
@@ -65,7 +65,7 @@ Seat::Seat(unsigned int id, QWidget *parent)
 void Seat::setValid(bool valid)
 {
 	m_bValid = valid;
-	
+
 	if (!valid)
 	{
 		this->setToolTip(QString());	// unset tooltip
@@ -76,17 +76,17 @@ void Seat::setValid(bool valid)
 void Seat::setInfo(const QString& name, const QString& location)
 {
 	m_strName = name;
-	
+
 	chopName();
-	
+
 	if (m_strName.length() < name.length())
 		m_strName.append("...");
-	
+
 	QString tooltip(tr("Name: %1").arg(name));
-	
+
 	if (!location.isEmpty())
 		tooltip.append(QString("\n") + tr("Location: %1").arg(location));
-	
+
 	this->setToolTip(tooltip);
 }
 
@@ -127,17 +127,17 @@ void Seat::setAction(Player::PlayerAction action, chips_type amount)
 				m_pCurrentActionImg = &SeatImages::Instance().imgActAllin;
 			break;
 	}
-	
+
 	if (amount > 0)
 		m_strAmount.setNum(amount);
 	else
 		m_strAmount.clear();
-		
+
 	m_pChipStack->setAmount(amount);
 }
 
 void Seat::setWin(chips_type amount)
-{	
+{
 	if (amount > 0)
 	{
 		m_strAmount.setNum(amount);
@@ -170,7 +170,7 @@ void Seat::setCards(const char *c1, const char *c2)
 	m_FirstCard.load(QString("gfx/deck/%1/%2.png")
 		.arg(QString::fromStdString(config.get("ui_card_deck")))
 		.arg(c1));
-	
+
 	m_SecondCard.load(QString("gfx/deck/%1/%2.png")
 		.arg(QString::fromStdString(config.get("ui_card_deck")))
 		.arg(c2));
@@ -191,10 +191,10 @@ QRectF Seat::boundingRect() const
 
 	//		8	9	0
 	//	 7			   1
-	// 						
+	//
 	//   6			   2
 	//		5	4	3
-	 
+
 	// smallcards
 	switch (m_nID)
 	{
@@ -212,10 +212,10 @@ QRectF Seat::boundingRect() const
 				width += sx_mini_card * 1.5;
 			break;
 	}
-	
+
 	QRectF rc(x, y, width, height);
 	QTransform m = this->transform();
-	
+
 	return m.mapRect(rc);
 }
 
@@ -228,7 +228,7 @@ QRectF Seat::boundingRectSeat() const
 		SeatImages::Instance().imgBack.height());
 
 	QTransform m = this->transform();
-	
+
 	return m.mapRect(rc);
 }
 
@@ -240,12 +240,12 @@ void Seat::paint(
 	// seat is not occupied, don't paint anything
 	if (!m_bValid)
 		return;
-	
-	
+
+
 	// seat
 	static const qreal seat_width = SeatImages::Instance().imgBack.width();
 	static const qreal seat_height = SeatImages::Instance().imgBack.height();
-	
+
 	const QImage *imgBack;
 	if (m_bSitout)
 		imgBack = &(SeatImages::Instance().imgBackSitout);
@@ -253,7 +253,7 @@ void Seat::paint(
 		imgBack = &(SeatImages::Instance().imgBackCurrent);
 	else
 		imgBack = &(SeatImages::Instance().imgBack);
-	
+
 	painter->save();
 
 	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
@@ -265,7 +265,7 @@ void Seat::paint(
 			seat_width + m_pCurrentActionImg->width(),
 			seat_height),
 		*imgBack);
-	
+
 	// action
 	if (m_pCurrentActionImg)
 	{
@@ -281,19 +281,19 @@ void Seat::paint(
 	// text name
 	QPainterPath pathTxtName;
 	pathTxtName.addText(10, m_fmInSeat.height() + 10, m_ftInSeat, m_strName);
-	
+
 	painter->fillPath(pathTxtName, Qt::black);
-	
+
 	// text stake
 	QPainterPath pathTxtStake;
 	pathTxtStake.addText(10, 75, m_ftInSeat, m_strStake);
-	
+
 	painter->fillPath(pathTxtStake, Qt::black);
 
 	// text bet-amount
 	qreal tx_pos = 0;
 	qreal ty_pos = 0;
-			
+
 	calcBetTextPos(tx_pos, ty_pos, m_fmInSeat.width(m_strAmount));
 
 	painter->setFont(m_ftInSeat);
@@ -309,7 +309,7 @@ void Seat::paint(
 	// chip stack
 	qreal csx_pos = 0;
 	qreal csy_pos = 0;
-	
+
 	calcChipStackPos(csx_pos, csy_pos, m_fmInSeat.width(m_strAmount));
 
 	m_pChipStack->setPos(csx_pos, csy_pos);
@@ -334,7 +334,7 @@ void Seat::paint(
 			bc1x_pos = seat_width + m_pCurrentActionImg->width() - (sx_card * 1.5);
 			bc2x_pos = seat_width + m_pCurrentActionImg->width() - sx_card;
 		}
-		
+
 		painter->drawPixmap(
 			QRectF(
 				bc1x_pos,
@@ -352,7 +352,7 @@ void Seat::paint(
 			m_SecondCard,
 			QRectF(0 , 0, m_SecondCard.width(), m_SecondCard.height()));
 	}
-	
+
 	// small cards
 	if (m_bSmallCards && !m_bBigCards)
 	{
@@ -375,15 +375,15 @@ void Seat::paint(
 				sy_mini_card),
 			imgCardBackside);
 	}
-	
-#ifdef DEBUG	
+
+#ifdef DEBUG
 	if (config.getBool("dbg_bbox"))
 	{
 		painter->setPen(Qt::blue);
 		painter->drawRect(this->boundingRect());
 	}
 #endif
-	
+
 	painter->restore();
 }
 
@@ -391,7 +391,7 @@ void Seat::calcSCardPos(qreal& x, qreal& y) const
 {
 	//		8	9	0
 	//	 7			   1
-	// 						
+	//
 	//   6			   2
 	//		5	4	3
 
@@ -420,7 +420,7 @@ void Seat::calcBetTextPos(qreal& x, qreal& y, int txt_width) const
 {
 	//		8	9	0
 	//	 7			   1
-	// 						
+	//
 	//   6			   2
 	//		5	4	3
 
@@ -449,7 +449,7 @@ void Seat::calcChipStackPos(qreal& x, qreal& y, int txt_width) const
 {
 	//		8	9	0
 	//	 7			   1
-	// 						
+	//
 	//   6			   2
 	//		5	4	3
 
@@ -476,7 +476,7 @@ void Seat::calcChipStackPos(qreal& x, qreal& y, int txt_width) const
 
 void Seat::chopName()
 {
-	while (m_fmInSeat.width(m_strName) > (SeatImages::Instance().imgBack.width() - 
+	while (m_fmInSeat.width(m_strName) > (SeatImages::Instance().imgBack.width() -
 									SeatImages::Instance().imgActNone.width()))
 	{
 		m_strName.chop(1);
@@ -488,6 +488,6 @@ void Seat::setInSeatFont(const QFont& font)
 {
 	m_ftInSeat = font;
 	m_fmInSeat = QFontMetrics(m_ftInSeat);
-	
+
 	m_ftInSeat.setStyleStrategy(QFont::ForceOutline);
 }

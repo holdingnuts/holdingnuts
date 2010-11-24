@@ -44,7 +44,7 @@ ChatBox::ChatBox(
 
 	m_pEditChatLog = new QTextEdit(this);
 	m_pEditChatLog->setReadOnly(true);
-	
+
 	if(nTextLogHeight > 0)
 		m_pEditChatLog->setFixedHeight(nTextLogHeight);
 
@@ -55,13 +55,13 @@ ChatBox::ChatBox(
 
 	// layout
 	QHBoxLayout *lInputLine = new QHBoxLayout;
-	
+
 	lInputLine->addWidget(m_pEditChat);
 	lInputLine->addWidget(m_pSendMsg);
 
 	QVBoxLayout *lchat = new QVBoxLayout(this);
 
-	
+
 	if (align == INPUTLINE_TOP)
 		lchat->addLayout(lInputLine);
 
@@ -84,35 +84,35 @@ void ChatBox::addMessage(const QString &msg, const QString &from, const QColor &
 	QScrollBar *sb = m_pEditChatLog->verticalScrollBar();
 	int scrollpos = sb->value();
 	bool was_bottom = (sb->value() == sb->maximum());
-	
+
 	// save current cursor
 	QTextCursor c = m_pEditChatLog->textCursor();
-	
+
 	// move cursor position to end
 	m_pEditChatLog->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
 	int new_pos = m_pEditChatLog->textCursor().position();
-	
+
 	// set format at current cursor position
 	m_pEditChatLog->setTextColor(color);
 	m_pEditChatLog->setFontPointSize(m_nFontPointSize);
-	
+
 	if (m_bShowTime)
 		m_pEditChatLog->insertPlainText("<" + QTime::currentTime().toString("hh:mm") + "> ");
-	
+
 	// is the message from other client
 	if (from.length())
 	{
 		m_pEditChatLog->setFontWeight(QFont::Bold);
 		m_pEditChatLog->insertPlainText("[" + from + "] ");
 	}
-	
+
 	m_pEditChatLog->setFontWeight(QFont::Normal);
 	m_pEditChatLog->insertPlainText(msg + "\r\n");
-	
+
 	// restore previous cursor position and selection
 	if (new_pos != c.position())
 		m_pEditChatLog->setTextCursor(c);
-	
+
 	// was the scroll-position at bottom?
 	if (was_bottom)
 	{
@@ -183,9 +183,9 @@ void ChatBox::actionChat()
 	if (m_pEditChat->text().length())
 	{
 		emit dispatchedMessage(m_pEditChat->text());
-		
+
 		m_pEditChat->addHistory();
-		
+
 		m_pEditChat->clear();
 		m_pEditChat->setFocus(Qt::OtherFocusReason);
 	}
@@ -202,7 +202,7 @@ void HistoryLineEdit::keyPressEvent(QKeyEvent * qke)
 	if (qke->key() == Qt::Key_Up)
 	{
 		qke->accept();
-		
+
 		if (history_idx + 1 < history.count())
 		{
 			history_idx++;
@@ -212,7 +212,7 @@ void HistoryLineEdit::keyPressEvent(QKeyEvent * qke)
 	else if (qke->key() == Qt::Key_Down)
 	{
 		qke->accept();
-		
+
 		if (history_idx -1 >= 0)
 		{
 			history_idx--;
@@ -226,12 +226,12 @@ void HistoryLineEdit::keyPressEvent(QKeyEvent * qke)
 void HistoryLineEdit::addHistory()
 {
 	const int max_history = 20;
-	
+
 	history.enqueue(text());
-	
+
 	if (history.count() > max_history)
 		history.dequeue();
-	
+
 	// reset index
 	history_idx = -1;
 }

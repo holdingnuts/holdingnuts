@@ -47,25 +47,25 @@ using namespace std;
  * Start-Hand vs. Random-Hand (Heads-Up) probabilities:
  * 	http://www.thema-poker.com/wahrscheinlichkeiten/starthaende
  */
- 
+
 int main(int argc, char **argv)
 {
 	printf("Poker Hand-Simulator\n");
-	
+
 	unsigned long tests;
-	
+
 	if (argc < 2)
 		tests = 10000000;
 	else
 		tests = atoi(argv[1]);
-	
+
 #ifdef HW_RANDOM
 	FILE *fp = fopen(HW_RANDOM, "r");
 #else
 	// init PRNG
 	srand((unsigned) time(NULL));
 #endif /* HW_RANDOM */
-	
+
 	struct {
 		const char *str;
 		const double probab;
@@ -81,36 +81,36 @@ int main(int argc, char **argv)
 		{ "Straight Flush",	.00027851	},
 		{ "Royal Flush",	.00003232	}
 	};
-	
-	
+
+
 	printf("Iterations: %ld\n", tests);
-	
+
 	if (true)
 	{
 		// all combinations + RoyalFlush
 		const int strengths = (HandStrength::StraightFlush - HandStrength::HighCard +1) +1;
 		long int count[strengths];
 		int last_progress = 0;
-		
+
 		for (int i=0; i < strengths; i++)
 			count[i] = 0;
-		
+
 		printf(".");
-		
+
 		for (unsigned long i=0; i < tests; i++)
 		{
 #ifdef HW_RANDOM
 			unsigned long seed;
 			size_t read_elements;
 			read_elements = fread(&seed, sizeof(seed), 1, fp);
-			
+
 			if (read_elements*sizeof(seed) != sizeof(seed))
 			{
 				fprintf(stderr, "Error reading from random device (bytes read: %d; bytes expected: %d).\n",
 					(int)read_elements, (int)sizeof(seed));
 				return -1;
 			}
-			
+
 			srand(seed);
 #endif /* HW_RANDOM */
 
@@ -125,23 +125,23 @@ int main(int argc, char **argv)
 					last_progress = progress;
 				}
 			}
-			
+
 			Deck *d = new Deck();
-			
+
 			d->fill();
 			d->shuffle();
-			
-			
+
+
 			HoleCards *h = new HoleCards();
-			
+
 			Card c1, c2;
 			d->pop(c1);
 			d->pop(c2);
 			h->setCards(c1, c2);
-			
-			
+
+
 			CommunityCards *cc = new CommunityCards();
-			
+
 			Card f1, f2, f3, t, r;
 			d->pop(f1);
 			d->pop(f2);
@@ -151,27 +151,27 @@ int main(int argc, char **argv)
 			cc->setTurn(t);
 			d->pop(r);
 			cc->setRiver(r);
-			
-			
+
+
 			HandStrength strength;
 			GameLogic::getStrength(h, cc, &strength);
-			
+
 			vector<Card> rank;
 			strength.copyRankCards(&rank);
-			
+
 			// handle RoyalFlush as special case
 			if (strength.getRanking() == HandStrength::StraightFlush && rank.front().getFace() == Card::Ace)
 				count[strengths-1]++;
 			else
 				count[strength.getRanking() - HandStrength::HighCard]++;
-			
+
 			delete cc;
 			delete h;
 			delete d;
 		}
-		
+
 		printf("\n");
-		
+
 		for (int i=0; i < strengths; i++)
 			printf("%.8lf (%+7.8lf = %+7.6lf%%) - %s\n",
 				(double)count[i] / (double) tests,
@@ -179,44 +179,44 @@ int main(int argc, char **argv)
 				((double)count[i] / (double) tests - rankings[i].probab)*100.0,
 				rankings[i].str);
 	}
-	
+
 	printf("--------------------------------------------------------------------------------\n");
-	
-	
-	
+
+
+
 	if (false)
 	{
 		long int wincount = 0, losecount = 0, splitcount = 0;
-		
+
 		HoleCards *h1 = new HoleCards();
 		Card card1(Card::Seven,  Card::Clubs);
 		Card card2(Card::Seven,  Card::Hearts);
 		h1->setCards(card1, card2);
-		
-		
+
+
 		for (unsigned long i=0; i < tests; i++)
 		{
 			Deck *d = new Deck();
-			
+
 			d->fill();
-			
+
 			// remove test-holecards
 			d->debugRemoveCard(card1);
 			d->debugRemoveCard(card2);
-			
+
 			d->shuffle();
-			
-			
+
+
 			HoleCards *h2 = new HoleCards();
-			
+
 			Card c1, c2;
 			d->pop(c1);
 			d->pop(c2);
 			h2->setCards(c1, c2);
-			
-			
+
+
 			CommunityCards *cc = new CommunityCards();
-			
+
 			Card f1, f2, f3, t, r;
 			d->pop(f1);
 			d->pop(f2);
@@ -226,12 +226,12 @@ int main(int argc, char **argv)
 			cc->setTurn(t);
 			d->pop(r);
 			cc->setRiver(r);
-			
-			
+
+
 			HandStrength strength1, strength2;
 			GameLogic::getStrength(h1, cc, &strength1);
 			GameLogic::getStrength(h2, cc, &strength2);
-			
+
 			if (strength1 > strength2)
 				wincount++;
 			else if (strength1 == strength2)
@@ -239,24 +239,24 @@ int main(int argc, char **argv)
 			else if (strength1 < strength2)
 				losecount++;
 			else { printf("Outch, bug in strength-operator.\n"); return 0; }
-			
+
 			delete cc;
 			delete h2;
 			delete d;
 		}
-		
+
 		printf("%s ", card1.getName());
 		printf("%s - ", card2.getName());
-		
+
 		printf("win %4.2lf%%, lose %4.2lf%%, split %4.2lf%%\n",
 			100 * ((double) wincount / (double) tests),
 			100 * ((double) losecount / (double) tests),
 			100 * ((double) splitcount / (double) tests));
 	}
-	
+
 #ifdef HW_RANDOM
 	fclose(fp);
 #endif /* HW_RANDOM */
-	
+
 	return 0;
 }
