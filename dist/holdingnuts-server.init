@@ -62,7 +62,7 @@ case "$1" in
 		sleep 1
 	    else
                 log_warning_msg "holdingnuts-server not running, attempting to start."
-	    	rm -f /var/run/holdingnuts-server.pid
+                rm -f /var/run/holdingnuts-server.pid
 	    fi
             if start-stop-daemon --start --quiet --background \
                 --pidfile /var/run/holdingnuts-server.pid --make-pidfile \
