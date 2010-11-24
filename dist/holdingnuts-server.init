@@ -10,7 +10,7 @@ CONFIG=/var/lib/holdingnuts
 test -x $DAEMON || exit 0
 
 . /lib/lsb/init-functions
-. /etc/default/rcS
+test -f /etc/default/rcS && . /etc/default/rcS
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
