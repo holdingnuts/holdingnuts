@@ -92,6 +92,29 @@
     </message>
 </context>
 <context>
+    <name>FirstStartDialog</name>
+    <message>
+        <source>First start</source>
+        <translation>Первый запуск</translation>
+    </message>
+    <message>
+        <source>This is the first time you started HoldingNuts. Please confirm the below basic settings.</source>
+        <translation>Вы запустили HoldingNuts в первый раз. Пожалуйста, подтвердите базовые настройки.</translation>
+    </message>
+    <message>
+        <source>Player name</source>
+        <translation>Имя игрока</translation>
+    </message>
+    <message>
+        <source>Use unique identifier</source>
+        <translation>Уникальный идентификатор</translation>
+    </message>
+    <message>
+        <source>By using a unique identifier game servers can recognize you which allows rejoining games after a disconnect and participate in player rankings.</source>
+        <translation>Используя уникальный идентификатор, игровые сервера смогут узнать Вас и позволить продолжить прерванную игру, а также сохранять Ваш ранг.</translation>
+    </message>
+</context>
+<context>
     <name>GameListTableModel</name>
     <message>
         <source>Name</source>
@@ -218,7 +241,7 @@
     </message>
     <message>
         <source>%1 wins pot #%2 with %3.</source>
-        <translation>%1 выиграл(а) банк #%2 с %3.</translation>
+        <translation type="obsolete">%1 выиграл(а) банк #%2 с %3.</translation>
     </message>
     <message>
         <source>%1 receives %3 odd chips of split pot #%2.</source>
@@ -243,6 +266,18 @@
     <message>
         <source>Connection closed.</source>
         <translation>Соединение закрыто.</translation>
+    </message>
+    <message>
+        <source>%1 receives pot #%2 with %3.</source>
+        <translation>%1 получил банк #%2 с %3.</translation>
+    </message>
+    <message>
+        <source>%1 wins %2.</source>
+        <translation>%1 выиграл %2.</translation>
+    </message>
+    <message>
+        <source>HoldingNuts Table - [</source>
+        <translation>Игровой стол HoldingNuts -[</translation>
     </message>
 </context>
 <context>
@@ -388,6 +423,10 @@
     <message>
         <source>Table chat verbosity</source>
         <translation>Чат за столом</translation>
+    </message>
+    <message>
+        <source>Sort hole cards (descending)</source>
+        <translation>Сортировать карты (по убыванию)</translation>
     </message>
 </context>
 <context>
@@ -542,7 +581,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>unkown gametype</source>
-        <translation>неизвестный тип игры</translation>
+        <translation type="obsolete">неизвестный тип игры</translation>
     </message>
     <message>
         <source>Cash game</source>
@@ -558,7 +597,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>unkown gamemode</source>
-        <translation>неизвестный режим игры</translation>
+        <translation type="obsolete">неизвестный режим игры</translation>
     </message>
     <message>
         <source>Waiting</source>
@@ -574,7 +613,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>unkown gamestate</source>
-        <translation>неизвестное состояние игры</translation>
+        <translation type="obsolete">неизвестное состояние игры</translation>
     </message>
     <message>
         <source>Logout</source>
@@ -583,6 +622,35 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     <message>
         <source>Welcome</source>
         <translation>Добро пожаловать,</translation>
+    </message>
+    <message>
+        <source>Subs&amp;cribe</source>
+        <translation>Подписаться</translation>
+    </message>
+    <message>
+        <source>Unsu&amp;bscribe</source>
+        <translation>Отписаться</translation>
+    </message>
+    <message>
+        <source>The table will be opened on the next hand.</source>
+        <translatorcomment>Not sure what does it mean &quot;table&quot; in the context. The game desk or spreadsheet table?</translatorcomment>
+        <translation type="unfinished">Стол будет открыт на следующей сдаче.</translation>
+    </message>
+    <message>
+        <source>unknown gametype</source>
+        <translation>неизвестный тип игры</translation>
+    </message>
+    <message>
+        <source>unknown gamemode</source>
+        <translation>неизвестный режим игры</translation>
+    </message>
+    <message>
+        <source>unknown gamestate</source>
+        <translation>неизвестное состояние игры</translation>
+    </message>
+    <message>
+        <source>%1 player(s), %2 game(s)</source>
+        <translation>%1 игрок(и), %2 игра(игры)</translation>
     </message>
 </context>
 <context>
@@ -630,7 +698,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     <message>
         <source>Allin</source>
         <translatorcomment>I&apos;ve used term &quot;va-bank&quot; but probably its obsolete word. Will ask my Russian friends :-)</translatorcomment>
-        <translation>Ва-банк</translation>
+        <translation type="obsolete">Ва-банк</translation>
     </message>
     <message>
         <source>Ctrl+F</source>
@@ -670,7 +738,7 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     </message>
     <message>
         <source>HoldingNuts table</source>
-        <translation>Стол HoldingNuts</translation>
+        <translation type="obsolete">Стол HoldingNuts</translation>
     </message>
     <message>
         <source>&amp;Call %1</source>
@@ -904,6 +972,15 @@ Format: &lt;host&gt;[:&lt;port&gt;]</source>
     <message>
         <source>Straight Flush</source>
         <translation>Флэш-стрит</translation>
+    </message>
+    <message>
+        <source>Muck losing
+hands</source>
+        <translation>Сумма проигрыша</translation>
+    </message>
+    <message>
+        <source>Max</source>
+        <translation>Максимум</translation>
     </message>
 </context>
 </TS>
