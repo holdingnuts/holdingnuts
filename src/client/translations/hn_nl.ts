@@ -95,10 +95,33 @@
     </message>
 </context>
 <context>
+    <name>FirstStartDialog</name>
+    <message>
+        <source>First start</source>
+        <translation>Eerste gebruik</translation>
+    </message>
+    <message>
+        <source>This is the first time you started HoldingNuts. Please confirm the below basic settings.</source>
+        <translation type="unfinished">Het is de eerste keer dat je HoldingNuts opstart bevestig de basis instellingen aub.</translation>
+    </message>
+    <message>
+        <source>Player name</source>
+        <translation>Spelernaam</translation>
+    </message>
+    <message>
+        <source>Use unique identifier</source>
+        <translation>Gebruik een unieke Gebruikersnaam</translation>
+    </message>
+    <message>
+        <source>By using a unique identifier game servers can recognize you which allows rejoining games after a disconnect and participate in player rankings.</source>
+        <translation type="unfinished">Als u een unieke spelersnaam gebruikt kan men terug aan het spel deelnemen als de verbinding moest verbroken worden alsook voor aan de rankings deel te nemen.</translation>
+    </message>
+</context>
+<context>
     <name>GameListTableModel</name>
     <message>
         <source>Name</source>
-        <translation type="obsolete">Naam</translation>
+        <translation>Naam</translation>
     </message>
     <message>
         <source>Gametype</source>
@@ -237,7 +260,7 @@
     </message>
     <message>
         <source>%1, it&apos;s your turn!</source>
-        <translation>%1, uw beurt.</translation>
+        <translation type="unfinished">%1, uw beurt!</translation>
     </message>
     <message>
         <source>%1 receives pot #%2 with %3.</source>
@@ -264,15 +287,15 @@
     </message>
     <message>
         <source>ID</source>
-        <translation>ID</translation>
+        <translation type="obsolete">ID</translation>
     </message>
     <message>
         <source>Admin</source>
-        <translation>Admin</translation>
+        <translation type="obsolete">Admin</translation>
     </message>
     <message>
         <source>Location</source>
-        <translation>Locatie</translation>
+        <translation type="obsolete">Locatie</translation>
     </message>
 </context>
 <context>
@@ -448,7 +471,7 @@
 You can optionally specify a port number.
 Format: &lt;host&gt;[:&lt;port&gt;]</source>
         <translation>De server (domeinnaam of IP) waarmee u wilt verbinden.
-Het is mogelijk om een poortnummer op te geven.
+Het is mogelijk om als optie een poortnummer op te geven.
 Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
@@ -533,7 +556,7 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>unkown gametype</source>
-        <translation>onbekend speltype</translation>
+        <translation type="obsolete">onbekend speltype</translation>
     </message>
     <message>
         <source>Cash game</source>
@@ -545,11 +568,11 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>Sit&apos;n&apos;Go</source>
-        <translation>Zitten-gaan</translation>
+        <translation>Sit-and-go</translation>
     </message>
     <message>
         <source>unkown gamemode</source>
-        <translation>onbekende spelmodus</translation>
+        <translation type="obsolete">onbekende spelmodus</translation>
     </message>
     <message>
         <source>Waiting</source>
@@ -565,7 +588,7 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>unkown gamestate</source>
-        <translation>onbekende spelstatus</translation>
+        <translation type="obsolete">onbekende spelstatus</translation>
     </message>
     <message>
         <source>Welcome</source>
@@ -573,15 +596,15 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     </message>
     <message>
         <source>hide started Games</source>
-        <translation>gestarte spellen verbergen</translation>
+        <translation type="obsolete">gestarte spellen verbergen</translation>
     </message>
     <message>
         <source>hide private Games</source>
-        <translation>privéspellen verbergen</translation>
+        <translation type="obsolete">privéspellen verbergen</translation>
     </message>
     <message>
         <source>&amp;Subscribe</source>
-        <translation>I&amp;nschrijven</translation>
+        <translation type="obsolete">I&amp;nschrijven</translation>
     </message>
     <message>
         <source>Unsu&amp;bscribe</source>
@@ -630,6 +653,30 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     <message>
         <source>%1 player(s), %2 game(s)</source>
         <translation>%1 speler(s), %2 spel(len)</translation>
+    </message>
+    <message>
+        <source>hide started</source>
+        <translation type="unfinished">Verberg gestarte spelen</translation>
+    </message>
+    <message>
+        <source>hide private</source>
+        <translation type="unfinished">Verberg private</translation>
+    </message>
+    <message>
+        <source>Subs&amp;cribe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>unknown gametype</source>
+        <translation type="unfinished">Onbekend speltype</translation>
+    </message>
+    <message>
+        <source>unknown gamemode</source>
+        <translation type="unfinished">Onbekende game modus</translation>
+    </message>
+    <message>
+        <source>unknown gamestate</source>
+        <translation type="unfinished">Onbekende spelstatus</translation>
     </message>
 </context>
 <context>
@@ -949,6 +996,16 @@ Indeling: &lt;host&gt;[:&lt;poort&gt;]</translation>
     <message>
         <source>%1 high</source>
         <translation>%1 hoog</translation>
+    </message>
+    <message>
+        <source>Muck losing
+hands</source>
+        <translation type="unfinished">Verberg verliezende
+hand</translation>
+    </message>
+    <message>
+        <source>This table will be closed in %1 seconds.</source>
+        <translation type="unfinished">Deze tafel word gesloten in %1 seconden.</translation>
     </message>
 </context>
 </TS>
