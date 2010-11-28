@@ -41,11 +41,13 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	QWidget *tabPlayerinfo = new QWidget;
 	QWidget *tabAppearance = new QWidget;
 	QWidget *tabLogChat = new QWidget;
+	QWidget *tabNetwork = new QWidget;
 
 	tabWidget->addTab(tabGeneral, tr("General"));
 	tabWidget->addTab(tabPlayerinfo, tr("Player info"));
 	tabWidget->addTab(tabAppearance, tr("Appearance"));
 	tabWidget->addTab(tabLogChat, tr("Log and chat"));
+	tabWidget->addTab(tabNetwork, tr("Network"));
 
 
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -71,6 +73,8 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 		{ "",	tr("Auto-Detect") },
 		{ "de",	"German" },
 		{ "en",	"English" },
+		{ "fi",	"Finnish" },
+		{ "fr",	"French" },
 		{ "it", "Italian" },
 		{ "ja", "Japanese" },
 		{ "nl", "Dutch" },
@@ -227,6 +231,29 @@ SettingsDialog::SettingsDialog(ConfigParser &cp, QWidget *parent)
 	formLogChat->addRow(" ", checkVerboseTableCards);
 	formLogChat->addRow(" ", checkVerboseTablePlayerChat);
 	tabLogChat->setLayout(formLogChat);
+
+
+	// --- tabNetwork ---
+	QGroupBox *groupProxy = new QGroupBox(tr("SOCKS5 proxy"), tabNetwork);
+
+	editProxyHost = new QLineEdit(QString::fromStdString(cfg->get("proxy_host")), groupProxy);
+	editProxyPort = new QLineEdit(QString::number(cfg->getInt("proxy_port")), groupProxy);
+	editProxyPort->setValidator(new QIntValidator(1, 65535, editProxyPort));
+	editProxyUsername = new QLineEdit(QString::fromStdString(cfg->get("proxy_username")), groupProxy);
+	editProxyPassword = new QLineEdit(QString::fromStdString(cfg->get("proxy_password")), groupProxy);
+
+	QFormLayout *formNetwork = new QFormLayout;
+	formNetwork->addRow(tr("Host"), editProxyHost);
+	formNetwork->addRow(tr("Port"), editProxyPort);
+	formNetwork->addRow(tr("Username"), editProxyUsername);
+	formNetwork->addRow(tr("Password"), editProxyPassword);
+
+	groupProxy->setLayout(formNetwork);
+
+	QVBoxLayout *layoutNetwork = new QVBoxLayout;
+	layoutNetwork->addWidget(groupProxy);
+
+	tabNetwork->setLayout(layoutNetwork);
 }
 
 void SettingsDialog::actionGenUUID()
@@ -301,6 +328,12 @@ void SettingsDialog::actionOk()
 
 		cfg->set("chat_verbosity_table", chat_verbosity_table);
 
+
+		// tabNetwork
+		cfg->set("proxy_host", editProxyHost->text().toStdString());
+		cfg->set("proxy_port", editProxyPort->text().toInt(0, 10));
+		cfg->set("proxy_username", editProxyUsername->text().toStdString());
+		cfg->set("proxy_password", editProxyPassword->text().toStdString());
 
 		accept();
 	}

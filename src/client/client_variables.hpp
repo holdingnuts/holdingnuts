@@ -45,6 +45,10 @@ config.set("sound_focus",	true);			// only play sound if window has focus
 config.set("chat_console",	false);			// send raw commands if chat prefixed with '/'
 config.set("chat_verbosity_foyer", 0x0f);		// verbosity level for foyer chat
 config.set("chat_verbosity_table", 0x07);		// verbosity level for table chat
+config.set("proxy_host",	"");			// SOCKS5 proxy hostname
+config.set("proxy_port",        1080);			// SOCKS5 proxy port
+config.set("proxy_username",	"");			// SOCKS5 proxy username
+config.set("proxy_password",	"");			// SOCKS5 proxy password
 
 #ifdef DEBUG
 config.set("dbg_register",	-1);			// automatically register to a game (value is gid; auto_connect must be set)

@@ -70,6 +70,12 @@ private:
 	QCheckBox *checkVerboseTableCards;
 	QCheckBox *checkVerboseTablePlayerChat;
 
+	// tabNetwork
+	QLineEdit *editProxyHost;
+	QLineEdit *editProxyPort;
+	QLineEdit *editProxyUsername;
+	QLineEdit *editProxyPassword;
+
 private slots:
 	void actionOk();
 	void actionGenUUID();

@@ -1544,6 +1544,21 @@ void PClient::init()
 		}
 	}
 
+	// proxy-support
+	if (!config.get("proxy_host").empty())
+	{
+		QNetworkProxy proxy;
+		proxy.setType(QNetworkProxy::Socks5Proxy);
+		proxy.setHostName(QString::fromStdString(config.get("proxy_host")));
+		proxy.setPort(config.getInt("proxy_port"));
+		if (!config.get("proxy_username").empty())
+		{
+			proxy.setUser(QString::fromStdString(config.get("proxy_username")));
+			proxy.setPassword(QString::fromStdString(config.get("proxy_password")));
+		}
+		QNetworkProxy::setApplicationProxy(proxy);
+	}
+
 
 #ifndef NOAUDIO
 	// load sounds
