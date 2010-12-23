@@ -2,6 +2,41 @@ ChangeLog
 =========
 
 
+HoldingNuts 0.8.0 (released on ??)
+
+  * changed versioning scheme (from 0.0.5 to 0.8.0)
+  * graphical chip stacks / jetons
+  * display overall winnings of a hand
+  * hole-cards can be sorted
+  * server: fixed problem with respawning games (restart-games)
+  * spectate feature
+  * improved reconnect-feature
+  * added some more server-statistics
+  * display server statistics (count of active players and games)
+  * symmetrical placement of players at table
+  * server: player ranking support using sqlite3 database
+  * display warning if UUID is already in use
+  * improved chat console
+  * history feature for chat
+  * "config-save" server-command
+  * config-option for appending to logfile
+  * fixed: rounding error with blinds factor
+  * moved sitout/back-buttons to "persistent actions"
+  * fixed gamelogic bug with wheel-straight
+  * workaround QTBUG-6840 and QTBUG-8606: disable pixmap-cache for Qt 4.6.0 and 4.6.2,
+    fixes problem where hole-cards were displayed as duplicates
+  * new translations: Finnish, French
+  * "first start" dialog
+  * automatically mark as "sitout" on table-window close
+  * fixed list for recently connected servers
+  * minor: improved input-focus
+  * fixed render performance regression
+  * background for table window
+  * added command-line help/usage message for server and client
+  * client: new command-line option "-d <data-dir>" for specifying alternative data-directory
+  * automatically close table after some time when game ended
+
+
 HoldingNuts 0.0.5 (released on 26 Jun 2009)
 
   * fixed: don't strip off player name on foyer messages (join/left foyer)
@@ -45,7 +80,7 @@ HoldingNuts 0.0.4 (released on 29 May 2009)
   * prevent auto-action-checkboxes from overlapping action-buttons
   * fixed order of removing broken players from game
     when two or more players go broke in the same hand
-  * added command-line option for specifying alternative config-directory 
+  * added command-line option for specifying alternative config-directory
     (this allows multiple server/client instances with independent config)
   * created simple man-pages
   * adjusted version-compat to 0.0.4
