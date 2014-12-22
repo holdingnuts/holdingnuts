@@ -42,6 +42,7 @@ if (ENABLE_SQLITE)
        LIST (APPEND aux_lib ${SQLITE3_LIBRARIES})
 endif (ENABLE_SQLITE)
 
+add_definitions(-Wno-unused-but-set-variable)
 
 add_executable (holdingnuts-server
 	pserver.cpp ${aux_obj}
