@@ -1,0 +1,104 @@
+#! /bin/sh
+
+set -e
+
+# /etc/init.d/holdingnuts-server: start and stop the holdingnuts server
+
+### BEGIN INIT INFO
+# Provides:          holdingnuts-server
+# Required-Start:    $remote_fs $syslog $network
+# Required-Stop:     $remote_fs $syslog $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start and stop the holdingnuts server
+# Description:       Enable the server of holdingnuts.
+### END INIT INFO
+
+DAEMON=/usr/local/bin/holdingnuts-server
+CONFIG=/var/lib/holdingnuts
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+test -f /etc/default/rcS && . /etc/default/rcS
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+
+case "$1" in
+  start)
+            log_daemon_msg "Starting holdingnuts daemon" "holdingnuts-server"
+	    if [ -s /var/run/holdingnuts-server.pid ] && kill -0 $(cat /var/run/holdingnuts-server.pid) >/dev/null 2>&1; then
+                log_progress_msg "holdingnuts-server apparently already running"
+                log_end_msg 0
+		exit 0
+	    fi
+            if start-stop-daemon --start --quiet --background \
+                --pidfile /var/run/holdingnuts-server.pid --make-pidfile \
+                --exec $DAEMON --chuid holdingnuts:holdingnuts \
+                -- -c $CONFIG
+            then
+                rc=0
+                sleep 1
+                if ! kill -0 $(cat /var/run/holdingnuts-server.pid) >/dev/null 2>&1; then
+                    log_failure_msg "holdingnuts-server failed to start"
+                    rc=1
+                fi
+            else
+                rc=1
+            fi
+            if [ $rc -eq 0 ]; then
+                log_end_msg 0
+            else
+                log_end_msg 1
+                rm -f /var/run/holdingnuts-server.pid
+            fi
+	;;
+  stop)
+        log_daemon_msg "Stopping holdingnuts-server daemon" "holdingnuts-server"
+	start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/holdingnuts-server.pid
+        log_end_msg $?
+	rm -f /var/run/holdingnuts-server.pid
+	;;
+
+  reload|force-reload)
+        log_warning_msg "Not implemented."
+	;;
+
+  restart)
+	set +e
+            log_daemon_msg "Restarting holdingnuts-server" "holdingnuts-server"
+	    if [ -s /var/run/holdingnuts-server.pid ] && kill -0 $(cat /var/run/holdingnuts-server.pid) >/dev/null 2>&1; then
+		start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/holdingnuts-server.pid || true
+		sleep 1
+	    else
+                log_warning_msg "holdingnuts-server not running, attempting to start."
+                rm -f /var/run/holdingnuts-server.pid
+	    fi
+            if start-stop-daemon --start --quiet --background \
+                --pidfile /var/run/holdingnuts-server.pid --make-pidfile \
+                --exec $DAEMON --chuid holdingnuts:holdingnuts \
+                -- -c $CONFIG
+            then
+                rc=0
+                sleep 1
+                if ! kill -0 $(cat /var/run/holdingnuts-server.pid) >/dev/null 2>&1; then
+                    log_failure_msg "holdingnuts-server failed to start"
+                    rc=1
+                fi
+            else
+                rc=1
+            fi
+            if [ $rc -eq 0 ]; then
+                log_end_msg 0
+            else
+                log_end_msg 1
+                rm -f /var/run/holdingnuts-server.pid
+            fi
+	;;
+
+  *)
+	echo "Usage: /etc/init.d/holdingnuts-server {start|stop|reload|force-reload|restart}"
+	exit 1
+esac
+
+exit 0

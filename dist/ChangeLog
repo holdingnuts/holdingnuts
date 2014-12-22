@@ -1,0 +1,118 @@
+ChangeLog
+=========
+
+
+HoldingNuts 0.8.0 (released on ??)
+
+  * changed versioning scheme (from 0.0.5 to 0.8.0)
+  * graphical chip stacks / jetons
+  * display overall winnings of a hand
+  * hole-cards can be sorted
+  * server: fixed problem with respawning games (restart-games)
+  * spectate feature
+  * improved reconnect-feature
+  * added some more server-statistics
+  * display server statistics (count of active players and games)
+  * symmetrical placement of players at table
+  * server: player ranking support using sqlite3 database
+  * display warning if UUID is already in use
+  * improved chat console
+  * history feature for chat
+  * "config-save" server-command
+  * config-option for appending to logfile
+  * fixed: rounding error with blinds factor
+  * moved sitout/back-buttons to "persistent actions"
+  * fixed gamelogic bug with wheel-straight
+  * workaround QTBUG-6840 and QTBUG-8606: disable pixmap-cache for Qt 4.6.0 and 4.6.2,
+    fixes problem where hole-cards were displayed as duplicates
+  * new translations: Finnish, French
+  * "first start" dialog
+  * automatically mark as "sitout" on table-window close
+  * fixed list for recently connected servers
+  * minor: improved input-focus
+  * fixed render performance regression
+  * background for table window
+  * added command-line help/usage message for server and client
+  * client: new command-line option "-d <data-dir>" for specifying alternative data-directory
+  * automatically close table after some time when game ended
+
+
+HoldingNuts 0.0.5 (released on 26 Jun 2009)
+
+  * fixed: don't strip off player name on foyer messages (join/left foyer)
+  * fixed: don't allow players who are allin to muck their cards
+  * fixed: don't allow the dealer-button to be movable by mouse
+  * workaround: set encoding to UTF-8; allows localized chat
+  * new translations: Russian, Italian
+  * improved re-connect feature (re-initialization on new round)
+  * added log messages for some more events
+  * fixed (on Windows): omit playing sounds if table window is hidden
+  * added notice for waiting for the table to open
+  * limit length of nickname and player info
+  * update display of pot after each bet:
+    * summarize all pots and bets instead of showing single pots
+    * detailed information about the pot is shown as tooltip window
+
+
+HoldingNuts 0.0.4 (released on 29 May 2009)
+
+  * fixed sending quotes in chat
+  * fixed server-history (sort by most recent server)
+  * chop long nicknames on table-seat
+  * fixed positions of dealer-button
+  * new option: bring table-window to top
+  * new translation: Japanese
+  * removed support for cent-amounts, only whole chips bets possible
+  * fixed displaying last action of current player
+  * new option: display time in foyer chat
+  * new option: several verbosity levels for chat/log messages
+  * increased maximum length of chat messages
+  * fixed client calculation for determining quick-bet buttons
+  * send blinds-message to table on blinds raise
+  * log table messages
+  * new option: send welcome message to clients on connect
+  * fixed: show starting blinds in gameinfo instead of current blinds
+  * support for restart-games (games which restart after they ended)
+  * localized server messages like "joined foyer", "player broke", ...
+  * fixed client problem with bet-actions appearing
+    * a second time after action was performed
+    * when no more action was possible (e.g. all others allin)
+  * prevent auto-action-checkboxes from overlapping action-buttons
+  * fixed order of removing broken players from game
+    when two or more players go broke in the same hand
+  * added command-line option for specifying alternative config-directory
+    (this allows multiple server/client instances with independent config)
+  * created simple man-pages
+  * adjusted version-compat to 0.0.4
+
+
+HoldingNuts 0.0.3 (released on 24 April 2009)
+
+  * bugfix: fixed losing chatbox input focus
+  * gamelist: update gamelist immediately on newly created games
+  * settings-dialog: clear UUID setting
+  * quick-bet buttons (like 1/2 or pot-size bet)
+  * bugfix: corrected headsup blinds rule (order of action)
+  * distribution of split-pot odd-chips
+  * new translation: Romanian
+  * randomly place players around table on start of game
+  * centralized table view (rotate table that player takes central seat)
+  * localized table messages (e.g. "Player1 checked." in user's language)
+  * previous opened table can now be re-opened
+  * new sounds for table events
+  * fixed card decks: corrected position of suit and made suits slightly bigger
+  * two-staged "It's your turn" reminder (text and sound)
+  * auto-connect to default-server config-option
+  * support for private, password protected games
+  * improved lobby layout
+  * server: set/get config vars at runtime (when authed)
+  * client: server connection history
+  * simple server statistics
+  * include timestamp in log
+  * owner can start game before it is full
+  * gamelist filter for started and private games
+
+
+HoldingNuts 0.0.2 (released on 27 March 2009)
+
+  * Initial release
