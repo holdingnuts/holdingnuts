@@ -8,3 +8,8 @@ You can find the documentation in the Internet archive's wayback machine:
   * [Hacking - how to build the sources](https://web.archive.org/web/20190531204251/http://wiki.holdingnuts.net/hacking)
   * [Development](https://web.archive.org/web/20190607203017/http://wiki.holdingnuts.net/devel:start)
     * [Setup](https://web.archive.org/web/20181015233911/http://wiki.holdingnuts.net/devel:setup)
+
+
+## Simulator build only
+
+`cmake -DENABLE_CLIENT=Off -DENABLE_SERVER=Off -DENABLE_SQLITE=Off -DENABLE_TEST=On -DENABLE_DEBUG=On ..`

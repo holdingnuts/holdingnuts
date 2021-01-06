@@ -23,6 +23,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 
 #include <vector>
@@ -50,14 +51,60 @@ using namespace std;
  
 int main(int argc, char **argv)
 {
-	printf("Poker Hand-Simulator\n");
+	//printf("Poker Hand-Simulator\n");
 	
-	unsigned long tests;
+	const unsigned long iterations = 10000;	// TODO: via option
 	
-	if (argc < 2)
-		tests = 10000000;
-	else
-		tests = atoi(argv[1]);
+	char custom_str[3] = {'\0', '\0', '\0'};	// face + suit + \0
+	Card *custom_holecard1 = NULL;
+	Card *custom_holecard2 = NULL;
+	Card *custom_flop1 = NULL;
+	Card *custom_flop2 = NULL;
+	Card *custom_flop3 = NULL;
+	Card *custom_turn = NULL;
+	Card *custom_river = NULL;
+	
+	if (argc >= 2) {
+		if (strlen(argv[1]) != 4) {
+			printf("Error: Hole cards '%s' not specified as 4 chars, e.g. AhKd\n", argv[1]);
+			exit(1);
+		}
+		
+		custom_holecard1 = new Card(strncpy(custom_str, argv[1]+0, 2));
+		custom_holecard2 = new Card(strncpy(custom_str, argv[1]+2, 2));
+		
+		printf("Hole cards: %s ", custom_holecard1->getName());
+		printf("%s", custom_holecard2->getName());
+		
+		if (argc == 3) {
+			unsigned int len = strlen(argv[2]);
+			if (len != 6 && len != 8 && len != 10) {
+				printf("Error: Community cards '%s' not specified as 6, 8, 10 chars, e.g. AhKhQh, AhKhQhJh, AhKhQhJhTh\n", argv[2]);
+				exit(1);
+			}
+			
+			custom_flop1 = new Card(strncpy(custom_str, argv[2]+0, 2));
+			custom_flop2 = new Card(strncpy(custom_str, argv[2]+2, 2));
+			custom_flop3 = new Card(strncpy(custom_str, argv[2]+4, 2));
+			
+			printf("    Flop: %s ", custom_flop1->getName());
+			printf("%s ", custom_flop2->getName());
+			printf("%s", custom_flop3->getName());
+			
+			if (len >= 8) {
+				custom_turn = new Card(strncpy(custom_str, argv[2]+6, 2));
+				printf("    Turn: %s", custom_turn->getName());
+				if (len == 10) {
+					custom_river = new Card(strncpy(custom_str, argv[2]+8, 2));
+					printf("    River: %s", custom_river->getName());
+				}
+			}
+		} else if (argc > 3) {
+			printf("Error: Too many arguments\n");
+			exit(1);
+		}
+		printf("\n");
+	}
 	
 #ifdef HW_RANDOM
 	FILE *fp = fopen(HW_RANDOM, "r");
@@ -83,21 +130,20 @@ int main(int argc, char **argv)
 	};
 	
 	
-	printf("Iterations: %ld\n", tests);
+	//printf("Iterations: %ld\n", iterations);
 	
 	if (true)
 	{
 		// all combinations + RoyalFlush
 		const int strengths = (HandStrength::StraightFlush - HandStrength::HighCard +1) +1;
 		long int count[strengths];
-		int last_progress = 0;
 		
 		for (int i=0; i < strengths; i++)
 			count[i] = 0;
 		
-		printf(".");
+		printf("--------------------------------------------------------------------------------\n");
 		
-		for (unsigned long i=0; i < tests; i++)
+		for (unsigned long i=0; i < iterations; i++)
 		{
 #ifdef HW_RANDOM
 			unsigned long seed;
@@ -113,18 +159,6 @@ int main(int argc, char **argv)
 			
 			srand(seed);
 #endif /* HW_RANDOM */
-
-			// progress
-			if (!(i % 1000))
-			{
-				int progress = 80 * i / tests;
-				if (progress > last_progress)
-				{
-					printf(".");
-					fflush(stdout);
-					last_progress = progress;
-				}
-			}
 			
 			Deck *d = new Deck();
 			
@@ -133,24 +167,50 @@ int main(int argc, char **argv)
 			
 			
 			HoleCards *h = new HoleCards();
-			
-			Card c1, c2;
-			d->pop(c1);
-			d->pop(c2);
-			h->setCards(c1, c2);
+			if (custom_holecard1 != NULL && custom_holecard2 != NULL) {
+				d->debugRemoveCard(*custom_holecard1);
+				d->debugRemoveCard(*custom_holecard2);
+				h->setCards(*custom_holecard1, *custom_holecard2);
+			} else {
+				Card c1, c2;
+				d->pop(c1);
+				d->pop(c2);
+				h->setCards(c1, c2);
+			}
 			
 			
 			CommunityCards *cc = new CommunityCards();
 			
-			Card f1, f2, f3, t, r;
-			d->pop(f1);
-			d->pop(f2);
-			d->pop(f3);
-			cc->setFlop(f1, f2, f3);
-			d->pop(t);
-			cc->setTurn(t);
-			d->pop(r);
-			cc->setRiver(r);
+			if (custom_flop1 != NULL && custom_flop2 != NULL && custom_flop3 != NULL) {
+				d->debugRemoveCard(*custom_flop1);
+				d->debugRemoveCard(*custom_flop2);
+				d->debugRemoveCard(*custom_flop3);
+				cc->setFlop(*custom_flop1, *custom_flop2, *custom_flop3);
+			} else {
+				Card f1, f2, f3;
+				d->pop(f1);
+				d->pop(f2);
+				d->pop(f3);
+				cc->setFlop(f1, f2, f3);
+			}
+			
+			if (custom_turn != NULL) {
+				d->debugRemoveCard(*custom_turn);
+				cc->setTurn(*custom_turn);
+			} else {
+				Card t;
+				d->pop(t);
+				cc->setTurn(t);
+			}
+			
+			if (custom_river != NULL) {
+				d->debugRemoveCard(*custom_river);
+				cc->setRiver(*custom_river);
+			} else {
+				Card r;
+				d->pop(r);
+				cc->setRiver(r);
+			}
 			
 			
 			HandStrength strength;
@@ -170,62 +230,85 @@ int main(int argc, char **argv)
 			delete d;
 		}
 		
-		printf("\n");
-		
-		for (int i=0; i < strengths; i++)
-			printf("%.8lf (%+7.8lf = %+7.6lf%%) - %s\n",
-				(double)count[i] / (double) tests,
-				(double)count[i] / (double) tests - rankings[i].probab,
-				((double)count[i] / (double) tests - rankings[i].probab)*100.0,
+		for (int i=0; i < strengths; i++) {
+			printf("%6.2lf%% (%+7.2lf%%) - %s\n",
+				((double)count[i] / (double) iterations)*100.0,
+				custom_holecard1 != NULL ? 0 : ((double)count[i] / (double) iterations - rankings[i].probab)*100.0,
 				rankings[i].str);
+		}
 	}
 	
 	printf("--------------------------------------------------------------------------------\n");
 	
 	
 	
-	if (false)
+	if (true)
 	{
 		long int wincount = 0, losecount = 0, splitcount = 0;
 		
 		HoleCards *h1 = new HoleCards();
-		Card card1(Card::Seven,  Card::Clubs);
-		Card card2(Card::Seven,  Card::Hearts);
-		h1->setCards(card1, card2);
+		Card *card1 = new Card();
+		Card *card2 = new Card();
+		if (custom_holecard1 != NULL && custom_holecard2 != NULL) {
+			card1 = custom_holecard1;
+			card2 = custom_holecard2;
+		}
+		h1->setCards(*card1, *card2);
 		
-		
-		for (unsigned long i=0; i < tests; i++)
+		for (unsigned long i=0; i < iterations; i++)
 		{
 			Deck *d = new Deck();
 			
 			d->fill();
 			
 			// remove test-holecards
-			d->debugRemoveCard(card1);
-			d->debugRemoveCard(card2);
+			d->debugRemoveCard(*card1);
+			d->debugRemoveCard(*card2);
 			
 			d->shuffle();
 			
 			
+			CommunityCards *cc = new CommunityCards();
+			
+			if (custom_flop1 != NULL && custom_flop2 != NULL && custom_flop3 != NULL) {
+				d->debugRemoveCard(*custom_flop1);
+				d->debugRemoveCard(*custom_flop2);
+				d->debugRemoveCard(*custom_flop3);
+				cc->setFlop(*custom_flop1, *custom_flop2, *custom_flop3);
+			} else {
+				Card f1, f2, f3;
+				d->pop(f1);
+				d->pop(f2);
+				d->pop(f3);
+				cc->setFlop(f1, f2, f3);
+			}
+			
+			if (custom_turn != NULL) {
+				d->debugRemoveCard(*custom_turn);
+				cc->setTurn(*custom_turn);
+			} else {
+				Card t;
+				d->pop(t);
+				cc->setTurn(t);
+			}
+			
+			if (custom_river != NULL) {
+				d->debugRemoveCard(*custom_river);
+				cc->setRiver(*custom_river);
+			} else {
+				Card r;
+				d->pop(r);
+				cc->setRiver(r);
+			}
+			
+			
+			// 1 opponent
 			HoleCards *h2 = new HoleCards();
 			
 			Card c1, c2;
 			d->pop(c1);
 			d->pop(c2);
 			h2->setCards(c1, c2);
-			
-			
-			CommunityCards *cc = new CommunityCards();
-			
-			Card f1, f2, f3, t, r;
-			d->pop(f1);
-			d->pop(f2);
-			d->pop(f3);
-			cc->setFlop(f1, f2, f3);
-			d->pop(t);
-			cc->setTurn(t);
-			d->pop(r);
-			cc->setRiver(r);
 			
 			
 			HandStrength strength1, strength2;
@@ -245,13 +328,13 @@ int main(int argc, char **argv)
 			delete d;
 		}
 		
-		printf("%s ", card1.getName());
-		printf("%s - ", card2.getName());
+		printf("%s ", card1->getName());
+		printf("%s - ", card2->getName());
 		
 		printf("win %4.2lf%%, lose %4.2lf%%, split %4.2lf%%\n",
-			100 * ((double) wincount / (double) tests),
-			100 * ((double) losecount / (double) tests),
-			100 * ((double) splitcount / (double) tests));
+			100 * ((double) wincount / (double) iterations),
+			100 * ((double) losecount / (double) iterations),
+			100 * ((double) splitcount / (double) iterations));
 	}
 	
 #ifdef HW_RANDOM
